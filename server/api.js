@@ -1,12 +1,8 @@
 const http = require('http');
 const Twit = require('twit');
+const fs = require('fs');
 
-const T = new  Twit({
-	consumer_key: '',
-	consumer_secret: '',
-	access_token: '112543028-',
-	access_token_secret: ''
-});
+const T = new  Twit(JSON.parse(fs.readFileSync(__dirname + '/credentials.json', 'utf8')));
 
 console.log("Booting server...");
 
