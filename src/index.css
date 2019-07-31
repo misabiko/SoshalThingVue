@@ -46,6 +46,17 @@ body {
 
 .soshalPost {
 	background-color: #181925;
+	position: relative;
+	padding-left: 20%;
+}
+
+.soshalPSide {
+	position: absolute;
+	left: 0;
+}
+
+.soshalPSide img {
+	margin: 5px 16px;
 }
 
 .soshalPMedia img {

@@ -88,7 +88,7 @@ let homePromise : Promise<void> = fetch('http://localhost:43043/statuses/home_ti
 	});
 
 function PostMedia(props : {imageSrcs : string[]}) {
-	const imgs = props.imageSrcs.map((src : string) => <img src={src}/>);
+	const imgs = props.imageSrcs.map((src : string, i : number) => <img key={i} src={src}/>);
 	return (
 		<div className="soshalPMedia">
 			{imgs}
@@ -96,9 +96,23 @@ function PostMedia(props : {imageSrcs : string[]}) {
 	);
 }
 
+interface PostData {
+	authorName : string,
+	authorHandle : string,
+	authorAvatar : string,
+	text : string,
+	images? : string[]
+}
+
 function Post(props : {postData: PostData}) {
 	return (
 		<div className="soshalPost">
+			<div className="soshalPSide">
+				<img
+					alt={props.postData.authorHandle + "'s avatar"}
+					src={props.postData.authorAvatar}
+				/>
+			</div>
 			<span>
 				{props.postData.authorName}
 				{"@" + props.postData.authorHandle}
@@ -107,13 +121,6 @@ function Post(props : {postData: PostData}) {
 			{props.postData.images ? <PostMedia imageSrcs={props.postData.images}/> : null}
 		</div>
 	);
-}
-
-interface PostData {
-	authorName : string,
-	authorHandle : string,
-	text : string,
-	images? : string[]
 }
 
 interface TimelineState {
@@ -137,6 +144,7 @@ class Timeline extends React.Component<{}, TimelineState> {
 			posts.push(<Post key={status.id} postData={{
 				authorName: status.user.name,
 				authorHandle: status.user.screen_name,
+				authorAvatar: status.user.profile_image_url_https,
 				text: status.text,
 				images: (status.extended_entities && status.extended_entities.media.length) ? status.extended_entities.media.map((media : any) => media.media_url_https) : null
 			}}/>);
