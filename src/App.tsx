@@ -33,50 +33,50 @@ source: "<a href="http://twitter.com/download/iphone" rel="nofollow">Twitter for
 text: "花火の音が聞こえる"
 truncated: false
 user:
-contributors_enabled: false
-created_at: "Mon Apr 22 10:45:39 +0000 2013"
-default_profile: false
-default_profile_image: false
-description: "のんびりだらだらお絵描きマン like:スプラトゥーン A&C/ポケモン/東方/ アイコン→【@sakibuizu2】"
-entities: {url: {…}, description: {…}}
-favourites_count: 3800
-follow_request_sent: false
-followers_count: 479
-following: true
-friends_count: 348
-geo_enabled: false
-has_extended_profile: true
-id: 1371833978
-id_str: "1371833978"
-is_translation_enabled: false
-is_translator: false
-lang: null
-listed_count: 29
-location: "やけたとう"
-name: "かまち＠絆"
-notifications: false
-profile_background_color: "9AE4E8"
-profile_background_image_url: "http://abs.twimg.com/images/themes/theme16/bg.gif"
-profile_background_image_url_https: "https://abs.twimg.com/images/themes/theme16/bg.gif"
-profile_background_tile: false
-profile_banner_url: "https://pbs.twimg.com/profile_banners/1371833978/1555606290"
-profile_image_url: "http://pbs.twimg.com/profile_images/1001402893927268352/K4FU-liF_normal.jpg"
-profile_image_url_https: "https://pbs.twimg.com/profile_images/1001402893927268352/K4FU-liF_normal.jpg"
-profile_link_color: "0084B4"
-profile_sidebar_border_color: "BDDCAD"
-profile_sidebar_fill_color: "DDFFCC"
-profile_text_color: "333333"
-profile_use_background_image: true
-protected: false
-screen_name: "kamati0maru"
-statuses_count: 31373
-time_zone: null
-translator_type: "none"
-url: "https://t.co/QmgE8EaHm5"
-utc_offset: null
-verified: false
-__proto__: Object
-__proto__: Object
+	contributors_enabled: false
+	created_at: "Mon Apr 22 10:45:39 +0000 2013"
+	default_profile: false
+	default_profile_image: false
+	description: "のんびりだらだらお絵描きマン like:スプラトゥーン A&C/ポケモン/東方/ アイコン→【@sakibuizu2】"
+	entities: {url: {…}, description: {…}}
+	favourites_count: 3800
+	follow_request_sent: false
+	followers_count: 479
+	following: true
+	friends_count: 348
+	geo_enabled: false
+	has_extended_profile: true
+	id: 1371833978
+	id_str: "1371833978"
+	is_translation_enabled: false
+	is_translator: false
+	lang: null
+	listed_count: 29
+	location: "やけたとう"
+	name: "かまち＠絆"
+	notifications: false
+	profile_background_color: "9AE4E8"
+	profile_background_image_url: "http://abs.twimg.com/images/themes/theme16/bg.gif"
+	profile_background_image_url_https: "https://abs.twimg.com/images/themes/theme16/bg.gif"
+	profile_background_tile: false
+	profile_banner_url: "https://pbs.twimg.com/profile_banners/1371833978/1555606290"
+	profile_image_url: "http://pbs.twimg.com/profile_images/1001402893927268352/K4FU-liF_normal.jpg"
+	profile_image_url_https: "https://pbs.twimg.com/profile_images/1001402893927268352/K4FU-liF_normal.jpg"
+	profile_link_color: "0084B4"
+	profile_sidebar_border_color: "BDDCAD"
+	profile_sidebar_fill_color: "DDFFCC"
+	profile_text_color: "333333"
+	profile_use_background_image: true
+	protected: false
+	screen_name: "kamati0maru"
+	statuses_count: 31373
+	time_zone: null
+	translator_type: "none"
+	url: "https://t.co/QmgE8EaHm5"
+	utc_offset: null
+	verified: false
+	__proto__: Object
+	__proto__: Object
 */
 
 let statuses = [] as any[];
@@ -87,12 +87,23 @@ let homePromise : Promise<void> = fetch('http://localhost:43043/statuses/home_ti
 		statuses = json;
 	});
 
-function Post(props : {text: string}) {
+function Post(props : {postData: PostData}) {
 	return (
-		<div>
-			{props.text}
+		<div className="soshalPost">
+			<span>
+				{props.postData.authorName}
+				{"@" + props.postData.authorHandle}
+			</span>
+			<p>{props.postData.text}</p>
 		</div>
 	);
+}
+
+interface PostData {
+	authorName : string,
+	authorHandle : string,
+	text : string,
+	image? : string
 }
 
 interface TimelineState {
@@ -102,7 +113,7 @@ class Timeline extends React.Component<{}, TimelineState> {
 	constructor(props: TimelineState) {
 		super(props);
 		this.state = {
-			statuses: [] as any[]
+			statuses: [] as PostData[]
 		};
 	}
 
@@ -113,9 +124,16 @@ class Timeline extends React.Component<{}, TimelineState> {
 	render() {
 		const posts = [] as JSX.Element[];
 		for (let status of this.state.statuses)
-			posts.push(<li><Post key={status.id} text={status.text}/></li>);
+			posts.push(<Post key={status.id} postData={{
+				authorName: status.user.name,
+				authorHandle: status.user.screen_name,
+				text: status.text
+			}}/>);
 
-		return <ul>{posts}</ul>;
+		return <div className="soshalTimeline">
+			<div className="soshalTHeader">Home</div>
+			<div className="soshalTPosts">{posts}</div>
+		</div>;
 	}
 }
 
