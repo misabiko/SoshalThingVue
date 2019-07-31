@@ -59,6 +59,10 @@ class Timeline extends React.Component<{}, TimelineState> {
 		};
 	}
 
+	componentDidMount() : void {
+		this.refresh();
+	}
+
 	refresh = async () => {
 		return await fetch('http://localhost:43043/statuses/home_timeline')
 			.then(response => response.json())
