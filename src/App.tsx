@@ -1,6 +1,6 @@
 import React from 'react';
 
-//https://stackoverflow.com/a/57124645/2692695
+/*//https://stackoverflow.com/a/57124645/2692695
 //Formats object into RESTful URI parameters (?param1=boop&param2=bap)
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function toURI(params : {[name: string] : any}) {
@@ -9,15 +9,7 @@ function toURI(params : {[name: string] : any}) {
 			([key, val]) => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`
 		)
 		.join("&");
-}
-
-let statuses = [] as any[];
-let homePromise : Promise<void> = fetch('http://localhost:43043/statuses/home_timeline')
-	.then(response => response.json())
-	.then(json => {
-		console.dir(json);
-		statuses = json;
-	});
+}*/
 
 function PostMedia(props : {imageSrcs : string[]}) {
 	const imgs = props.imageSrcs.map((src : string, i : number) => <img key={i} alt={"img" + i} src={src}/>);
@@ -29,6 +21,7 @@ function PostMedia(props : {imageSrcs : string[]}) {
 }
 
 interface PostData {
+	id : number,
 	authorName : string,
 	authorHandle : string,
 	authorAvatar : string,
@@ -56,34 +49,44 @@ function Post(props : {postData: PostData}) {
 }
 
 interface TimelineState {
-	statuses : any[]
+	posts : any[]
 }
 class Timeline extends React.Component<{}, TimelineState> {
 	constructor(props: TimelineState) {
 		super(props);
 		this.state = {
-			statuses: [] as PostData[]
+			posts: [] as PostData[]
 		};
 	}
 
-	componentDidMount() : void {
-		homePromise.then(() => this.setState({statuses}));
-	}
+	refresh = async () => {
+		return await fetch('http://localhost:43043/statuses/home_timeline')
+			.then(response => response.json())
+			.then(json => {
+				console.dir(json);
+				const posts : PostData[] = [];
+				for (const post of json)
+					posts.push({
+						id: post.id,
+						authorName: post.user.name,
+						authorHandle: post.user.screen_name,
+						authorAvatar: post.user.profile_image_url_https,
+						text: post.text,
+						images: (post.extended_entities && post.extended_entities.media.length) ? post.extended_entities.media.map((media : any) => media.media_url_https) : null
+					});
+
+				this.setState({posts});
+			});
+	};
 
 	render() {
-		const posts = [] as JSX.Element[];
-		for (let status of this.state.statuses)
-			posts.push(<Post key={status.id} postData={{
-				authorName: status.user.name,
-				authorHandle: status.user.screen_name,
-				authorAvatar: status.user.profile_image_url_https,
-				text: status.text,
-				images: (status.extended_entities && status.extended_entities.media.length) ? status.extended_entities.media.map((media : any) => media.media_url_https) : null
-			}}/>);
+		const postComps = [] as JSX.Element[];
+		for (let post of this.state.posts)
+			postComps.push(<Post key={post.id} postData={post}/>);
 
 		return <div className="soshalTimeline">
-			<div className="soshalTHeader">Home</div>
-			<div className="soshalTPosts">{posts}</div>
+			<div className="soshalTHeader" onClick={this.refresh}>Home</div>
+			<div className="soshalTPosts">{postComps}</div>
 		</div>;
 	}
 }
