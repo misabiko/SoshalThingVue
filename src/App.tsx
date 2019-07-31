@@ -1,6 +1,6 @@
 import React from 'react';
 
-/*//https://stackoverflow.com/a/57124645/2692695
+//https://stackoverflow.com/a/57124645/2692695
 //Formats object into RESTful URI parameters (?param1=boop&param2=bap)
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function toURI(params : {[name: string] : any}) {
@@ -9,7 +9,7 @@ function toURI(params : {[name: string] : any}) {
 			([key, val]) => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`
 		)
 		.join("&");
-}*/
+}
 
 function PostMedia(props : {imageSrcs : string[]}) {
 	const imgs = props.imageSrcs.map((src : string, i : number) => <img key={i} alt={"img" + i} src={src}/>);
@@ -48,15 +48,17 @@ function Post(props : {postData: PostData}) {
 	);
 }
 
-
-class Timeline extends React.Component<{endpoint: string}, {
-	endpoint: string,
+interface TProps {
+	name: string,
+	endpoint: string;
+	options?: any;
+}
+class Timeline extends React.Component<TProps, {
 	posts : any[]
 }> {
-	constructor(props: {endpoint: string}) {
+	constructor(props: Readonly<TProps>) {
 		super(props);
 		this.state = {
-			endpoint: props.endpoint,
 			posts: [] as PostData[]
 		};
 	}
@@ -66,12 +68,12 @@ class Timeline extends React.Component<{endpoint: string}, {
 	}
 
 	refresh = async () => {
-		await fetch('http://localhost:43043/' + this.state.endpoint)
+		await fetch('http://localhost:43043/' + this.props.endpoint + (this.props.options ? toURI(this.props.options) : ""))
 			.then(response => response.json())
 			.then(json => {
 				console.dir(json);
 				const posts : PostData[] = [];
-				for (const post of json)
+				for (const post of (json instanceof Array ? json : json.statuses))
 					posts.push({
 						id: post.id,
 						authorName: post.user.name,
@@ -91,16 +93,24 @@ class Timeline extends React.Component<{endpoint: string}, {
 			postComps.push(<Post key={post.id} postData={post}/>);
 
 		return <div className="soshalTimeline">
-			<div className="soshalTHeader" onClick={this.refresh}>Home</div>
+			<div className="soshalTHeader" onClick={this.refresh}>{this.props.name}</div>
 			<div className="soshalTPosts">{postComps}</div>
 		</div>;
 	}
 }
 
 function SoshalThing() {
-	return (<div>
-		<Timeline endpoint={'statuses/home_timeline'}/>
-	</div>);
+	return (<>
+		<Timeline
+			name="Home"
+			endpoint={'statuses/home_timeline'}
+		/>
+		<Timeline
+			name="Search"
+			endpoint={'search/tweets'}
+			options={{ q: 'banana since:2011-07-11', count: 10 }}
+		/>
+	</>);
 }
 
 export default SoshalThing;
