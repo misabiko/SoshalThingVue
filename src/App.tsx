@@ -87,6 +87,15 @@ let homePromise : Promise<void> = fetch('http://localhost:43043/statuses/home_ti
 		statuses = json;
 	});
 
+function PostMedia(props : {imageSrcs : string[]}) {
+	const imgs = props.imageSrcs.map((src : string) => <img src={src}/>);
+	return (
+		<div className="soshalPMedia">
+			{imgs}
+		</div>
+	);
+}
+
 function Post(props : {postData: PostData}) {
 	return (
 		<div className="soshalPost">
@@ -95,6 +104,7 @@ function Post(props : {postData: PostData}) {
 				{"@" + props.postData.authorHandle}
 			</span>
 			<p>{props.postData.text}</p>
+			{props.postData.images ? <PostMedia imageSrcs={props.postData.images}/> : null}
 		</div>
 	);
 }
@@ -103,7 +113,7 @@ interface PostData {
 	authorName : string,
 	authorHandle : string,
 	text : string,
-	image? : string
+	images? : string[]
 }
 
 interface TimelineState {
@@ -127,7 +137,8 @@ class Timeline extends React.Component<{}, TimelineState> {
 			posts.push(<Post key={status.id} postData={{
 				authorName: status.user.name,
 				authorHandle: status.user.screen_name,
-				text: status.text
+				text: status.text,
+				images: (status.extended_entities && status.extended_entities.media.length) ? status.extended_entities.media.map((media : any) => media.media_url_https) : null
 			}}/>);
 
 		return <div className="soshalTimeline">

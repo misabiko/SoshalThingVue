@@ -24,7 +24,7 @@ body {
 }
 
 .soshalTimeline {
-	width: 350px;
+	width: 500px;
 	height: 100%;
 	padding: 10px 5px;
 	box-sizing: border-box;
@@ -46,4 +46,8 @@ body {
 
 .soshalPost {
 	background-color: #181925;
+}
+
+.soshalPMedia img {
+	width: 100%;
 }
