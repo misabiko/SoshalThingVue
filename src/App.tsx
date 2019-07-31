@@ -1,5 +1,17 @@
 import React from 'react';
 
+//TODO Make data request interface
+//TODO Request from Mastodon
+//TODO Bind data requests to timelines
+//TODO Implement streaming
+//TODO Request on scroll
+//TODO Collapse images
+//TODO Expand images
+//TODO Implement likes, retweets
+//TODO Implement login
+
+//TODO Launch server from index?
+
 //https://stackoverflow.com/a/57124645/2692695
 //Formats object into RESTful URI parameters (?param1=boop&param2=bap)
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -20,7 +32,7 @@ let homePromise : Promise<void> = fetch('http://localhost:43043/statuses/home_ti
 	});
 
 function PostMedia(props : {imageSrcs : string[]}) {
-	const imgs = props.imageSrcs.map((src : string, i : number) => <img key={i} src={src}/>);
+	const imgs = props.imageSrcs.map((src : string, i : number) => <img key={i} alt={"img" + i} src={src}/>);
 	return (
 		<div className="soshalPMedia">
 			{imgs}

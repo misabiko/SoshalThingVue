@@ -21,6 +21,7 @@ body {
 	color: white;
 	background-color: #14151f;
 	height: 100vh;
+	display: flex;
 }
 
 .soshalTimeline {
@@ -57,6 +58,7 @@ body {
 
 .soshalPSide img {
 	margin: 5px 16px;
+	border-radius: 4px;
 }
 
 .soshalPMedia img {
