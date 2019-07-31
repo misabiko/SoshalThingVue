@@ -15,9 +15,6 @@ body {
 	sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-}
-
-#root {
 	color: white;
 	background-color: #14151f;
 	height: 100vh;

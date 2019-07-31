@@ -48,23 +48,25 @@ function Post(props : {postData: PostData}) {
 	);
 }
 
-interface TimelineState {
+
+class Timeline extends React.Component<{endpoint: string}, {
+	endpoint: string,
 	posts : any[]
-}
-class Timeline extends React.Component<{}, TimelineState> {
-	constructor(props: TimelineState) {
+}> {
+	constructor(props: {endpoint: string}) {
 		super(props);
 		this.state = {
+			endpoint: props.endpoint,
 			posts: [] as PostData[]
 		};
 	}
 
 	componentDidMount() : void {
-		this.refresh();
+		this.refresh().then();
 	}
 
 	refresh = async () => {
-		return await fetch('http://localhost:43043/statuses/home_timeline')
+		await fetch('http://localhost:43043/' + this.state.endpoint)
 			.then(response => response.json())
 			.then(json => {
 				console.dir(json);
@@ -95,7 +97,13 @@ class Timeline extends React.Component<{}, TimelineState> {
 	}
 }
 
-export default Timeline;
+function SoshalThing() {
+	return (<div>
+		<Timeline endpoint={'statuses/home_timeline'}/>
+	</div>);
+}
+
+export default SoshalThing;
 
 /*
 contributors: null
