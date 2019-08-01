@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {SyntheticEvent} from 'react';
 
 //https://stackoverflow.com/a/57124645/2692695
 //Formats object into RESTful URI parameters (?param1=boop&param2=bap)
@@ -11,13 +11,26 @@ function toURI(params : {[name: string] : any}) {
 		.join("&");
 }
 
-function PostMedia(props : {imageSrcs : string[]}) {
-	const imgs = props.imageSrcs.map((src : string, i : number) => <img key={i} alt={"img" + i} src={src}/>);
-	return (
-		<div className="soshalPMedia">
-			{imgs}
-		</div>
-	);
+interface PMProps {imageSrcs : string[]}
+class PostMedia extends React.Component<PMProps> {
+	handleImageLoaded(loadEvent : SyntheticEvent) {
+		const img = loadEvent.target as HTMLImageElement;
+		if (img.parentElement)
+			img.parentElement.classList.add(img.width > img.height ? "landscape" : "portrait");
+	}
+
+	render() {
+		const imgs = this.props.imageSrcs.map((src : string, i : number) => (
+			<div key={i} className={"soshalMediaHolder"}>
+				<img onLoad={e => this.handleImageLoaded(e)} alt={"img" + i} src={src}/>
+			</div>
+		));
+		return (
+			<div className={"soshalPMedia soshalPMedia" + imgs.length}>
+				{imgs}
+			</div>
+		);
+	}
 }
 
 interface PostData {

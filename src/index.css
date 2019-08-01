@@ -61,6 +61,34 @@ body {
 	border-radius: 4px;
 }
 
-.soshalPMedia img {
+.soshalPMedia {
+	height: 300px;
+}
+
+.soshalMediaHolder {
+	overflow: hidden;
+	display: inline-flex;
+	height: 100%;
+	width: 50%;
+	justify-content: center;
+}
+
+.soshalPMedia1 .soshalMediaHolder {
 	width: 100%;
+}
+
+.soshalPMedia3 .soshalMediaHolder,
+.soshalPMedia4 .soshalMediaHolder {
+	height: 50%;
+}
+
+.soshalMediaHolder img {
+	align-self: center;
+}
+
+.portrait img {
+	width: 100%;
+}
+.landscape img {
+	height: 100%;
 }
