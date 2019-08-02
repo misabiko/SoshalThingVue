@@ -64,7 +64,6 @@ interface PostData {
 }
 
 function Post(props : {postData: PostData}) {
-	console.log("Rendering " + props.postData.id);
 	return (
 		<div className="soshalPost">
 			<div className="soshalPSide">
@@ -113,10 +112,11 @@ class Timeline extends React.Component<TProps, {posts : any[]}> {
 	resetRefreshing = () => {
 		clearInterval(this.interval);
 		if (visible()) {
-			this.interval = window.setInterval(() => this.refresh, this.props.refreshRate);
+			this.interval = window.setInterval(this.refresh, this.props.refreshRate);
 
 			this.refresh();
-		}
+		}else
+			this.interval = undefined;
 	};
 
 	refresh = async () => {
@@ -141,13 +141,13 @@ class Timeline extends React.Component<TProps, {posts : any[]}> {
 	};
 
 	render() {
-		const postComps = [] as JSX.Element[];
-		for (let post of this.state.posts)
-			postComps.push(<Post key={post.id} postData={post}/>);
-
 		return <div className="soshalTimeline">
 			<div className="soshalTHeader" onClick={this.refresh}>{this.props.name}</div>
-			<div className="soshalTPosts">{postComps}</div>
+			<div className="soshalTPosts">{
+				this.state.posts.map(
+					post => <Post key={post.id} postData={post}/>
+				)
+			}</div>
 		</div>;
 	}
 }
