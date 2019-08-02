@@ -1,7 +1,7 @@
 import React, {SyntheticEvent} from 'react';
 
 //https://stackoverflow.com/a/19519701/2692695
-/*const visible = (function(){
+const visible = (function(){
 	let stateKey:string, eventKey: string;
 	const keys: {[name:string]:string} = {
 		hidden: "visibilitychange",
@@ -15,11 +15,11 @@ import React, {SyntheticEvent} from 'react';
 			break;
 		}
 	}
-	return function(c) {
+	return function(c?: EventListenerOrEventListenerObject) {
 		if (c) document.addEventListener(eventKey, c);
 		return !(document as any)[stateKey];
 	}
-})();*/
+})();
 
 //https://stackoverflow.com/a/57124645/2692695
 //Formats object into RESTful URI parameters (?param1=boop&param2=bap)
@@ -64,6 +64,7 @@ interface PostData {
 }
 
 function Post(props : {postData: PostData}) {
+	console.log("Rendering " + props.postData.id);
 	return (
 		<div className="soshalPost">
 			<div className="soshalPSide">
@@ -91,9 +92,7 @@ interface TProps {
 class Timeline extends React.Component<TProps, {posts : any[]}> {
 	private interval?: number;
 
-	static defaultProps = {
-		refreshRate: 15000
-	};
+	static defaultProps = {refreshRate: 30000};
 
 	constructor(props: Readonly<TProps>) {
 		super(props);
@@ -103,12 +102,22 @@ class Timeline extends React.Component<TProps, {posts : any[]}> {
 	}
 
 	componentDidMount() : void {
-		this.interval = window.setInterval(this.refresh, this.props.refreshRate);
+		this.resetRefreshing();
+		visible(this.resetRefreshing);
 	}
 
 	componentWillUnmount() : void {
 		window.clearInterval(this.interval);
 	}
+
+	resetRefreshing = () => {
+		clearInterval(this.interval);
+		if (visible()) {
+			this.interval = window.setInterval(() => this.refresh, this.props.refreshRate);
+
+			this.refresh();
+		}
+	};
 
 	refresh = async () => {
 		console.log("Refreshing " + this.props.name);
