@@ -39,6 +39,66 @@ interface PostData {
 	images? : string[]
 }
 
+class PostMedia {
+	element : HTMLDivElement;
+
+	constructor(public imageSrcs : string[]) {
+		this.element = document.createElement("div");
+		this.element.className = "soshalPMedia soshalPMedia" + this.imageSrcs.length;
+
+
+		for (let i = 0; i < this.imageSrcs.length; i++) {
+			const mediaHolder = document.createElement("div");
+			mediaHolder.className = "soshalMediaHolder";
+			this.element.append(mediaHolder);
+
+			const img = document.createElement("img");
+			img.addEventListener("load", PostMedia.handleImageLoaded);
+			img.alt = "img" + i;
+			img.src = this.imageSrcs[i];
+			mediaHolder.append(img);
+		}
+	}
+
+	static handleImageLoaded(loadEvent : Event) {
+		const img = loadEvent.target as HTMLImageElement;
+		if (img.parentElement)
+			img.parentElement.classList.add(img.width > img.height ? "landscape" : "portrait");
+	}
+}
+
+class Post {
+	element : HTMLDivElement;
+	postMedia : PostMedia;
+
+	constructor(public data : PostData) {
+		this.element = document.createElement("div");
+		this.element.className = "soshalTPost";
+
+		const sideDiv = document.createElement("div");
+		sideDiv.className = "soshalPSide";
+		this.element.append(sideDiv);
+
+		const avatar = document.createElement("img");
+		avatar.alt = this.data.authorHandle + "'s avatar";
+		avatar.src = this.data.authorAvatar;
+		sideDiv.append(avatar);
+
+		const span = document.createElement("span");
+		span.append(this.data.authorName, "@" + this.data.authorHandle);
+		this.element.append(span);
+
+		const p = document.createElement("p");
+		p.textContent = this.data.text;
+		this.element.append(p);
+
+		if (data.images) {
+			this.postMedia = new PostMedia(data.images);
+			this.element.append(this.postMedia.element);
+		}
+	}
+}
+
 interface TwitterOptions {
 	since_id?: string,
 	q?: string,
@@ -47,7 +107,7 @@ interface TwitterOptions {
 //Remember to clearInterval when removing
 class Timeline {
 	private interval?: number;
-	private posts : PostData[] = [];
+	private posts : Post[] = [];
 	element : HTMLDivElement;
 	postContainer : HTMLDivElement;
 
@@ -102,38 +162,13 @@ class Timeline {
 			});
 		}
 
-		for (const post of newPosts.reverse())
+		for (const postData of newPosts.reverse()) {
+			const post = new Post(postData);
 			this.posts.unshift(post);
-
-		this.options.since_id = this.posts[0].id;
-
-		this.updatePosts();
-	}
-
-	updatePosts() {
-		for (const post of this.posts.reverse()) {
-			const div = document.createElement("div");
-			div.className = "soshalTPost";
-
-			const sideDiv = document.createElement("div");
-			sideDiv.className = "soshalPSide";
-			div.append(sideDiv);
-
-			const avatar = document.createElement("img");
-			avatar.alt = post.authorHandle + "'s avatar";
-			avatar.src = post.authorAvatar;
-			sideDiv.append(avatar);
-
-			const span = document.createElement("span");
-			span.append(post.authorName, "@" + post.authorHandle);
-			div.append(span);
-
-			const p = document.createElement("p");
-			p.textContent = post.text;
-			div.append(p);
-
-			this.postContainer.prepend(div);
+			this.postContainer.prepend(post.element);
 		}
+
+		this.options.since_id = this.posts[0].data.id;
 	}
 }
 
@@ -154,7 +189,6 @@ class SoshalThing {
 
 const soshalThing = new SoshalThing();
 soshalThing.addTimeline(new Timeline("Home", "statuses/home_timeline"));
-soshalThing.addTimeline(new Timeline("Search", "search/tweets", { q: 'banana since:2011-07-11', count: 10 }));
 
 window.onload = () => document.body.append(soshalThing.element);
 
