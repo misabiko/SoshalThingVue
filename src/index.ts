@@ -34,6 +34,19 @@ function twitterJSONToPostDatas(json : any) : PostData[] {
 	console.dir(json);
 
 	return (json instanceof Array ? json : json.statuses).map((postData: any) => {
+		if (postData.hasOwnProperty("retweeted_status"))
+			return {
+				id: postData.id_str,
+				authorName: postData.retweeted_status.user.name,
+				authorHandle: postData.retweeted_status.user.screen_name,
+				authorAvatar: postData.retweeted_status.user.profile_image_url_https,
+				text: postData.retweeted_status.text,
+				images: (postData.extended_entities && postData.extended_entities.media.length) ? postData.extended_entities.media.map((media : any) => media.media_url_https) : null,
+				reposterName: postData.user.name,
+				reposterHandle: postData.user.screen_name,
+				reposterAvatar: postData.user.profile_image_url_https
+			};
+
 		return {
 			id: postData.id_str,
 			authorName: postData.user.name,
@@ -114,6 +127,23 @@ class Post {
 	}
 }
 
+interface RepostData extends PostData {
+	reposterName : string,
+	reposterHandle : string,
+	reposterAvatar : string
+}
+
+class Repost extends Post {
+	constructor(data : RepostData) {
+		super(data);
+
+		const repostDiv = document.createElement("div");
+		repostDiv.append(data.reposterName + " retweeted");
+		repostDiv.className = "soshalRepostLabel";
+		this.element.prepend(repostDiv);
+	}
+}
+
 interface TwitterOptions {
 	since_id?: string,
 	q?: string,
@@ -161,7 +191,7 @@ class Timeline {
 			.then(json => twitterJSONToPostDatas(json));
 
 		for (const postData of newPostDatas.reverse()) {
-			const post = new Post(postData);
+			const post = (postData as RepostData).reposterName ? new Repost(postData as RepostData) : new Post(postData);
 			this.posts.unshift(post);
 			this.postContainer.prepend(post.element);
 		}
