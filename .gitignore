@@ -1,5 +1,6 @@
 .idea/
 credentials.json
+dist/*.js
 
 # dependencies
 /node_modules
