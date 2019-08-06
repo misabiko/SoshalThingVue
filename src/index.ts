@@ -30,11 +30,120 @@ function toURI(params : {[name: string] : any}) {
 		.join("&");
 }
 
-class Timeline {
-	element : HTMLDivElement;
+interface PostData {
+	id : string,
+	authorName : string,
+	authorHandle : string,
+	authorAvatar : string,
+	text : string,
+	images? : string[]
 }
 
-console.log("index is on!");
+interface TwitterOptions {
+	since_id?: string,
+	q?: string,
+	count?: number
+}
+//Remember to clearInterval when removing
+class Timeline {
+	private interval?: number;
+	private posts : PostData[] = [];
+	element : HTMLDivElement;
+	postContainer : HTMLDivElement;
+
+	constructor(readonly name : string, readonly endpoint : string, private options : TwitterOptions = {}, private refreshRate : number = 90000) {
+		this.element = document.createElement("div");
+		this.element.className = "soshalTimeline";
+
+		const header = document.createElement("div");
+		header.className = "soshalTHeader";
+		header.addEventListener("click", () => this.refresh());
+		header.textContent = this.name;
+		this.element.append(header);
+
+		this.postContainer = document.createElement("div");
+		this.postContainer.className = "soshalTPosts";
+		this.element.append(this.postContainer);
+
+		this.resetRefreshing();
+		visible(this.resetRefreshing);
+	}
+
+	resetRefreshing() {
+		clearInterval(this.interval);
+		if (visible()) {
+			this.interval = window.setInterval(this.refresh, this.refreshRate);
+
+			this.refresh();
+		}else
+			this.interval = undefined;
+	}
+
+	async refresh() {
+		console.log("Refreshing " + this.name);
+		const json = await fetch('http://localhost:43043/' + this.endpoint + (this.options ? toURI(this.options) : ""))
+			.then(response => response.json());
+
+		console.dir(json);
+		const newPosts : PostData[] = [];
+		const sinceId = this.options.since_id;
+
+		for (const post of (json instanceof Array ? json : json.statuses)) {
+			if (sinceId === post.id_str)
+				break;
+			console.log("Adding " + post.id_str);
+			newPosts.push({
+				id: post.id_str,
+				authorName: post.user.name,
+				authorHandle: post.user.screen_name,
+				authorAvatar: post.user.profile_image_url_https,
+				text: post.text,
+				images: (post.extended_entities && post.extended_entities.media.length) ? post.extended_entities.media.map((media : any) => media.media_url_https) : null
+			});
+		}
+
+		for (const post of newPosts.reverse())
+			this.posts.unshift(post);
+
+		this.options.since_id = this.posts[0].id;
+
+		this.updatePosts();
+	}
+
+	updatePosts() {
+		for (const post of this.posts.reverse()) {
+			const div = document.createElement("div");
+			div.className = "soshalTPost";
+
+			const sideDiv = document.createElement("div");
+			sideDiv.className = "soshalPSide";
+			div.append(sideDiv);
+
+			const avatar = document.createElement("img");
+			avatar.alt = post.authorHandle + "'s avatar";
+			avatar.src = post.authorAvatar;
+			sideDiv.append(avatar);
+
+			const span = document.createElement("span");
+			span.append(post.authorName, "@" + post.authorHandle);
+			div.append(span);
+
+			const p = document.createElement("p");
+			p.textContent = post.text;
+			div.append(p);
+
+			this.postContainer.prepend(div);
+		}
+	}
+}
+
+const timelines : Timeline[] = [];
+timelines.push(new Timeline("Home", "statuses/home_timeline"));
+const soshalThingDiv = document.createElement("div");
+soshalThingDiv.id = "soshalThing";
+soshalThingDiv.append(timelines[0].element);
+
+window.onload = () => document.body.append(soshalThingDiv);
 
 /*interface PMProps {imageSrcs : string[]}
 class PostMedia extends React.Component<PMProps> {
@@ -58,14 +167,6 @@ class PostMedia extends React.Component<PMProps> {
 	}
 }
 
-interface PostData {
-	id : string,
-	authorName : string,
-	authorHandle : string,
-	authorAvatar : string,
-	text : string,
-	images? : string[]
-}
 
 function Post(props : {postData: PostData}) {
 	return (
