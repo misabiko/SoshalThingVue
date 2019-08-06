@@ -137,13 +137,26 @@ class Timeline {
 	}
 }
 
-const timelines : Timeline[] = [];
-timelines.push(new Timeline("Home", "statuses/home_timeline"));
-const soshalThingDiv = document.createElement("div");
-soshalThingDiv.id = "soshalThing";
-soshalThingDiv.append(timelines[0].element);
+class SoshalThing {
+	timelines : Timeline[] = [];
+	element : HTMLDivElement;
 
-window.onload = () => document.body.append(soshalThingDiv);
+	constructor() {
+		this.element = document.createElement("div");
+		this.element.id = "soshalThing";
+	}
+
+	addTimeline(timeline : Timeline) {
+		this.timelines.push(timeline);
+		this.element.append(timeline.element);
+	}
+}
+
+const soshalThing = new SoshalThing();
+soshalThing.addTimeline(new Timeline("Home", "statuses/home_timeline"));
+soshalThing.addTimeline(new Timeline("Search", "search/tweets", { q: 'banana since:2011-07-11', count: 10 }));
+
+window.onload = () => document.body.append(soshalThing.element);
 
 /*interface PMProps {imageSrcs : string[]}
 class PostMedia extends React.Component<PMProps> {
