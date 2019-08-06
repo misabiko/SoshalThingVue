@@ -90,6 +90,7 @@ interface TProps {
 }
 class Timeline extends React.Component<TProps, {posts : any[]}> {
 	private interval?: number;
+	protected _options?: any;
 
 	static defaultProps = {refreshRate: 90000};
 
@@ -98,6 +99,10 @@ class Timeline extends React.Component<TProps, {posts : any[]}> {
 		this.state = {
 			posts: [] as PostData[]
 		};
+	}
+
+	get options(): object {
+		return {...this.props.options, ...this._options};
 	}
 
 	componentDidMount() : void {
@@ -121,7 +126,8 @@ class Timeline extends React.Component<TProps, {posts : any[]}> {
 
 	refresh = async () => {
 		console.log("Refreshing " + this.props.name);
-		await fetch('http://localhost:43043/' + this.props.endpoint + (this.props.options ? toURI(this.props.options) : ""))
+		const options = this.options;
+		await fetch('http://localhost:43043/' + this.props.endpoint + (options ? toURI(options) : ""))
 			.then(response => response.json())
 			.then(json => {
 				console.dir(json);
@@ -152,12 +158,17 @@ class Timeline extends React.Component<TProps, {posts : any[]}> {
 	}
 }
 
+class HomeTimeline extends React.Component {
+	render() {
+		//console.dir(this.state.posts);
+		//this._options.since_id = this.state.posts[0].id_str;
+		return <Timeline endpoint={"statuses/home_timeline"} name={"Home"}/>;
+	}
+}
+
 function SoshalThing() {
 	return (<>
-		<Timeline
-			name="Home"
-			endpoint={'statuses/home_timeline'}
-		/>
+		<HomeTimeline/>
 		{/*<Timeline
 			name="Search"
 			endpoint={'search/tweets'}
