@@ -19,7 +19,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "node server/api.js & react-scripts start"
+    "backend": "node server/api.js",
+    "dev": "npm run backend & npm run start"
   },
   "eslintConfig": {
     "extends": "react-app"

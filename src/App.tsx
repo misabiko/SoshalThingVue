@@ -91,7 +91,7 @@ interface TProps {
 class Timeline extends React.Component<TProps, {posts : any[]}> {
 	private interval?: number;
 
-	static defaultProps = {refreshRate: 30000};
+	static defaultProps = {refreshRate: 65000};
 
 	constructor(props: Readonly<TProps>) {
 		super(props);
@@ -158,11 +158,11 @@ function SoshalThing() {
 			name="Home"
 			endpoint={'statuses/home_timeline'}
 		/>
-		<Timeline
+		{/*<Timeline
 			name="Search"
 			endpoint={'search/tweets'}
 			options={{ q: 'banana since:2011-07-11', count: 10 }}
-		/>
+		/>*/}
 	</>);
 }
 
