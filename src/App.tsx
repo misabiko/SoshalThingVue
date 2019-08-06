@@ -55,7 +55,7 @@ class PostMedia extends React.Component<PMProps> {
 }
 
 interface PostData {
-	id : number,
+	id : string,
 	authorName : string,
 	authorHandle : string,
 	authorAvatar : string,
@@ -91,7 +91,7 @@ interface TProps {
 class Timeline extends React.Component<TProps, {posts : any[]}> {
 	private interval?: number;
 
-	static defaultProps = {refreshRate: 65000};
+	static defaultProps = {refreshRate: 90000};
 
 	constructor(props: Readonly<TProps>) {
 		super(props);
@@ -128,7 +128,7 @@ class Timeline extends React.Component<TProps, {posts : any[]}> {
 				const posts : PostData[] = [];
 				for (const post of (json instanceof Array ? json : json.statuses))
 					posts.push({
-						id: post.id,
+						id: post.id_str,
 						authorName: post.user.name,
 						authorHandle: post.user.screen_name,
 						authorAvatar: post.user.profile_image_url_https,
