@@ -19,6 +19,8 @@ const T = new Twit(JSON.parse(fs.readFileSync(credentialsPath, 'utf8')));
 clog("Booting server...");
 
 http.createServer((request, response) => {
+	clog(request.url);
+
 	//https://stackoverflow.com/a/56780570/2692695
 	let splitURL = request.url.split('?');
 	let params = Array.from(new URLSearchParams(splitURL[1])).reduce((o, i) => ({ ...o, [i[0]]: isNaN(i[1]) ? i[1] : parseInt(i[1]) }), {});
