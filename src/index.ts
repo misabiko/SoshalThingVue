@@ -30,13 +30,19 @@ function toURI(params : {[name: string] : any}) {
 		.join("&");
 }
 
-interface PostData {
-	id : string,
-	authorName : string,
-	authorHandle : string,
-	authorAvatar : string,
-	text : string,
-	images? : string[]
+function twitterJSONToPostDatas(json : any) : PostData[] {
+	console.dir(json);
+
+	return (json instanceof Array ? json : json.statuses).map((postData: any) => {
+		return {
+			id: postData.id_str,
+			authorName: postData.user.name,
+			authorHandle: postData.user.screen_name,
+			authorAvatar: postData.user.profile_image_url_https,
+			text: postData.text,
+			images: (postData.extended_entities && postData.extended_entities.media.length) ? postData.extended_entities.media.map((media : any) => media.media_url_https) : null
+		};
+	});
 }
 
 class PostMedia {
@@ -65,6 +71,15 @@ class PostMedia {
 		if (img.parentElement)
 			img.parentElement.classList.add(img.width > img.height ? "landscape" : "portrait");
 	}
+}
+
+interface PostData {
+	id : string,
+	authorName : string,
+	authorHandle : string,
+	authorAvatar : string,
+	text : string,
+	images? : string[]
 }
 
 class Post {
@@ -141,28 +156,11 @@ class Timeline {
 
 	async refresh() {
 		console.log("Refreshing " + this.name);
-		const json = await fetch('http://localhost:43043/' + this.endpoint + (this.options ? toURI(this.options) : ""))
-			.then(response => response.json());
+		const newPostDatas = await fetch('http://localhost:43043/' + this.endpoint + (this.options ? toURI(this.options) : ""))
+			.then(response => response.json())
+			.then(json => twitterJSONToPostDatas(json));
 
-		console.dir(json);
-		const newPosts : PostData[] = [];
-		const sinceId = this.options.since_id;
-
-		for (const post of (json instanceof Array ? json : json.statuses)) {
-			if (sinceId === post.id_str)
-				break;
-
-			newPosts.push({
-				id: post.id_str,
-				authorName: post.user.name,
-				authorHandle: post.user.screen_name,
-				authorAvatar: post.user.profile_image_url_https,
-				text: post.text,
-				images: (post.extended_entities && post.extended_entities.media.length) ? post.extended_entities.media.map((media : any) => media.media_url_https) : null
-			});
-		}
-
-		for (const postData of newPosts.reverse()) {
+		for (const postData of newPostDatas.reverse()) {
 			const post = new Post(postData);
 			this.posts.unshift(post);
 			this.postContainer.prepend(post.element);
