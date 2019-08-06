@@ -26,7 +26,7 @@ http.createServer((request, response) => {
 	if (params)
 		clog("Params: " + JSON.stringify(params));
 
-	if (!twitterRemaining && (twitterResetTime - Date.now()) < 0)
+	if (!twitterRemaining && (twitterResetTime - Date.now()) >= 0)
 		cerror("Rate limit reached. Reset in " + ((twitterResetTime - Date.now()) / 60000) + " minutes.");
 	else
 		T.get(splitURL[0].substr(1), params)
