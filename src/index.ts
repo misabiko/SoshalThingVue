@@ -72,7 +72,7 @@ class Timeline {
 	resetRefreshing() {
 		clearInterval(this.interval);
 		if (visible()) {
-			this.interval = window.setInterval(this.refresh, this.refreshRate);
+			this.interval = window.setInterval(() => this.refresh(), this.refreshRate);
 
 			this.refresh();
 		}else
@@ -91,7 +91,7 @@ class Timeline {
 		for (const post of (json instanceof Array ? json : json.statuses)) {
 			if (sinceId === post.id_str)
 				break;
-			console.log("Adding " + post.id_str);
+
 			newPosts.push({
 				id: post.id_str,
 				authorName: post.user.name,
