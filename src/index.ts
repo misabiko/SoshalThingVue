@@ -144,11 +144,6 @@ class Repost extends Post {
 	}
 }
 
-interface TwitterOptions {
-	since_id?: string,
-	q?: string,
-	count?: number
-}
 //Remember to clearInterval when removing
 class Timeline {
 	private interval?: number;
@@ -156,7 +151,7 @@ class Timeline {
 	element : HTMLDivElement;
 	postContainer : HTMLDivElement;
 
-	constructor(readonly name : string, readonly endpoint : string, private options : TwitterOptions = {}, private refreshRate : number = 90000) {
+	constructor(readonly name : string, readonly endpoint : string, private options : any = {}, private refreshRate : number = 90000) {
 		this.element = document.createElement("div");
 		this.element.className = "soshalTimeline";
 
@@ -217,6 +212,7 @@ class SoshalThing {
 
 const soshalThing = new SoshalThing();
 soshalThing.addTimeline(new Timeline("Home", "statuses/home_timeline"));
+soshalThing.addTimeline(new Timeline("Art", "search/tweets", {"q": "list:misabiko/Art filter:media -filter:retweets"}, 10000));
 
 window.onload = () => document.body.append(soshalThing.element);
 
