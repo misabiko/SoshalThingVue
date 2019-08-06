@@ -1,5 +1,3 @@
-import React, {SyntheticEvent} from 'react';
-
 //https://stackoverflow.com/a/19519701/2692695
 const visible = (function(){
 	let stateKey:string, eventKey: string;
@@ -32,7 +30,13 @@ function toURI(params : {[name: string] : any}) {
 		.join("&");
 }
 
-interface PMProps {imageSrcs : string[]}
+class Timeline {
+	element : HTMLDivElement;
+}
+
+console.log("index is on!");
+
+/*interface PMProps {imageSrcs : string[]}
 class PostMedia extends React.Component<PMProps> {
 	handleImageLoaded(loadEvent : SyntheticEvent) {
 		const img = loadEvent.target as HTMLImageElement;
@@ -169,15 +173,15 @@ class HomeTimeline extends React.Component {
 function SoshalThing() {
 	return (<>
 		<HomeTimeline/>
-		{/*<Timeline
+		{/!*<Timeline
 			name="Search"
 			endpoint={'search/tweets'}
 			options={{ q: 'banana since:2011-07-11', count: 10 }}
-		/>*/}
+		/>*!/}
 	</>);
 }
 
-export default SoshalThing;
+export default SoshalThing;*/
 
 /*
 contributors: null

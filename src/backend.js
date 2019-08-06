@@ -1,7 +1,7 @@
 const http = require('http');
 const Twit = require('twit');
 const fs = require('fs');
-const credentialsPath = __dirname + '/credentials.json';
+const credentialsPath = __dirname + '/../credentials.json';
 
 const clog = str => console.log("[Server] " + str);
 const cerror = str => console.error("[Server] " + str);
