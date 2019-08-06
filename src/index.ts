@@ -73,7 +73,7 @@ class Post {
 
 	constructor(public data : PostData) {
 		this.element = document.createElement("div");
-		this.element.className = "soshalTPost";
+		this.element.className = "soshalPost";
 
 		const sideDiv = document.createElement("div");
 		sideDiv.className = "soshalPSide";
