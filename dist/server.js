@@ -14,8 +14,8 @@ http_1.createServer(async (request, response) => {
         response.end();
         return;
     }
-    response.writeHead(200, { 'Content-Type': reqTypes[request.url][0] });
-    response.write((await fs_1.promises.readFile(__dirname + reqTypes[request.url][1])).toString());
-    response.end();
+    const reqType = reqTypes[request.url];
+    response.writeHead(200, { 'Content-Type': reqType[0] });
+    response.end((await fs_1.promises.readFile(__dirname + reqType[1])).toString());
 }).listen(3000);
 console.log('Server running at http://localhost:3000/');
