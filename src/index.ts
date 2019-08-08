@@ -100,6 +100,7 @@ class Post {
 	constructor(public data : PostData) {
 		this.element = document.createElement("div");
 		this.element.className = "soshalPost";
+		this.element.setAttribute("post-id", data.id);
 
 		const sideDiv = document.createElement("div");
 		sideDiv.className = "soshalPSide";
@@ -164,7 +165,7 @@ class Timeline {
 		this.element.append(this.postContainer);
 
 		this.resetRefreshing();
-		visible(this.resetRefreshing);
+		visible(() => this.resetRefreshing());
 	}
 
 	resetRefreshing() {
@@ -180,15 +181,40 @@ class Timeline {
 	async refresh() {
 		const newPostDatas = await fetch('http://localhost:43043/' + this.endpoint + (this.options ? toURI(this.options) : ""))
 			.then(response => response.json())
-			.then(json => twitterJSONToPostDatas(json));
+			.then(json => twitterJSONToPostDatas(json).reverse());
 
-		for (const postData of newPostDatas.reverse()) {
-			const post = (postData as RepostData).reposterName ? new Repost(postData as RepostData) : new Post(postData);
-			this.posts.unshift(post);
-			this.postContainer.prepend(post.element);
+		if (this.posts.length) {
+			let currId = parseInt(this.posts[0].data.id);
+			for (let newIndex = 0, oldIndex = 0; newIndex < newPostDatas.length; newIndex++) {
+				const newId = parseInt(newPostDatas[newIndex].id);
+				if (newId > currId) {
+					const post = (newPostDatas[newIndex] as RepostData).reposterName ? new Repost(newPostDatas[newIndex] as RepostData) : new Post(newPostDatas[newIndex]);
+					this.posts.push(post);
+					this.postContainer.prepend(post.element);
+				}else if (newId < currId) {
+					//Count how many posts we have to delete, removing them from DOM as we count
+					let deleteCount = 1;
+					while (newId < parseInt(this.posts[oldIndex + deleteCount].data.id) && oldIndex + deleteCount < this.posts.length) {
+						this.posts[oldIndex + deleteCount].element.remove();
+						deleteCount++;
+					}
+
+					//The removing the data
+					this.posts.splice(oldIndex, deleteCount);
+				}else {
+					if (oldIndex + 1 < this.posts.length)
+						currId = parseInt(this.posts[++oldIndex].data.id);
+					else
+						break;
+				}
+			}
+		}else {
+			for (const postData of newPostDatas) {
+				const post = (postData as RepostData).reposterName ? new Repost(postData as RepostData) : new Post(postData);
+				this.posts.push(post);
+				this.postContainer.prepend(post.element);
+			}
 		}
-
-		this.options.since_id = this.posts[0].data.id;
 	}
 }
 
