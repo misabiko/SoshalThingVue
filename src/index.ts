@@ -130,6 +130,21 @@ class Post {
 			this.postMedia = new PostMedia(data.images);
 			this.element.append(this.postMedia.element);
 		}
+
+		const buttons = document.createElement("div");
+		buttons.className = "soshalPButtons";
+		const repostButton = document.createElement("button");
+		repostButton.textContent = "Retweet";
+		repostButton.addEventListener("click", () => {
+			fetch('http://localhost:43043/like/statuses/retweet/:id' + toURI({id: this.data.id}));
+		});
+		const likeButton = document.createElement("button");
+		likeButton.textContent = "Like";
+		likeButton.addEventListener("click", () => {
+			fetch('http://localhost:43043/like/favorites/create' + toURI({id: this.data.id}));
+		});
+		buttons.append(repostButton, likeButton);
+		this.element.append(buttons);
 	}
 }
 
@@ -198,7 +213,7 @@ class Timeline {
 	}
 
 	async refresh() {
-		const newPostDatas = await fetch('http://localhost:43043/' + this.endpoint + (this.options ? toURI(this.options) : ""))
+		const newPostDatas = await fetch('http://localhost:43043/querytweets/' + this.endpoint + (this.options ? toURI(this.options) : ""))
 			.then(response => response.json())
 			.then(json => twitterJSONToPostDatas(json))
 			.then(newData => newData.reverse().filter(a => this.posts.findIndex(b => b.data.id === a.id) < 0));
@@ -234,5 +249,6 @@ class SoshalThing {
 const soshalThing = new SoshalThing();
 soshalThing.addTimeline(new Timeline("Home", "statuses/home_timeline"));
 soshalThing.addTimeline(new Timeline("Art", "search/tweets", {"q": "list:misabiko/Art filter:media -filter:retweets"}, 10000));
+soshalThing.addTimeline(new Timeline("Mentions", "search/tweets", {"q": "misabiko -from:misabiko -from:GoldenMisabiko"}, 10000));
 
 window.onload = () => document.body.append(soshalThing.element);
