@@ -6,8 +6,7 @@ const credentialsPath = __dirname + '/../credentials.json';
 const clog = str => console.log("[Server] " + str);
 const cerror = str => console.error("[Server] " + str);
 
-let twitterResetTime;
-let twitterRemaining = 15;
+let twitter = {};
 
 if (!fs.existsSync(credentialsPath)) {
 	cerror("You need to add credentials.json for Twit options.");
@@ -28,10 +27,12 @@ http.createServer((request, response) => {
 	if (params)
 		clog("Params: " + JSON.stringify(params));
 
-	if (!twitterRemaining && (twitterResetTime - Date.now()) >= 0)
-		cerror("Rate limit reached. Reset in " + ((twitterResetTime - Date.now()) / 60000) + " minutes.");
+	const endpoint = splitURL[0].substr(1);
+
+	if (twitter.hasOwnProperty(endpoint) && !twitter[endpoint].remaining && (twitter[endpoint].resetTime - Date.now()) >= 0)
+		cerror("Rate limit reached. Reset in " + ((twitter[endpoint].resetTime - Date.now()) / 60000) + " minutes.");
 	else
-		T.get(splitURL[0].substr(1), params)
+		T.get(endpoint, params)
 			.then(twitResp => {
 				response.writeHead(200, {
 					"Content-Type": "application/json",
@@ -40,9 +41,12 @@ http.createServer((request, response) => {
 				response.write(JSON.stringify(twitResp.data));
 
 				clog("Remaining calls: " + twitResp.resp.headers["x-rate-limit-remaining"]);
-				twitterResetTime = new Date(1000 * parseInt(twitResp.resp.headers["x-rate-limit-reset"]));
-				twitterRemaining = parseInt(twitResp.resp.headers["x-rate-limit-remaining"]);
-				clog((Math.round((twitterResetTime - Date.now()) / 600) / 100) + " minutes until reset.");
+
+				if (!twitter.hasOwnProperty(endpoint))
+					twitter[endpoint] = {};
+				twitter[endpoint].resetTime = new Date(1000 * parseInt(twitResp.resp.headers["x-rate-limit-reset"]));
+				twitter[endpoint].remaining = parseInt(twitResp.resp.headers["x-rate-limit-remaining"]);
+				clog((Math.round((twitter[endpoint].resetTime - Date.now()) / 600) / 100) + " minutes until reset.");
 				response.end();
 
 				console.log("");
