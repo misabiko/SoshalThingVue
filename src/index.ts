@@ -32,28 +32,34 @@ function toURI(params : {[name: string] : any}) {
 
 function twitterJSONToPostDatas(json : any) : PostData[] {
 	return (json instanceof Array ? json : json.statuses).map((postData: any) => {
+		const obj = {
+			id: postData.id_str,
+			authorName: postData.user.name,
+			authorHandle: postData.user.screen_name,
+			authorAvatar: postData.user.profile_image_url_https,
+			creationTime: new Date(postData.created_at),
+			text: postData.text,
+			images: (postData.extended_entities && postData.extended_entities.media.length) ? postData.extended_entities.media.map((media : any) => media.media_url_https) : null
+		};
+
 		if (postData.hasOwnProperty("retweeted_status"))
 			return {
-				id: postData.id_str,
+				...obj,
 				authorName: postData.retweeted_status.user.name,
 				authorHandle: postData.retweeted_status.user.screen_name,
 				authorAvatar: postData.retweeted_status.user.profile_image_url_https,
 				text: postData.retweeted_status.text,
-				images: (postData.extended_entities && postData.extended_entities.media.length) ? postData.extended_entities.media.map((media : any) => media.media_url_https) : null,
 				reposterName: postData.user.name,
 				reposterHandle: postData.user.screen_name,
 				reposterAvatar: postData.user.profile_image_url_https
 			};
 
-		return {
-			id: postData.id_str,
-			authorName: postData.user.name,
-			authorHandle: postData.user.screen_name,
-			authorAvatar: postData.user.profile_image_url_https,
-			text: postData.text,
-			images: (postData.extended_entities && postData.extended_entities.media.length) ? postData.extended_entities.media.map((media : any) => media.media_url_https) : null
-		};
+		return obj;
 	});
+}
+
+function getPostObject(postData : PostData) : Post {
+	return (postData as RepostData).reposterName ? new Repost(postData as RepostData) : new Post(postData);
 }
 
 class PostMedia {
@@ -86,6 +92,7 @@ class PostMedia {
 
 interface PostData {
 	id : string,
+	creationTime : Date,
 	authorName : string,
 	authorHandle : string,
 	authorAvatar : string,
@@ -178,42 +185,33 @@ class Timeline {
 			this.interval = undefined;
 	}
 
+	addPost(postData : PostData) {
+		const post = getPostObject(postData);
+		this.posts.push(post);
+		this.postContainer.prepend(post.element);
+	}
+
+	insertPost(postData : PostData, index : number) {
+		const post = getPostObject(postData);
+		this.postContainer.insertBefore(post.element, this.posts[index].element);
+		this.posts.splice(index, 0, post);
+	}
+
 	async refresh() {
 		const newPostDatas = await fetch('http://localhost:43043/' + this.endpoint + (this.options ? toURI(this.options) : ""))
 			.then(response => response.json())
-			.then(json => twitterJSONToPostDatas(json).reverse());
+			.then(json => twitterJSONToPostDatas(json))
+			.then(newData => newData.reverse().filter(a => this.posts.findIndex(b => b.data.id === a.id) < 0));
 
-		if (this.posts.length) {
-			let currId = parseInt(this.posts[0].data.id);
-			for (let newIndex = 0, oldIndex = 0; newIndex < newPostDatas.length; newIndex++) {
-				const newId = parseInt(newPostDatas[newIndex].id);
-				if (newId > currId) {
-					const post = (newPostDatas[newIndex] as RepostData).reposterName ? new Repost(newPostDatas[newIndex] as RepostData) : new Post(newPostDatas[newIndex]);
-					this.posts.push(post);
-					this.postContainer.prepend(post.element);
-				}else if (newId < currId) {
-					//Count how many posts we have to delete, removing them from DOM as we count
-					let deleteCount = 1;
-					while (newId < parseInt(this.posts[oldIndex + deleteCount].data.id) && oldIndex + deleteCount < this.posts.length) {
-						this.posts[oldIndex + deleteCount].element.remove();
-						deleteCount++;
-					}
-
-					//The removing the data
-					this.posts.splice(oldIndex, deleteCount);
-				}else {
-					if (oldIndex + 1 < this.posts.length)
-						currId = parseInt(this.posts[++oldIndex].data.id);
-					else
-						break;
+		for (const newPostData of newPostDatas) {
+			let added = false;
+			for (let i = 0; i < this.posts.length && !added; i++)
+				if (newPostData.creationTime.getTime() < this.posts[i].data.creationTime.getTime()) {
+					this.insertPost(newPostData, i);
+					added = true;
 				}
-			}
-		}else {
-			for (const postData of newPostDatas) {
-				const post = (postData as RepostData).reposterName ? new Repost(postData as RepostData) : new Post(postData);
-				this.posts.push(post);
-				this.postContainer.prepend(post.element);
-			}
+			if (!added)
+				this.addPost(newPostData);
 		}
 	}
 }
