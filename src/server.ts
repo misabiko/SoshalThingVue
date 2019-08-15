@@ -1,5 +1,22 @@
-import {createServer} from "http";
-import {promises as fsPromises} from "fs";
+import * as Fastify from 'fastify';
+import {AddressInfo} from "net";
+
+const fastify: Fastify.FastifyInstance = Fastify({logger: true});
+
+fastify.get('/', async () => ({hello: 'world'}));
+
+const start = async () => {
+	try {
+		await fastify.listen(3000);
+		fastify.log.info(`Server listening on ${(<AddressInfo>fastify.server.address()).port}`);
+	}catch (err) {
+		fastify.log.error(err);
+		process.exit(1);
+	}
+};
+start().then();
+
+/*import {promises as fsPromises} from "fs";
 
 const reqTypes : {[url : string] : string[]} = {
 	'/': ['text/html', '/index.html'],
@@ -23,3 +40,4 @@ createServer(async (request, response) => {
 }).listen(3000);
 
 console.log('Server running at http://localhost:3000/');
+*/

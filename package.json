@@ -12,6 +12,7 @@
   "dependencies": {
     "@types/node": "^12.6.9",
     "@types/twit": "^2.2.22",
+    "fastify": "^2.7.1",
     "twit": "^2.2.11"
   },
   "devDependencies": {
