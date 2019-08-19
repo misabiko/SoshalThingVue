@@ -5,9 +5,7 @@
   "private": true,
   "repository": "github:misabiko/SocialThing",
   "scripts": {
-    "start": "tsc && node dist/server.js",
-    "backend": "node src/backend.js",
-    "dev": "tsc && concurrently \"node src/backend.js\" \"node dist/server.js\""
+    "start": "tsc && node dist/server.js"
   },
   "dependencies": {
     "@types/node": "^12.6.9",

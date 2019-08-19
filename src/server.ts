@@ -18,34 +18,6 @@ if (!fs.existsSync(credentialsPath)) {
 
 const T = new Twit(JSON.parse(fs.readFileSync(credentialsPath, 'utf8')));
 
-/*http.createServer((request, response) => {
-	clog(request.url);
-
-	/!*if (request.url.startsWith("/like")) {
-		const url = request.url.substring(5);
-
-		if (!params.id) {
-			cerror("You need to add the tweet's id in parameter.");
-			return;
-		}
-		const endpoint = splitURL[0].substr(6);
-
-		T.post(endpoint, params).then(twitResp => {
-			response.writeHead(200, {
-				"Access-Control-Allow-Origin": "*"
-			});
-			response.end();
-
-			console.log("");
-		})
-			.catch(error => {
-				cerror("Error on Twitter request.");
-				console.dir(error);
-			});
-		return;
-	}*!/
-}).listen(43043);*/
-
 const fastify : Fastify.FastifyInstance = Fastify({logger: {prettyPrint: true}});
 
 fastify.register(fastifyStatic, {
@@ -63,7 +35,7 @@ staticGet("index.html", "/");
 staticGet("index.js", "/index.js");
 staticGet("index.css", "/index.css");
 
-fastify.get("/twitter/*", (request, reply) => {
+fastify.get("/twitter/tweets/*", (request, reply) => {
 	if (request.query)
 		fastify.log.info("Params: ", request.query);
 
@@ -94,6 +66,25 @@ fastify.get("/twitter/*", (request, reply) => {
 			.catch(error => {
 				fastify.log.error("Error on Twitter request.", error);
 			});
+});
+
+fastify.post("/twitter/like/*", (request, reply) => {
+	if (!request.query.id) {
+		fastify.log.error("You need to add the tweet's id in parameter.");
+		return;
+	}
+
+	T.post(request.params["*"], request.query).then(() => {
+		reply.code(200)
+			.headers({
+			"Access-Control-Allow-Origin": "*"
+		});
+		reply.send();
+	})
+		.catch(error => {
+			fastify.log.error("Error on Twitter request.");
+			console.dir(error);
+		});
 });
 
 fastify.listen(3000)
