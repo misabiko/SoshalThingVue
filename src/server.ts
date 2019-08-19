@@ -8,9 +8,13 @@ fastify.register(fastifyStatic, {
 	serve: false
 });
 
-fastify.get("/", (request, reply) => {reply.sendFile("index.html")});
-fastify.get("/index.js", (request, reply) => {reply.sendFile("index.js")});
-fastify.get("/index.css", (request, reply) => {reply.sendFile("index.css")});
+function staticGet(filename : string, path? : string) {
+	fastify.get(path || "/" + filename, (request, reply) => {reply.sendFile(filename)});
+}
+
+staticGet("index.html", "/");
+staticGet("index.js", "/index.js");
+staticGet("index.css", "/index.css");
 
 fastify.listen(3000)
 	.catch(err => {
