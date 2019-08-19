@@ -1,43 +1,19 @@
 import * as Fastify from 'fastify';
-import {AddressInfo} from "net";
+import * as fastifyStatic from "fastify-static";
 
-const fastify: Fastify.FastifyInstance = Fastify({logger: true});
+const fastify : Fastify.FastifyInstance = Fastify({logger: {prettyPrint: true}});
 
-fastify.get('/', async () => ({hello: 'world'}));
+fastify.register(fastifyStatic, {
+	root: __dirname,
+	serve: false
+});
 
-const start = async () => {
-	try {
-		await fastify.listen(3000);
-		fastify.log.info(`Server listening on ${(<AddressInfo>fastify.server.address()).port}`);
-	}catch (err) {
+fastify.get("/", (request, reply) => {reply.sendFile("index.html")});
+fastify.get("/index.js", (request, reply) => {reply.sendFile("index.js")});
+fastify.get("/index.css", (request, reply) => {reply.sendFile("index.css")});
+
+fastify.listen(3000)
+	.catch(err => {
 		fastify.log.error(err);
 		process.exit(1);
-	}
-};
-start().then();
-
-/*import {promises as fsPromises} from "fs";
-
-const reqTypes : {[url : string] : string[]} = {
-	'/': ['text/html', '/index.html'],
-	'/index.js': ['text/javascript', '/index.js'],
-	'/manifest.json': ['application/json', '/manifest.json'],
-	'/index.css': ['text/css', '/index.css']
-};
-
-createServer(async (request, response) => {
-	console.log(request.url);
-
-	if (!reqTypes.hasOwnProperty(request.url)) {
-		response.writeHead(404);
-		response.end();
-		return;
-	}
-
-	const reqType = reqTypes[request.url];
-	response.writeHead(200, {'Content-Type': reqType[0]});
-	response.end((await fsPromises.readFile(__dirname + reqType[1])).toString());
-}).listen(3000);
-
-console.log('Server running at http://localhost:3000/');
-*/
+	});
