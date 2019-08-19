@@ -63,28 +63,29 @@ fastify.get("/twitter/tweets/*", (request, reply) => {
 					});
 				reply.send(twitResp.data);
 			})
-			.catch(error => {
-				fastify.log.error("Error on Twitter request.", error);
-			});
+			.catch(error => fastify.log.error("Error on Twitter request.", error));
 });
 
-fastify.post("/twitter/like/*", (request, reply) => {
-	if (!request.query.id) {
-		fastify.log.error("You need to add the tweet's id in parameter.");
-		return;
-	}
-
-	T.post(request.params["*"], request.query).then(() => {
+fastify.post("/twitter/like/:id", (request, reply) => {
+	T.post("favorites/create", {id: request.params.id}).then(() => {
 		reply.code(200)
 			.headers({
 			"Access-Control-Allow-Origin": "*"
 		});
 		reply.send();
 	})
-		.catch(error => {
-			fastify.log.error("Error on Twitter request.");
-			console.dir(error);
-		});
+		.catch(error => fastify.log.error("Error on Twitter like.", error));
+});
+
+fastify.post("/twitter/retweet/:id", (request, reply) => {
+	T.post("statuses/retweet", {id: request.params.id}).then(() => {
+		reply.code(200)
+			.headers({
+				"Access-Control-Allow-Origin": "*"
+			});
+		reply.send();
+	})
+		.catch(error => fastify.log.error("Error on Twitter retweet.", error));
 });
 
 fastify.listen(3000)

@@ -135,13 +135,13 @@ class Post {
 		buttons.className = "soshalPButtons";
 		const repostButton = document.createElement("button");
 		repostButton.textContent = "Retweet";
-		repostButton.addEventListener("click", () => {
-			fetch('twitter/like/statuses/retweet/:id' + toURI({id: this.data.id}), {method: "POST"});
+		repostButton.addEventListener("click", async () => {
+			await fetch('twitter/retweet/' + this.data.id, {method: "POST"});
 		});
 		const likeButton = document.createElement("button");
 		likeButton.textContent = "Like";
-		likeButton.addEventListener("click", () => {
-			fetch('twitter/like/favorites/create' + toURI({id: this.data.id}), {method: "POST"});
+		likeButton.addEventListener("click", async () => {
+			await fetch('twitter/like/' + this.data.id, {method: "POST"});
 		});
 		buttons.append(repostButton, likeButton);
 		this.element.append(buttons);
