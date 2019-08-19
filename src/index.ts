@@ -135,13 +135,13 @@ class Post {
 		buttons.className = "soshalPButtons";
 		const repostButton = document.createElement("button");
 		repostButton.textContent = "Retweet";
-		repostButton.addEventListener("click", () => {
-			fetch('http://localhost:43043/like/statuses/retweet/:id' + toURI({id: this.data.id}));
+		repostButton.addEventListener("click", async () => {
+			await fetch('twitter/retweet/' + this.data.id, {method: "POST"});
 		});
 		const likeButton = document.createElement("button");
 		likeButton.textContent = "Like";
-		likeButton.addEventListener("click", () => {
-			fetch('http://localhost:43043/like/favorites/create' + toURI({id: this.data.id}));
+		likeButton.addEventListener("click", async () => {
+			await fetch('twitter/like/' + this.data.id, {method: "POST"});
 		});
 		buttons.append(repostButton, likeButton);
 		this.element.append(buttons);
@@ -213,7 +213,7 @@ class Timeline {
 	}
 
 	async refresh() {
-		const newPostDatas = await fetch('http://localhost:43043/querytweets/' + this.endpoint + (this.options ? toURI(this.options) : ""))
+		const newPostDatas = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ""))
 			.then(response => response.json())
 			.then(json => twitterJSONToPostDatas(json))
 			.then(newData => newData.reverse().filter(a => this.posts.findIndex(b => b.data.id === a.id) < 0));
