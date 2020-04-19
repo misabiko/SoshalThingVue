@@ -39,7 +39,9 @@ function twitterJSONToPostDatas(json : any) : PostData[] {
 			authorAvatar: postData.user.profile_image_url_https,
 			creationTime: new Date(postData.created_at),
 			text: postData.text,
-			images: (postData.extended_entities && postData.extended_entities.media.length) ? postData.extended_entities.media.map((media : any) => media.media_url_https) : null
+			images: (postData.extended_entities && postData.extended_entities.media.length) ? postData.extended_entities.media.map((media : any) => media.media_url_https) : null,
+			liked: postData.favorited,
+			reposted: postData.retweeted,
 		};
 
 		if (postData.hasOwnProperty("retweeted_status"))
@@ -97,12 +99,17 @@ interface PostData {
 	authorHandle : string,
 	authorAvatar : string,
 	text : string,
-	images? : string[]
+	images? : string[],
+	liked : boolean,
+	reposted : boolean
 }
 
 class Post {
 	element : HTMLDivElement;
 	postMedia : PostMedia;
+	likeButton : HTMLButtonElement;
+	repostButton : HTMLButtonElement;
+	commentButton : HTMLButtonElement;
 
 	constructor(public data : PostData) {
 		this.element = document.createElement("div");
@@ -134,17 +141,13 @@ class Post {
 		const buttons = document.createElement("div");
 		buttons.className = "soshalPButtons";
 		buttons.append(
-			Post.createButton('retweet', 'fas', 'repostButton', async () => {
-				await fetch('twitter/retweet/' + this.data.id, {method: "POST"});
-			}),
-			Post.createButton('heart', 'far', 'likeButton', async () => {
-				await fetch('twitter/like/' + this.data.id, {method: "POST"});
-			})
+			this.createRepostButton(),
+			this.createLikeButton(),
 		);
 		this.element.append(buttons);
 	}
 
-	static createButton(iconName: string, iconStyle: string, className : string, onClick : () => Promise<void>) {
+	static createButton(iconName : string, iconStyle : string, className : string, onClick : () => Promise<void>) {
 		const button = document.createElement('button');
 		button.className = className;
 		button.addEventListener("click", onClick);
@@ -154,6 +157,48 @@ class Post {
 		button.append(icon);
 
 		return button;
+	}
+
+	createLikeButton() {
+		this.likeButton = Post.createButton('heart', this.data.liked ? 'fas' : 'far', 'likeButton', async () => {
+			const twitResp = await fetch('twitter/like/' + this.data.id, {method: "POST"})
+				.then(response => response.json());
+			this.setLiked(twitResp.favorited);
+		});
+		this.setLiked(this.data.liked);
+
+		return this.likeButton;
+	}
+
+	setLiked(liked : boolean) {
+		if (liked) {
+			this.likeButton.classList.add('likedPostButton');
+			this.likeButton.firstElementChild.classList.remove('far');
+			this.likeButton.firstElementChild.classList.add('fas');
+		}else {
+			this.likeButton.classList.remove('likedPostButton');
+			this.likeButton.firstElementChild.classList.remove('fas');
+			this.likeButton.firstElementChild.classList.add('far');
+		}
+	}
+
+	createRepostButton() {
+		this.repostButton = Post.createButton('retweet', 'fas', 'repostButton', async () => {
+			const twitResp = await fetch('twitter/retweet/' + this.data.id, {method: "POST"})
+				.then(response => response.json());
+			if (twitResp.retweeted)
+				this.repostButton.classList.add('repostedPostButton');
+		});
+		this.setReposted(this.data.reposted);
+
+		return this.repostButton;
+	}
+
+	setReposted(liked : boolean) {
+		if (liked)
+			this.repostButton.classList.add('repostedPostButton');
+		else
+			this.repostButton.classList.remove('repostedPostButton');
 	}
 }
 
@@ -276,5 +321,6 @@ const soshalThing = new SoshalThing();
 soshalThing.addTimeline(new Timeline("Home", "statuses/home_timeline"));
 soshalThing.addTimeline(new Timeline("Art", "search/tweets", {"q": "list:misabiko/Art filter:media -filter:retweets"}, 10000));
 soshalThing.addTimeline(new Timeline("Mentions", "search/tweets", {"q": "misabiko -from:misabiko -from:GoldenMisabiko"}, 10000));
+soshalThing.addTimeline(new Timeline("#深夜の真剣お絵描き60分一本勝負", "search/tweets", {"q": "#深夜の真剣お絵描き60分一本勝負 filter:media -filter:retweets"}, 10000));
 
 window.onload = () => document.body.append(soshalThing.element);

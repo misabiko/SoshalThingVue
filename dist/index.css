@@ -95,11 +95,11 @@ body {
 	font-size: 18px;
 }
 
-button:hover.likeButton i {
+button:hover.likeButton i, .likedPostButton i {
 	color: #e0245e;
 }
 
-button:hover.repostButton i {
+button:hover.repostButton i, .repostedPostButton i {
 	color: #17bf63;
 }
 
