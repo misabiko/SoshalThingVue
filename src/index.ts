@@ -1,7 +1,7 @@
 //https://stackoverflow.com/a/19519701/2692695
-const visible = (function(){
-	let stateKey:string, eventKey: string;
-	const keys: {[name:string]:string} = {
+const visible = (function() {
+	let stateKey : string, eventKey : string;
+	const keys : { [name : string] : string } = {
 		hidden: "visibilitychange",
 		webkitHidden: "webkitvisibilitychange",
 		mozHidden: "mozvisibilitychange",
@@ -13,7 +13,7 @@ const visible = (function(){
 			break;
 		}
 	}
-	return function(c?: EventListenerOrEventListenerObject) {
+	return function(c? : EventListenerOrEventListenerObject) {
 		if (c) document.addEventListener(eventKey, c);
 		return !(document as any)[stateKey];
 	}
@@ -22,7 +22,7 @@ const visible = (function(){
 //https://stackoverflow.com/a/57124645/2692695
 //Formats object into RESTful URI parameters (?param1=boop&param2=bap)
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function toURI(params : {[name: string] : any}) {
+function toURI(params : { [name : string] : any }) {
 	return '?' + Object.entries(params)
 		.map(
 			([key, val]) => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`
@@ -31,7 +31,7 @@ function toURI(params : {[name: string] : any}) {
 }
 
 function twitterJSONToPostDatas(json : any) : PostData[] {
-	return (json instanceof Array ? json : json.statuses).map((postData: any) => {
+	return (json instanceof Array ? json : json.statuses).map((postData : any) => {
 		const obj = {
 			id: postData.id_str,
 			authorName: postData.user.name,
@@ -133,22 +133,31 @@ class Post {
 
 		const buttons = document.createElement("div");
 		buttons.className = "soshalPButtons";
-		const repostButton = document.createElement("button");
-		repostButton.textContent = "Retweet";
-		repostButton.addEventListener("click", async () => {
-			await fetch('twitter/retweet/' + this.data.id, {method: "POST"});
-		});
-		const likeButton = document.createElement("button");
-		likeButton.textContent = "Like";
-		likeButton.addEventListener("click", async () => {
-			await fetch('twitter/like/' + this.data.id, {method: "POST"});
-		});
-		buttons.append(repostButton, likeButton);
+		buttons.append(
+			Post.createButton('Retweet', 'retweet', async () => {
+				await fetch('twitter/retweet/' + this.data.id, {method: "POST"});
+			}),
+			Post.createButton('Like', 'heart', async () => {
+				await fetch('twitter/like/' + this.data.id, {method: "POST"});
+			})
+		);
 		this.element.append(buttons);
+	}
+
+	static createButton(name : string, iconName : string, onClick : () => Promise<void>) {
+		const button = document.createElement('button');
+		button.textContent = name;
+		button.addEventListener("click", onClick);
+
+		const icon = document.createElement('i');
+		icon.className = 'far fa-' + iconName;
+		button.append(icon);
+
+		return button;
 	}
 }
 
-interface RepostData extends PostData {
+interface RepostData extends PostData {
 	reposterName : string,
 	reposterHandle : string,
 	reposterAvatar : string
@@ -167,7 +176,7 @@ class Repost extends Post {
 
 //Remember to clearInterval when removing
 class Timeline {
-	private interval?: number;
+	private interval? : number;
 	private posts : Post[] = [];
 	element : HTMLDivElement;
 	postContainer : HTMLDivElement;
