@@ -67,6 +67,25 @@ body {
 	margin-bottom: 2px;
 }
 
+.soshalPost {
+	margin: 0;
+}
+
+.soshalPButtons button {
+	margin: 8px 0;
+}
+
+.soshalPButtons button {
+	border: 0;
+	margin-right: 10px;
+	background: none;
+	color: #8899a6;
+}
+
+.soshalPButtons i {
+	font-size: 18px;
+}
+
 .soshalPSide {
 	position: absolute;
 	left: 0;
@@ -79,6 +98,7 @@ body {
 
 .soshalPMedia {
 	height: 300px;
+	overflow: hidden;/*TODO remove once layout is settled*/
 }
 
 .soshalMediaHolder {

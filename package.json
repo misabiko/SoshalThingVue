@@ -8,6 +8,7 @@
     "start": "tsc && node dist/server.js"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.0",
     "@types/node": "^12.6.9",
     "@types/twit": "^2.2.22",
     "fastify": "^2.7.1",
