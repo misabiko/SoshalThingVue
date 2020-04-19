@@ -231,18 +231,35 @@ class Timeline {
 	}
 }
 
-class SoshalThing {
-	timelines : Timeline[] = [];
+class Sidebar {
 	element : HTMLDivElement;
 
 	constructor() {
 		this.element = document.createElement("div");
+		this.element.id = 'soshalSidebar';
+	}
+}
+
+class SoshalThing {
+	timelines : Timeline[] = [];
+	element : HTMLDivElement;
+	timelineContainer : HTMLDivElement;
+	sidebar = new Sidebar();
+
+	constructor() {
+		this.element = document.createElement("div");
 		this.element.id = "soshalThing";
+
+		this.timelineContainer = document.createElement("div");
+		this.timelineContainer.id = "soshalTimelineContainer";
+		this.element.append(this.timelineContainer);
+
+		this.element.append(this.sidebar.element)
 	}
 
 	addTimeline(timeline : Timeline) {
 		this.timelines.push(timeline);
-		this.element.append(timeline.element);
+		this.timelineContainer.append(timeline.element);
 	}
 }
 

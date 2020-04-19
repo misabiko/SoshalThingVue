@@ -24,6 +24,19 @@ body {
 	display: flex;
 }
 
+#soshalSidebar {
+	width: 60px;
+	height: 100%;
+	background-color: #1e2039;
+	position: fixed;
+}
+
+#soshalTimelineContainer {
+	width: 100%;
+	height: 100%;
+	padding-left: 70px;
+}
+
 .soshalTimeline {
 	width: 500px;
 	height: 100%;
