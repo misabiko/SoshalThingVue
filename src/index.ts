@@ -134,18 +134,19 @@ class Post {
 		const buttons = document.createElement("div");
 		buttons.className = "soshalPButtons";
 		buttons.append(
-			Post.createButton('retweet', 'fas', async () => {
+			Post.createButton('retweet', 'fas', 'repostButton', async () => {
 				await fetch('twitter/retweet/' + this.data.id, {method: "POST"});
 			}),
-			Post.createButton('heart', 'far', async () => {
+			Post.createButton('heart', 'far', 'likeButton', async () => {
 				await fetch('twitter/like/' + this.data.id, {method: "POST"});
 			})
 		);
 		this.element.append(buttons);
 	}
 
-	static createButton(iconName: string, iconStyle: string, onClick : () => Promise<void>) {
+	static createButton(iconName: string, iconStyle: string, className : string, onClick : () => Promise<void>) {
 		const button = document.createElement('button');
+		button.className = className;
 		button.addEventListener("click", onClick);
 
 		const icon = document.createElement('i');

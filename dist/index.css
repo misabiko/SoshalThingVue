@@ -71,6 +71,10 @@ body {
 	margin: 0;
 }
 
+.soshalRepostLabel {
+	color: #8899a6;
+}
+
 .soshalPButtons button {
 	margin: 8px 0;
 }
@@ -84,6 +88,18 @@ body {
 
 .soshalPButtons i {
 	font-size: 18px;
+}
+
+button:hover.likeButton i {
+	color: #e0245e;
+}
+
+button:hover.repostButton i {
+	color: #17bf63;
+}
+
+button:hover.commentButton i {
+	color: #1da1f2;
 }
 
 .soshalPSide {
