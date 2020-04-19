@@ -15,18 +15,21 @@ body {
 	sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	background-color: #14151f;
 }
 
 #soshalThing {
 	color: white;
 	background-color: #14151f;
 	height: 100vh;
-	display: flex;
+	overflow-x: scroll;
+	overflow-y: hidden;
 }
 
 #soshalSidebar {
 	width: 60px;
-	height: 100%;
+	top: 0;
+	bottom: 0;
 	background-color: #1e2039;
 	position: fixed;
 }
@@ -42,7 +45,7 @@ body {
 .soshalTimeline {
 	width: 500px;
 	height: 100%;
-	padding: 10px 5px;
+	padding: 0 5px;
 	box-sizing: border-box;
 	display: flex;
 	flex-flow: column;
@@ -63,16 +66,18 @@ body {
 .soshalPost {
 	background-color: #181925;
 	position: relative;
-	padding-left: 20%;
+	padding: 8px 8px 8px 20%;
 	margin-bottom: 2px;
 }
 
-.soshalPost {
+.soshalPost p {
 	margin: 0;
 }
 
 .soshalRepostLabel {
 	color: #8899a6;
+	padding: 5px 0;
+	font-size: smaller;
 }
 
 .soshalPButtons button {
