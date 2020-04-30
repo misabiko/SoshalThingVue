@@ -30,36 +30,6 @@ function toURI(params : { [name : string] : any }) {
 		.join("&");
 }
 
-/*function twitterJSONToPostDatas(json : tweetJSON | tweetJSON[]) : PostData[] {
-	return (json instanceof Array ? json : json.statuses).map((postData : any) => {
-		const obj = {
-			id: postData.id_str,
-			authorName: postData.user.name,
-			authorHandle: postData.user.screen_name,
-			authorAvatar: postData.user.profile_image_url_https,
-			creationTime: new Date(postData.created_at),
-			text: postData.text,
-			images: (postData.extended_entities && postData.extended_entities.media.length) ? postData.extended_entities.media.map((media : any) => media.media_url_https) : null,
-			liked: postData.favorited,
-			reposted: postData.retweeted,
-		};
-
-		if (postData.hasOwnProperty("retweeted_status"))
-			return {
-				...obj,
-				authorName: postData.retweeted_status.user.name,
-				authorHandle: postData.retweeted_status.user.screen_name,
-				authorAvatar: postData.retweeted_status.user.profile_image_url_https,
-				text: postData.retweeted_status.text,
-				reposterName: postData.user.name,
-				reposterHandle: postData.user.screen_name,
-				reposterAvatar: postData.user.profile_image_url_https
-			};
-
-		return obj;
-	});
-}*/
-
 function getPostObject(postData : PostData) : Post {
 	return (postData as RepostData).reposterName ? new Repost(postData as RepostData) : new Post(postData);
 }
@@ -269,22 +239,11 @@ class Timeline {
 	async refresh() {
 		const newPostDatas = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ""))
 			.then(response => response.json())
-			.then(json => json.map((tweetJSON : any) => {
-				return {
-					id: tweetJSON.id,
-					creationTime: new Date(tweetJSON.created_at),
-					authorName: tweetJSON.user.name,
-					authorHandle: tweetJSON.user.screen_name,
-					authorAvatar: tweetJSON.user.profile_image_url,
-					text: tweetJSON.text,
-					images: [],
-					liked: false,
-					reposted: false,
-				} as PostData
-			}))
-			.then(newData => newData.reverse().filter((a: PostData) => this.posts.findIndex(b => b.data.id === a.id) < 0));
+			.then(newData => newData.reverse().filter((a : PostData) => this.posts.findIndex(b => b.data.id === a.id) < 0));
 
 		for (const newPostData of newPostDatas) {
+			newPostData.creationTime = new Date(newPostData.creationTime);
+
 			let added = false;
 			for (let i = 0; i < this.posts.length && !added; i++)
 				if (newPostData.creationTime.getTime() < this.posts[i].data.creationTime.getTime()) {
@@ -332,7 +291,7 @@ class SoshalThing {
 const soshalThing = new SoshalThing();
 //soshalThing.addTimeline(new Timeline("Home", "statuses/home_timeline"));
 soshalThing.addTimeline(new Timeline("Art", "search", {"q": "list:misabiko/Art filter:media -filter:retweets"}, 10000));
-//soshalThing.addTimeline(new Timeline("Mentions", "search", {"q": "misabiko -from:misabiko -from:GoldenMisabiko"}, 10000));
-//soshalThing.addTimeline(new Timeline("#深夜の真剣お絵描き60分一本勝負", "search", {"q": "#深夜の真剣お絵描き60分一本勝負 filter:media -filter:retweets"}, 10000));
+soshalThing.addTimeline(new Timeline("Mentions", "search", {"q": "misabiko -from:misabiko -from:GoldenMisabiko"}, 10000));
+soshalThing.addTimeline(new Timeline("#深夜の真剣お絵描き60分一本勝負", "search", {"q": "#深夜の真剣お絵描き60分一本勝負 filter:media -filter:retweets"}, 10000));
 
 window.onload = () => document.body.append(soshalThing.element);
