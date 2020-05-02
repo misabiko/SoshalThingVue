@@ -217,7 +217,6 @@ class Timeline {
 
 	resetRefreshing() {
 		clearInterval(this.interval);
-		console.log("LoggedIn: " + soshalThing.loggedIn);
 		if (soshalThing.loggedIn && visible()) {
 			this.interval = window.setInterval(() => this.refresh(), this.refreshRate);
 
@@ -345,7 +344,7 @@ class SoshalThing {
 }
 
 const soshalThing = new SoshalThing();
-//soshalThing.addTimeline(new Timeline("Home", "statuses/home_timeline"));
+soshalThing.addTimeline(new Timeline("Home", "home_timeline"));
 soshalThing.addTimeline(new Timeline("Art", "search", {"q": "list:misabiko/Art filter:media -filter:retweets"}, 10000));
 soshalThing.addTimeline(new Timeline("Mentions", "search", {"q": "misabiko -from:misabiko -from:GoldenMisabiko"}, 10000));
 soshalThing.addTimeline(new Timeline("#深夜の真剣お絵描き60分一本勝負", "search", {"q": "#深夜の真剣お絵描き60分一本勝負 filter:media -filter:retweets"}, 10000));

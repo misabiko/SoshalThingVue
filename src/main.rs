@@ -44,6 +44,7 @@ async fn main() -> Result<()> {
 			.service(
 				web::scope("/twitter")
 					.route("/tweets/search", web::get().to(twitter::search_tweets))
+					.route("/tweets/home_timeline", web::get().to(twitter::home_timeline))
 					.service(twitter::login)
 					.service(twitter::callback)
 			)
