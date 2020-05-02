@@ -210,13 +210,15 @@ class Timeline {
 		this.postContainer.className = "soshalTPosts";
 		this.element.append(this.postContainer);
 
+		//Init refreshing and set it as event callback on visible/focus
 		this.resetRefreshing();
 		visible(() => this.resetRefreshing());
 	}
 
 	resetRefreshing() {
 		clearInterval(this.interval);
-		if (visible()) {
+		console.log("LoggedIn: " + soshalThing.loggedIn);
+		if (soshalThing.loggedIn && visible()) {
 			this.interval = window.setInterval(() => this.refresh(), this.refreshRate);
 
 			this.refresh().then();
@@ -239,7 +241,11 @@ class Timeline {
 	async refresh() {
 		const newPostDatas = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ""))
 			.then(response => response.json())
-			.then(newData => newData.reverse().filter((a : PostData) => this.posts.findIndex(b => b.data.id === a.id) < 0));
+			.then(newData => {
+				console.log(newData.length);
+				console.log(typeof(newData));
+				return newData.reverse().filter((a : PostData) => this.posts.findIndex(b => b.data.id === a.id) < 0);
+			});
 
 		for (const newPostData of newPostDatas) {
 			newPostData.creationTime = new Date(newPostData.creationTime);
@@ -265,11 +271,38 @@ class Sidebar {
 	}
 }
 
+class LoginBar {
+	element : HTMLDivElement;
+	loginLink : HTMLAnchorElement;
+
+	constructor() {
+		this.element = document.createElement("div");
+		this.element.id = 'soshalLoginBar';
+
+		this.loginLink = document.createElement("a");
+		this.element.append(this.loginLink);
+
+		this.setMessage("");
+	}
+
+	setMessage(message: string) {
+		if (message) {
+			this.loginLink.text = message;
+			this.element.classList.remove("loginBarHidden");
+		}else {
+			this.loginLink.href = "";
+			this.element.classList.add("loginBarHidden");
+		}
+	}
+}
+
 class SoshalThing {
 	timelines : Timeline[] = [];
 	element : HTMLDivElement;
 	timelineContainer : HTMLDivElement;
 	sidebar = new Sidebar();
+	loginBar = new LoginBar();
+	loggedIn = false;
 
 	constructor() {
 		this.element = document.createElement("div");
@@ -279,12 +312,35 @@ class SoshalThing {
 		this.timelineContainer.id = "soshalTimelineContainer";
 		this.element.append(this.timelineContainer);
 
-		this.element.append(this.sidebar.element)
+		this.element.append(this.sidebar.element);
+
+		this.element.append(this.loginBar.element);
+
+		fetch('/twitter/login')
+			.then(response => response.json())
+			.then(json => {
+				if (json === 'LoggedIn')
+					this.setLoggedIn(true);
+				else {
+					this.loginBar.setMessage(json.PreAuth.auth_url);
+				}
+			});
 	}
 
 	addTimeline(timeline : Timeline) {
 		this.timelines.push(timeline);
 		this.timelineContainer.append(timeline.element);
+	}
+
+	setLoggedIn(loggedIn : boolean) {
+		this.loggedIn = loggedIn;
+		for (const timeline of this.timelines)
+			timeline.resetRefreshing();
+
+		if (loggedIn)
+			this.timelineContainer.classList.remove("squishedTimelineContainer");
+		else
+			this.timelineContainer.classList.add("squishedTimelineContainer");
 	}
 }
 

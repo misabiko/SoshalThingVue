@@ -34,12 +34,30 @@ body {
 	position: fixed;
 }
 
+#soshalLoginBar {
+	left: 0;
+	right: 0;
+	height: 60px;
+	top: 0;
+	padding-left: 70px;
+	position: fixed;
+	background-color: #1e2039;
+}
+
+.loginBarHidden {
+	display: none;
+}
+
 #soshalTimelineContainer {
 	width: 100%;
 	height: 100%;
 	padding-left: 60px;
 	display: flex;
 	flex-wrap: nowrap;
+}
+
+.squishedTimelineContainer {
+	padding-top: 70px
 }
 
 .soshalTimeline {
