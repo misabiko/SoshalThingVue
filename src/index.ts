@@ -321,7 +321,7 @@ class SoshalThing {
 				if (json === 'LoggedIn')
 					this.setLoggedIn(true);
 				else {
-					this.loginBar.setMessage(json.PreAuth.auth_url);
+					this.loginBar.setMessage(json.auth_url);
 				}
 			});
 	}
