@@ -1,6 +1,6 @@
 .idea/
-credentials.json
-dist/*.js
+src/credentials.json
+dist/**
 
 # dependencies
 /node_modules
