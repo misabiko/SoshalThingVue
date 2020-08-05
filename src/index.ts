@@ -319,7 +319,7 @@ class SoshalThing {
 		fetch('/twitter/login')
 			.then(response => response.json())
 			.then(json => {
-				if (json === 'LoggedIn')
+				if (json.hasOwnProperty('userId'))
 					this.setLoggedIn(true);
 				else
 					this.loginBar.setMessage(json.auth_url);
