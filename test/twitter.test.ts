@@ -5,6 +5,7 @@ import {removeTextLink} from '../src/core/twitter';
 describe('Twitter', function() {
 	describe('tweet text parsing', function() {
 		it('should remove urls from tweets', function() {
+			//https://twitter.com/RyanSesselman/status/1005510675286896645?s=20
 			const sampleTweetText = 'She’s tough. But she’s worth it https://t.co/iBg7XMQdhL';
 
 			expect(removeTextLink(sampleTweetText)).to.eql('She’s tough. But she’s worth it');
