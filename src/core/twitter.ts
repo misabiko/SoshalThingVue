@@ -135,7 +135,7 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 			authorHandle: tweet.user.screen_name,
 			authorAvatar: tweet.user.profile_image_url_https,
 			text: removeTextLink(tweet.text),
-			//images? : string[],
+			images : tweet.entities.media ? tweet.entities.media.map((media : Media) => media.media_url_https) : undefined,
 			liked: tweet.favorited,
 			reposted: tweet.retweeted,
 		};
