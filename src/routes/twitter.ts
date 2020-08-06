@@ -12,37 +12,59 @@ let loginData : {
 }
 
 export namespace Twitter {
-	async function homeTimeline(req : Request, res : Response, next : NextFunction) {
+	function logTweets(response : any) {
+		console.log(`${response.length - 1} tweets sent.`);
+
+		console.log(`Rate: ${response._headers.get('x-rate-limit-remaining')} / ${response._headers.get('x-rate-limit-limit')}`);
+		const delta = (response._headers.get('x-rate-limit-reset') * 1000) - Date.now()
+		console.log(`Reset: ${Math.ceil(delta / 1000 / 60)} minutes`);
+	}
+
+	function parseQueryErrors(e : any, next : NextFunction) {
+		if ('errors' in e) {
+			for (const error of e.errors) {
+				// Twitter API error
+				if (error.code === 88)
+					console.log('Rate limit will reset on', new Date(e._headers.get('x-rate-limit-reset') * 1000));
+				else {
+					console.error(error);
+					next(error);
+				}
+			}
+		}else {
+			console.error(e);
+			next(e);
+		}
+	}
+
+	async function homeTimeline(_req : Request, res : Response, next : NextFunction) {
 		try {
 			const response = await client.get('statuses/home_timeline');
-			console.log(`${response.length - 1} tweets sent.`);
-
-			console.log(`Rate: ${response._headers.get('x-rate-limit-remaining')} / ${response._headers.get('x-rate-limit-limit')}`);
-			const delta = (response._headers.get('x-rate-limit-reset') * 1000) - Date.now()
-			console.log(`Reset: ${Math.ceil(delta / 1000 / 60)} minutes`);
+			logTweets(response);
 
 			const tweets : PostData[] = response.map(tweetToPostData);
 
 			await res.json(tweets);
 		}catch (e) {
-			if ('errors' in e) {
-				for (const error of e.errors) {
-					// Twitter API error
-					if (error.code === 88)
-						console.log('Rate limit will reset on', new Date(e._headers.get('x-rate-limit-reset') * 1000));
-					else {
-						console.error(error);
-						next(error);
-					}
-				}
-			}else {
-				console.error(e);
-				next(e);
-			}
+			parseQueryErrors(e, next);
 		}
 	}
 
-	async function login(req : Request, res : Response, next : NextFunction) {
+	async function search(req : Request, res : Response, next : NextFunction) {
+		try {
+			const response = await client.get('search/tweets', {q: req.query.q});
+			logTweets(response);
+
+			console.dir(response);
+			const tweets : PostData[] = response.statuses.map(tweetToPostData);
+
+			await res.json(tweets);
+		}catch (e) {
+			parseQueryErrors(e, next);
+		}
+	}
+
+	async function login(_req : Request, res : Response, next : NextFunction) {
 		try {
 			if (loginData)
 				return await res.json({
@@ -62,24 +84,29 @@ export namespace Twitter {
 	}
 
 	async function callback(req : Request, res : Response, next : NextFunction) {
-		const response = await client.getAccessToken({
-			oauth_verifier: <string>req.query.oauth_verifier,
-			oauth_token: <string>req.query.oauth_token,
-		});
+		try {
+			const response = await client.getAccessToken({
+				oauth_verifier: <string>req.query.oauth_verifier,
+				oauth_token: <string>req.query.oauth_token,
+			});
 
-		client = new TwitterLite({
-			consumer_key,
-			consumer_secret,
-			access_token_key: response.oauth_token,
-			access_token_secret: response.oauth_token_secret,
-		});
+			client = new TwitterLite({
+				consumer_key,
+				consumer_secret,
+				access_token_key: response.oauth_token,
+				access_token_secret: response.oauth_token_secret,
+			});
 
-		loginData = {
-			userId: response.user_id,
-			screenName: response.screen_name,
-		};
+			loginData = {
+				userId: response.user_id,
+				screenName: response.screen_name,
+			};
 
-		res.redirect('/');
+			res.redirect('/');
+		}catch (e) {
+			console.error(e);
+			next(e);
+		}
 	}
 
 	export const router = Router();
@@ -87,4 +114,5 @@ export namespace Twitter {
 	router.get('/login', login);
 	router.get('/callback', callback);
 	router.get('/tweets/home_timeline', homeTimeline);
+	router.get('/tweets/search', search);
 }

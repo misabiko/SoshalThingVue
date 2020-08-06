@@ -433,8 +433,10 @@ class NewTimelineModal extends Modal {
 
 		const {field: nameField, input: nameInput} = this.newTextField('Name');
 		box.append(nameField);
-		const {field: endpointField, input: endpointSelect} = this.newSelectField('Select an endpoint', 'home_timeline', 'something else');
+		const {field: endpointField, input: endpointSelect} = this.newSelectField('Select an endpoint', 'home_timeline', 'search');
 		box.append(endpointField);
+		const {field: paramField, input: paramInput} = this.newTextField('Parameters');
+		box.append(paramField);
 
 		const {control, button} = this.newButtonControl('Add');
 		box.append(control);
@@ -442,7 +444,8 @@ class NewTimelineModal extends Modal {
 		button.onclick = () => {
 			soshalThing.addTimeline(new Timeline(
 				nameInput.value,
-				endpointSelect.options[endpointSelect.selectedIndex].value
+				endpointSelect.options[endpointSelect.selectedIndex].value,
+				paramInput.value ? JSON.parse(paramInput.value) : undefined
 			));
 			endpointSelect.selectedIndex = 0;
 			this.hide();
