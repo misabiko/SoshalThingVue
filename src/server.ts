@@ -1,30 +1,18 @@
-import * as Fastify from 'fastify';
-import * as fastifyStatic from "fastify-static";
-import * as Twit from 'twit';
-import * as fs from 'fs';
+import express from 'express';
+import morgan from 'morgan';
+import {Twitter} from "./routes/twitter";
 
-const credentialsPath = __dirname + '/../credentials.json';
-const twitter : {
-	[endpoint : string] : {
-		resetTime : Date,
-		remaining : number
-	}
-} = {};
+const app = express();
 
-if (!fs.existsSync(credentialsPath)) {
-	console.error("You need to add credentials.json for Twit options.");
-	process.exit(1);
-}
+app.use(morgan('dev'));
 
-const T = new Twit(JSON.parse(fs.readFileSync(credentialsPath, 'utf8')));
+app.use(express.static('public'));
+app.use('/index.js', express.static(__dirname + '/index.js'));
+app.use('/twitter', Twitter.router);
 
-const fastify : Fastify.FastifyInstance = Fastify({logger: {prettyPrint: true}});
+app.listen(3000, () => console.log('Listening at http://localhost:3000'));
 
-fastify.register(fastifyStatic, {
-	root: __dirname,
-	serve: false
-});
-
+/*
 function staticGet(filename : string, path? : string) {
 	fastify.get(path || "/" + filename, (request, reply) => {
 		reply.sendFile(filename)
@@ -35,7 +23,7 @@ staticGet("index.html", "/");
 staticGet("index.js", "/index.js");
 staticGet("index.css", "/index.css");
 
-fastify.get("/twitter/tweets/*", (request, reply) => {
+app.get("/twitter/tweets/!*", (req : Request, res : Response) => {
 	if (request.query)
 		fastify.log.info("Params: ", request.query);
 
@@ -96,4 +84,4 @@ fastify.listen(3000)
 	.catch(err => {
 		fastify.log.error(err);
 		process.exit(1);
-	});
+	});*/
