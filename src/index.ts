@@ -41,7 +41,6 @@ class PostMedia {
 		this.element = document.createElement('div');
 		this.element.className = 'soshalPMedia soshalPMedia' + this.imageSrcs.length;
 
-
 		for (let i = 0; i < this.imageSrcs.length; i++) {
 			const mediaHolder = document.createElement('div');
 			mediaHolder.className = 'soshalMediaHolder';
@@ -263,6 +262,28 @@ class Sidebar {
 	constructor() {
 		this.element = document.createElement('div');
 		this.element.id = 'soshalSidebar';
+
+		const newTimelineButton = this.newButton('fa-plus');
+		newTimelineButton.onclick = () => {
+			soshalThing.newTimelineModal.show();
+		};
+		this.element.append(newTimelineButton);
+	}
+
+	newButton(iconName : string) : HTMLButtonElement {
+		const button = document.createElement('button');
+		button.className = 'button';
+
+		const span = document.createElement('span');
+		span.className = 'icon is-small';
+
+		const icon = document.createElement('icon');
+		icon.className = 'fas ' + iconName;
+
+		span.append(icon);
+		button.append(span);
+
+		return button;
 	}
 }
 
@@ -292,6 +313,143 @@ class LoginBar {
 	}
 }
 
+class Modal {
+	readonly element = document.createElement('div');
+	readonly background = document.createElement('div');
+	readonly content = document.createElement('div');
+	readonly closeButton = document.createElement('button');
+
+	constructor() {
+		this.element.className = 'modal';
+
+		this.background.className = 'modal-background';
+		this.background.addEventListener('click', () => {
+			this.hide();
+		});
+
+		this.content.className = 'modal-content';
+
+		this.closeButton.className = 'modal-close is-large';
+		this.closeButton.setAttribute('aria-label', 'close');
+		this.closeButton.onclick = () => {
+			this.hide();
+		};
+
+		this.element.append(this.background, this.content);
+	}
+
+	show() {
+		this.element.classList.add('is-active');
+	}
+
+	hide() {
+		this.element.classList.remove('is-active');
+	}
+
+	newBox() {
+		const box = document.createElement('div');
+		box.className = 'box';
+		return box;
+	}
+
+	newField(...controls : HTMLElement[]) {
+		const field = document.createElement('div');
+		field.className = 'field';
+
+		field.append(...controls);
+		return field;
+	}
+
+	newControl(input : HTMLElement) {
+		const control = document.createElement('div');
+		control.className = 'control';
+
+		control.append(input);
+		return control;
+	}
+
+	newTextField(fieldName : string, placeholder? : string) {
+		const label = document.createElement('label');
+		label.className = 'label';
+		label.textContent = fieldName;
+
+		const input = document.createElement('input');
+		input.className = 'input';
+		input.type = 'text';
+		input.placeholder = placeholder || fieldName;
+
+		return {
+			field: this.newField(label, this.newControl(input)),
+			input,
+		};
+	}
+
+	newSelectField(instruction : string, ...options : string[]) {
+		const div = document.createElement('div');
+		div.className = 'select';
+
+		const select = document.createElement('select');
+		div.append(select);
+
+		const instructionOption = document.createElement('option');
+		instructionOption.textContent = instruction;
+		instructionOption.disabled = true;
+		instructionOption.selected = true;
+		instructionOption.hidden = true;
+		instructionOption.value = undefined;
+		select.append(instructionOption);
+
+		for (const option of options) {
+			const el = document.createElement('option');
+			el.textContent = option;
+			select.append(el);
+		}
+
+		return {
+			field: this.newField(this.newControl(div)),
+			input: select,
+		};
+	}
+
+	newButtonControl(label : string) {
+		const button = document.createElement('button');
+		button.className = 'button is-link';
+		button.textContent = label;
+		button.type = 'button';
+
+		return {
+			control: this.newControl(button),
+			button,
+		};
+	}
+}
+
+class NewTimelineModal extends Modal {
+	constructor() {
+		super();
+
+		const box = this.newBox();
+		this.content.append(box);
+
+		const {field: nameField, input: nameInput} = this.newTextField('Name');
+		box.append(nameField);
+		const {field: endpointField, input: endpointSelect} = this.newSelectField('Select an endpoint', 'home_timeline', 'something else');
+		box.append(endpointField);
+
+		const {control, button} = this.newButtonControl('Add');
+		box.append(control);
+
+		button.onclick = () => {
+			soshalThing.addTimeline(new Timeline(
+				nameInput.value,
+				endpointSelect.options[endpointSelect.selectedIndex].value
+			));
+			endpointSelect.selectedIndex = 0;
+			this.hide();
+		};
+	}
+}
+
 class SoshalThing {
 	timelines : Timeline[] = [];
 	element : HTMLDivElement;
@@ -300,17 +458,21 @@ class SoshalThing {
 	loginBar = new LoginBar();
 	loggedIn = false;
 
+	newTimelineModal = new NewTimelineModal();
+
 	constructor() {
 		this.element = document.createElement('div');
 		this.element.id = 'soshalThing';
 
 		this.timelineContainer = document.createElement('div');
 		this.timelineContainer.id = 'soshalTimelineContainer';
-		this.element.append(this.timelineContainer);
 
-		this.element.append(this.sidebar.element);
-
-		this.element.append(this.loginBar.element);
+		this.element.append(
+			this.timelineContainer,
+			this.sidebar.element,
+			this.loginBar.element,
+			this.newTimelineModal.element
+		);
 
 		fetch('/twitter/login')
 			.then(response => response.json())
