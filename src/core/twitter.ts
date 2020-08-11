@@ -1,4 +1,4 @@
-import {PostData, RepostData} from '../PostData';
+import {PostData, RepostData} from './PostData';
 
 export interface Tweet {
 	created_at : string,

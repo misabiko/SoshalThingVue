@@ -1,8 +1,10 @@
 import {NextFunction, Request, Response, Router} from 'express';
+import {Strategy as TwitterStrategy} from 'passport-twitter';
 import TwitterLite from 'twitter-lite';
 import {consumer_key, consumer_secret} from '../credentials.json';
 import {tweetToPostData} from '../core/twitter';
-import {PostData} from '../PostData';
+import {PostData} from '../core/PostData';
+import passport from 'passport';
 
 let client = new TwitterLite({consumer_key, consumer_secret});
 
@@ -111,8 +113,44 @@ export namespace Twitter {
 
 	export const router = Router();
 
-	router.get('/login', login);
-	router.get('/callback', callback);
+	//Might need to ensure initializtion before
+	passport.serializeUser(function(user : any, done) {
+		console.log('serializeUser');
+		console.dir(user);
+		done(null, user.id);
+	});
+
+	passport.deserializeUser(function(id, done) {
+		console.log('serializeUser');
+		console.dir(id);
+		done(null, );
+	});
+
+	passport.use(new TwitterStrategy({
+			consumerKey: consumer_key,
+			consumerSecret: consumer_secret,
+			callbackURL: 'http://127.0.0.1:3000/twitter/callback',
+		},
+		function(access_token_key, access_token_secret, profile, done) {
+			console.log('Strategy Verify profile:');
+			console.dir(profile);
+
+			client = new TwitterLite({
+				consumer_key,
+				consumer_secret,
+				access_token_key,
+				access_token_secret,
+			});
+
+			done(null, profile);
+		}
+	));
+
+	router.get('/login', passport.authenticate('twitter'));
+	router.get('/callback', passport.authenticate('twitter', {
+		successRedirect: '/',
+		//failureRedirect: '/' TODO Have a way to signal failure
+	}));
 	router.get('/tweets/home_timeline', homeTimeline);
 	router.get('/tweets/search', search);
 }
