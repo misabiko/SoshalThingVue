@@ -26,14 +26,6 @@ body {
 	overflow-y: hidden;
 }
 
-#soshalSidebar {
-	width: 60px;
-	top: 0;
-	bottom: 0;
-	background-color: #1e2039;
-	position: fixed;
-}
-
 #soshalLoginBar {
 	left: 0;
 	right: 0;
@@ -62,11 +54,35 @@ body {
 
 .soshalTimeline {
 	width: 500px;
+	min-width: 500px;	/*I don't know why this is needed*/
 	height: 100%;
 	padding: 0 5px;
 	box-sizing: border-box;
 	display: flex;
 	flex-flow: column;
+}
+
+#soshalSidebar {
+	top: 0;
+	bottom: 0;
+	background-color: #1e2039;
+	position: fixed;
+}
+
+.sideBarMenu {
+	width: 20vw;
+	height: 100%;
+	display: inline-block;
+}
+
+#sidebarButtons {
+	width: 2.6vw;
+	height: 100%;
+	display: inline-block;
+}
+
+.serviceSettings {
+	height: 12vh
 }
 
 .soshalTHeader {

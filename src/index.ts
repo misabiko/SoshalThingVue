@@ -257,17 +257,49 @@ class Timeline {
 }
 
 class Sidebar {
-	element : HTMLDivElement;
+	element = document.createElement('div');
+	buttons = document.createElement('div');
+	menues : SidebarMenu[] = [];
+	activeMenu : number | undefined;
 
 	constructor() {
-		this.element = document.createElement('div');
 		this.element.id = 'soshalSidebar';
+
+		const serviceMenu = new ServiceMenu();
+		this.addMenu(serviceMenu);
+		this.showMenu(0);
+
+		this.buttons.id = 'sidebarButtons';
+		this.element.append(this.buttons);
 
 		const newTimelineButton = this.newButton('fa-plus');
 		newTimelineButton.onclick = () => {
 			soshalThing.newTimelineModal.show();
 		};
-		this.element.append(newTimelineButton);
+		this.buttons.append(newTimelineButton);
+	}
+
+	addMenu(menu: SidebarMenu) {
+		this.menues.push(menu);
+		this.element.append(menu.element);
+	}
+
+	showMenu(index : number) {
+		if (index === this.activeMenu)
+			return;
+
+		this.hideMenu();
+
+		this.menues[index].element.style.display = undefined;
+		this.activeMenu = index;
+	}
+
+	hideMenu() {
+		if (this.activeMenu === undefined)
+			return;
+
+		this.menues[this.activeMenu].element.style.display = 'none';
+		this.activeMenu = undefined;
 	}
 
 	newButton(iconName : string) : HTMLButtonElement {
@@ -287,29 +319,43 @@ class Sidebar {
 	}
 }
 
-class LoginBar {
-	element : HTMLDivElement;
-	loginLink : HTMLAnchorElement;
+class SidebarMenu {
+	readonly element = document.createElement('div');
+
+	constructor(id : string) {
+		this.element.className = 'sideBarMenu';
+		this.element.id = id;
+	}
+}
+
+class ServiceMenu extends SidebarMenu {
+	readonly services : ServiceSettings[] = [];
 
 	constructor() {
-		this.element = document.createElement('div');
-		this.element.id = 'soshalLoginBar';
+		super('serviceMenu');
 
-		this.loginLink = document.createElement('a');
-		this.element.append(this.loginLink);
-
-		this.setMessage('');
+		this.addService('twitter');
 	}
 
-	setMessage(message : string) {
-		if (message) {
-			this.loginLink.href = message;
-			this.loginLink.text = 'Twitter Login';
-			this.element.classList.remove('loginBarHidden');
-		}else {
-			this.loginLink.href = '';
-			this.element.classList.add('loginBarHidden');
-		}
+	addService(name : string) {
+		const service = new ServiceSettings('twitter');
+		this.services.push(service);
+		this.element.append(service.element);
+	}
+}
+
+class ServiceSettings {
+	readonly element = document.createElement('div');
+
+	constructor(name : string) {
+		this.element.className = 'serviceSettings';
+		this.element.textContent = name;
+
+		const anchor = document.createElement('a');
+		anchor.className = 'serviceLogin';
+		anchor.textContent = 'Login';
+		anchor.href = '/twitter/login';
+		this.element.append(anchor);
 	}
 }
 
@@ -458,7 +504,6 @@ class SoshalThing {
 	element : HTMLDivElement;
 	timelineContainer : HTMLDivElement;
 	sidebar = new Sidebar();
-	loginBar = new LoginBar();
 	loggedIn = false;
 
 	newTimelineModal = new NewTimelineModal();
@@ -473,18 +518,17 @@ class SoshalThing {
 		this.element.append(
 			this.timelineContainer,
 			this.sidebar.element,
-			this.loginBar.element,
 			this.newTimelineModal.element
 		);
 
-		fetch('/twitter/login')
+		/*fetch('/twitter/login')
 			.then(response => response.json())
 			.then(json => {
 				if (json.hasOwnProperty('userId'))
 					this.setLoggedIn(true);
 				else
 					this.loginBar.setMessage(json.auth_url);
-			});
+			});*/
 	}
 
 	addTimeline(timeline : Timeline) {
