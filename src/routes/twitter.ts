@@ -1,5 +1,5 @@
 import {NextFunction, Request, Response, Router} from 'express';
-import {Strategy as TwitterStrategy} from 'passport-twitter';
+import {Profile, Strategy as TwitterStrategy} from 'passport-twitter';
 import TwitterLite from 'twitter-lite';
 import {consumer_key, consumer_secret} from '../credentials.json';
 import {tweetToPostData} from '../core/twitter';
@@ -8,10 +8,12 @@ import passport from 'passport';
 
 let client = new TwitterLite({consumer_key, consumer_secret});
 
-let loginData : {
-	userId : string,
-	screenName : string,
+interface AuthUser {
+	id : string,
+	username : string,
 }
+
+let authUser : AuthUser
 
 export namespace Twitter {
 	function logTweets(response : any) {
@@ -66,83 +68,44 @@ export namespace Twitter {
 		}
 	}
 
-	async function login(_req : Request, res : Response, next : NextFunction) {
-		try {
-			if (loginData)
-				return await res.json({
-					userId: loginData.userId,
-					screenName: loginData.screenName,
-				});
-
-			const response = await client.getRequestToken('http://127.0.0.1:3000/twitter/callback');
-
-			if (response.oauth_callback_confirmed !== 'false')
-				await res.json({auth_url: 'https://api.twitter.com/oauth/authenticate?oauth_token=' + response.oauth_token});
-			else
-				await res.status(500).json({});
-		}catch (error) {
-			next(error);
-		}
-	}
-
-	async function callback(req : Request, res : Response, next : NextFunction) {
-		try {
-			const response = await client.getAccessToken({
-				oauth_verifier: <string>req.query.oauth_verifier,
-				oauth_token: <string>req.query.oauth_token,
-			});
-
-			client = new TwitterLite({
-				consumer_key,
-				consumer_secret,
-				access_token_key: response.oauth_token,
-				access_token_secret: response.oauth_token_secret,
-			});
-
-			loginData = {
-				userId: response.user_id,
-				screenName: response.screen_name,
-			};
-
-			res.redirect('/');
-		}catch (e) {
-			console.error(e);
-			next(e);
-		}
-	}
-
 	export const router = Router();
 
-	//Might need to ensure initializtion before
-	passport.serializeUser(function(user : any, done) {
-		console.log('serializeUser');
-		console.dir(user);
+	passport.serializeUser(function(user : AuthUser, done) {
 		done(null, user.id);
 	});
 
-	passport.deserializeUser(function(id, done) {
-		console.log('serializeUser');
-		console.dir(id);
-		done(null, );
+	passport.deserializeUser(function(id : string, done) {
+		if (!authUser)
+			done(new Error(`User login data hasn't been initialized.`));
+		else if (id !== authUser.id)
+			done(new Error(`"${id}" isn't a valid user id.`));
+		else
+			done(null, authUser);
 	});
 
 	passport.use(new TwitterStrategy({
 			consumerKey: consumer_key,
 			consumerSecret: consumer_secret,
-			callbackURL: 'http://127.0.0.1:3000/twitter/callback',
+			callbackURL: 'http://localhost:3000/twitter/callback',
 		},
-		function(access_token_key, access_token_secret, profile, done) {
-			console.log('Strategy Verify profile:');
-			console.dir(profile);
+		function(access_token_key, access_token_secret, profile: Profile, done) {
+			try {
+				client = new TwitterLite({
+					consumer_key,
+					consumer_secret,
+					access_token_key,
+					access_token_secret,
+				});
 
-			client = new TwitterLite({
-				consumer_key,
-				consumer_secret,
-				access_token_key,
-				access_token_secret,
-			});
+				authUser = {
+					id: profile.id,
+					username: profile.username,
+				};
 
-			done(null, profile);
+				done(null, authUser);
+			}catch (e) {
+				done(e);
+			}
 		}
 	));
 

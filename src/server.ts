@@ -1,14 +1,29 @@
-import express from 'express';
+import express, {Request, Response} from 'express';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import session from 'express-session';
 import morgan from 'morgan';
 import passport from 'passport';
 import {Twitter} from "./routes/twitter";
 
 const app = express();
 
-app.use(morgan('dev'));
-app.use(passport.initialize());
+app.use(express.static('public'));
+app.use('/index.js', express.static(__dirname + '/index.js'));
 
-app.use(function (err : Error, req : Request, res : Response, next : NextFunction) {
+app.use(morgan('dev'));
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(session({
+	secret: 'ehyAv3bH2AwKMMWiOgOeNlOYg',
+	resave: false,
+	saveUninitialized: true,
+	//cookie: {secure: true},	TODO Implement HTTPS
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(function (err : Error, req : Request, res : Response) {
 	console.error(err.stack)
 	res.status(500).send('Something broke!')
 })
