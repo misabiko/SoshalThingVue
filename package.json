@@ -5,8 +5,13 @@
 	"private": true,
 	"repository": "github:misabiko/SocialThing",
 	"scripts": {
-		"build": "tsc --project tsconfig.json",
+		"css-build": "sass src/style.sass public/style.css",
+		"css-watch": "npm run css-build -- --watch",
+		"ts-build": "tsc --project tsconfig.json",
+		"ts-watch": "tsc --project tsconfig.json -w",
+		"build": "npm run ts-build && npm run css-build",
 		"start": "npm run build && node dist/server.js",
+		"start-watch": "node dist/server.js",
 		"test": "mocha --require ts-node/register 'test/**/*.ts'"
 	},
 	"dependencies": {
@@ -22,6 +27,7 @@
 		"@types/passport": "^1.0.4",
 		"@types/passport-twitter": "^1.0.36",
 		"body-parser": "^1.19.0",
+		"bulma": "^0.9.0",
 		"chai": "^4.2.0",
 		"cookie-parser": "^1.4.5",
 		"express": "^4.17.1",
@@ -30,6 +36,7 @@
 		"morgan": "^1.10.0",
 		"passport": "^0.4.1",
 		"passport-twitter": "^1.0.4",
+		"sass": "^1.26.10",
 		"twitter-lite": "^0.14.0"
 	},
 	"devDependencies": {

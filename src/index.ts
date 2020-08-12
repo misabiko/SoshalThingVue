@@ -323,7 +323,7 @@ class SidebarMenu {
 	readonly element = document.createElement('div');
 
 	constructor(id : string) {
-		this.element.className = 'sideBarMenu';
+		this.element.className = 'sidebarMenu';
 		this.element.id = id;
 	}
 }
@@ -334,11 +334,12 @@ class ServiceMenu extends SidebarMenu {
 	constructor() {
 		super('serviceMenu');
 
-		this.addService('twitter');
+		this.addService(new ServiceSettings('Twitter', '/twitter/login'));
+		this.addService(new ServiceSettings('Mastodon', ''));
+		this.addService(new ServiceSettings('Pixiv', ''));
 	}
 
-	addService(name : string) {
-		const service = new ServiceSettings('twitter');
+	addService(service: ServiceSettings) {
 		this.services.push(service);
 		this.element.append(service.element);
 	}
@@ -347,15 +348,27 @@ class ServiceMenu extends SidebarMenu {
 class ServiceSettings {
 	readonly element = document.createElement('div');
 
-	constructor(name : string) {
+	constructor(name : string, loginHref : string) {
 		this.element.className = 'serviceSettings';
 		this.element.textContent = name;
 
+		const level = document.createElement('div');
+		level.className = 'level';
+		this.element.append(level);
+
+		const levelLeft = document.createElement('div');
+		levelLeft.className = 'level-left';
+		level.append(levelLeft);
+
+		const levelRight = document.createElement('div');
+		levelRight.className = 'level-right';
+		level.append(levelRight);
+
 		const anchor = document.createElement('a');
-		anchor.className = 'serviceLogin';
+		anchor.className = 'serviceLogin level-item';
 		anchor.textContent = 'Login';
-		anchor.href = '/twitter/login';
-		this.element.append(anchor);
+		anchor.href = loginHref;
+		levelRight.append(anchor);
 	}
 }
 

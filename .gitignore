@@ -1,6 +1,7 @@
 .idea/
 src/credentials.json
 dist/**
+/public/style.css*
 
 # dependencies
 /node_modules
