@@ -8,8 +8,11 @@ const app = express();
 app.use(morgan('dev'));
 app.use(passport.initialize());
 
-app.use(express.static('public'));
-app.use('/index.js', express.static(__dirname + '/index.js'));
+app.use(function (err : Error, req : Request, res : Response, next : NextFunction) {
+	console.error(err.stack)
+	res.status(500).send('Something broke!')
+})
+
 app.use('/twitter', Twitter.router);
 
 app.listen(3000, () => console.log('Listening at http://localhost:3000'));
