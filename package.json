@@ -8,9 +8,10 @@
 		"css-build": "sass src/style.sass public/style.css",
 		"css-watch": "npm run css-build -- --watch",
 		"ts-build": "tsc --project tsconfig.json",
+		"ts-watch": "tsc --project tsconfig.json -w",
 		"build": "npm run ts-build && npm run css-build",
 		"start": "npm run build && node dist/server.js",
-		"start-watch": "npm run ts-build && npm run css-watch && node dist/server.js",
+		"start-watch": "node dist/server.js",
 		"test": "mocha --require ts-node/register 'test/**/*.ts'"
 	},
 	"dependencies": {
