@@ -1,6 +1,24 @@
 @charset "utf-8"
 @import '../node_modules/bulma/bulma.sass'
 
+$bg-color: #14151f
+$element-color: #1e2039
+$container-color: #282a3e
+
+.sidebarMenu
+	width: 20vw
+	height: 100%
+	display: inline-block
+	padding: 1rem
+	background-color: $container-color
+
+.serviceSettings
+	@extend .box
+	@extend .has-text-white
+	background-color: $element-color
+
+.serviceLogin
+	@extend .button
 
 
 //TODO optimize for sass
@@ -18,11 +36,10 @@ body
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif
 	-webkit-font-smoothing: antialiased
 	-moz-osx-font-smoothing: grayscale
-	background-color: #14151f
 
 #soshalThing
 	color: white
-	background-color: #14151f
+	background-color: $bg-color
 	height: 100vh
 	overflow-x: scroll
 	overflow-y: hidden
@@ -34,7 +51,7 @@ body
 	top: 0
 	padding-left: 70px
 	position: fixed
-	background-color: #1e2039
+	background-color: $element-color
 
 .loginBarHidden
 	display: none
@@ -61,27 +78,19 @@ body
 #soshalSidebar
 	top: 0
 	bottom: 0
-	background-color: #1e2039
+	background-color: $element-color
 	position: fixed
-
-.sideBarMenu
-	width: 20vw
-	height: 100%
-	display: inline-block
 
 #sidebarButtons
 	width: 2.6vw
 	height: 100%
 	display: inline-block
 
-.serviceSettings
-	height: 12vh
-
 .soshalTHeader
 	height: 50px
 	line-height: 50px
 	padding-left: 25px
-	background-color: #1e2039
+	background-color: $element-color
 
 .soshalTPosts
 	overflow-y: scroll
