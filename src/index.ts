@@ -1,4 +1,4 @@
-//https://stackoverflow.com/a/19519701/2692695
+/*//https://stackoverflow.com/a/19519701/2692695
 const visible = (function() {
 	let stateKey : string, eventKey : string;
 	const keys : { [name : string] : string } = {
@@ -534,14 +534,14 @@ class SoshalThing {
 			this.newTimelineModal.element
 		);
 
-		/*fetch('/twitter/login')
+		/!*fetch('/twitter/login')
 			.then(response => response.json())
 			.then(json => {
 				if (json.hasOwnProperty('userId'))
 					this.setLoggedIn(true);
 				else
 					this.loginBar.setMessage(json.auth_url);
-			});*/
+			});*!/
 	}
 
 	addTimeline(timeline : Timeline) {
@@ -564,4 +564,15 @@ class SoshalThing {
 const soshalThing = new SoshalThing();
 soshalThing.addTimeline(new Timeline('Home', 'home_timeline'));
 
-window.onload = () => document.body.append(soshalThing.element);
+window.onload = () => document.body.append(soshalThing.element);*/
+
+import Vue from 'vue';
+import App from './App.vue';
+
+Vue.config.productionTip = false;
+
+new Vue({
+	el: '#app',
+	template: '<App/>',
+	components: { App },
+});
