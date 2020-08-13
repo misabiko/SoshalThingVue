@@ -10,6 +10,7 @@ const app = express();
 
 app.use(express.static('public'));
 app.use('/index.js', express.static(__dirname + '/index.js'));
+app.use('/style.css', express.static(__dirname + '/style.css'));
 
 app.use(morgan('dev'));
 app.use(cookieParser());

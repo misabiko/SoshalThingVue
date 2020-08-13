@@ -7,9 +7,8 @@
 	"scripts": {
 		"css-build": "sass src/style.sass public/style.css",
 		"css-watch": "npm run css-build -- --watch",
-		"ts-build": "tsc --project tsconfig.json",
-		"ts-watch": "tsc --project tsconfig.json -w",
-		"build": "npm run css-build && webpack",
+		"ts-watch": "webpack --watch",
+		"build": "webpack",
 		"start": "npm run build && node dist/server.js",
 		"just-start": "node dist/server.js",
 		"test": "mocha --require ts-node/register 'test/**/*.ts'"
@@ -39,7 +38,10 @@
 		"vue": "^2.6.11"
 	},
 	"devDependencies": {
+		"css-loader": "^4.2.1",
+		"mini-css-extract-plugin": "^0.10.0",
 		"sass": "^1.26.10",
+		"sass-loader": "^9.0.3",
 		"ts-loader": "^8.0.2",
 		"ts-node": "^8.10.2",
 		"typescript": "^3.9.7",

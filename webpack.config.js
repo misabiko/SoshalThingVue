@@ -1,5 +1,6 @@
 const path = require('path');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const serverConfig = {
 	mode: 'development',
@@ -44,7 +45,7 @@ const clientConfig = {
 				test: /\.tsx?$/,
 				loader: 'ts-loader',
 				exclude: '/node_modules/',
-				options: { appendTsSuffixTo: [/\.vue$/] }
+				options: {appendTsSuffixTo: [/\.vue$/]}
 			},
 			{
 				test: /\.vue$/,
@@ -54,11 +55,23 @@ const clientConfig = {
 				test: /\.sass$/,
 				use: [
 					'vue-style-loader',
-					'css-loader',
+					{
+						loader: MiniCssExtractPlugin.loader,
+						options: {
+							publicPath: '/public/',
+						},
+					},
+					{
+						loader: 'css-loader',
+						options: {
+							sourceMap: true,
+						}
+					},
 					{
 						loader: 'sass-loader',
 						options: {
-							indentedSyntax: true,
+							sourceMap: true,
+							implementation: require('sass'),
 							sassOptions: {
 								indentedSyntax: true
 							}
@@ -70,6 +83,9 @@ const clientConfig = {
 	},
 	plugins: [
 		new VueLoaderPlugin(),
+		new MiniCssExtractPlugin({
+			filename: 'style.css',
+		}),
 	],
 };
 

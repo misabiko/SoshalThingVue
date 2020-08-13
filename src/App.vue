@@ -1,19 +1,29 @@
 <template>
 	<div id='app'>
+		<Sidebar></Sidebar>
 		<TimelineContainer></TimelineContainer>
 	</div>
 </template>
 
 <script>
 import TimelineContainer from "./components/TimelineContainer";
+import Sidebar from "./components/Sidebar";
 
 export default {
 	components: {
-		TimelineContainer
+		TimelineContainer,
+		Sidebar
 	}
 }
 </script>
 
-<style scoped>
+<style lang='sass'>
+@use 'variables' as *
 
+#soshalThing
+	color: white
+	background-color: $bg-color
+	height: 100vh
+	overflow-x: scroll
+	overflow-y: hidden
 </style>
