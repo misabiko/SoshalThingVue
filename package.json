@@ -5,12 +5,10 @@
 	"private": true,
 	"repository": "github:misabiko/SocialThing",
 	"scripts": {
-		"css-build": "sass src/style.sass public/style.css",
-		"css-watch": "npm run css-build -- --watch",
-		"ts-watch": "webpack --watch",
 		"build": "webpack",
-		"start": "npm run build && node dist/server.js",
-		"just-start": "node dist/server.js",
+		"watch": "npm run build -- --watch",
+		"start": "node dist/server.js",
+		"build-start": "npm run build && npm run just-start",
 		"test": "mocha --require ts-node/register 'test/**/*.ts'"
 	},
 	"dependencies": {
