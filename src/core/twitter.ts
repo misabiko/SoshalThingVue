@@ -142,6 +142,9 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 }
 
 function retweetToRepostData(tweet : Tweet) : RepostData {
+	if (!tweet.retweeted_status)
+		throw new Error("Tweet doesn't include retweeted_status.");
+
 	return {
 		reposterName: tweet.user.name,
 		reposterHandle: tweet.user.screen_name,

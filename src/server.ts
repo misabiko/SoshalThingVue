@@ -1,4 +1,4 @@
-import express, {Request, Response} from 'express';
+import express, {NextFunction, Request, Response} from 'express';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import session from 'express-session';
@@ -23,7 +23,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(function (err : Error, req : Request, res : Response) {
+app.use(function (err : Error, req : Request, res : Response, _next : NextFunction) {
 	console.error(err.stack)
 	res.status(500).send('Something broke!')
 })
