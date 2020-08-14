@@ -16,12 +16,16 @@ interface AuthUser {
 let authUser : AuthUser
 
 export namespace Twitter {
-	function logTweets(response : any) {
-		console.log(`${response.length - 1} tweets sent.`);
-
+	function logRateLimit(response: any) {
 		console.log(`Rate: ${response._headers.get('x-rate-limit-remaining')} / ${response._headers.get('x-rate-limit-limit')}`);
 		const delta = (response._headers.get('x-rate-limit-reset') * 1000) - Date.now()
 		console.log(`Reset: ${Math.ceil(delta / 1000 / 60)} minutes`);
+	}
+
+	function logTweets(response : any) {
+		console.log(`${response.length - 1} tweets sent.`);
+
+		logRateLimit(response);
 	}
 
 	function parseQueryErrors(e : any, next : NextFunction) {
@@ -59,10 +63,37 @@ export namespace Twitter {
 			const response = await client.get('search/tweets', {q: req.query.q});
 			logTweets(response);
 
-			console.dir(response);
 			const tweets : PostData[] = response.statuses.map(tweetToPostData);
 
 			await res.json(tweets);
+		}catch (e) {
+			parseQueryErrors(e, next);
+		}
+	}
+
+	async function like(req : Request, res : Response, next : NextFunction) {
+		try {
+			const response = await client.post('favorites/create', {
+				id: req.params.id,
+			});
+
+			await res.json({
+				post: tweetToPostData(response),
+			});
+		}catch (e) {
+			parseQueryErrors(e, next);
+		}
+	}
+
+	async function retweet(req : Request, res : Response, next : NextFunction) {
+		try {
+			const response = await client.post('statuses/retweet', {
+				id: req.params.id,
+			});
+
+			await res.json({
+				post: tweetToPostData(response),
+			});
 		}catch (e) {
 			parseQueryErrors(e, next);
 		}
@@ -126,5 +157,7 @@ export namespace Twitter {
 		//failureRedirect: '/' TODO Have a way to signal failure
 	}));
 	router.get('/tweets/home_timeline', preventUnauthorized, homeTimeline);
-	router.get('/tweets/search', preventUnauthorized, search);
+	router.get('/tweets/search/*', preventUnauthorized, search);
+	router.post('/like/:id', preventUnauthorized, like);
+	router.post('/retweet/:id', preventUnauthorized, retweet);
 }

@@ -25,13 +25,13 @@
 
 						a.level-item.repostButton(
 							:class='{repostedPostButton: reposted}'
-							@click='reposted = !reposted'
+							@click='repost'
 						)
 							span.icon.is-small: FontAwesomeIcon(icon='retweet')
 
 						a.level-item.likeButton(
 							:class='{likedPostButton: liked}'
-							@click='liked = !liked'
+							@click='like'
 						)
 							span.icon.is-small: FontAwesomeIcon(:icon="[liked ? 'fas' : 'far', 'heart']")
 
@@ -67,16 +67,24 @@ export default Vue.component('Post', {
 	},
 	methods: {
 		async like() {
-			const json = await fetch('twitter/like/' + this.data.id, {method: 'POST'})
-				.then(response => response.json());
+			if (this.liked) {
 
-			this.liked = json.favorited;
+			}else {
+				const json = await fetch('twitter/like/' + this.data.id, {method: 'POST'}).then(response => response.json());
+				const post = json.post as PostData;
+				//TODO Update data
+				this.liked = post.liked;
+			}
 		},
 		async repost() {
-			const json = await fetch('twitter/retweet/' + this.data.id, {method: 'POST'})
-				.then(response => response.json());
+			if (this.reposted) {
 
-			this.reposted = json.reposted;
+			}else {
+				const json = await fetch('twitter/retweet/' + this.data.id, {method: 'POST'}).then(response => response.json());
+				const post = json.post as PostData;
+
+				this.reposted = post.reposted;
+			}
 		},
 	},
 	components: {

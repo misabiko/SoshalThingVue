@@ -6,14 +6,20 @@
 
 <script lang='ts'>
 import Vue from 'vue';
-import TimelineContainer from "./TimelineContainer";
-import Sidebar from "./Sidebar";
+import TimelineContainer from './TimelineContainer';
+import Sidebar from './Sidebar';
 
 export default Vue.component('App', {
 	data: function() {
 		return {
 			timelines: [
-				{id: 0, name: 'Home', endpoint: 'home_timeline'}
+				{id: 0, name: 'Home', endpoint: 'home_timeline'},
+				{
+					id: 1,
+					name: 'Art',
+					endpoint: 'search/tweets',
+					options: {'q': 'list:misabiko/Art filter:media -filter:retweets'}
+				}
 			],
 		}
 	},
