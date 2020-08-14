@@ -1,15 +1,25 @@
 <template>
 	<nav>
-		<ServiceMenu></ServiceMenu>
+		<ServiceMenu v-if='expanded'></ServiceMenu>
 		<div id='sidebarButtons'>
-			<button>
-				<span class='icon is-small'>
-					<FontAwesomeIcon icon='angle-double-right' fixed-width inverse size='2x'></FontAwesomeIcon>
+			<button @click='expanded = !expanded'>
+				<span>
+					<FontAwesomeIcon
+						:icon="expanded ? 'angle-double-left' : 'angle-double-right'"
+						fixed-width
+						inverse
+						size='2x'
+					/>
 				</span>
 			</button>
 			<button>
-				<span class='icon is-small'>
-					<FontAwesomeIcon icon='plus' fixed-width inverse size='2x'></FontAwesomeIcon>
+				<span>
+					<FontAwesomeIcon
+						icon='plus'
+						fixed-width
+						inverse
+						size='2x'
+					/>
 				</span>
 			</button>
 		</div>
@@ -20,11 +30,16 @@
 import Vue from 'vue';
 import ServiceMenu from './ServiceMenu.vue';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faPlus, faAngleDoubleRight} from '@fortawesome/free-solid-svg-icons';
+import {faPlus, faAngleDoubleLeft, faAngleDoubleRight} from '@fortawesome/free-solid-svg-icons';
 
-library.add(faPlus, faAngleDoubleRight);
+library.add(faPlus, faAngleDoubleLeft, faAngleDoubleRight);
 
 export default Vue.component('Sidebar', {
+	data: function() {
+		return {
+			expanded: false,
+		};
+	},
 	components: {
 		ServiceMenu,
 	}
