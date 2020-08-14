@@ -134,6 +134,7 @@ export default Vue.component('Timeline', {
 		updateData(postData: PostData) {
 			const index = this.posts.findIndex(oldData => oldData.id == postData.id);
 			Object.assign(this.posts[index], postData);
+			this.posts[index].creationTime = new Date(this.posts[index].creationTime);
 		},
 
 		clearPosts() {

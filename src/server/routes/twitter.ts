@@ -89,6 +89,20 @@ export namespace Twitter {
 		}
 	}
 
+	async function unlike(req : Request, res : Response, next : NextFunction) {
+		try {
+			const response = await client.post('favorites/destroy', {
+				id: req.params.id,
+			});
+
+			await res.json({
+				post: tweetToPostData(response),
+			});
+		}catch (e) {
+			parseQueryErrors(e, next);
+		}
+	}
+
 	async function retweet(req : Request, res : Response, next : NextFunction) {
 		try {
 			const response = await client.post('statuses/retweet', {
@@ -163,5 +177,6 @@ export namespace Twitter {
 	router.get('/tweets/home_timeline', preventUnauthorized, homeTimeline);
 	router.get('/tweets/search/', preventUnauthorized, search);
 	router.post('/like/:id', preventUnauthorized, like);
+	router.post('/unlike/:id', preventUnauthorized, unlike);
 	router.post('/retweet/:id', preventUnauthorized, retweet);
 }

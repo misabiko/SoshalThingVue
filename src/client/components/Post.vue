@@ -67,31 +67,26 @@ export default Vue.component('Post', {
 	},
 	methods: {
 		async like() {
-			if (this.liked) {
+			const json = await fetch(`twitter/${this.liked ? 'unlike' : 'like'}/${this.data.id}`, {method: 'POST'})
+				.then(response => response.json());
+			const post = json.post as PostData;
 
-			}else {
-				const json = await fetch('twitter/like/' + this.data.id, {method: 'POST'}).then(response => response.json());
-				const post = json.post as PostData;
-				this.updateData(post);
-
-				this.liked = post.liked;
-				this.reposted = post.reposted;
-			}
+			this.updateData(post);
 		},
 		async repost() {
-			if (this.reposted) {
+			if (this.reposted)
+				return;
 
-			}else {
-				const json = await fetch('twitter/retweet/' + this.data.id, {method: 'POST'}).then(response => response.json());
-				const post = json.post as PostData;
-				this.updateData(post);
-
-				this.liked = post.liked;
-				this.reposted = post.reposted;
-			}
+			const json = await fetch(`twitter/retweet/${this.data.id}`, {method: 'POST'})
+				.then(response => response.json());
+			const post = json.post as PostData;
+			this.updateData(post);
 		},
 		updateData(newPostData : PostData) {
 			this.$emit('update-data', newPostData);
+
+			this.liked = newPostData.liked;
+			this.reposted = newPostData.reposted;
 		}
 	},
 	components: {
