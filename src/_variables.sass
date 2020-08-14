@@ -1,0 +1,21 @@
+$bg-color: #14151f
+$element-color: #1e2039
+$container-color: #282a3e
+$post-color: #181925
+$sidebar-menu-width: 20vw
+
+$background: $bg-color
+
+@mixin borderless-button($pad: 0)
+	padding: $pad
+	border: none
+	background: none
+
+@mixin pretty-scrollbar
+	::-webkit-scrollbar
+		width: 12px
+		height: 12px
+
+	::-webkit-scrollbar-thumb
+		border-radius: 0
+		background-color: #2f3042

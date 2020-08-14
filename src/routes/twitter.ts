@@ -68,6 +68,10 @@ export namespace Twitter {
 		}
 	}
 
+	export function checkLogin() : boolean {
+		return !!authUser;
+	}
+
 	export const router = Router();
 
 	passport.serializeUser(function(user : AuthUser, done) {
@@ -75,7 +79,7 @@ export namespace Twitter {
 	});
 
 	passport.deserializeUser(function(id : string, done) {
-		if (!authUser)
+		if (!checkLogin())
 			done(new Error(`User login data hasn't been initialized.`));
 		else if (id !== authUser.id)
 			done(new Error(`"${id}" isn't a valid user id.`));
