@@ -2,9 +2,14 @@
 	<nav>
 		<ServiceMenu></ServiceMenu>
 		<div id='sidebarButtons'>
-			<button	class='button'>
+			<button>
 				<span class='icon is-small'>
-					<FontAwesomeIcon icon='plus'></FontAwesomeIcon>
+					<FontAwesomeIcon icon='angle-double-right' fixed-width inverse size='2x'></FontAwesomeIcon>
+				</span>
+			</button>
+			<button>
+				<span class='icon is-small'>
+					<FontAwesomeIcon icon='plus' fixed-width inverse size='2x'></FontAwesomeIcon>
 				</span>
 			</button>
 		</div>
@@ -14,6 +19,10 @@
 <script lang='ts'>
 import Vue from 'vue';
 import ServiceMenu from './ServiceMenu.vue';
+import {library} from '@fortawesome/fontawesome-svg-core';
+import {faPlus, faAngleDoubleRight} from '@fortawesome/free-solid-svg-icons';
+
+library.add(faPlus, faAngleDoubleRight);
 
 export default Vue.component('Sidebar', {
 	components: {
@@ -26,11 +35,22 @@ export default Vue.component('Sidebar', {
 @use '../variables' as *
 nav
 	background-color: $element-color
-	height: 100%
 	z-index: 1
 	display: flex
 
 #sidebarButtons
 	width: 2.6vw
-	height: 100%
+	padding: 1rem 0
+	text-align: center
+	display: flex
+	flex-direction: column
+
+	button
+		padding: 0
+		border: none
+		background: none
+		height: 45px
+
+		span
+			vertical-align: middle
 </style>

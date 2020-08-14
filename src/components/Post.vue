@@ -41,6 +41,11 @@
 import Vue, {PropType} from 'vue';
 import {PostData} from '../core/PostData';
 import PostMedia from './PostMedia.vue';
+import {library} from '@fortawesome/fontawesome-svg-core';
+import {faHeart as fasHeart, faRetweet} from '@fortawesome/free-solid-svg-icons';
+import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
+
+library.add(fasHeart, farHeart, faRetweet);
 
 export default Vue.component('Post', {
 	props: {
