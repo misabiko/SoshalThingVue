@@ -1,5 +1,5 @@
 <template lang='pug'>
-	div(:class="['postMedia', 'postMedia' + sources.length]")
+	.postMedia
 		.mediaHolder(v-for='(source, index) of sources')
 			img(
 				@load='handleImageLoaded'
@@ -27,29 +27,30 @@ export default Vue.component('PostMedia', {
 
 <style scoped lang='sass'>
 .postMedia
-	height: 300px
+	max-height: 50vh
 	overflow: hidden //TODO remove once layout is settled
 	margin-top: 1rem
+	text-align: center
 
 .mediaHolder
 	overflow: hidden
 	display: inline-flex
-	height: 100%
-	width: 50%
+	width: 100%
+	max-width: unset
 	justify-content: center
 
-.postMedia1 .mediaHolder
+	img
+		align-self: center
+
+//.postMedia1 .mediaHolder
 	width: 100%
 
-.postMedia3 .mediaHolder,
-.postMedia4 .mediaHolder
+//.postMedia3 .mediaHolder,
+//.postMedia4 .mediaHolder
 	height: 50%
 
-.mediaHolder img
-	align-self: center
-
-.portrait img
+//.portrait img
 	width: 100%
-.landscape img
+//.landscape img
 	height: 100%
 </style>

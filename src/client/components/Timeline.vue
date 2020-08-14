@@ -18,6 +18,8 @@
 							:key='ep'
 						) {{ ep }}
 
+				b-button(@click='clearPosts') Clear
+
 		.timelinePosts
 			Post(
 				v-for='post of posts'
@@ -60,16 +62,14 @@ export default Vue.component('Timeline', {
 	},
 	mounted() {
 		if ((this as any).enabled)
-			(this as any).autoRefresh();
-		//this.$root.visible(() => this.autoRefresh());
+			(this as any).resetAutoRefresh();
+		//this.$root.visible(() => this.resetAutoRefresh());
 	},
 	beforeDestroy() {
 		(this as any).disableAutoRefresh();
 	},
 	methods: {
-		autoRefresh() {
-			console.log(`${this.name} reset refreshing ${this.enabled}`);
-
+		resetAutoRefresh() {
 			//TODO Disable refreshing when not in focus
 			window.clearInterval(this.interval);
 			this.interval = window.setInterval(() => this.refresh(), this.refreshRate);
@@ -127,6 +127,10 @@ export default Vue.component('Timeline', {
 			console.dir(postData);
 			const index = this.posts.findIndex(oldData => oldData.id == postData.id);
 			Object.assign(this.posts[index], postData);
+		},
+
+		clearPosts() {
+			this.posts = [];
 		}
 	},
 	computed: {
@@ -138,9 +142,17 @@ export default Vue.component('Timeline', {
 	watch: {
 		enabled(newEnabled, _oldEnabled) {
 			if (newEnabled)
-				(this as any).autoRefresh();
+				(this as any).resetAutoRefresh();
 			else
 				(this as any).disableAutoRefresh();
+		},
+
+		endpoint(newEndpoint, oldEndpoint) {
+			if (newEndpoint === oldEndpoint)
+				return;
+
+			(this as any).clearPosts();
+			(this as any).resetAutoRefresh();
 		}
 	},
 	components: {
