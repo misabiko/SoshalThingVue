@@ -23,6 +23,7 @@
 				v-for='post of posts'
 				:key='post.id'
 				:data='post'
+				@update-data='updateData'
 			)
 </template>
 
@@ -120,6 +121,12 @@ export default Vue.component('Timeline', {
 
 		insertPost(postData : PostData, index : number) {
 			this.posts.splice(index, 0, postData);
+		},
+
+		updateData(postData: PostData) {
+			console.dir(postData);
+			const index = this.posts.findIndex(oldData => oldData.id == postData.id);
+			Object.assign(this.posts[index], postData);
 		}
 	},
 	computed: {

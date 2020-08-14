@@ -72,8 +72,10 @@ export default Vue.component('Post', {
 			}else {
 				const json = await fetch('twitter/like/' + this.data.id, {method: 'POST'}).then(response => response.json());
 				const post = json.post as PostData;
-				//TODO Update data
+				this.updateData(post);
+
 				this.liked = post.liked;
+				this.reposted = post.reposted;
 			}
 		},
 		async repost() {
@@ -82,10 +84,15 @@ export default Vue.component('Post', {
 			}else {
 				const json = await fetch('twitter/retweet/' + this.data.id, {method: 'POST'}).then(response => response.json());
 				const post = json.post as PostData;
+				this.updateData(post);
 
+				this.liked = post.liked;
 				this.reposted = post.reposted;
 			}
 		},
+		updateData(newPostData : PostData) {
+			this.$emit('update-data', newPostData);
+		}
 	},
 	components: {
 		PostMedia,
