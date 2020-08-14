@@ -5,6 +5,7 @@
 			:key='timeline.id'
 			:initial-data='timeline'
 			:endpoints='endpoints'
+			@remove-timeline="$emit('remove-timeline', $event)"
 		)
 </template>
 

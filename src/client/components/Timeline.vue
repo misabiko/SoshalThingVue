@@ -18,7 +18,9 @@
 							:key='ep'
 						) {{ ep }}
 
-				b-button(@click='clearPosts') Clear
+				.level
+					.level-left: b-button.level-item(@click='clearPosts') Clear
+					.level-right: b-button.level-item(@click='remove' type='is-danger') Remove
 
 		.timelinePosts
 			Post(
@@ -131,6 +133,10 @@ export default Vue.component('Timeline', {
 
 		clearPosts() {
 			this.posts = [];
+		},
+
+		remove() {
+			this.$emit('remove-timeline', this.initialData.id);
 		}
 	},
 	computed: {
@@ -183,6 +189,7 @@ export default Vue.component('Timeline', {
 	background-color: $element-color
 	display: flex
 	justify-content: space-between
+	cursor: pointer
 
 	button
 		@include borderless-button(0 1.6rem)

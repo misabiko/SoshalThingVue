@@ -60,6 +60,9 @@ nav
 		@include borderless-button
 		height: 45px
 
+		&:not(:last-child)
+			margin-bottom: 1rem
+
 		span
 			vertical-align: middle
 </style>

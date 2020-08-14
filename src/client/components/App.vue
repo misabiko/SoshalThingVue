@@ -1,7 +1,10 @@
 <template lang='pug'>
 	#soshalThing.has-text-light
 		Sidebar(@new-timeline='addTimeline')
-		TimelineContainer(:timelines='timelines')
+		TimelineContainer(
+			:timelines='timelines'
+			@remove-timeline='removeTimeline($event)'
+		)
 </template>
 
 <script lang='ts'>
@@ -37,6 +40,10 @@ export default Vue.component('App', {
 		addTimeline() {
 			const id = this.getUniqueId();
 			this.timelines.push({id, name: 'Timeline #' + id, endpoint: ''});
+		},
+		removeTimeline(id : number) {
+			const index = this.timelines.findIndex(timeline => timeline.id === id);
+			this.timelines.splice(index, 1);
 		},
 		getUniqueId() : number {
 			//Feels clunky
