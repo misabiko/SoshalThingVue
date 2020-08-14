@@ -39,6 +39,22 @@ export default Vue.component('App', {
 
 <style lang='sass'>
 @use 'variables' as *
+@import '../node_modules/bulma/bulma.sass'
+
+::-webkit-scrollbar
+	width: 12px
+	height: 12px
+
+::-webkit-scrollbar-thumb
+	border-radius: 0
+	background-color: #2f3042
+
+body
+	background-color: $bg-color
+	margin: 0
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif
+	-webkit-font-smoothing: antialiased
+	-moz-osx-font-smoothing: grayscale
 
 #soshalThing
 	color: white
