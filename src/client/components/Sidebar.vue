@@ -62,6 +62,10 @@ nav
 
 		span
 			vertical-align: middle
+</style>
+
+<style lang='sass'>
+@use '../variables' as *
 
 .slide-right-enter-active
 	transition: 150ms ease-out
