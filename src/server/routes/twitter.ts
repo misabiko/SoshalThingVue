@@ -23,7 +23,10 @@ export namespace Twitter {
 	}
 
 	function logTweets(response : any) {
-		console.log(`${response.length - 1} tweets sent.`);
+		if ('search_metadata' in response)
+			console.log(`${response.search_metadata.count} tweets sent.`);
+		else
+			console.log(`${response.length - 1} tweets sent.`);
 
 		logRateLimit(response);
 	}
@@ -62,6 +65,7 @@ export namespace Twitter {
 		try {
 			const response = await client.get('search/tweets', {q: req.query.q});
 			logTweets(response);
+			//TODO Add type of search response
 
 			const tweets : PostData[] = response.statuses.map(tweetToPostData);
 
