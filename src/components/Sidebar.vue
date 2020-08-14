@@ -2,10 +2,11 @@
 
 </template>
 
-<script>
-export default {
-	name: "Sidebar"
-}
+<script lang='ts'>
+import Vue from 'vue';
+
+export default Vue.component('Sidebar', {
+});
 </script>
 
 <style>

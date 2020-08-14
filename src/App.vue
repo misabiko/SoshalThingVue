@@ -5,16 +5,17 @@
 	</div>
 </template>
 
-<script>
+<script lang='ts'>
+import Vue from 'vue';
 import TimelineContainer from "./components/TimelineContainer";
 import Sidebar from "./components/Sidebar";
 
-export default {
+export default Vue.component('App', {
 	components: {
 		TimelineContainer,
 		Sidebar
 	}
-}
+});
 </script>
 
 <style lang='sass'>

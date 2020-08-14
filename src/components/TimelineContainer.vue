@@ -10,10 +10,11 @@
 	</div>
 </template>
 
-<script>
+<script lang='ts'>
+import Vue from 'vue';
 import Timeline from "./Timeline";
 
-export default {
+export default Vue.component('TimelineContainer', {
 	data() {
 		return {
 			timelines: [
@@ -22,7 +23,7 @@ export default {
 		}
 	},
 	components: {Timeline}
-}
+});
 </script>
 
 <style lang='sass'>

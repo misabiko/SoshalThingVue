@@ -4,12 +4,28 @@
 			class='timelineHeader'
 			@click='refresh'
 		>{{ name }}</div>
-		<div class='timelinePosts'></div>
+		<div class='timelinePosts'>
+
+		</div>
 	</div>
 </template>
 
-<script>
-export default {
+<script lang='ts'>
+import Vue from 'vue';
+import {PostData} from '../core/PostData';
+
+//https://stackoverflow.com/a/57124645/2692695
+//Formats object into RESTful URI parameters (?param1=boop&param2=bap)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function toURI(params : { [name : string] : any }) {
+	return '?' + Object.entries(params)
+		.map(
+			([key, val]) => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`
+		)
+		.join('&');
+}
+
+export default Vue.component('Timeline', {
 	props: {
 		name: String,
 		endpoint: String,
@@ -17,58 +33,77 @@ export default {
 			type: Number,
 			default: 90000,
 		},
+		options: Object,
+		enabled: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	data: function() {
 		return {
-			interval: undefined,
-			//posts: Post,
+			interval: (undefined as unknown) as number,
+			posts: [] as PostData[],
 		}
 	},
 	mounted() {
-		this.resetRefreshing();
-		//this.$root.visible(() => this.resetRefreshing());
+		//this.autoRefresh();
+		//this.$root.visible(() => this.autoRefresh());
 	},
 	beforeDestroy() {
-		clearInterval(this.interval);
+		//this.disableAutoRefresh();
 	},
 	methods: {
-		resetRefreshing() {
+		/*autoRefresh() {
 			console.log(`${this.name} reset refreshing`);
 
-			clearInterval(this.interval);
-			//TODO Disable refreshing when logged out
 			//TODO Disable refreshing when not in focus
-			//if (this.$root.loggedIn && this.$root.visible()) {
-				this.interval = window.setInterval(() => this.refresh(), this.refreshRate);
+			clearInterval(this.interval);
+			this.interval = window.setInterval(() => this.refresh(), this.refreshRate);
 
-				this.refresh().then();
-			//}else this.interval = undefined;
+			this.refresh().then();
 		},
+
+		disableAutoRefresh() {
+			clearInterval(this.interval);
+			this.interval = undefined;
+		},*/
+
 		async refresh() {
-			/*const newPostDatas = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ''))
+			console.log(`refreshing... (enabled: ${this.enabled})`);
+			if (!this.enabled)
+				return;
+
+			const newPostDatas = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ''))
 				.then(response => response.json())
-				.then(newData => newData.reverse().filter((a : PostData) => this.posts.findIndex(b => b.data.id === a.id) < 0));
+				.then(newData => newData.reverse().filter((a : PostData) => this.posts.findIndex((b : any) => b.id === a.id) < 0));
 
 			for (const newPostData of newPostDatas) {
 				newPostData.creationTime = new Date(newPostData.creationTime);
 
 				let added = false;
 				for (let i = 0; i < this.posts.length && !added; i++)
-					if (newPostData.creationTime.getTime() < this.posts[i].data.creationTime.getTime()) {
+					if (newPostData.creationTime.getTime() < this.posts[i].creationTime.getTime()) {
 						this.insertPost(newPostData, i);
 						added = true;
 					}
 				if (!added)
 					this.addPost(newPostData);
-			}*/
+			}
+		},
 
-			console.log(`${this.name} refreshing...`);
+		addPost(postData : PostData) {
+			this.posts.unshift(postData);
+		},
+
+		insertPost(postData : PostData, index : number) {
+			this.posts.splice(index, 0, postData);
 		}
 	}
-}
+})
 </script>
 
 <style lang='sass'>
+//TODO add scoped css
 @use '../variables' as *
 
 .timeline
