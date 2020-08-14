@@ -2,9 +2,7 @@
 	<nav>
 		<ServiceMenu></ServiceMenu>
 		<div id='sidebarButtons'>
-			<button
-				class='button'
-			>
+			<button	class='button'>
 				<span class='icon is-small'>
 					<FontAwesomeIcon icon='plus'></FontAwesomeIcon>
 				</span>
@@ -27,13 +25,12 @@ export default Vue.component('Sidebar', {
 <style lang='sass'>
 @use '../variables' as *
 nav
-	top: 0
-	bottom: 0
 	background-color: $element-color
-	position: fixed
+	height: 100%
+	z-index: 1
+	display: flex
 
 #sidebarButtons
 	width: 2.6vw
 	height: 100%
-	display: inline-block
 </style>

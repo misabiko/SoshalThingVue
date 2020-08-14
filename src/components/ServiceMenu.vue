@@ -35,7 +35,6 @@ export default Vue.component('ServiceMenu', {
 .sidebarMenu
 	width: 20vw
 	height: 100%
-	display: inline-block
 	padding: 1rem
 	background-color: $container-color
 </style>

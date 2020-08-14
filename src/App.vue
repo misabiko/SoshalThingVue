@@ -61,4 +61,5 @@ body
 	height: 100vh
 	overflow-x: scroll
 	overflow-y: hidden
+	display: flex
 </style>

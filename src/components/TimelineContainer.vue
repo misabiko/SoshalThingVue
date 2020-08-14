@@ -27,10 +27,8 @@ export default Vue.component('TimelineContainer', {
 </script>
 
 <style lang='sass'>
-	#timelineContainer
-		width: 100%
-		height: 100%
-		padding-left: 60px
-		display: flex
-		flex-wrap: nowrap
+#timelineContainer
+	height: 100%
+	flex-wrap: nowrap
+	flex-grow: 1
 </style>
