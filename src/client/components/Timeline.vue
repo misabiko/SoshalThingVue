@@ -88,7 +88,12 @@ export default Vue.component('Timeline', {
 
 			const response = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ''));
 
-			if (!response.ok)
+			if (response.status == 401) {
+				//TODO Alert the message
+				console.error('Lost connection to Twitter');
+				this.$store.commit('setLogin', {service: 'Twitter', login: false});
+				return;
+			}else if (!response.ok)
 				throw new Error(`Timeline ${this.name}: Server error on refresh`);
 
 			const newPostDatas = await response.json().then(newData =>

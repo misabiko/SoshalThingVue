@@ -113,11 +113,18 @@ export namespace Twitter {
 		}
 	));
 
+	function preventUnauthorized(req : Request, res : Response, next : NextFunction) {
+		if (req.user)
+			next();
+		else
+			res.sendStatus(401);
+	}
+
 	router.get('/login', passport.authenticate('twitter'));
 	router.get('/callback', passport.authenticate('twitter', {
 		successRedirect: '/',
 		//failureRedirect: '/' TODO Have a way to signal failure
 	}));
-	router.get('/tweets/home_timeline', homeTimeline);
-	router.get('/tweets/search', search);
+	router.get('/tweets/home_timeline', preventUnauthorized, homeTimeline);
+	router.get('/tweets/search', preventUnauthorized, search);
 }
