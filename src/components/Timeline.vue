@@ -3,9 +3,15 @@
 		<div
 			class='timelineHeader'
 			@click='refresh'
-		>{{ name }}</div>
+		>
+			{{ name }}
+		</div>
 		<div class='timelinePosts'>
-
+			<Post
+				v-for='post of posts'
+				:key='post.id'
+				:data='post'
+			></Post>
 		</div>
 	</div>
 </template>
@@ -13,6 +19,7 @@
 <script lang='ts'>
 import Vue from 'vue';
 import {PostData} from '../core/PostData';
+import Post from './Post.vue';
 
 //https://stackoverflow.com/a/57124645/2692695
 //Formats object into RESTful URI parameters (?param1=boop&param2=bap)
@@ -98,7 +105,10 @@ export default Vue.component('Timeline', {
 		insertPost(postData : PostData, index : number) {
 			this.posts.splice(index, 0, postData);
 		}
-	}
+	},
+	components: {
+		Post,
+	},
 })
 </script>
 
@@ -108,7 +118,8 @@ export default Vue.component('Timeline', {
 
 .timeline
 	width: 500px
-	min-width: 500px //TODO I don't know why this is needed
+	min-width: 500px
+	//TODO I don't know why this is needed
 	height: 100%
 	padding: 0 5px
 	box-sizing: border-box
