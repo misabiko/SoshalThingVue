@@ -1,16 +1,9 @@
-<template>
-	<div class='serviceSettings'>
-		{{ name }}
-		<div class='level' v-if='!loggedIn'>
-			<div class='level-left'></div>
-			<div class='level-right'>
-				<a
-					class='serviceLogin level-item'
-					:href='loginHref'
-				>Login</a>
-			</div>
-		</div>
-	</div>
+<template lang='pug'>
+	.serviceSettings {{ name }}
+		.level(v-if='!loggedIn')
+			.level-left
+			.level-right
+				a.button.level-item(:href='loginHref') Login
 </template>
 
 <script lang='ts'>
@@ -29,7 +22,8 @@ export default Vue.component('ServiceSettings', {
 	},
 	computed: {
 		loggedIn() : boolean {
-			return this.$store.state.logins[this.name];
+			//TODO resolve state in computed
+			return (this.$store.state as any).logins[this.name];
 		}
 	}
 });
@@ -43,7 +37,4 @@ export default Vue.component('ServiceSettings', {
 	@extend .box
 	@extend .has-text-white
 	background-color: $element-color
-
-.serviceLogin
-	@extend .button
 </style>

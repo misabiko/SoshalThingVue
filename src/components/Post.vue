@@ -1,47 +1,45 @@
-<template>
-	<article class='post' :post-id='data.id'>
-		<div class='respostLabel' v-if='data.reposterName'>
-			<p>{{ data.reposterName + ' retweeted' }}</p>
-		</div>
-		<div class='media'>
-			<figure class='media-left'>
-				<p class='image is-64x64'>
-					<img
-						:alt="data.authorHandle + '\'s avatar'"
-						:src='data.authorAvatar'
-					/>
-				</p>
-			</figure>
-			<div class='media-content'>
-				<div class='content'>
-					<p>
-						<strong class='has-text-light'>{{ data.authorName }}</strong> <small>{{
-							'@' + data.authorHandle
-						}}</small> <small>sometime</small>
-						<br>
-						{{ data.text }}
-					</p>
-				</div>
-				<nav class='level is-mobile'>
-					<div class='level-left'>
-						<a class='level-item commentButton'>
-							<span class='icon is-small'><FontAwesomeIcon icon='reply'/></span>
-						</a>
-						<a class='level-item repostButton' :class='{repostedPostButton: reposted}' @click='reposted = !reposted'>
-							<span class='icon is-small'><FontAwesomeIcon icon='retweet'/></span>
-						</a>
-						<a class='level-item likeButton' :class='{likedPostButton: liked}' @click='liked = !liked'>
-							<span class='icon is-small'><FontAwesomeIcon :icon="[liked ? 'fas' : 'far', 'heart']"/></span>
-						</a>
-					</div>
-				</nav>
-			</div>
-			<div class='media-right'>
-				<button class='delete'></button>
-			</div>
-		</div>
-		<PostMedia v-if='data.images' :sources='data.images'></PostMedia>
-	</article>
+<template lang='pug'>
+	article.post(:post-id='data.id')
+		.repostLabel(v-if='data.reposterName')
+			p {{ data.reposterName + ' retweeted' }}
+
+		.media
+			figure.media-left
+				p.image.is-64x64: img(
+					:alt=`data.authorHandle + "'s avatar"`
+					:src='data.authorAvatar'
+				)
+
+			.media-content
+				.content: p
+					strong.has-text-light {{ data.authorName }}
+					small {{'@' + data.authorHandle}}
+					small sometime
+					br
+					| {{ data.text }}
+
+				nav.level.is-mobile
+					.level-left
+						a.level-item.commentButton
+							span.icon.is-small: FontAwesomeIcon(icon='reply')
+
+						a.level-item.repostButton(
+							:class='{repostedPostButton: reposted}'
+							@click='reposted = !reposted'
+						)
+							span.icon.is-small: FontAwesomeIcon(icon='retweet')
+
+						a.level-item.likeButton(
+							:class='{likedPostButton: liked}'
+							@click='liked = !liked'
+						)
+							span.icon.is-small: FontAwesomeIcon(:icon="[liked ? 'fas' : 'far', 'heart']")
+
+			.media-right: button.delete
+		PostMedia(
+			v-if='data.images'
+			:sources='data.images'
+		)
 </template>
 
 <script lang='ts'>
@@ -112,7 +110,7 @@ article.post
 		&:hover.commentButton svg
 			color: #1da1f2
 
-.respostLabel
+.repostLabel
 	margin-left: 64px
 	color: #8899a6
 	font-size: smaller

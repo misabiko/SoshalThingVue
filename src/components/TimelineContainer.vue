@@ -1,12 +1,11 @@
-<template>
-	<div id='timelineContainer'>
-		<Timeline
+<template lang='pug'>
+	#timelineContainer
+		Timeline(
 			v-for='timeline of timelines'
 			:key='timeline.id'
 			:initial-data='timeline'
 			:endpoints='endpoints'
-		></Timeline>
-	</div>
+		)
 </template>
 
 <script lang='ts'>

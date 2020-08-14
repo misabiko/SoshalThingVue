@@ -1,13 +1,11 @@
-<template>
-	<div :class="['postMedia', 'postMedia' + sources.length]">
-		<div v-for='(source, index) of sources' class='mediaHolder'>
-			<img
+<template lang='pug'>
+	div(:class="['postMedia', 'postMedia' + sources.length]")
+		.mediaHolder(v-for='(source, index) of sources')
+			img(
 				@load='handleImageLoaded'
 				:alt="'img' + index"
 				:src='source'
-			>
-		</div>
-	</div>
+			)
 </template>
 
 <script lang='ts'>

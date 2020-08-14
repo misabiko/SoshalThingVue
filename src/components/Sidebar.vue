@@ -1,31 +1,22 @@
-<template>
-	<nav>
-		<b-collapse :open='expanded' animation='slide-right'>
-			<ServiceMenu/>
-		</b-collapse>
-		<div id='sidebarButtons'>
-			<button @click='expanded = !expanded'>
-				<span>
-					<FontAwesomeIcon
+<template lang='pug'>
+	nav
+		b-collapse(:open='expanded' animation='slide-right')
+			ServiceMenu
+		#sidebarButtons
+			button(@click='expanded = !expanded')
+				span: FontAwesomeIcon(
 						:icon="expanded ? 'angle-double-left' : 'angle-double-right'"
 						fixed-width
 						inverse
 						size='2x'
-					/>
-				</span>
-			</button>
-			<button @click="$emit('new-timeline')">
-				<span>
-					<FontAwesomeIcon
+				)
+			button(@click="$emit('new-timeline')")
+				span: FontAwesomeIcon(
 						icon='plus'
 						fixed-width
 						inverse
 						size='2x'
-					/>
-				</span>
-			</button>
-		</div>
-	</nav>
+				)
 </template>
 
 <script lang='ts'>
@@ -59,7 +50,7 @@ nav
 	display: flex
 
 #sidebarButtons
-	width: 2.6vw
+	width: 60px
 	padding: 1rem 0
 	text-align: center
 	display: flex

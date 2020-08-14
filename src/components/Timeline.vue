@@ -1,40 +1,29 @@
-<template>
-	<div class='timeline'>
-		<div
-			class='timelineHeader'
-			@click.self='refresh'
-		>
-			<span>{{ name }}</span>
-			<button @click='isOptionsOpen = !isOptionsOpen'>
-				<FontAwesomeIcon icon='ellipsis-v' inverse size='lg'/>
-			</button>
-		</div>
-		<b-collapse :open='isOptionsOpen' animation='slide'>
-			<div class='timelineOptions'>
-				<b-field label='Name' custom-class='has-text-light'>
-					<b-input v-model='name'></b-input>
-				</b-field>
-				<b-field label='Endpoint' custom-class='has-text-light'>
-					<b-select placeholder='Select an endpoint' v-model='endpoint' required>
-						<option
+<template lang='pug'>
+	.timeline
+		.timelineHeader(@click.self='refresh')
+			span {{ name }}
+			button(@click='isOptionsOpen = !isOptionsOpen')
+				FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
+
+		b-collapse(:open='isOptionsOpen' animation='slide')
+			.timelineOptions
+				b-field(label='Name' custom-class='has-text-light')
+					b-input(v-model='name')
+
+				b-field(label='Endpoint' custom-class='has-text-light')
+					b-select(placeholder='Select an endpoint' v-model='endpoint' required)
+						option(
 							v-for='ep in endpoints'
 							:value='ep'
 							:key='ep'
-						>
-							{{ ep }}
-						</option>
-					</b-select>
-				</b-field>
-			</div>
-		</b-collapse>
-		<div class='timelinePosts'>
-			<Post
+						) {{ ep }}
+
+		.timelinePosts
+			Post(
 				v-for='post of posts'
 				:key='post.id'
 				:data='post'
-			></Post>
-		</div>
-	</div>
+			)
 </template>
 
 <script lang='ts'>

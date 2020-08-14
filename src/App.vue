@@ -1,8 +1,7 @@
-<template>
-	<div id='soshalThing' class='has-text-light'>
-		<Sidebar @new-timeline='addTimeline'></Sidebar>
-		<TimelineContainer :timelines='timelines'></TimelineContainer>
-	</div>
+<template lang='pug'>
+	#soshalThing.has-text-light
+		Sidebar(@new-timeline='addTimeline')
+		TimelineContainer(:timelines='timelines')
 </template>
 
 <script lang='ts'>

@@ -1,12 +1,11 @@
-<template>
-	<div class='sidebarMenu'>
-		<ServiceSettings
+<template lang='pug'>
+	.sidebarMenu
+		ServiceSettings(
 			v-for='service of services'
 			:key='service.name'
 			:name='service.name'
 			:loginHref='service.loginHref'
-		></ServiceSettings>
-	</div>
+		)
 </template>
 
 <script lang='ts'>

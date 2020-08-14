@@ -83,6 +83,10 @@ const clientConfig = {
 				test: /\.css$/,
 				loader: 'style-loader!css-loader'
 			},
+			{
+				test: /\.pug$/,
+				loader: 'pug-plain-loader',
+			}
 		],
 	},
 	plugins: [
