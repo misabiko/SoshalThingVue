@@ -29,7 +29,7 @@ export default Vue.component('ServiceSettings', {
 	},
 	computed: {
 		loggedIn() : boolean {
-			return this.$logins[this.name];
+			return this.$store.state.logins[this.name];
 		}
 	}
 });

@@ -125,7 +125,7 @@ export default Vue.component('Timeline', {
 	computed: {
 		enabled() {
 			//TODO resolve data in computed
-			return this.$logins.Twitter && !!(this as any).endpoint;
+			return this.$store.state.logins.Twitter && !!(this as any).endpoint;
 		}
 	},
 	components: {

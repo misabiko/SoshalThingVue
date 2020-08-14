@@ -27,9 +27,7 @@ export default Vue.component('App', {
 			const json = await fetch('/checkLogins')
 				.then(response => response.json());
 
-			for (const service in this.$logins)
-				if (this.$logins.hasOwnProperty(service))
-					this.$logins[service] = json.hasOwnProperty(service) && json[service];
+			this.$store.commit('updateLogins', json);
 		},
 		addTimeline() {
 			const id = this.getUniqueId();
