@@ -27,7 +27,6 @@ export default Vue.component('PostMedia', {
 
 <style scoped lang='sass'>
 .postMedia
-	max-height: 50vh
 	margin-top: 1rem
 	text-align: center
 
@@ -37,6 +36,7 @@ export default Vue.component('PostMedia', {
 	width: 100%
 	max-width: unset
 	justify-content: center
+	max-height: 50vh
 
 	img
 		align-self: center
