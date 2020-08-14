@@ -6,7 +6,7 @@
 				class='button'
 			>
 				<span class='icon is-small'>
-					<icon class='fas fa-plus'></icon>
+					<FontAwesomeIcon icon='plus'></FontAwesomeIcon>
 				</span>
 			</button>
 		</div>

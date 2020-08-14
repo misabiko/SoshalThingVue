@@ -27,7 +27,6 @@ export default Vue.component('App', {
 			this.$logins.twitter = json.hasOwnProperty('twitter') && json.twitter;
 			this.$logins.mastodon = json.hasOwnProperty('mastodon') && json.mastodon;
 			this.$logins.pixiv = json.hasOwnProperty('pixiv') && json.pixiv;
-			console.log('Logged in: ', this.$logins);
 		}
 	},
 	components: {

@@ -21,15 +21,17 @@
 		<div class='postButtons'>
 			<button
 				class='repostButton'
+				:class='{repostedPostButton: data.reposted}'
 				@click='repost'
 			>
-				<icon :class="['fas', 'fa-retweet', {repostedPostButton: data.reposted}]"></icon>
+				<FontAwesomeIcon icon='retweet'></FontAwesomeIcon>
 			</button>
 			<button
 				class='likeButton'
+				:class='{likedPostButton: data.liked}'
 				@click='like'
 			>
-				<icon :class="[data.liked ? 'fas' : 'far', 'fa-heart', {likedPostButton: data.liked}]"></icon>
+				<FontAwesomeIcon :icon="[data.liked ? 'fas' : 'far', 'heart']"></FontAwesomeIcon>
 			</button>
 		</div>
 	</div>
