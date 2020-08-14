@@ -33,7 +33,7 @@ export default Vue.component('ServiceMenu', {
 @use '../variables' as *
 
 .sidebarMenu
-	width: 20vw
+	width: $sidebar-menu-width
 	height: 100%
 	padding: 1rem
 	background-color: $container-color

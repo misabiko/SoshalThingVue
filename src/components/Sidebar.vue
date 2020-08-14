@@ -1,6 +1,8 @@
 <template>
 	<nav>
-		<ServiceMenu v-if='expanded'></ServiceMenu>
+		<b-collapse :open='expanded' animation='slide-right'>
+			<ServiceMenu/>
+		</b-collapse>
 		<div id='sidebarButtons'>
 			<button @click='expanded = !expanded'>
 				<span>
@@ -67,4 +69,19 @@ nav
 
 		span
 			vertical-align: middle
+
+.slide-right-enter-active
+	transition: 150ms ease-out
+
+.slide-right-leave-active
+	transition: 150ms ease-out
+	transition-timing-function: cubic-bezier(0, 1, 0.5, 1)
+
+.slide-right-enter-to, .slide-right-leave
+	max-width: $sidebar-menu-width
+	overflow: hidden
+
+.slide-right-enter, .slide-right-leave-to
+	max-width: 0
+	overflow: hidden
 </style>
