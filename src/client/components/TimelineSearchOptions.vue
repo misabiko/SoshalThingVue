@@ -10,7 +10,7 @@ export default Vue.component('TimelineSearchOptions', {
 	props: ['options'],
 	data: function() {
 		return {
-			query: (this as any).options.q,
+			query: (this as any).options ? (this as any).options.q : '',
 		}
 	},
 	watch: {

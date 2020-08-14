@@ -1,5 +1,5 @@
 <template lang='pug'>
-	article.post(:post-id='data.id')
+	article.post(:post-id='data.id' @mouseover='hovered = true' @mouseleave='hovered = false')
 		.repostLabel(v-if='data.reposterName')
 			p {{ data.reposterName + ' retweeted' }}
 
@@ -35,7 +35,8 @@
 						)
 							span.icon.is-small: FontAwesomeIcon(:icon="[liked ? 'fas' : 'far', 'heart']")
 
-			.media-right: button.delete
+			b-collapse.media-right(:open='hovered' animation='slide-left')
+				button.delete(@click="$emit('remove', data.id)")
 		PostMedia(
 			v-if='data.images'
 			:sources='data.images'
@@ -63,6 +64,7 @@ export default Vue.component('Post', {
 		return {
 			liked: this.data.liked,
 			reposted: this.data.reposted,
+			hovered: false,
 		}
 	},
 	methods: {
@@ -106,8 +108,18 @@ article.post
 	figure img
 		border-radius: 4px
 
+	.content
+		strong
+			margin-right: 0.5rem
+
+		small
+			color: $grey-text
+
+		small + small
+			float: right
+
 	a
-		color: #8899a6
+		color: $grey-text
 
 		&:hover.likeButton, &.likedPostButton
 			svg
@@ -122,9 +134,28 @@ article.post
 
 .repostLabel
 	margin-left: 64px
-	color: #8899a6
+	color: $grey-text
 	font-size: smaller
 
 	p
 		margin-left: 1rem
+</style>
+
+<style lang='sass'>
+@use '../variables' as *
+
+.slide-left-enter-active
+	transition: 150ms ease-out
+
+.slide-left-leave-active
+	transition: 150ms ease-out
+	transition-timing-function: cubic-bezier(0, 1, 0.5, 1)
+
+.slide-left-enter-to, .slide-left-leave
+	max-width: 40px
+	overflow: hidden
+
+.slide-left-enter, .slide-left-leave-to
+	max-width: 0
+	overflow: hidden
 </style>

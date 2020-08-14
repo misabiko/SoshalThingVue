@@ -28,7 +28,6 @@ export default Vue.component('PostMedia', {
 <style scoped lang='sass'>
 .postMedia
 	max-height: 50vh
-	overflow: hidden //TODO remove once layout is settled
 	margin-top: 1rem
 	text-align: center
 
@@ -41,16 +40,5 @@ export default Vue.component('PostMedia', {
 
 	img
 		align-self: center
-
-//.postMedia1 .mediaHolder
-	width: 100%
-
-//.postMedia3 .mediaHolder,
-//.postMedia4 .mediaHolder
-	height: 50%
-
-//.portrait img
-	width: 100%
-//.landscape img
-	height: 100%
+		border-radius: 8px
 </style>

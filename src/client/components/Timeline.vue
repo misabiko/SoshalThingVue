@@ -33,6 +33,7 @@
 				:key='post.id'
 				:data='post'
 				@update-data='updateData'
+				@remove='removePost($event)'
 			)
 </template>
 
@@ -131,7 +132,12 @@ export default Vue.component('Timeline', {
 			this.posts.splice(index, 0, postData);
 		},
 
-		updateData(postData: PostData) {
+		removePost(id : string) {
+			const index = this.posts.findIndex((post : PostData) => post.id === id);
+			this.posts.splice(index, 1);
+		},
+
+		updateData(postData : PostData) {
 			const index = this.posts.findIndex(oldData => oldData.id == postData.id);
 			Object.assign(this.posts[index], postData);
 			this.posts[index].creationTime = new Date(this.posts[index].creationTime);
@@ -148,7 +154,9 @@ export default Vue.component('Timeline', {
 	computed: {
 		enabled() {
 			//TODO resolve data in computed
-			return (this.$store.state as any).logins.Twitter && !!(this as any).endpoint;
+			return (this.$store.state as any).logins.Twitter &&
+				!!(this as any).endpoint &&
+				((this as any).endpoint !== 'search' || ((this as any).options && !!(this as any).options.q.length));
 		}
 	},
 	watch: {
