@@ -161,7 +161,7 @@ export namespace Twitter {
 		//failureRedirect: '/' TODO Have a way to signal failure
 	}));
 	router.get('/tweets/home_timeline', preventUnauthorized, homeTimeline);
-	router.get('/tweets/search/*', preventUnauthorized, search);
+	router.get('/tweets/search/', preventUnauthorized, search);
 	router.post('/like/:id', preventUnauthorized, like);
 	router.post('/retweet/:id', preventUnauthorized, retweet);
 }

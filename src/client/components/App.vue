@@ -17,7 +17,7 @@ export default Vue.component('App', {
 				{
 					id: 1,
 					name: 'Art',
-					endpoint: 'search/tweets',
+					endpoint: 'search',
 					options: {'q': 'list:misabiko/Art filter:media -filter:retweets'}
 				}
 			],
