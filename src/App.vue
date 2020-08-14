@@ -1,5 +1,5 @@
 <template>
-	<div id='app'>
+	<div id='soshalThing'>
 		<Sidebar></Sidebar>
 		<TimelineContainer></TimelineContainer>
 	</div>
