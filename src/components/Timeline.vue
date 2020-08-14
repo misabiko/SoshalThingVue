@@ -63,33 +63,35 @@ export default Vue.component('Timeline', {
 			endpoint: this.initialData.endpoint,
 			refreshRate: this.initialData.refreshRate || 90000,
 			options: this.initialData.options,
-			interval: (undefined as unknown) as number,
+			interval: undefined as number | undefined,
 			posts: [] as PostData[],
 			isOptionsOpen: !(this.initialData.name && this.initialData.endpoint),
 		}
 	},
 	mounted() {
-		//this.autoRefresh();
+		if ((this as any).enabled)
+			(this as any).autoRefresh();
 		//this.$root.visible(() => this.autoRefresh());
 	},
 	beforeDestroy() {
-		//this.disableAutoRefresh();
+		(this as any).disableAutoRefresh();
 	},
 	methods: {
-		/*autoRefresh() {
-			console.log(`${this.name} reset refreshing`);
+		autoRefresh() {
+			console.log(`${this.name} reset refreshing ${this.enabled}`);
 
 			//TODO Disable refreshing when not in focus
-			clearInterval(this.interval);
+			console.log('boop');
+			window.clearInterval(this.interval);
 			this.interval = window.setInterval(() => this.refresh(), this.refreshRate);
-
+			console.log('interval', this.interval);
 			this.refresh().then();
 		},
 
 		disableAutoRefresh() {
-			clearInterval(this.interval);
+			window.clearInterval(this.interval);
 			this.interval = undefined;
-		},*/
+		},
 
 		async refresh() {
 			console.log(`refreshing... (enabled: ${this.enabled})`);
@@ -125,7 +127,15 @@ export default Vue.component('Timeline', {
 	computed: {
 		enabled() {
 			//TODO resolve data in computed
-			return this.$store.state.logins.Twitter && !!(this as any).endpoint;
+			return (this.$store.state as any).logins.Twitter && !!(this as any).endpoint;
+		}
+	},
+	watch: {
+		enabled(newEnabled, _oldEnabled) {
+			if (newEnabled)
+				(this as any).autoRefresh();
+			else
+				(this as any).disableAutoRefresh();
 		}
 	},
 	components: {
