@@ -1,7 +1,7 @@
 <template>
 	<div id='soshalThing'>
-		<Sidebar></Sidebar>
-		<TimelineContainer></TimelineContainer>
+		<Sidebar @new-timeline='addTimeline'></Sidebar>
+		<TimelineContainer :timelines='timelines'></TimelineContainer>
 	</div>
 </template>
 
@@ -14,10 +14,14 @@ export default Vue.component('App', {
 	data: function() {
 		return {
 			loggedIn: false,
+			timelines: [
+				{id: 0, name: 'Home', endpoint: 'home_timeline'}
+			],
 		}
 	},
 	mounted() {
-		this.checkLogins();
+		//TODO resolve methods in mounted
+		(this as any).checkLogins();
 	},
 	methods: {
 		async checkLogins() {
@@ -27,6 +31,18 @@ export default Vue.component('App', {
 			this.$logins.twitter = json.hasOwnProperty('twitter') && json.twitter;
 			this.$logins.mastodon = json.hasOwnProperty('mastodon') && json.mastodon;
 			this.$logins.pixiv = json.hasOwnProperty('pixiv') && json.pixiv;
+		},
+		addTimeline() {
+			this.timelines.push({id: this.getUniqueId(), name: '', endpoint: ''});
+		},
+		getUniqueId() : number {
+			//Feels clunky
+			let id = 0;
+			const ids = this.timelines.map(timeline => timeline.id);
+			while (ids.includes(id))
+				id++;
+
+			return id;
 		}
 	},
 	components: {
@@ -59,7 +75,5 @@ body
 	color: white
 	background-color: $bg-color
 	height: 100vh
-	overflow-x: scroll
-	overflow-y: hidden
 	display: flex
 </style>

@@ -12,7 +12,7 @@
 					/>
 				</span>
 			</button>
-			<button>
+			<button @click="$emit('new-timeline')">
 				<span>
 					<FontAwesomeIcon
 						icon='plus'

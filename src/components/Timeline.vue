@@ -4,7 +4,7 @@
 			class='timelineHeader'
 			@click='refresh'
 		>
-			{{ name }}
+			{{ name }} {{ tid }}
 		</div>
 		<div class='timelinePosts'>
 			<Post
@@ -45,6 +45,7 @@ export default Vue.component('Timeline', {
 			type: Boolean,
 			default: false,
 		},
+		tid: Number,
 	},
 	data: function() {
 		return {

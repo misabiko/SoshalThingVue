@@ -3,6 +3,7 @@
 		<Timeline
 			v-for='timeline of timelines'
 			:key='timeline.id'
+			:tid='timeline.id'
 			:name='timeline.name'
 			:endpoint='timeline.endpoint'
 			:refresh-rate='timeline.refreshRate'
@@ -15,12 +16,16 @@ import Vue from 'vue';
 import Timeline from "./Timeline";
 
 export default Vue.component('TimelineContainer', {
+	props: {
+		//Not a fan of the container not owning its items :/
+		timelines: {
+			type: Array,
+			required: true,
+		},
+	},
 	data() {
 		return {
-			timelines: [
-				{id: 0, name: 'Home', endpoint: 'home_timeline'},
-			],
-		}
+		};
 	},
 	components: {Timeline}
 });
@@ -29,6 +34,8 @@ export default Vue.component('TimelineContainer', {
 <style lang='sass'>
 #timelineContainer
 	height: 100%
-	flex-wrap: nowrap
+	overflow-x: scroll
+	overflow-y: hidden
+	display: flex
 	flex-grow: 1
 </style>
