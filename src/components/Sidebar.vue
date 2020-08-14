@@ -48,6 +48,7 @@ export default Vue.component('Sidebar', {
 
 <style lang='sass'>
 @use '../variables' as *
+
 nav
 	background-color: $element-color
 	z-index: 1
@@ -61,9 +62,7 @@ nav
 	flex-direction: column
 
 	button
-		padding: 0
-		border: none
-		background: none
+		@include borderless-button
 		height: 45px
 
 		span

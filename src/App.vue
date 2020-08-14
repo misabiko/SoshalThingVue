@@ -1,5 +1,5 @@
 <template>
-	<div id='soshalThing'>
+	<div id='soshalThing' class='has-text-light'>
 		<Sidebar @new-timeline='addTimeline'></Sidebar>
 		<TimelineContainer :timelines='timelines'></TimelineContainer>
 	</div>
@@ -33,7 +33,8 @@ export default Vue.component('App', {
 			this.$logins.pixiv = json.hasOwnProperty('pixiv') && json.pixiv;
 		},
 		addTimeline() {
-			this.timelines.push({id: this.getUniqueId(), name: '', endpoint: ''});
+			const id = this.getUniqueId();
+			this.timelines.push({id, name: 'Timeline #' + id, endpoint: ''});
 		},
 		getUniqueId() : number {
 			//Feels clunky
@@ -54,26 +55,13 @@ export default Vue.component('App', {
 
 <style lang='sass'>
 @use 'variables' as *
-@import '../node_modules/bulma/bulma.sass'
+@import '~bulma'
 
-::-webkit-scrollbar
-	width: 12px
-	height: 12px
-
-::-webkit-scrollbar-thumb
-	border-radius: 0
-	background-color: #2f3042
-
-body
+#soshalThing
+	height: 100vh
+	display: flex
 	background-color: $bg-color
-	margin: 0
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif
 	-webkit-font-smoothing: antialiased
 	-moz-osx-font-smoothing: grayscale
-
-#soshalThing
-	color: white
-	background-color: $bg-color
-	height: 100vh
-	display: flex
 </style>

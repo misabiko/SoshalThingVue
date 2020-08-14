@@ -2,10 +2,31 @@
 	<div class='timeline'>
 		<div
 			class='timelineHeader'
-			@click='refresh'
+			@click.self='refresh'
 		>
-			{{ name }} {{ tid }}
+			<span>{{ name }} {{ tid }}</span>
+			<button @click='isOptionsOpen = !isOptionsOpen'>
+				<FontAwesomeIcon icon='ellipsis-v' inverse size='lg'/>
+			</button>
 		</div>
+		<b-collapse :open='isOptionsOpen' animation='slide'>
+			<div class='timelineOptions'>
+				<b-field label='Name' custom-class='has-text-light'>
+					<b-input v-model='name'></b-input>
+				</b-field>
+				<b-field label='Endpoint' custom-class='has-text-light'>
+					<b-select placeholder='Select an endpoint' v-model='endpoint' required>
+						<option
+							v-for='ep in endpoints'
+							:value='ep'
+							:key='ep'
+						>
+							{{ ep }}
+						</option>
+					</b-select>
+				</b-field>
+			</div>
+		</b-collapse>
 		<div class='timelinePosts'>
 			<Post
 				v-for='post of posts'
@@ -19,11 +40,13 @@
 <script lang='ts'>
 import Vue from 'vue';
 import {PostData} from '../core/PostData';
-import Post from './Post.vue';
+import Post from './Post';
+import {library} from '@fortawesome/fontawesome-svg-core';
+import {faEllipsisV} from '@fortawesome/free-solid-svg-icons';
+
+library.add(faEllipsisV);
 
 //https://stackoverflow.com/a/57124645/2692695
-//Formats object into RESTful URI parameters (?param1=boop&param2=bap)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function toURI(params : { [name : string] : any }) {
 	return '?' + Object.entries(params)
 		.map(
@@ -33,24 +56,17 @@ function toURI(params : { [name : string] : any }) {
 }
 
 export default Vue.component('Timeline', {
-	props: {
-		name: String,
-		endpoint: String,
-		refreshRate: {
-			type: Number,
-			default: 90000,
-		},
-		options: Object,
-		enabled: {
-			type: Boolean,
-			default: false,
-		},
-		tid: Number,
-	},
+	props: ['initialData', 'endpoints'],
 	data: function() {
 		return {
+			name: this.initialData.name,
+			endpoint: this.initialData.endpoint,
+			refreshRate: this.initialData.refreshRate || 90000,
+			options: this.initialData.options,
+			tid: this.initialData.id,
 			interval: (undefined as unknown) as number,
 			posts: [] as PostData[],
+			isOptionsOpen: !(this.initialData.name && this.initialData.endpoint),
 		}
 	},
 	mounted() {
@@ -77,8 +93,8 @@ export default Vue.component('Timeline', {
 		},*/
 
 		async refresh() {
-			console.log(`refreshing... (enabled: ${this.$logins.twitter})`);
-			if (!this.$logins.twitter)
+			console.log(`refreshing... (enabled: ${this.enabled})`);
+			if (!this.enabled)
 				return;
 
 			const newPostDatas = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ''))
@@ -107,6 +123,12 @@ export default Vue.component('Timeline', {
 			this.posts.splice(index, 0, postData);
 		}
 	},
+	computed: {
+		enabled() {
+			//TODO resolve data in computed
+			return this.$logins.twitter && !!(this as any).endpoint;
+		}
+	},
 	components: {
 		Post,
 	},
@@ -116,6 +138,14 @@ export default Vue.component('Timeline', {
 <style lang='sass'>
 //TODO add scoped css
 @use '../variables' as *
+
+::-webkit-scrollbar
+	width: 12px
+	height: 12px
+
+::-webkit-scrollbar-thumb
+	border-radius: 0
+	background-color: #2f3042
 
 .timeline
 	width: 500px
@@ -132,6 +162,16 @@ export default Vue.component('Timeline', {
 	line-height: 50px
 	padding-left: 25px
 	background-color: $element-color
+	display: flex
+	justify-content: space-between
+
+	button
+		@include borderless-button(0 1.6rem)
+		height: 100%
+
+.timelineOptions
+	background-color: $container-color
+	padding: 1rem
 
 .timelinePosts
 	overflow-y: scroll

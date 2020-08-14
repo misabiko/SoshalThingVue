@@ -3,10 +3,8 @@
 		<Timeline
 			v-for='timeline of timelines'
 			:key='timeline.id'
-			:tid='timeline.id'
-			:name='timeline.name'
-			:endpoint='timeline.endpoint'
-			:refresh-rate='timeline.refreshRate'
+			:initial-data='timeline'
+			:endpoints='endpoints'
 		></Timeline>
 	</div>
 </template>
@@ -25,6 +23,7 @@ export default Vue.component('TimelineContainer', {
 	},
 	data() {
 		return {
+			endpoints: ['home_timeline', 'search']
 		};
 	},
 	components: {Timeline}

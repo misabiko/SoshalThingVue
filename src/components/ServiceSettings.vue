@@ -26,7 +26,7 @@ export default Vue.component('ServiceSettings', {
 
 <style scoped lang='sass'>
 @use '../variables' as *
-@import '../../node_modules/bulma/bulma.sass'
+@import '~bulma'
 
 .serviceSettings
 	@extend .box
