@@ -4,7 +4,7 @@ import './style.sass';
 
 Vue.config.productionTip = false;
 
-new Vue({
+const soshalThing = new Vue({
 	el: '#soshalThing',
 	template: '<App/>',
 	components: {App},
