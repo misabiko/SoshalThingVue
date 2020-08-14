@@ -56,7 +56,7 @@ export default Vue.component('Post', {
 	},
 	data: function() {
 		return {
-			liked: this.data.favorited,
+			liked: this.data.liked,
 			reposted: this.data.reposted,
 		}
 	},
