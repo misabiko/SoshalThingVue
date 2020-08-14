@@ -6,8 +6,8 @@
 
 <script lang='ts'>
 import Vue from 'vue';
-import TimelineContainer from "./components/TimelineContainer";
-import Sidebar from "./components/Sidebar";
+import TimelineContainer from "./TimelineContainer";
+import Sidebar from "./Sidebar";
 
 export default Vue.component('App', {
 	data: function() {
@@ -50,7 +50,7 @@ export default Vue.component('App', {
 </script>
 
 <style lang='sass'>
-@use 'variables' as *
+@use '../variables' as *
 @import '~bulma'
 
 #soshalThing

@@ -2,7 +2,7 @@ import Vue from 'vue';
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
 import Buefy from 'buefy';
 import 'buefy/dist/buefy.css';
-import App from './App.vue';
+import App from './components/App.vue';
 import store from './store';
 
 Vue.component('FontAwesomeIcon', FontAwesomeIcon);

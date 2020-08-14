@@ -10,7 +10,7 @@
 
 <script lang='ts'>
 import Vue from 'vue';
-import ServiceSettings from './ServiceSettings.vue';
+import ServiceSettings from './ServiceSettings';
 
 export default Vue.component('ServiceMenu', {
 	data: function() {

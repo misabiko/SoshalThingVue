@@ -10,7 +10,7 @@
 
 <script lang='ts'>
 import Vue from 'vue';
-import Timeline from "./Timeline";
+import Timeline from "./Timeline.vue";
 
 export default Vue.component('TimelineContainer', {
 	props: {

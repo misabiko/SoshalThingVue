@@ -28,8 +28,8 @@
 
 <script lang='ts'>
 import Vue from 'vue';
-import {PostData} from '../core/PostData';
-import Post from './Post';
+import {PostData} from '../../core/PostData';
+import Post from './Post.vue';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV} from '@fortawesome/free-solid-svg-icons';
 
@@ -86,9 +86,14 @@ export default Vue.component('Timeline', {
 			if (!this.enabled)
 				return;
 
-			const newPostDatas = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ''))
-				.then(response => response.json())
-				.then(newData => newData.reverse().filter((a : PostData) => this.posts.findIndex((b : any) => b.id === a.id) < 0));
+			const response = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ''));
+
+			if (!response.ok)
+				throw new Error(`Timeline ${this.name}: Server error on refresh`);
+
+			const newPostDatas = await response.json().then(newData =>
+				newData.reverse().filter((a : PostData) => this.posts.findIndex((b : any) => b.id === a.id) < 0)
+			);
 
 			for (const newPostData of newPostDatas) {
 				newPostData.creationTime = new Date(newPostData.creationTime);

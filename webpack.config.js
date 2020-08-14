@@ -6,7 +6,7 @@ const serverConfig = {
 	mode: 'development',
 	target: 'node',
 	node: {__dirname: false},
-	entry: path.resolve(__dirname, 'src', 'server.ts'),
+	entry: path.resolve(__dirname, 'src', 'server', 'server.ts'),
 	output: {
 		filename: 'server.js',
 		path: path.resolve(__dirname, 'dist'),
@@ -28,7 +28,7 @@ const serverConfig = {
 const clientConfig = {
 	mode: 'development',
 	devtool: 'inline-source-map',
-	entry: path.resolve(__dirname, 'src', 'index.ts'),
+	entry: path.resolve(__dirname, 'src', 'client', 'index.ts'),
 	output: {
 		filename: 'index.js',
 		path: path.resolve(__dirname, 'dist'),

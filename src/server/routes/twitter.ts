@@ -3,7 +3,7 @@ import {Profile, Strategy as TwitterStrategy} from 'passport-twitter';
 import TwitterLite from 'twitter-lite';
 import {consumer_key, consumer_secret} from '../credentials.json';
 import {tweetToPostData} from '../core/twitter';
-import {PostData} from '../core/PostData';
+import {PostData} from '../../core/PostData';
 import passport from 'passport';
 
 let client = new TwitterLite({consumer_key, consumer_secret});

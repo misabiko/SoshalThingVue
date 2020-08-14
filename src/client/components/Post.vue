@@ -44,8 +44,8 @@
 
 <script lang='ts'>
 import Vue, {PropType} from 'vue';
-import {PostData} from '../core/PostData';
-import PostMedia from './PostMedia.vue';
+import {PostData} from '../../core/PostData';
+import PostMedia from './PostMedia';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faHeart as fasHeart, faRetweet, faReply} from '@fortawesome/free-solid-svg-icons';
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';

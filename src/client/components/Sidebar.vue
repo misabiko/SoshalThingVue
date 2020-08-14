@@ -21,7 +21,7 @@
 
 <script lang='ts'>
 import Vue from 'vue';
-import ServiceMenu from './ServiceMenu.vue';
+import ServiceMenu from './ServiceMenu';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faPlus, faAngleDoubleLeft, faAngleDoubleRight} from '@fortawesome/free-solid-svg-icons';
 

@@ -8,7 +8,7 @@
 		"build": "webpack",
 		"watch": "npm run build -- --watch",
 		"start": "node dist/server.js",
-		"build-start": "npm run build && npm run just-start",
+		"build-start": "npm run build && npm run start",
 		"test": "mocha --require ts-node/register 'test/**/*.ts'"
 	},
 	"dependencies": {
