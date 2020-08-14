@@ -13,6 +13,13 @@ export interface Tweet {
 		urls : TweetURL[],
 		media? : Media[],
 	},
+	extended_entities? : {
+		hashtags : Hashtag[],
+		symbols : [],
+		user_mentions : UserMention[],
+		urls : TweetURL[],
+		media? : Media[],
+	},
 	retweeted_status? : Tweet,
 	source : string,
 	in_reply_to_status_id : null,
@@ -125,6 +132,9 @@ interface MediaSize {
 }
 
 export function tweetToPostData(tweet : Tweet) : PostData {
+	if ('extended_entities' in tweet)
+		Object.assign(tweet.entities, tweet.extended_entities);
+
 	if ('retweeted_status' in tweet)
 		return retweetToRepostData(tweet);
 	else
