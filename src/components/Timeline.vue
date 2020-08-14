@@ -69,8 +69,8 @@ export default Vue.component('Timeline', {
 		},*/
 
 		async refresh() {
-			console.log(`refreshing... (enabled: ${this.enabled})`);
-			if (!this.enabled)
+			console.log(`refreshing... (enabled: ${this.$logins.twitter})`);
+			if (!this.$logins.twitter)
 				return;
 
 			const newPostDatas = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ''))

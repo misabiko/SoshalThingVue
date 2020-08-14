@@ -30,5 +30,12 @@ app.use(function (err : Error, req : Request, res : Response, _next : NextFuncti
 })
 
 app.use('/twitter', Twitter.router);
+app.get('/checklogins', function(req : Request, res : Response) {
+	res.json({
+		twitter: Twitter.checkLogin(),
+		mastodon: false,
+		pixiv: false,
+	})
+});
 
 app.listen(3000, () => console.log('Listening at http://localhost:3000'));

@@ -4,7 +4,13 @@ import './style.sass';
 
 Vue.config.productionTip = false;
 
-const soshalThing = new Vue({
+Vue.prototype.$logins = {
+	twitter: false,
+	mastodon: false,
+	pixiv: false,
+};
+
+new Vue({
 	el: '#soshalThing',
 	template: '<App/>',
 	components: {App},
