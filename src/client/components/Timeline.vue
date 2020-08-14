@@ -18,6 +18,11 @@
 							:key='ep'
 						) {{ ep }}
 
+				TimelineSearchOptions(
+					v-if="endpoint === 'search'"
+					:options.sync='options'
+				)
+
 				.level
 					.level-left: b-button.level-item(@click='clearPosts') Clear
 					.level-right: b-button.level-item(@click='remove' type='is-danger') Remove
@@ -37,6 +42,7 @@ import {PostData} from '../../core/PostData';
 import Post from './Post.vue';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV} from '@fortawesome/free-solid-svg-icons';
+import TimelineSearchOptions from './TimelineSearchOptions.vue';
 
 library.add(faEllipsisV);
 
@@ -126,7 +132,6 @@ export default Vue.component('Timeline', {
 		},
 
 		updateData(postData: PostData) {
-			console.dir(postData);
 			const index = this.posts.findIndex(oldData => oldData.id == postData.id);
 			Object.assign(this.posts[index], postData);
 		},
@@ -163,6 +168,7 @@ export default Vue.component('Timeline', {
 	},
 	components: {
 		Post,
+		TimelineSearchOptions,
 	},
 })
 </script>
