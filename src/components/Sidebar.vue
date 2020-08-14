@@ -48,8 +48,10 @@ export default Vue.component('Sidebar', {
 });
 </script>
 
-<style lang='sass'>
+<style scoped lang='sass'>
 @use '../variables' as *
+
+@include pretty-scrollbar
 
 nav
 	background-color: $element-color

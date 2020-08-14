@@ -81,10 +81,9 @@ export default Vue.component('Timeline', {
 			console.log(`${this.name} reset refreshing ${this.enabled}`);
 
 			//TODO Disable refreshing when not in focus
-			console.log('boop');
 			window.clearInterval(this.interval);
 			this.interval = window.setInterval(() => this.refresh(), this.refreshRate);
-			console.log('interval', this.interval);
+
 			this.refresh().then();
 		},
 
@@ -144,17 +143,10 @@ export default Vue.component('Timeline', {
 })
 </script>
 
-<style lang='sass'>
-//TODO add scoped css
+<style scoped lang='sass'>
 @use '../variables' as *
 
-::-webkit-scrollbar
-	width: 12px
-	height: 12px
-
-::-webkit-scrollbar-thumb
-	border-radius: 0
-	background-color: #2f3042
+@include pretty-scrollbar
 
 .timeline
 	width: 500px

@@ -31,6 +31,7 @@ export default Vue.component('PostMedia', {
 .postMedia
 	height: 300px
 	overflow: hidden //TODO remove once layout is settled
+	margin-top: 1rem
 
 .mediaHolder
 	overflow: hidden

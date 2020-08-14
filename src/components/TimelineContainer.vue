@@ -30,7 +30,11 @@ export default Vue.component('TimelineContainer', {
 });
 </script>
 
-<style lang='sass'>
+<style scoped lang='sass'>
+@use '../variables' as *
+
+@include pretty-scrollbar
+
 #timelineContainer
 	height: 100%
 	overflow-x: scroll

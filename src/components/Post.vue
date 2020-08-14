@@ -1,40 +1,47 @@
 <template>
-	<div class='post' :post-id='data.id'>
-		<div
-			v-if='data.reposterName'
-			class='respostLabel'
-		>
-			{{ data.reposterName + ' retweeted' }}
+	<article class='post' :post-id='data.id'>
+		<div class='respostLabel' v-if='data.reposterName'>
+			<p>{{ data.reposterName + ' retweeted' }}</p>
 		</div>
-		<div class='postSide'>
-			<img
-				:alt="data.authorHandle + '\'s avatar'"
-				:src='data.authorAvatar'
-				/>
+		<div class='media'>
+			<figure class='media-left'>
+				<p class='image is-64x64'>
+					<img
+						:alt="data.authorHandle + '\'s avatar'"
+						:src='data.authorAvatar'
+					/>
+				</p>
+			</figure>
+			<div class='media-content'>
+				<div class='content'>
+					<p>
+						<strong class='has-text-light'>{{ data.authorName }}</strong> <small>{{
+							'@' + data.authorHandle
+						}}</small> <small>sometime</small>
+						<br>
+						{{ data.text }}
+					</p>
+				</div>
+				<nav class='level is-mobile'>
+					<div class='level-left'>
+						<a class='level-item commentButton'>
+							<span class='icon is-small'><FontAwesomeIcon icon='reply'/></span>
+						</a>
+						<a class='level-item repostButton' :class='{repostedPostButton: reposted}' @click='reposted = !reposted'>
+							<span class='icon is-small'><FontAwesomeIcon icon='retweet'/></span>
+						</a>
+						<a class='level-item likeButton' :class='{likedPostButton: liked}' @click='liked = !liked'>
+							<span class='icon is-small'><FontAwesomeIcon :icon="[liked ? 'fas' : 'far', 'heart']"/></span>
+						</a>
+					</div>
+				</nav>
+			</div>
+			<div class='media-right'>
+				<button class='delete'></button>
+			</div>
 		</div>
-		<span>
-			{{ data.authorName }}
-			{{ '@' + data.authorHandle }}
-		</span>
-		<p>{{ data.text }}</p>
 		<PostMedia v-if='data.images' :sources='data.images'></PostMedia>
-		<div class='postButtons'>
-			<button
-				class='repostButton'
-				:class='{repostedPostButton: data.reposted}'
-				@click='repost'
-			>
-				<FontAwesomeIcon icon='retweet'></FontAwesomeIcon>
-			</button>
-			<button
-				class='likeButton'
-				:class='{likedPostButton: data.liked}'
-				@click='like'
-			>
-				<FontAwesomeIcon :icon="[data.liked ? 'fas' : 'far', 'heart']"></FontAwesomeIcon>
-			</button>
-		</div>
-	</div>
+	</article>
 </template>
 
 <script lang='ts'>
@@ -42,10 +49,10 @@ import Vue, {PropType} from 'vue';
 import {PostData} from '../core/PostData';
 import PostMedia from './PostMedia.vue';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faHeart as fasHeart, faRetweet} from '@fortawesome/free-solid-svg-icons';
+import {faHeart as fasHeart, faRetweet, faReply} from '@fortawesome/free-solid-svg-icons';
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 
-library.add(fasHeart, farHeart, faRetweet);
+library.add(fasHeart, farHeart, faRetweet, faReply);
 
 export default Vue.component('Post', {
 	props: {
@@ -81,46 +88,35 @@ export default Vue.component('Post', {
 </script>
 
 <style scoped lang='sass'>
-.post
-	background-color: #181925
-	position: relative
-	padding: 8px 8px 8px 20%
+@use '../variables' as *
+
+article.post
+	padding: 1rem
+	background-color: $post-color
 	margin-bottom: 2px
 
-.postSide
-	position: absolute
-	left: 0
+	figure img
+		border-radius: 4px
 
-.post p
-	margin: 0
+	a
+		color: #8899a6
 
-.repostLabel
+		&:hover.likeButton, &.likedPostButton
+			svg
+				color: #e0245e
+
+		&:hover.repostButton, &.repostedPostButton
+			svg
+				color: #17bf63
+
+		&:hover.commentButton svg
+			color: #1da1f2
+
+.respostLabel
+	margin-left: 64px
 	color: #8899a6
-	padding: 5px 0
 	font-size: smaller
 
-.postButtons button
-	margin: 8px 0
-
-.postButtons button
-	border: 0
-	margin-right: 10px
-	background: none
-	color: #8899a6
-
-.postButtons i
-	font-size: 18px
-
-button:hover.likeButton i, .likedPostButton i
-	color: #e0245e
-
-button:hover.repostButton i, .repostedPostButton i
-	color: #17bf63
-
-button:hover.commentButton i
-	color: #1da1f2
-
-.postSide img
-	margin: 5px 16px
-	border-radius: 4px
+	p
+		margin-left: 1rem
 </style>
