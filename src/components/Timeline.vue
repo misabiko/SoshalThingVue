@@ -4,7 +4,7 @@
 			class='timelineHeader'
 			@click.self='refresh'
 		>
-			<span>{{ name }} {{ tid }}</span>
+			<span>{{ name }}</span>
 			<button @click='isOptionsOpen = !isOptionsOpen'>
 				<FontAwesomeIcon icon='ellipsis-v' inverse size='lg'/>
 			</button>
@@ -63,7 +63,6 @@ export default Vue.component('Timeline', {
 			endpoint: this.initialData.endpoint,
 			refreshRate: this.initialData.refreshRate || 90000,
 			options: this.initialData.options,
-			tid: this.initialData.id,
 			interval: (undefined as unknown) as number,
 			posts: [] as PostData[],
 			isOptionsOpen: !(this.initialData.name && this.initialData.endpoint),
@@ -126,7 +125,7 @@ export default Vue.component('Timeline', {
 	computed: {
 		enabled() {
 			//TODO resolve data in computed
-			return this.$logins.twitter && !!(this as any).endpoint;
+			return this.$logins.Twitter && !!(this as any).endpoint;
 		}
 	},
 	components: {

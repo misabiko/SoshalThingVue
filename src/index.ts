@@ -11,9 +11,9 @@ Vue.use(Buefy);
 Vue.config.productionTip = false;
 
 Vue.prototype.$logins = {
-	twitter: false,
-	mastodon: false,
-	pixiv: false,
+	Twitter: false,
+	Mastodon: false,
+	Pixiv: false,
 };
 
 new Vue({

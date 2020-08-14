@@ -1,7 +1,7 @@
 <template>
 	<div class='serviceSettings'>
 		{{ name }}
-		<div class='level'>
+		<div class='level' v-if='!loggedIn'>
 			<div class='level-left'></div>
 			<div class='level-right'>
 				<a
@@ -18,8 +18,19 @@ import Vue from 'vue';
 
 export default Vue.component('ServiceSettings', {
 	props: {
-		name: String,
-		loginHref: String,
+		name: {
+			type: String,
+			required: true,
+		},
+		loginHref: {
+			type: String,
+			required: true,
+		},
+	},
+	computed: {
+		loggedIn() : boolean {
+			return this.$logins[this.name];
+		}
 	}
 });
 </script>

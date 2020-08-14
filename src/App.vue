@@ -13,7 +13,6 @@ import Sidebar from "./components/Sidebar";
 export default Vue.component('App', {
 	data: function() {
 		return {
-			loggedIn: false,
 			timelines: [
 				{id: 0, name: 'Home', endpoint: 'home_timeline'}
 			],
@@ -28,9 +27,9 @@ export default Vue.component('App', {
 			const json = await fetch('/checkLogins')
 				.then(response => response.json());
 
-			this.$logins.twitter = json.hasOwnProperty('twitter') && json.twitter;
-			this.$logins.mastodon = json.hasOwnProperty('mastodon') && json.mastodon;
-			this.$logins.pixiv = json.hasOwnProperty('pixiv') && json.pixiv;
+			for (const service in this.$logins)
+				if (this.$logins.hasOwnProperty(service))
+					this.$logins[service] = json.hasOwnProperty(service) && json[service];
 		},
 		addTimeline() {
 			const id = this.getUniqueId();
