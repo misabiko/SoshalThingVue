@@ -1,5 +1,5 @@
 <template lang='pug'>
-	nav
+	nav.sidebar
 		b-collapse(:open='expanded' animation='slide-right')
 			ServiceMenu
 		#sidebarButtons
@@ -44,7 +44,7 @@ export default Vue.component('Sidebar', {
 
 @include pretty-scrollbar
 
-nav
+.sidebar
 	background-color: $element-color
 	z-index: 1
 	display: flex
@@ -84,4 +84,9 @@ nav
 .slide-right-enter, .slide-right-leave-to
 	max-width: 0
 	overflow: hidden
+</style>
+
+<style lang='sass'>
+.sidebar .collapse-content
+	height: 100%
 </style>
