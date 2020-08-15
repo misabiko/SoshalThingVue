@@ -9,17 +9,12 @@
 </template>
 
 <script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
-
-const PostMediaProps = Vue.extend({
-	props: {
-		sources: Array
-	}
-});
+import {Vue, Component, Prop} from 'vue-property-decorator';
 
 @Component
-export default class PostMedia extends PostMediaProps {
+export default class PostMedia extends Vue {
+	@Prop(Array) readonly sources!: string[];
+
 	handleImageLoaded(loadEvent : Event) {
 		const img = loadEvent.target as HTMLImageElement;
 		if (img.parentElement)

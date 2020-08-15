@@ -3,8 +3,12 @@ import Vuex, {MutationTree} from 'vuex';
 
 Vue.use(Vuex);
 
+export interface Logins {
+	[service: string] : boolean
+}
+
 class State {
-	logins: {[service: string] : boolean} = {
+	logins: Logins = {
 		Twitter: false,
 		Mastodon: false,
 		Pixiv: false,

@@ -5,8 +5,7 @@
 </template>
 
 <script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import {Vue, Component, Ref} from 'vue-property-decorator'
 import TimelineContainer from './TimelineContainer';
 import Sidebar from './Sidebar';
 
@@ -17,9 +16,7 @@ import Sidebar from './Sidebar';
 	}
 })
 export default class App extends Vue {
-	$refs!: Vue['$refs!'] & {
-		timelineContainer: TimelineContainer
-	}
+	@Ref() readonly timelineContainer!: TimelineContainer
 
 	mounted() {
 		this.checkLogins();
@@ -33,7 +30,7 @@ export default class App extends Vue {
 	}
 
 	newTimeline() : void {
-		this.$refs.timelineContainer.addTimeline();
+		this.timelineContainer.addTimeline();
 	}
 }
 </script>

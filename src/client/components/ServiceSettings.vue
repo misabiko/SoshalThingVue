@@ -9,6 +9,8 @@
 <script lang='ts'>
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import {State} from 'vuex-class';
+import {Logins} from '../store';
 
 const ServiceSettingsProps = Vue.extend({
 	props: {
@@ -25,9 +27,11 @@ const ServiceSettingsProps = Vue.extend({
 
 @Component
 export default class ServiceSettings extends ServiceSettingsProps {
+	@State('logins') readonly logins!: Logins;
+
 	get loggedIn() : boolean {
 		//TODO resolve state in computed
-		return (this.$store.state as any).logins[this.name];
+		return this.logins[this.name];
 	}
 };
 </script>

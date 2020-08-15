@@ -14,11 +14,12 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import Timeline from "./Timeline.vue";
 
-interface TimelineData {
+export interface TimelineData {
 	id: number,
 	name: string,
 	endpoint: string,
-	options?: {q: string}
+	options?: {q: string},
+	refreshRate?: number,
 }
 
 @Component({

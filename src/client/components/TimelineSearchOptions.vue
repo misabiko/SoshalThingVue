@@ -4,32 +4,24 @@
 </template>
 
 <script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
-
-const TimelineSearchOptionsProps = Vue.extend({
-	props: {
-		options: {
-			type: Object,
-			required: true,
-		}
-	},
-	watch: {
-		query(newQuery, _oldQuery) {
-			(this as any).$emit('update:options', {q: newQuery});
-		},
-		options(newOptions, _oldOptions) {
-			(this as any).query = newOptions.q;
-		}
-	}
-});
+import {Vue, Component, Prop, Watch} from 'vue-property-decorator';
+import {TimelineOptions} from './TimelineSettings.vue';
 
 @Component
-export default class TimelineSearchOptions extends TimelineSearchOptionsProps {
+export default class TimelineSearchOptions extends Vue {
+	@Prop({type: Object, required: true})
+	readonly options!: TimelineOptions;
+
 	query = (this as any).options ? (this as any).options.q : '';
+
+	@Watch('query')
+	onQueryChanged(newQuery: string, _oldQuery: string) {
+		(this as any).$emit('update:options', {q: newQuery});
+	}
+
+	@Watch('options')
+	onOptionsChanged(newOptions: TimelineOptions, _oldOptions: TimelineOptions) {
+		(this as any).query = newOptions.q;
+	}
 }
 </script>
-
-<style scoped lang='sass'>
-
-</style>

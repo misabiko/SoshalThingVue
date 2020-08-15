@@ -43,7 +43,7 @@
 
 <script lang='ts'>
 import Vue, {PropType} from 'vue';
-import Component from 'vue-class-component';
+import {Component, Prop} from 'vue-property-decorator';
 import {PostData} from '../../core/PostData';
 import PostMedia from './PostMedia';
 import {library} from '@fortawesome/fontawesome-svg-core';
@@ -52,19 +52,16 @@ import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 
 library.add(fasHeart, farHeart, faRetweet, faReply);
 
-const PostProps = Vue.extend({
-	props: {
-		data: {
-			type: Object as PropType<PostData>,
-			required: true,
-		},
-	}
-});
-
 @Component({
 	components: {PostMedia}
 })
-export default class Post extends PostProps {
+export default class Post extends Vue {
+	@Prop({
+		type: Object as PropType<PostData>,
+		required: true,
+	})
+	readonly data!: PostData;
+
 	liked = this.data.liked;
 	reposted = this.data.reposted;
 	hovered = false;

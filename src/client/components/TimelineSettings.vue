@@ -23,8 +23,7 @@
 </template>
 
 <script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import {Vue, Component, Prop} from 'vue-property-decorator';
 import TimelineSearchOptions from './TimelineSearchOptions.vue';
 
 export interface SettingsData {
@@ -37,31 +36,19 @@ export interface TimelineOptions {
 	q?: string
 }
 
-const TimelineSettingsProps = Vue.extend({
-	props: {
-		name: {
-			type: String,
-			required: true,
-		},
-		endpoint: {
-			type: String,
-			required: true,
-		},
-		options: {
-			type: Object,
-			required: true,
-		},
-		endpoints: {
-			type: Array,
-			required: true,
-		},
-	}
-});
-
 @Component({
 	components: {TimelineSearchOptions}
 })
-export default class TimelineSettings extends TimelineSettingsProps {
+export default class TimelineSettings extends Vue {
+	@Prop({type: String, required: true})
+	readonly name!: string;
+	@Prop({type: String, required: true})
+	readonly endpoint!: string;
+	@Prop({type: Object, required: true})
+	readonly options!: TimelineOptions;
+	@Prop({type: Array, required: true})
+	readonly endpoints!: string[];
+
 	nameEdit = this.name;
 	endpointEdit = this.endpoint;
 	optionsEdit = this.options;

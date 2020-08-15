@@ -33,14 +33,14 @@
 </template>
 
 <script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import {Vue, Component, Prop, Watch, Ref} from 'vue-property-decorator';
 import {PostData} from '../../core/PostData';
 import Post from './Post.vue';
 import TimelineSettings, {TimelineOptions} from './TimelineSettings';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import {SettingsData} from './TimelineSettings.vue';
+import {TimelineData} from './TimelineContainer.vue';
 
 library.add(faEllipsisV, faSyncAlt);
 
@@ -53,39 +53,17 @@ function toURI(params : { [name : string] : any }) {
 		.join('&');
 }
 
-const TimelineExtend = Vue.extend({
-	props: {
-		initialData: {
-			type: Object,
-			required: true,
-		},
-		endpoints: {
-			type: Array,
-			required: true,
-		},
-	},
-	watch: {
-		enabled(newEnabled, _oldEnabled) {
-			if (newEnabled)
-				(this as any).resetAutoRefresh();
-			else
-				(this as any).disableAutoRefresh();
-		},
-
-		endpoint(newEndpoint, oldEndpoint) {
-			if (newEndpoint === oldEndpoint)
-				return;
-
-			(this as any).clearPosts();
-			(this as any).resetAutoRefresh();
-		}
-	}
-});
-
 @Component({
 	components: {Post, TimelineSettings}
 })
-export default class Timeline extends TimelineExtend {
+export default class Timeline extends Vue {
+	@Prop({type: Object, required: true})
+	readonly initialData!: TimelineData;
+	@Prop({type: Array, required: true})
+	readonly endpoints!: string[];
+
+	@Ref('posts') readonly timelinePosts!: HTMLDivElement;
+
 	name = this.initialData.name as string;
 	endpoint = this.initialData.endpoint as string;
 	refreshRate = this.initialData.refreshRate || 90000 as number;
@@ -191,8 +169,7 @@ export default class Timeline extends TimelineExtend {
 	}
 
 	scrollTop() {
-		//TODO resolve refs
-		(this.$refs.posts as any).scroll({
+		this.timelinePosts.scroll({
 			top: 0,
 			left: 0,
 			behavior: 'smooth',
@@ -204,6 +181,23 @@ export default class Timeline extends TimelineExtend {
 		return (this.$store.state as any).logins.Twitter &&
 			!!(this as any).endpoint &&
 			((this as any).endpoint !== 'search' || ((this as any).options && !!(this as any).options.q.length));
+	}
+
+	@Watch('enabled')
+	onEnabledChanged(newEnabled: string, _oldEnabled: string) {
+		if (newEnabled)
+			(this as any).resetAutoRefresh();
+		else
+			(this as any).disableAutoRefresh();
+	}
+
+	@Watch('endpoint')
+	onEndpointChanged(newEndpoint: string, oldEndpoint: string) {
+		if (newEndpoint === oldEndpoint)
+			return;
+
+		(this as any).clearPosts();
+		(this as any).resetAutoRefresh();
 	}
 }
 </script>
