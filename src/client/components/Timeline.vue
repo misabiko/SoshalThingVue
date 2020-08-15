@@ -1,9 +1,12 @@
 <template lang='pug'>
 	.timeline
-		.timelineHeader(@click.self='refresh')
-			span {{ name }}
-			button(@click='isOptionsOpen = !isOptionsOpen')
-				FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
+		.timelineHeader(@click.self='scrollTop')
+			strong.has-text-white {{ name }}
+			.timelineButtons
+				button(@click='refresh(true)')
+					FontAwesomeIcon(icon='sync-alt' inverse size='lg')
+				button(@click='isOptionsOpen = !isOptionsOpen')
+					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
 
 		b-collapse(:open='isOptionsOpen' animation='slide')
 			.timelineOptions
@@ -19,7 +22,7 @@
 					.level-left: b-button.level-item(@click='clearPosts') Clear
 					.level-right: b-button.level-item(@click='remove' type='is-danger') Remove
 
-		.timelinePosts
+		.timelinePosts(ref='posts')
 			Post(
 				v-for='post of posts'
 				:key='post.id'
@@ -35,10 +38,10 @@ import {PostData} from '../../core/PostData';
 import Post from './Post.vue';
 import TimelineSettings, {TimelineOptions} from './TimelineSettings';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faEllipsisV} from '@fortawesome/free-solid-svg-icons';
+import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import {SettingsData} from './TimelineSettings.vue';
 
-library.add(faEllipsisV);
+library.add(faEllipsisV, faSyncAlt);
 
 //https://stackoverflow.com/a/57124645/2692695
 function toURI(params : { [name : string] : any }) {
@@ -84,8 +87,11 @@ export default Vue.component('Timeline', {
 			this.interval = undefined;
 		},
 
-		async refresh() {
+		async refresh(scrollTop = false) {
 			console.log(`refreshing... (enabled: ${this.enabled})`);
+			if (scrollTop)
+				this.scrollTop();
+
 			if (!this.enabled)
 				return;
 
@@ -148,6 +154,15 @@ export default Vue.component('Timeline', {
 			this.name = settings.name;
 			this.endpoint = settings.endpoint;
 			this.options = settings.options;
+		},
+
+		scrollTop() {
+			//TODO resolve refs
+			(this.$refs.posts as any).scroll({
+				top: 0,
+				left: 0,
+				behavior: 'smooth',
+			});
 		}
 	},
 	computed: {
@@ -203,7 +218,10 @@ export default Vue.component('Timeline', {
 	background-color: $element-color
 	display: flex
 	justify-content: space-between
-	cursor: pointer
+	//cursor: pointer
+
+	strong
+		vertical-align: middle
 
 	button
 		@include borderless-button(0 1.6rem)
