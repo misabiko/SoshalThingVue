@@ -43,6 +43,7 @@
 
 <script lang='ts'>
 import Vue, {PropType} from 'vue';
+import Component from 'vue-class-component';
 import {PostData} from '../../core/PostData';
 import PostMedia from './PostMedia';
 import {library} from '@fortawesome/fontawesome-svg-core';
@@ -51,48 +52,48 @@ import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 
 library.add(fasHeart, farHeart, faRetweet, faReply);
 
-export default Vue.component('Post', {
+const PostProps = Vue.extend({
 	props: {
 		data: {
 			type: Object as PropType<PostData>,
 			required: true,
 		},
-	},
-	data: function() {
-		return {
-			liked: this.data.liked,
-			reposted: this.data.reposted,
-			hovered: false,
-		}
-	},
-	methods: {
-		async like() {
-			const json = await fetch(`twitter/${this.liked ? 'unlike' : 'like'}/${this.data.id}`, {method: 'POST'})
-				.then(response => response.json());
-			const post = json.post as PostData;
-
-			this.updateData(post);
-		},
-		async repost() {
-			if (this.reposted)
-				return;
-
-			const json = await fetch(`twitter/retweet/${this.data.id}`, {method: 'POST'})
-				.then(response => response.json());
-			const post = json.post as PostData;
-			this.updateData(post);
-		},
-		updateData(newPostData : PostData) {
-			this.$emit('update-data', newPostData);
-
-			this.liked = newPostData.liked;
-			this.reposted = newPostData.reposted;
-		}
-	},
-	components: {
-		PostMedia,
-	},
+	}
 });
+
+@Component({
+	components: {PostMedia}
+})
+export default class Post extends PostProps {
+	liked = this.data.liked;
+	reposted = this.data.reposted;
+	hovered = false;
+
+	async like() {
+		const json = await fetch(`twitter/${this.liked ? 'unlike' : 'like'}/${this.data.id}`, {method: 'POST'})
+			.then(response => response.json());
+		const post = json.post as PostData;
+
+		this.updateData(post);
+	}
+
+	async repost() {
+		if (this.reposted)
+			return;
+
+		const json = await fetch(`twitter/retweet/${this.data.id}`, {method: 'POST'})
+			.then(response => response.json());
+		const post = json.post as PostData;
+		this.updateData(post);
+	}
+
+	updateData(newPostData : PostData) {
+		this.$emit('update-data', newPostData);
+
+		this.liked = newPostData.liked;
+		this.reposted = newPostData.reposted;
+	}
+}
 </script>
 
 <style scoped lang='sass'>

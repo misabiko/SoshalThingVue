@@ -5,12 +5,13 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import Component from 'vue-class-component';
 
-export default Vue.component('TimelineSearchOptions', {
-	props: ['options'],
-	data: function() {
-		return {
-			query: (this as any).options ? (this as any).options.q : '',
+const TimelineSearchOptionsProps = Vue.extend({
+	props: {
+		options: {
+			type: Object,
+			required: true,
 		}
 	},
 	watch: {
@@ -22,6 +23,11 @@ export default Vue.component('TimelineSearchOptions', {
 		}
 	}
 });
+
+@Component
+export default class TimelineSearchOptions extends TimelineSearchOptionsProps {
+	query = (this as any).options ? (this as any).options.q : '';
+}
 </script>
 
 <style scoped lang='sass'>

@@ -11,6 +11,7 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import Component from 'vue-class-component';
 import Timeline from "./Timeline.vue";
 
 interface TimelineData {
@@ -20,39 +21,38 @@ interface TimelineData {
 	options?: {q: string}
 }
 
-export default Vue.component('TimelineContainer', {
-	data() {
-		return {
-			timelines: [
-				{id: 0, name: 'Home', endpoint: 'home_timeline'},
-			] as TimelineData[],
-			endpoints: ['home_timeline', 'search']
-		};
-	},
-	methods: {
-		addTimeline() : void {
-			const id = this.getUniqueId();
-			this.timelines.push({id, name: 'Timeline #' + id, endpoint: ''});
-		},
-		removeTimeline(id : number) : void {
-			const index = this.timelines.findIndex((timeline : TimelineData) => timeline.id === id);
-			this.timelines.splice(index, 1);
-		},
-		getUniqueId() : number {
-			if (!this.timelines.length)
-				return 0;
-
-			//Feels clunky
-			let id = 0;
-			const ids = this.timelines.map(timeline => timeline.id);
-			while (ids.includes(id))
-				id++;
-
-			return id;
-		}
-	},
+@Component({
 	components: {Timeline}
-});
+})
+export default class TimelineContainer extends Vue {
+	timelines : TimelineData[] = [
+		{id: 0, name: 'Home', endpoint: 'home_timeline'},
+	];
+	endpoints = ['home_timeline', 'search'];
+
+	addTimeline() : void {
+		const id = this.getUniqueId();
+		this.timelines.push({id, name: 'Timeline #' + id, endpoint: ''});
+	}
+
+	removeTimeline(id : number) : void {
+		const index = this.timelines.findIndex((timeline : TimelineData) => timeline.id === id);
+		this.timelines.splice(index, 1);
+	}
+
+	getUniqueId() : number {
+		if (!this.timelines.length)
+			return 0;
+
+		//Feels clunky
+		let id = 0;
+		const ids = this.timelines.map(timeline => timeline.id);
+		while (ids.includes(id))
+			id++;
+
+		return id;
+	}
+};
 </script>
 
 <style scoped lang='sass'>

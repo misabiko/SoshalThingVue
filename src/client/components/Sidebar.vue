@@ -21,22 +21,19 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import Component from 'vue-class-component';
 import ServiceMenu from './ServiceMenu';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faPlus, faAngleDoubleLeft, faAngleDoubleRight} from '@fortawesome/free-solid-svg-icons';
 
 library.add(faPlus, faAngleDoubleLeft, faAngleDoubleRight);
 
-export default Vue.component('Sidebar', {
-	data: function() {
-		return {
-			expanded: false,
-		};
-	},
-	components: {
-		ServiceMenu,
-	}
-});
+@Component({
+	components: {ServiceMenu}
+})
+export default class Sidebar extends Vue {
+	expanded = false;
+};
 </script>
 
 <style scoped lang='sass'>

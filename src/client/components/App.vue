@@ -6,31 +6,36 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import Component from 'vue-class-component';
 import TimelineContainer from './TimelineContainer';
 import Sidebar from './Sidebar';
 
-export default Vue.component('App', {
-	mounted() {
-		//TODO resolve methods in mounted
-		(this as any).checkLogins();
-	},
-	methods: {
-		async checkLogins() {
-			const json = await fetch('/checkLogins')
-				.then(response => response.json());
-
-			this.$store.commit('updateLogins', json);
-		},
-		newTimeline() : void {
-			//TODO resolve refs
-			(this.$refs.timelineContainer as any).addTimeline();
-		}
-	},
+@Component({
 	components: {
+		Sidebar,
 		TimelineContainer,
-		Sidebar
-	},
-});
+	}
+})
+export default class App extends Vue {
+	$refs!: Vue['$refs!'] & {
+		timelineContainer: TimelineContainer
+	}
+
+	mounted() {
+		this.checkLogins();
+	}
+
+	async checkLogins() {
+		const json = await fetch('/checkLogins')
+			.then(response => response.json());
+
+		this.$store.commit('updateLogins', json);
+	}
+
+	newTimeline() : void {
+		this.$refs.timelineContainer.addTimeline();
+	}
+}
 </script>
 
 <style lang='sass'>

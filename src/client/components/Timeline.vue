@@ -34,6 +34,7 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import Component from 'vue-class-component';
 import {PostData} from '../../core/PostData';
 import Post from './Post.vue';
 import TimelineSettings, {TimelineOptions} from './TimelineSettings';
@@ -52,7 +53,7 @@ function toURI(params : { [name : string] : any }) {
 		.join('&');
 }
 
-export default Vue.component('Timeline', {
+const TimelineExtend = Vue.extend({
 	props: {
 		initialData: {
 			type: Object,
@@ -62,129 +63,6 @@ export default Vue.component('Timeline', {
 			type: Array,
 			required: true,
 		},
-	},
-	data: function() {
-		return {
-			name: this.initialData.name as string,
-			endpoint: this.initialData.endpoint as string,
-			refreshRate: this.initialData.refreshRate || 90000 as number,
-			options: this.initialData.options || {} as TimelineOptions,
-			interval: undefined as number | undefined,
-			posts: [] as PostData[],
-			isOptionsOpen: !(this.initialData.name && this.initialData.endpoint) as boolean,
-		}
-	},
-	mounted() {
-		if ((this as any).enabled)
-			(this as any).resetAutoRefresh();
-		//this.$root.visible(() => this.resetAutoRefresh());
-
-		(this as any).$el.scrollIntoView({
-			behavior: 'smooth'
-		});
-	},
-	beforeDestroy() {
-		(this as any).disableAutoRefresh();
-	},
-	methods: {
-		resetAutoRefresh() {
-			//TODO Disable refreshing when not in focus
-			window.clearInterval(this.interval);
-			this.interval = window.setInterval(() => this.refresh(), this.refreshRate);
-
-			this.refresh().then();
-		},
-
-		disableAutoRefresh() {
-			window.clearInterval(this.interval);
-			this.interval = undefined;
-		},
-
-		async refresh(scrollTop = false) {
-			console.log(`refreshing... (enabled: ${this.enabled})`);
-			if (scrollTop)
-				this.scrollTop();
-
-			if (!this.enabled)
-				return;
-
-			const response = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ''));
-
-			if (response.status == 401) {
-				//TODO Alert the message
-				console.error('Lost connection to Twitter');
-				this.$store.commit('setLogin', {service: 'Twitter', login: false});
-				return;
-			}else if (!response.ok)
-				throw new Error(`Timeline ${this.name}: Server error on refresh`);
-
-			const newPostDatas = await response.json().then(newData =>
-				newData.reverse().filter((a : PostData) => this.posts.findIndex((b : any) => b.id === a.id) < 0)
-			);
-
-			for (const newPostData of newPostDatas) {
-				newPostData.creationTime = new Date(newPostData.creationTime);
-
-				let added = false;
-				for (let i = 0; i < this.posts.length && !added; i++)
-					if (newPostData.creationTime.getTime() < this.posts[i].creationTime.getTime()) {
-						this.insertPost(newPostData, i);
-						added = true;
-					}
-				if (!added)
-					this.addPost(newPostData);
-			}
-		},
-
-		addPost(postData : PostData) {
-			this.posts.unshift(postData);
-		},
-
-		insertPost(postData : PostData, index : number) {
-			this.posts.splice(index, 0, postData);
-		},
-
-		removePost(id : string) {
-			const index = this.posts.findIndex((post : PostData) => post.id === id);
-			this.posts.splice(index, 1);
-		},
-
-		updateData(postData : PostData) {
-			const index = this.posts.findIndex(oldData => oldData.id == postData.id);
-			Object.assign(this.posts[index], postData);
-			this.posts[index].creationTime = new Date(this.posts[index].creationTime);
-		},
-
-		clearPosts() {
-			this.posts = [];
-		},
-
-		remove() {
-			this.$emit('remove-timeline', this.initialData.id);
-		},
-
-		applySettings(settings : SettingsData) {
-			this.name = settings.name;
-			this.endpoint = settings.endpoint;
-			this.options = settings.options;
-		},
-
-		scrollTop() {
-			//TODO resolve refs
-			(this.$refs.posts as any).scroll({
-				top: 0,
-				left: 0,
-				behavior: 'smooth',
-			});
-		}
-	},
-	computed: {
-		enabled() {
-			//TODO resolve data in computed
-			return (this.$store.state as any).logins.Twitter &&
-				!!(this as any).endpoint &&
-				((this as any).endpoint !== 'search' || ((this as any).options && !!(this as any).options.q.length));
-		}
 	},
 	watch: {
 		enabled(newEnabled, _oldEnabled) {
@@ -201,12 +79,133 @@ export default Vue.component('Timeline', {
 			(this as any).clearPosts();
 			(this as any).resetAutoRefresh();
 		}
-	},
-	components: {
-		Post,
-		TimelineSettings,
-	},
+	}
+});
+
+@Component({
+	components: {Post, TimelineSettings}
 })
+export default class Timeline extends TimelineExtend {
+	name = this.initialData.name as string;
+	endpoint = this.initialData.endpoint as string;
+	refreshRate = this.initialData.refreshRate || 90000 as number;
+	options = this.initialData.options || {} as TimelineOptions;
+	interval = undefined as number | undefined;
+	posts = [] as PostData[];
+	isOptionsOpen = !(this.initialData.name && this.initialData.endpoint) as boolean;
+
+	mounted() {
+		if ((this as any).enabled)
+			(this as any).resetAutoRefresh();
+		//this.$root.visible(() => this.resetAutoRefresh());
+
+		(this as any).$el.scrollIntoView({
+			behavior: 'smooth'
+		});
+	}
+
+	beforeDestroy() {
+		(this as any).disableAutoRefresh();
+	}
+
+	resetAutoRefresh() {
+		//TODO Disable refreshing when not in focus
+		window.clearInterval(this.interval);
+		this.interval = window.setInterval(() => this.refresh(), this.refreshRate);
+
+		this.refresh().then();
+	}
+
+	disableAutoRefresh() {
+		window.clearInterval(this.interval);
+		this.interval = undefined;
+	}
+
+	async refresh(scrollTop = false) {
+		console.log(`refreshing... (enabled: ${this.enabled})`);
+		if (scrollTop)
+			this.scrollTop();
+
+		if (!this.enabled)
+			return;
+
+		const response = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ''));
+
+		if (response.status == 401) {
+			//TODO Alert the message
+			console.error('Lost connection to Twitter');
+			this.$store.commit('setLogin', {service: 'Twitter', login: false});
+			return;
+		}else if (!response.ok)
+			throw new Error(`Timeline ${this.name}: Server error on refresh`);
+
+		const newPostDatas = await response.json().then(newData =>
+			newData.reverse().filter((a : PostData) => this.posts.findIndex((b : any) => b.id === a.id) < 0)
+		);
+
+		for (const newPostData of newPostDatas) {
+			newPostData.creationTime = new Date(newPostData.creationTime);
+
+			let added = false;
+			for (let i = 0; i < this.posts.length && !added; i++)
+				if (newPostData.creationTime.getTime() < this.posts[i].creationTime.getTime()) {
+					this.insertPost(newPostData, i);
+					added = true;
+				}
+			if (!added)
+				this.addPost(newPostData);
+		}
+	}
+
+	addPost(postData : PostData) {
+		this.posts.unshift(postData);
+	}
+
+	insertPost(postData : PostData, index : number) {
+		this.posts.splice(index, 0, postData);
+	}
+
+	removePost(id : string) {
+		const index = this.posts.findIndex((post : PostData) => post.id === id);
+		this.posts.splice(index, 1);
+	}
+
+	updateData(postData : PostData) {
+		const index = this.posts.findIndex(oldData => oldData.id == postData.id);
+		Object.assign(this.posts[index], postData);
+		this.posts[index].creationTime = new Date(this.posts[index].creationTime);
+	}
+
+	clearPosts() {
+		this.posts = [];
+	}
+
+	remove() {
+		this.$emit('remove-timeline', this.initialData.id);
+	}
+
+	applySettings(settings : SettingsData) {
+		this.name = settings.name;
+		this.endpoint = settings.endpoint;
+		this.options = settings.options;
+	}
+
+	scrollTop() {
+		//TODO resolve refs
+		(this.$refs.posts as any).scroll({
+			top: 0,
+			left: 0,
+			behavior: 'smooth',
+		});
+	}
+
+	get enabled() {
+		//TODO resolve data in computed
+		return (this.$store.state as any).logins.Twitter &&
+			!!(this as any).endpoint &&
+			((this as any).endpoint !== 'search' || ((this as any).options && !!(this as any).options.q.length));
+	}
+}
 </script>
 
 <style scoped lang='sass'>

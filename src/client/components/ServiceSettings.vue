@@ -8,8 +8,9 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import Component from 'vue-class-component';
 
-export default Vue.component('ServiceSettings', {
+const ServiceSettingsProps = Vue.extend({
 	props: {
 		name: {
 			type: String,
@@ -19,14 +20,16 @@ export default Vue.component('ServiceSettings', {
 			type: String,
 			required: true,
 		},
-	},
-	computed: {
-		loggedIn() : boolean {
-			//TODO resolve state in computed
-			return (this.$store.state as any).logins[this.name];
-		}
 	}
 });
+
+@Component
+export default class ServiceSettings extends ServiceSettingsProps {
+	get loggedIn() : boolean {
+		//TODO resolve state in computed
+		return (this.$store.state as any).logins[this.name];
+	}
+};
 </script>
 
 <style scoped lang='sass'>

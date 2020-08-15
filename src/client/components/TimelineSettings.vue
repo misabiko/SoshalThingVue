@@ -24,6 +24,7 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import Component from 'vue-class-component';
 import TimelineSearchOptions from './TimelineSearchOptions.vue';
 
 export interface SettingsData {
@@ -36,7 +37,7 @@ export interface TimelineOptions {
 	q?: string
 }
 
-export default Vue.component('TimelineSettings', {
+const TimelineSettingsProps = Vue.extend({
 	props: {
 		name: {
 			type: String,
@@ -54,41 +55,35 @@ export default Vue.component('TimelineSettings', {
 			type: Array,
 			required: true,
 		},
-	},
-	data: function() {
-		return {
-			nameEdit: this.name,
-			endpointEdit: this.endpoint,
-			optionsEdit: this.options,
-		}
-	},
-	computed: {
-		changes() : {[setting : string] : boolean} {
-			return {
-				name: this.nameEdit !== this.name,
-				endpoint: this.endpointEdit !== this.endpoint,
-				options: this.optionsEdit !== this.options,
-			};
-		},
-		anyChanges() : boolean {
-			return Object.values(this.changes).some(change => change);
-		}
-	},
-	methods: {
-		applySettings() {
-			this.$emit('apply-settings', {
-				name: this.nameEdit,
-				endpoint: this.endpointEdit,
-				options: this.optionsEdit,
-			});
-		}
-	},
-	components: {
-		TimelineSearchOptions,
 	}
 });
+
+@Component({
+	components: {TimelineSearchOptions}
+})
+export default class TimelineSettings extends TimelineSettingsProps {
+	nameEdit = this.name;
+	endpointEdit = this.endpoint;
+	optionsEdit = this.options;
+
+	get changes() : {[setting : string] : boolean} {
+		return {
+			name: this.nameEdit !== this.name,
+			endpoint: this.endpointEdit !== this.endpoint,
+			options: this.optionsEdit !== this.options,
+		};
+	}
+
+	get anyChanges() : boolean {
+		return Object.values(this.changes).some(change => change);
+	}
+
+	applySettings() {
+		this.$emit('apply-settings', {
+			name: this.nameEdit,
+			endpoint: this.endpointEdit,
+			options: this.optionsEdit,
+		});
+	}
+}
 </script>
-
-<style scoped lang='sass'>
-
-</style>

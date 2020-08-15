@@ -10,22 +10,19 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import Component from 'vue-class-component';
 import ServiceSettings from './ServiceSettings';
 
-export default Vue.component('ServiceMenu', {
-	data: function() {
-		return {
-			services: [
-				{name: 'Twitter', loginHref: '/twitter/login'},
-				{name: 'Mastodon', loginHref: ''},
-				{name: 'Pixiv', loginHref: ''},
-			]
-		};
-	},
-	components: {
-		ServiceSettings,
-	}
-});
+@Component({
+	components: {ServiceSettings}
+})
+export default class ServiceMenu extends Vue {
+	services = [
+		{name: 'Twitter', loginHref: '/twitter/login'},
+		{name: 'Mastodon', loginHref: ''},
+		{name: 'Pixiv', loginHref: ''},
+	];
+};
 </script>
 
 <style scoped lang='sass'>

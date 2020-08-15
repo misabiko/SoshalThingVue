@@ -10,19 +10,22 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import Component from 'vue-class-component';
 
-export default Vue.component('PostMedia', {
+const PostMediaProps = Vue.extend({
 	props: {
 		sources: Array
-	},
-	methods: {
-		handleImageLoaded(loadEvent : Event) {
-			const img = loadEvent.target as HTMLImageElement;
-			if (img.parentElement)
-				img.parentElement.classList.add(img.width > img.height ? 'landscape' : 'portrait');
-		}
 	}
 });
+
+@Component
+export default class PostMedia extends PostMediaProps {
+	handleImageLoaded(loadEvent : Event) {
+		const img = loadEvent.target as HTMLImageElement;
+		if (img.parentElement)
+			img.parentElement.classList.add(img.width > img.height ? 'landscape' : 'portrait');
+	}
+}
 </script>
 
 <style scoped lang='sass'>
