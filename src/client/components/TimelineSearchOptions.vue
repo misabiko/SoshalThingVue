@@ -12,16 +12,16 @@ export default class TimelineSearchOptions extends Vue {
 	@Prop({type: Object, required: true})
 	readonly options!: TimelineOptions;
 
-	query = (this as any).options ? (this as any).options.q : '';
+	query = this.options ? this.options.q : '';
 
 	@Watch('query')
 	onQueryChanged(newQuery: string, _oldQuery: string) {
-		(this as any).$emit('update:options', {q: newQuery});
+		this.$emit('update:options', {q: newQuery});
 	}
 
 	@Watch('options')
 	onOptionsChanged(newOptions: TimelineOptions, _oldOptions: TimelineOptions) {
-		(this as any).query = newOptions.q;
+		this.query = newOptions.q;
 	}
 }
 </script>

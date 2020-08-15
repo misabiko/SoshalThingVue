@@ -41,6 +41,8 @@ import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import {SettingsData} from './TimelineSettings.vue';
 import {TimelineData} from './TimelineContainer.vue';
+import {State} from 'vuex-class';
+import {Logins} from '../store';
 
 library.add(faEllipsisV, faSyncAlt);
 
@@ -64,6 +66,8 @@ export default class Timeline extends Vue {
 
 	@Ref('posts') readonly timelinePosts!: HTMLDivElement;
 
+	@State('logins') readonly logins!: Logins;
+
 	name = this.initialData.name as string;
 	endpoint = this.initialData.endpoint as string;
 	refreshRate = this.initialData.refreshRate || 90000 as number;
@@ -73,17 +77,17 @@ export default class Timeline extends Vue {
 	isOptionsOpen = !(this.initialData.name && this.initialData.endpoint) as boolean;
 
 	mounted() {
-		if ((this as any).enabled)
-			(this as any).resetAutoRefresh();
+		if (this.enabled)
+			this.resetAutoRefresh();
 		//this.$root.visible(() => this.resetAutoRefresh());
 
-		(this as any).$el.scrollIntoView({
+		this.$el.scrollIntoView({
 			behavior: 'smooth'
 		});
 	}
 
 	beforeDestroy() {
-		(this as any).disableAutoRefresh();
+		this.disableAutoRefresh();
 	}
 
 	resetAutoRefresh() {
@@ -177,18 +181,19 @@ export default class Timeline extends Vue {
 	}
 
 	get enabled() {
-		//TODO resolve data in computed
-		return (this.$store.state as any).logins.Twitter &&
-			!!(this as any).endpoint &&
-			((this as any).endpoint !== 'search' || ((this as any).options && !!(this as any).options.q.length));
+		const query = this.options && this.options.q ? this.options.q : '';
+
+		return this.logins.Twitter &&
+			!!this.endpoint &&
+			(this.endpoint !== 'search' || !!query.length);
 	}
 
 	@Watch('enabled')
 	onEnabledChanged(newEnabled: string, _oldEnabled: string) {
 		if (newEnabled)
-			(this as any).resetAutoRefresh();
+			this.resetAutoRefresh();
 		else
-			(this as any).disableAutoRefresh();
+			this.disableAutoRefresh();
 	}
 
 	@Watch('endpoint')
@@ -196,8 +201,8 @@ export default class Timeline extends Vue {
 		if (newEndpoint === oldEndpoint)
 			return;
 
-		(this as any).clearPosts();
-		(this as any).resetAutoRefresh();
+		this.clearPosts();
+		this.resetAutoRefresh();
 	}
 }
 </script>

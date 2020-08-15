@@ -30,7 +30,6 @@ export default class ServiceSettings extends ServiceSettingsProps {
 	@State('logins') readonly logins!: Logins;
 
 	get loggedIn() : boolean {
-		//TODO resolve state in computed
 		return this.logins[this.name];
 	}
 };
