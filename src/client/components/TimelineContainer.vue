@@ -5,7 +5,7 @@
 			:key='timeline.id'
 			:initial-data='timeline'
 			:endpoints='endpoints'
-			@remove-timeline="$emit('remove-timeline', $event)"
+			@remove-timeline="removeTimeline($event)"
 		)
 </template>
 
@@ -13,18 +13,43 @@
 import Vue from 'vue';
 import Timeline from "./Timeline.vue";
 
+interface TimelineData {
+	id: number,
+	name: string,
+	endpoint: string,
+	options?: {q: string}
+}
+
 export default Vue.component('TimelineContainer', {
-	props: {
-		//Not a fan of the container not owning its items :/
-		timelines: {
-			type: Array,
-			required: true,
-		},
-	},
 	data() {
 		return {
+			timelines: [
+				{id: 0, name: 'Home', endpoint: 'home_timeline'},
+			] as TimelineData[],
 			endpoints: ['home_timeline', 'search']
 		};
+	},
+	methods: {
+		addTimeline() : void {
+			const id = this.getUniqueId();
+			this.timelines.push({id, name: 'Timeline #' + id, endpoint: ''});
+		},
+		removeTimeline(id : number) : void {
+			const index = this.timelines.findIndex((timeline : TimelineData) => timeline.id === id);
+			this.timelines.splice(index, 1);
+		},
+		getUniqueId() : number {
+			if (!this.timelines.length)
+				return 0;
+
+			//Feels clunky
+			let id = 0;
+			const ids = this.timelines.map(timeline => timeline.id);
+			while (ids.includes(id))
+				id++;
+
+			return id;
+		}
 	},
 	components: {Timeline}
 });

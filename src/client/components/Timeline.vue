@@ -53,7 +53,16 @@ function toURI(params : { [name : string] : any }) {
 }
 
 export default Vue.component('Timeline', {
-	props: ['initialData', 'endpoints'],
+	props: {
+		initialData: {
+			type: Object,
+			required: true,
+		},
+		endpoints: {
+			type: Array,
+			required: true,
+		},
+	},
 	data: function() {
 		return {
 			name: this.initialData.name as string,
@@ -69,6 +78,10 @@ export default Vue.component('Timeline', {
 		if ((this as any).enabled)
 			(this as any).resetAutoRefresh();
 		//this.$root.visible(() => this.resetAutoRefresh());
+
+		(this as any).$el.scrollIntoView({
+			behavior: 'smooth'
+		});
 	},
 	beforeDestroy() {
 		(this as any).disableAutoRefresh();
