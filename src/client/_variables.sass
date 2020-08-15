@@ -11,7 +11,14 @@ $background: $bg-color
 	padding: $pad
 	border: none
 	background: none
+	outline: none
 	cursor: pointer
+
+	&:hover svg
+		color: $grey-text
+
+	&:active
+		margin-top: 1px
 
 @mixin pretty-scrollbar
 	::-webkit-scrollbar
