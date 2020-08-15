@@ -31,12 +31,14 @@ export default class PostMedia extends Vue {
 .mediaHolder
 	overflow: hidden
 	display: flex
-	width: 100%
-	max-width: unset
 	justify-content: center
 	max-height: 50vh
+	border-radius: 8px
+
+	&:not(:last-child)
+		margin-bottom: 2px
 
 	img
 		align-self: center
-		border-radius: 8px
+		width: 100%
 </style>
