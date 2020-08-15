@@ -11,12 +11,12 @@
 				)
 
 			.media-content
-				.content: p
-					strong.has-text-light {{ data.authorName }}
-					small {{'@' + data.authorHandle}}
-					small sometime
-					br
-					| {{ data.text }}
+				.content
+					span.names
+						strong.has-text-light {{ data.authorName }}
+						small {{'@' + data.authorHandle}}
+					span.timestamp: small sometime
+					p {{ data.text }}
 
 				nav.level.is-mobile
 					.level-left
@@ -34,9 +34,7 @@
 							@click='like'
 						)
 							span.icon.is-small: FontAwesomeIcon(:icon="[liked ? 'fas' : 'far', 'heart']")
-
-			b-collapse.media-right(:open='hovered' animation='slide-left')
-				button.delete(@click="$emit('remove', data.id)")
+			//-.media-right
 		PostMedia(
 			v-if='data.images'
 			:sources='data.images'
@@ -109,14 +107,22 @@ article.post
 		border-radius: 4px
 
 	.content
-		strong
-			margin-right: 0.5rem
+		.names
+			text-overflow: ellipsis
+			white-space: nowrap
+			overflow: hidden
+			display: inline-block
+			max-width: 300px
 
-		small
-			color: $grey-text
+		span
+			*
+				vertical-align: middle
 
-		small + small
-			float: right
+			strong
+				margin-right: 0.5rem
+
+	small
+		color: $grey-text
 
 	a
 		color: $grey-text
@@ -131,6 +137,9 @@ article.post
 
 		&:hover.commentButton svg
 			color: #1da1f2
+
+.timestamp
+	float: right
 
 .repostLabel
 	margin-left: 64px
@@ -152,10 +161,12 @@ article.post
 	transition-timing-function: cubic-bezier(0, 1, 0.5, 1)
 
 .slide-left-enter-to, .slide-left-leave
-	max-width: 40px
+	//max-width: 40px
+	opacity: 1
 	overflow: hidden
 
 .slide-left-enter, .slide-left-leave-to
-	max-width: 0
+	//max-width: 0
+	opacity: 0
 	overflow: hidden
 </style>

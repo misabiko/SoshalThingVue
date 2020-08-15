@@ -32,7 +32,7 @@ export default Vue.component('PostMedia', {
 
 .mediaHolder
 	overflow: hidden
-	display: inline-flex
+	display: flex
 	width: 100%
 	max-width: unset
 	justify-content: center

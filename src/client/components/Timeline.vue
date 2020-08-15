@@ -215,5 +215,6 @@ export default Vue.component('Timeline', {
 
 .timelinePosts
 	overflow-y: scroll
+	overflow-x: hidden
 	flex-grow: 1
 </style>
