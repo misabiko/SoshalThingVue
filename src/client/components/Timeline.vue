@@ -7,20 +7,12 @@
 
 		b-collapse(:open='isOptionsOpen' animation='slide')
 			.timelineOptions
-				b-field(label='Name' custom-class='has-text-light')
-					b-input(v-model='name')
-
-				b-field(label='Endpoint' custom-class='has-text-light')
-					b-select(placeholder='Select an endpoint' v-model='endpoint' required)
-						option(
-							v-for='ep in endpoints'
-							:value='ep'
-							:key='ep'
-						) {{ ep }}
-
-				TimelineSearchOptions(
-					v-if="endpoint === 'search'"
-					:options.sync='options'
+				TimelineSettings.mb-4(
+					:name='name'
+					:endpoint='endpoint'
+					:options='options'
+					:endpoints='endpoints'
+					@apply-settings='applySettings($event)'
 				)
 
 				.level
@@ -41,9 +33,10 @@
 import Vue from 'vue';
 import {PostData} from '../../core/PostData';
 import Post from './Post.vue';
+import TimelineSettings, {TimelineOptions} from './TimelineSettings';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV} from '@fortawesome/free-solid-svg-icons';
-import TimelineSearchOptions from './TimelineSearchOptions.vue';
+import {SettingsData} from './TimelineSettings.vue';
 
 library.add(faEllipsisV);
 
@@ -60,13 +53,13 @@ export default Vue.component('Timeline', {
 	props: ['initialData', 'endpoints'],
 	data: function() {
 		return {
-			name: this.initialData.name,
-			endpoint: this.initialData.endpoint,
-			refreshRate: this.initialData.refreshRate || 90000,
-			options: this.initialData.options,
+			name: this.initialData.name as string,
+			endpoint: this.initialData.endpoint as string,
+			refreshRate: this.initialData.refreshRate || 90000 as number,
+			options: this.initialData.options || {} as TimelineOptions,
 			interval: undefined as number | undefined,
 			posts: [] as PostData[],
-			isOptionsOpen: !(this.initialData.name && this.initialData.endpoint),
+			isOptionsOpen: !(this.initialData.name && this.initialData.endpoint) as boolean,
 		}
 	},
 	mounted() {
@@ -149,6 +142,12 @@ export default Vue.component('Timeline', {
 
 		remove() {
 			this.$emit('remove-timeline', this.initialData.id);
+		},
+
+		applySettings(settings : SettingsData) {
+			this.name = settings.name;
+			this.endpoint = settings.endpoint;
+			this.options = settings.options;
 		}
 	},
 	computed: {
@@ -177,7 +176,7 @@ export default Vue.component('Timeline', {
 	},
 	components: {
 		Post,
-		TimelineSearchOptions,
+		TimelineSettings,
 	},
 })
 </script>
