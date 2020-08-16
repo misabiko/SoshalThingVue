@@ -150,6 +150,9 @@ article.post
 			strong
 				margin-right: 0.5rem
 
+		p
+			white-space: pre-line
+
 	small
 		color: $grey-text
 

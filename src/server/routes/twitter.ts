@@ -96,6 +96,7 @@ export namespace Twitter {
 		try {
 			const response = await client.post('favorites/create', {
 				id: req.params.id,
+				tweet_mode: 'extended',
 			});
 
 			await res.json({
@@ -110,6 +111,7 @@ export namespace Twitter {
 		try {
 			const response = await client.post('favorites/destroy', {
 				id: req.params.id,
+				tweet_mode: 'extended',
 			});
 
 			await res.json({
@@ -124,6 +126,7 @@ export namespace Twitter {
 		try {
 			const response = await client.post('statuses/retweet', {
 				id: req.params.id,
+				tweet_mode: 'extended',
 			});
 
 			await res.json({
