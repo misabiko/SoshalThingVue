@@ -189,7 +189,7 @@ export default class Timeline extends Vue {
 	}
 
 	@Watch('enabled')
-	onEnabledChanged(newEnabled: string, _oldEnabled: string) {
+	onEnabledChanged(newEnabled: string) {
 		if (newEnabled)
 			this.resetAutoRefresh();
 		else
