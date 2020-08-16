@@ -3,8 +3,7 @@
 		ServiceSettings(
 			v-for='service of services'
 			:key='service.name'
-			:name='service.name'
-			:loginHref='service.loginHref'
+			:service='service'
 		)
 </template>
 
@@ -18,9 +17,9 @@ import ServiceSettings from './ServiceSettings';
 })
 export default class ServiceMenu extends Vue {
 	services = [
-		{name: 'Twitter', loginHref: '/twitter/login'},
-		{name: 'Mastodon', loginHref: ''},
-		{name: 'Pixiv', loginHref: ''},
+		{name: 'Twitter', loginHref: '/twitter/login', endpoints: ['home_timeline', 'search']},
+		{name: 'Mastodon', loginHref: '' , endpoints: []},
+		{name: 'Pixiv', loginHref: '' , endpoints: []},
 	];
 };
 </script>

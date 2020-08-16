@@ -5,6 +5,7 @@ import {consumer_key, consumer_secret} from '../credentials.json';
 import {tweetToPostData} from '../core/twitter';
 import {PostData} from '../../core/PostData';
 import passport from 'passport';
+import {RateLimitStatus, StuffedResponse} from '../../core/ServerResponses';
 
 let client = new TwitterLite({consumer_key, consumer_secret});
 
@@ -13,7 +14,15 @@ interface AuthUser {
 	username : string,
 }
 
-let authUser : AuthUser
+let authUser : AuthUser;
+
+function getRateLimits(response: any) : RateLimitStatus{
+	return {
+		remaining: parseInt(response._headers.get('x-rate-limit-remaining')),
+		limit: parseInt(response._headers.get('x-rate-limit-limit')),
+		reset: parseInt(response._headers.get('x-rate-limit-reset')),
+	};
+}
 
 export namespace Twitter {
 	function logRateLimit(response: any) {
@@ -53,9 +62,12 @@ export namespace Twitter {
 			const response = await client.get('statuses/home_timeline');
 			logTweets(response);
 
-			const tweets : PostData[] = response.map(tweetToPostData);
+			const posts : PostData[] = response.map(tweetToPostData);
 
-			await res.json(tweets);
+			await res.json({
+				services: {Twitter: {home_timeline: getRateLimits(response)}},
+				posts,
+			} as StuffedResponse);
 		}catch (e) {
 			parseQueryErrors(e, next);
 		}
@@ -67,9 +79,12 @@ export namespace Twitter {
 			logTweets(response);
 			//TODO Add type of search response
 
-			const tweets : PostData[] = response.statuses.map(tweetToPostData);
+			const posts : PostData[] = response.statuses.map(tweetToPostData);
 
-			await res.json(tweets);
+			await res.json({
+				services: {Twitter: {search: getRateLimits(response)}},
+				posts,
+			} as StuffedResponse);
 		}catch (e) {
 			parseQueryErrors(e, next);
 		}
@@ -175,7 +190,7 @@ export namespace Twitter {
 		//failureRedirect: '/' TODO Have a way to signal failure
 	}));
 	router.get('/tweets/home_timeline', preventUnauthorized, homeTimeline);
-	router.get('/tweets/search/', preventUnauthorized, search);
+	router.get('/tweets/search', preventUnauthorized, search);
 	router.post('/like/:id', preventUnauthorized, like);
 	router.post('/unlike/:id', preventUnauthorized, unlike);
 	router.post('/retweet/:id', preventUnauthorized, retweet);

@@ -43,6 +43,7 @@ import {SettingsData} from './TimelineSettings.vue';
 import {TimelineData} from './TimelineContainer.vue';
 import {State} from 'vuex-class';
 import {Logins} from '../store';
+import {StuffedResponse} from '../../core/ServerResponses';
 
 library.add(faEllipsisV, faSyncAlt);
 
@@ -104,6 +105,7 @@ export default class Timeline extends Vue {
 	}
 
 	async refresh(scrollTop = false) {
+		//TODO Replace with visual update queue
 		console.log(`refreshing... (enabled: ${this.enabled})`);
 		if (scrollTop)
 			this.scrollTop();
@@ -111,7 +113,7 @@ export default class Timeline extends Vue {
 		if (!this.enabled)
 			return;
 
-		const response = await fetch('/twitter/tweets/' + this.endpoint + (this.options ? toURI(this.options) : ''));
+		const response = await fetch('/twitter/tweets/' + this.endpoint + (Object.keys(this.options).length ? toURI(this.options) : ''));
 
 		if (response.status == 401) {
 			//TODO Alert the message
@@ -121,9 +123,10 @@ export default class Timeline extends Vue {
 		}else if (!response.ok)
 			throw new Error(`Timeline ${this.name}: Server error on refresh`);
 
-		const newPostDatas = await response.json().then(newData =>
-			newData.reverse().filter((a : PostData) => this.posts.findIndex((b : any) => b.id === a.id) < 0)
-		);
+		const newPostDatas = await response.json().then((newData : StuffedResponse) => {
+			this.$store.commit('updateServices', newData.services);
+			return newData.posts.reverse().filter((a : PostData) => this.posts.findIndex((b : any) => b.id === a.id) < 0)
+		});
 
 		for (const newPostData of newPostDatas) {
 			newPostData.creationTime = new Date(newPostData.creationTime);
