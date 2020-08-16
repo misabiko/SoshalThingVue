@@ -6,7 +6,7 @@ import morgan from 'morgan';
 import favicon from 'serve-favicon';
 import passport from 'passport';
 import {Twitter} from "./routes/twitter";
-import * as path from 'path';
+import path from 'path';
 
 const app = express();
 

@@ -60,7 +60,7 @@ export namespace Twitter {
 
 	async function homeTimeline(_req : Request, res : Response, next : NextFunction) {
 		try {
-			const response : TwitterResponse = await client.get('statuses/home_timeline');
+			const response : TwitterResponse = await client.get('statuses/home_timeline', {tweet_mode: 'extended'});
 			console.log(`${(response as any).length - 1} tweets sent.`);
 			logRateLimit(response);
 
@@ -77,7 +77,7 @@ export namespace Twitter {
 
 	async function search(req : Request, res : Response, next : NextFunction) {
 		try {
-			const response : TwitterSearchResponse = await client.get('search/tweets', {q: req.query.q});
+			const response : TwitterSearchResponse = await client.get('search/tweets', {q: req.query.q, tweet_mode: 'extended'});
 			console.log(`${response.search_metadata.count} tweets sent.`);
 			logRateLimit(response);
 

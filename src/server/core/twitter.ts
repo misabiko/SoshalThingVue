@@ -1,61 +1,62 @@
 import {PostData, RepostData} from '../../core/PostData';
 
 export interface TwitterResponse {
-	_headers: TwitterHeaders;
+	_headers : TwitterHeaders;
 }
 
 export interface TwitterHomeTimeline extends TwitterResponse {
-	[index : number]: Tweet;
+	[index : number] : Tweet;
 }
 
 export interface TwitterSearchResponse extends TwitterResponse {
-	statuses: Tweet[],
-	search_metadata: {
-		completed_in: number,
-		max_id: number,
-		max_id_str: string,
-		next_results: string,
-		query: string,
-		refresh_url: string,
-		count: number,
-		since_id: number,
-		since_id_str: string
+	statuses : Tweet[],
+	search_metadata : {
+		completed_in : number,
+		max_id : number,
+		max_id_str : string,
+		next_results : string,
+		query : string,
+		refresh_url : string,
+		count : number,
+		since_id : number,
+		since_id_str : string
 	}
 }
 
 interface TwitterHeaders extends Headers {
-	'cache-control': []
-	connection: []
-	'content-disposition': []
-	'content-encoding': []
-	'content-length': []
-	'content-type': []
-	date: []
-	expires: []
-	'last-modified': []
-	pragma: []
-	server: []
-	'set-cookie': []
-	status: []
-	'strict-transport-security': []
-	'x-access-level': []
-	'x-connection-hash': []
-	'x-content-type-options': []
-	'x-frame-options': []
-	'x-rate-limit-limit': []
-	'x-rate-limit-remaining': []
-	'x-rate-limit-reset': []
-	'x-response-time': []
-	'x-transaction': []
-	'x-twitter-response-tags': []
-	'x-xss-protection': []
+	'cache-control' : []
+	connection : []
+	'content-disposition' : []
+	'content-encoding' : []
+	'content-length' : []
+	'content-type' : []
+	date : []
+	expires : []
+	'last-modified' : []
+	pragma : []
+	server : []
+	'set-cookie' : []
+	status : []
+	'strict-transport-security' : []
+	'x-access-level' : []
+	'x-connection-hash' : []
+	'x-content-type-options' : []
+	'x-frame-options' : []
+	'x-rate-limit-limit' : []
+	'x-rate-limit-remaining' : []
+	'x-rate-limit-reset' : []
+	'x-response-time' : []
+	'x-transaction' : []
+	'x-twitter-response-tags' : []
+	'x-xss-protection' : []
 }
 
 export interface Tweet {
 	created_at : string
 	id : number
 	id_str : string
-	text : string
+	//text : string
+	full_text : string
 	truncated : boolean
 	entities : {
 		hashtags : Hashtag[]
@@ -101,12 +102,12 @@ interface User {
 	location : string
 	description : string
 	url : string
-	entities: {
-		url: {
-			urls: TweetURL[]
+	entities : {
+		url : {
+			urls : TweetURL[]
 		}
-		description: {
-			urls: TweetURL[]
+		description : {
+			urls : TweetURL[]
 		}
 	}
 	protected : boolean
@@ -146,15 +147,15 @@ interface User {
 }
 
 interface TweetURL {
-	url: string
-	expanded_url: string
-	display_url: string
-	indices: number[]
+	url : string
+	expanded_url : string
+	display_url : string
+	indices : number[]
 }
 
 interface Hashtag {
-	text: string
-	indices: number[]
+	text : string
+	indices : number[]
 }
 
 interface UserMention {
@@ -166,10 +167,10 @@ interface UserMention {
 }
 
 interface TweetURL {
-	url: string
-	expanded_url: string
-	display_url: string
-	indices: number[]
+	url : string
+	expanded_url : string
+	display_url : string
+	indices : number[]
 }
 
 interface Media {
@@ -183,46 +184,48 @@ interface Media {
 	expanded_url : string
 	type : string
 	sizes : {
-		thumb: MediaSize[]
-		large: MediaSize[]
-		medium: MediaSize[]
-		small: MediaSize[]
+		thumb : MediaSize[]
+		large : MediaSize[]
+		medium : MediaSize[]
+		small : MediaSize[]
 	}
-	source_status_id: number
-	source_status_id_str: string
-	source_user_id: number
-	source_user_id_str: string
+	source_status_id : number
+	source_status_id_str : string
+	source_user_id : number
+	source_user_id_str : string
 }
 
 interface MediaSize {
-	w: number
-	h: number
-	resize: string
+	w : number
+	h : number
+	resize : string
 }
 
 export function tweetToPostData(tweet : Tweet) : PostData {
-	if ('extended_entities' in tweet)
-		Object.assign(tweet.entities, tweet.extended_entities);
-
 	if ('retweeted_status' in tweet)
 		return retweetToRepostData(tweet);
-	else
-		return {
-			id: tweet.id_str,
-			creationTime: tweet.created_at,
-			authorName: tweet.user.name,
-			authorHandle: tweet.user.screen_name,
-			authorAvatar: tweet.user.profile_image_url_https,
-			text: removeTextLink(tweet.text),
-			images : tweet.entities.media ? tweet.entities.media.map((media : Media) => media.media_url_https) : undefined,
-			liked: tweet.favorited,
-			reposted: tweet.retweeted,
-		};
+
+	const entities = tweet.extended_entities || tweet.entities;
+	const images = entities && entities.media ?
+		entities.media.map((media : Media) => media.media_url_https) :
+		undefined;
+
+	return {
+		id: tweet.id_str,
+		creationTime: tweet.created_at,
+		authorName: tweet.user.name,
+		authorHandle: tweet.user.screen_name,
+		authorAvatar: tweet.user.profile_image_url_https,
+		text: removeTextLink(tweet.full_text),
+		images,
+		liked: tweet.favorited,
+		reposted: tweet.retweeted,
+	};
 }
 
 function retweetToRepostData(tweet : Tweet) : RepostData {
 	if (!tweet.retweeted_status)
-		throw new Error("Tweet doesn't include retweeted_status.");
+		throw new Error('Tweet doesn\'t include retweeted_status.');
 
 	return {
 		reposterName: tweet.user.name,
