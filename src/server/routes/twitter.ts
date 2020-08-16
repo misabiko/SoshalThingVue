@@ -2,7 +2,7 @@ import {NextFunction, Request, Response, Router} from 'express';
 import {Profile, Strategy as TwitterStrategy} from 'passport-twitter';
 import TwitterLite from 'twitter-lite';
 import {consumer_key, consumer_secret} from '../credentials.json';
-import {tweetToPostData} from '../core/twitter';
+import {tweetToPostData, TwitterResponse, TwitterSearchResponse} from '../core/twitter';
 import {PostData} from '../../core/PostData';
 import passport from 'passport';
 import {RateLimitStatus, StuffedResponse} from '../../core/ServerResponses';
@@ -16,28 +16,20 @@ interface AuthUser {
 
 let authUser : AuthUser;
 
-function getRateLimits(response: any) : RateLimitStatus{
+function getRateLimits(response: TwitterResponse) : RateLimitStatus{
 	return {
-		remaining: parseInt(response._headers.get('x-rate-limit-remaining')),
-		limit: parseInt(response._headers.get('x-rate-limit-limit')),
-		reset: parseInt(response._headers.get('x-rate-limit-reset')),
+		remaining: parseInt(response._headers.get('x-rate-limit-remaining') || ''),
+		limit: parseInt(response._headers.get('x-rate-limit-limit') || ''),
+		reset: parseInt(response._headers.get('x-rate-limit-reset') || ''),
 	};
 }
 
 export namespace Twitter {
-	function logRateLimit(response: any) {
+	function logRateLimit(response: TwitterResponse) {
 		console.log(`Rate: ${response._headers.get('x-rate-limit-remaining')} / ${response._headers.get('x-rate-limit-limit')}`);
-		const delta = (response._headers.get('x-rate-limit-reset') * 1000) - Date.now()
+		const reset = (<unknown>response._headers.get('x-rate-limit-reset')) as number;
+		const delta = (reset * 1000) - Date.now();
 		console.log(`Reset: ${Math.ceil(delta / 1000 / 60)} minutes`);
-	}
-
-	function logTweets(response : any) {
-		if ('search_metadata' in response)
-			console.log(`${response.search_metadata.count} tweets sent.`);
-		else
-			console.log(`${response.length - 1} tweets sent.`);
-
-		logRateLimit(response);
 	}
 
 	function parseQueryErrors(e : any, next : NextFunction) {
@@ -59,10 +51,11 @@ export namespace Twitter {
 
 	async function homeTimeline(_req : Request, res : Response, next : NextFunction) {
 		try {
-			const response = await client.get('statuses/home_timeline');
-			logTweets(response);
+			const response : TwitterResponse = await client.get('statuses/home_timeline');
+			console.log(`${(response as any).length - 1} tweets sent.`);
+			logRateLimit(response);
 
-			const posts : PostData[] = response.map(tweetToPostData);
+			const posts : PostData[] = (response as any).map(tweetToPostData);
 
 			await res.json({
 				services: {Twitter: {home_timeline: getRateLimits(response)}},
@@ -75,9 +68,9 @@ export namespace Twitter {
 
 	async function search(req : Request, res : Response, next : NextFunction) {
 		try {
-			const response = await client.get('search/tweets', {q: req.query.q});
-			logTweets(response);
-			//TODO Add type of search response
+			const response : TwitterSearchResponse = await client.get('search/tweets', {q: req.query.q});
+			console.log(`${response.search_metadata.count} tweets sent.`);
+			logRateLimit(response);
 
 			const posts : PostData[] = response.statuses.map(tweetToPostData);
 
