@@ -9,20 +9,18 @@
 </template>
 
 <script lang='ts'>
-import Vue from 'vue';
+import {Vue, Component, Prop} from 'vue-property-decorator';
 
-export default Vue.component('PostMedia', {
-	props: {
-		sources: Array
-	},
-	methods: {
-		handleImageLoaded(loadEvent : Event) {
-			const img = loadEvent.target as HTMLImageElement;
-			if (img.parentElement)
-				img.parentElement.classList.add(img.width > img.height ? 'landscape' : 'portrait');
-		}
+@Component
+export default class PostMedia extends Vue {
+	@Prop(Array) readonly sources!: string[];
+
+	handleImageLoaded(loadEvent : Event) {
+		const img = loadEvent.target as HTMLImageElement;
+		if (img.parentElement)
+			img.parentElement.classList.add(img.width > img.height ? 'landscape' : 'portrait');
 	}
-});
+}
 </script>
 
 <style scoped lang='sass'>
@@ -33,12 +31,14 @@ export default Vue.component('PostMedia', {
 .mediaHolder
 	overflow: hidden
 	display: flex
-	width: 100%
-	max-width: unset
 	justify-content: center
 	max-height: 50vh
+	border-radius: 8px
+
+	&:not(:last-child)
+		margin-bottom: 2px
 
 	img
 		align-self: center
-		border-radius: 8px
+		width: 100%
 </style>

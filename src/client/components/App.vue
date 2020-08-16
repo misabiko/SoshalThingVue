@@ -5,32 +5,34 @@
 </template>
 
 <script lang='ts'>
-import Vue from 'vue';
+import {Vue, Component, Ref} from 'vue-property-decorator'
 import TimelineContainer from './TimelineContainer';
 import Sidebar from './Sidebar';
 
-export default Vue.component('App', {
-	mounted() {
-		//TODO resolve methods in mounted
-		(this as any).checkLogins();
-	},
-	methods: {
-		async checkLogins() {
-			const json = await fetch('/checkLogins')
-				.then(response => response.json());
-
-			this.$store.commit('updateLogins', json);
-		},
-		newTimeline() : void {
-			//TODO resolve refs
-			(this.$refs.timelineContainer as any).addTimeline();
-		}
-	},
+@Component({
 	components: {
+		Sidebar,
 		TimelineContainer,
-		Sidebar
-	},
-});
+	}
+})
+export default class App extends Vue {
+	@Ref() readonly timelineContainer!: TimelineContainer
+
+	mounted() {
+		this.checkLogins();
+	}
+
+	async checkLogins() {
+		const json = await fetch('/checkLogins')
+			.then(response => response.json());
+
+		this.$store.commit('updateLogins', json);
+	}
+
+	newTimeline() : void {
+		this.timelineContainer.addTimeline();
+	}
+}
 </script>
 
 <style lang='sass'>

@@ -23,7 +23,7 @@
 </template>
 
 <script lang='ts'>
-import Vue from 'vue';
+import {Vue, Component, Prop} from 'vue-property-decorator';
 import TimelineSearchOptions from './TimelineSearchOptions.vue';
 
 export interface SettingsData {
@@ -36,59 +36,41 @@ export interface TimelineOptions {
 	q?: string
 }
 
-export default Vue.component('TimelineSettings', {
-	props: {
-		name: {
-			type: String,
-			required: true,
-		},
-		endpoint: {
-			type: String,
-			required: true,
-		},
-		options: {
-			type: Object,
-			required: true,
-		},
-		endpoints: {
-			type: Array,
-			required: true,
-		},
-	},
-	data: function() {
+@Component({
+	components: {TimelineSearchOptions}
+})
+export default class TimelineSettings extends Vue {
+	@Prop({type: String, required: true})
+	readonly name!: string;
+	@Prop({type: String, required: true})
+	readonly endpoint!: string;
+	@Prop({type: Object, required: true})
+	readonly options!: TimelineOptions;
+	@Prop({type: Array, required: true})
+	readonly endpoints!: string[];
+
+	nameEdit = this.name;
+	endpointEdit = this.endpoint;
+	optionsEdit = this.options;
+
+	get changes() : {[setting : string] : boolean} {
 		return {
-			nameEdit: this.name,
-			endpointEdit: this.endpoint,
-			optionsEdit: this.options,
-		}
-	},
-	computed: {
-		changes() : {[setting : string] : boolean} {
-			return {
-				name: this.nameEdit !== this.name,
-				endpoint: this.endpointEdit !== this.endpoint,
-				options: this.optionsEdit !== this.options,
-			};
-		},
-		anyChanges() : boolean {
-			return Object.values(this.changes).some(change => change);
-		}
-	},
-	methods: {
-		applySettings() {
-			this.$emit('apply-settings', {
-				name: this.nameEdit,
-				endpoint: this.endpointEdit,
-				options: this.optionsEdit,
-			});
-		}
-	},
-	components: {
-		TimelineSearchOptions,
+			name: this.nameEdit !== this.name,
+			endpoint: this.endpointEdit !== this.endpoint,
+			options: this.optionsEdit !== this.options,
+		};
 	}
-});
+
+	get anyChanges() : boolean {
+		return Object.values(this.changes).some(change => change);
+	}
+
+	applySettings() {
+		this.$emit('apply-settings', {
+			name: this.nameEdit,
+			endpoint: this.endpointEdit,
+			options: this.optionsEdit,
+		});
+	}
+}
 </script>
-
-<style scoped lang='sass'>
-
-</style>

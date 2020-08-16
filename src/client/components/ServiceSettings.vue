@@ -1,32 +1,49 @@
 <template lang='pug'>
-	.serviceSettings {{ name }}
+	.serviceSettings {{ service.name }}
+		div(v-for='(rateLimit, endpoint) in rateLimits' :key='endpoint')
+			p {{ endpoint }}
+			b-progress(:value='rateLimit.remaining' :max='rateLimit.limit' show-value)
+				span.has-text-black-bis {{ rateLimit.remaining }} / {{ rateLimit.limit }}
+			p Reset {{ toRelative(rateLimit.reset) }}
 		.level(v-if='!loggedIn')
 			.level-left
 			.level-right
-				a.button.level-item(:href='loginHref') Login
+				a.button.level-item(:href='service.loginHref') Login
 </template>
 
 <script lang='ts'>
-import Vue from 'vue';
+import {Vue, Component, Prop} from 'vue-property-decorator';
+import {State} from 'vuex-class';
+import {Logins} from '../store';
+import {RateLimitStatus, ServiceStatuses} from '../../core/ServerResponses';
+import moment from 'moment';
 
-export default Vue.component('ServiceSettings', {
-	props: {
-		name: {
-			type: String,
-			required: true,
-		},
-		loginHref: {
-			type: String,
-			required: true,
-		},
-	},
-	computed: {
-		loggedIn() : boolean {
-			//TODO resolve state in computed
-			return (this.$store.state as any).logins[this.name];
-		}
+export interface ServiceData {
+	name: string,
+	loginHref: string,
+	endpoints: string[],
+}
+
+@Component
+export default class ServiceSettings extends Vue {
+	@Prop({type: Object,	required: true})
+	readonly service!: ServiceData;
+
+	@State('logins') readonly logins!: Logins;
+	@State('services') readonly services!: ServiceStatuses;
+
+	toRelative(time: number) : string {
+		return moment.unix(time).fromNow();
 	}
-});
+
+	get loggedIn() : boolean {
+		return this.logins[this.service.name];
+	}
+
+	get rateLimits() : {[endpoint: string] : RateLimitStatus} {
+		return this.services[this.service.name] || {};
+	}
+};
 </script>
 
 <style scoped lang='sass'>

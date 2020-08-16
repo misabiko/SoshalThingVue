@@ -15,7 +15,7 @@
 					span.names
 						strong.has-text-light {{ data.authorName }}
 						small {{'@' + data.authorHandle}}
-					span.timestamp: small sometime
+					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
 					p {{ data.text }}
 
 				nav.level.is-mobile
@@ -43,56 +43,85 @@
 
 <script lang='ts'>
 import Vue, {PropType} from 'vue';
+import {Component, Prop} from 'vue-property-decorator';
 import {PostData} from '../../core/PostData';
 import PostMedia from './PostMedia';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faHeart as fasHeart, faRetweet, faReply} from '@fortawesome/free-solid-svg-icons';
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
+import moment from 'moment';
 
 library.add(fasHeart, farHeart, faRetweet, faReply);
 
-export default Vue.component('Post', {
-	props: {
-		data: {
-			type: Object as PropType<PostData>,
-			required: true,
-		},
-	},
-	data: function() {
-		return {
-			liked: this.data.liked,
-			reposted: this.data.reposted,
-			hovered: false,
-		}
-	},
-	methods: {
-		async like() {
-			const json = await fetch(`twitter/${this.liked ? 'unlike' : 'like'}/${this.data.id}`, {method: 'POST'})
-				.then(response => response.json());
-			const post = json.post as PostData;
-
-			this.updateData(post);
-		},
-		async repost() {
-			if (this.reposted)
-				return;
-
-			const json = await fetch(`twitter/retweet/${this.data.id}`, {method: 'POST'})
-				.then(response => response.json());
-			const post = json.post as PostData;
-			this.updateData(post);
-		},
-		updateData(newPostData : PostData) {
-			this.$emit('update-data', newPostData);
-
-			this.liked = newPostData.liked;
-			this.reposted = newPostData.reposted;
-		}
-	},
-	components: {
-		PostMedia,
-	},
+moment.defineLocale('twitter', {
+	relativeTime: {
+		future: "in %s",
+		past:   "%s ago",
+		s  : 'a few seconds',
+		ss : '%ds',
+		m:  "a minute",
+		mm: "%dm",
+		h:  "an hour",
+		hh: "%dh",
+		d:  "a day",
+		dd: "%dd",
+		M:  "a month",
+		MM: "%dm",
+		y:  "a year",
+		yy: "%dy"
+	}
 });
+moment().locale('en');
+
+@Component({
+	components: {PostMedia}
+})
+export default class Post extends Vue {
+	@Prop({
+		type: Object as PropType<PostData>,
+		required: true,
+	})
+	readonly data!: PostData;
+
+	liked = this.data.liked;
+	reposted = this.data.reposted;
+	hovered = false;
+
+	async like() {
+		const json = await fetch(`twitter/${this.liked ? 'unlike' : 'like'}/${this.data.id}`, {method: 'POST'})
+			.then(response => response.json());
+		const post = json.post as PostData;
+
+		this.updateData(post);
+	}
+
+	async repost() {
+		if (this.reposted)
+			return;
+
+		const json = await fetch(`twitter/retweet/${this.data.id}`, {method: 'POST'})
+			.then(response => response.json());
+		const post = json.post as PostData;
+		this.updateData(post);
+	}
+
+	updateData(newPostData : PostData) {
+		this.$emit('update-data', newPostData);
+
+		this.liked = newPostData.liked;
+		this.reposted = newPostData.reposted;
+	}
+
+	get creationTimeShort() : string {
+		const t = moment(this.data.creationTime).locale('twitter').fromNow(true);
+		moment().locale('en');
+		return  t;
+	}
+
+	get creationTimeLong() : string {
+		return moment(this.data.creationTime).fromNow();
+	}
+}
 </script>
 
 <style scoped lang='sass'>
