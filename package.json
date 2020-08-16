@@ -1,9 +1,9 @@
 {
-	"name": "socialthing",
+	"name": "soshalthing",
 	"author": "misabiko",
 	"version": "0.1.0",
 	"private": true,
-	"repository": "github:misabiko/SocialThing",
+	"repository": "github:misabiko/SoshalThing",
 	"scripts": {
 		"build": "webpack",
 		"watch": "npm run build -- --watch",
