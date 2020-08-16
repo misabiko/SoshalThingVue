@@ -3,7 +3,7 @@ import {PostData} from './PostData';
 export interface RateLimitStatus {
 	remaining: number;
 	limit: number;
-	reset: number;	//In milliseconds
+	reset: number;	//In seconds
 }
 
 export interface ServiceStatuses {

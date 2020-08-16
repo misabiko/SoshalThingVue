@@ -1,10 +1,10 @@
 <template lang='pug'>
 	.serviceSettings {{ service.name }}
-		div(v-for='(rateLimit, endpoint) in rateLimits')
+		div(v-for='(rateLimit, endpoint) in rateLimits' :key='endpoint')
 			p {{ endpoint }}
-			b-progress(:value='rateLimit.remaining' :max='rateLimit.limit')
-				| {{ rateLimit.remaining }} / {{ rateLimit.limit }}
-			p Reset: {{ rateLimit.reset }} minutes
+			b-progress(:value='rateLimit.remaining' :max='rateLimit.limit' show-value)
+				span.has-text-black-bis {{ rateLimit.remaining }} / {{ rateLimit.limit }}
+			p Reset {{ toRelative(rateLimit.reset) }}
 		.level(v-if='!loggedIn')
 			.level-left
 			.level-right
@@ -16,6 +16,7 @@ import {Vue, Component, Prop} from 'vue-property-decorator';
 import {State} from 'vuex-class';
 import {Logins} from '../store';
 import {RateLimitStatus, ServiceStatuses} from '../../core/ServerResponses';
+import moment from 'moment';
 
 export interface ServiceData {
 	name: string,
@@ -31,22 +32,16 @@ export default class ServiceSettings extends Vue {
 	@State('logins') readonly logins!: Logins;
 	@State('services') readonly services!: ServiceStatuses;
 
+	toRelative(time: number) : string {
+		return moment.unix(time).fromNow();
+	}
+
 	get loggedIn() : boolean {
 		return this.logins[this.service.name];
 	}
 
 	get rateLimits() : {[endpoint: string] : RateLimitStatus} {
-		if (this.services.hasOwnProperty(this.service.name)) {
-			const limits : { [endpoint : string] : RateLimitStatus } = {};
-			for (const [endpoint, status] of Object.entries(this.services[this.service.name]))
-				limits[endpoint] = {
-					remaining: status.remaining,
-					limit: status.limit,
-					reset: Math.ceil(((status.reset * 1000) - Date.now()) / 1000 / 60),
-				}
-			return limits;
-		}else
-			return {};
+		return this.services[this.service.name] || {};
 	}
 };
 </script>
