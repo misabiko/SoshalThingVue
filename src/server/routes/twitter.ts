@@ -16,7 +16,7 @@ interface AuthUser {
 
 let authUser : AuthUser;
 
-function getRateLimits(response: TwitterResponse) : RateLimitStatus{
+function getRateLimits(response : TwitterResponse) : RateLimitStatus {
 	return {
 		remaining: parseInt(response._headers.get('x-rate-limit-remaining') || ''),
 		limit: parseInt(response._headers.get('x-rate-limit-limit') || ''),
@@ -25,7 +25,7 @@ function getRateLimits(response: TwitterResponse) : RateLimitStatus{
 }
 
 export namespace Twitter {
-	function logRateLimit(response: TwitterResponse) {
+	function logRateLimit(response : TwitterResponse) {
 		console.log(`Rate: ${response._headers.get('x-rate-limit-remaining')} / ${response._headers.get('x-rate-limit-limit')}`);
 		const reset = (<unknown>response._headers.get('x-rate-limit-reset')) as number;
 		const delta = (reset * 1000) - Date.now();
@@ -34,19 +34,28 @@ export namespace Twitter {
 
 	function parseQueryErrors(e : any, next : NextFunction) {
 		if ('errors' in e) {
-			for (const error of e.errors) {
-				// Twitter API error
-				if (error.code === 88)
-					console.log('Rate limit will reset on', new Date(e._headers.get('x-rate-limit-reset') * 1000));
-				else {
-					console.error(error);
-					next(error);
-				}
-			}
-		}else {
+			for (const error of e.errors)
+				console.error(error);
+		}else
 			console.error(e);
-			next(e);
-		}
+
+		next(e);
+	}
+
+	async function respondRateOver(e: any, endpoint: string, res : Response, next : NextFunction) {
+		if (e.errors) {
+			const error = e.errors.find((error : any) => error.code === 88);
+
+			if (error) {
+				console.log('Rate limit will reset on', new Date(e._headers.get('x-rate-limit-reset') * 1000));
+
+				await res.json({
+					services: {Twitter: {[endpoint]: getRateLimits(e)}},
+					posts: [],
+				} as StuffedResponse);
+			}
+		}else
+			parseQueryErrors(e, next);
 	}
 
 	async function homeTimeline(_req : Request, res : Response, next : NextFunction) {
@@ -62,7 +71,7 @@ export namespace Twitter {
 				posts,
 			} as StuffedResponse);
 		}catch (e) {
-			parseQueryErrors(e, next);
+			await respondRateOver(e, 'home_timeline', res, next);
 		}
 	}
 
@@ -79,7 +88,7 @@ export namespace Twitter {
 				posts,
 			} as StuffedResponse);
 		}catch (e) {
-			parseQueryErrors(e, next);
+			await respondRateOver(e, 'search', res, next);
 		}
 	}
 
@@ -149,7 +158,7 @@ export namespace Twitter {
 			consumerSecret: consumer_secret,
 			callbackURL: 'http://localhost:3000/twitter/callback',
 		},
-		function(access_token_key, access_token_secret, profile: Profile, done) {
+		function(access_token_key, access_token_secret, profile : Profile, done) {
 			try {
 				client = new TwitterLite({
 					consumer_key,

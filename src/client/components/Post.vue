@@ -15,7 +15,7 @@
 					span.names
 						strong.has-text-light {{ data.authorName }}
 						small {{'@' + data.authorHandle}}
-					span.timestamp: small sometime
+					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
 					p {{ data.text }}
 
 				nav.level.is-mobile
@@ -49,8 +49,29 @@ import PostMedia from './PostMedia';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faHeart as fasHeart, faRetweet, faReply} from '@fortawesome/free-solid-svg-icons';
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
+import moment from 'moment';
 
 library.add(fasHeart, farHeart, faRetweet, faReply);
+
+moment.defineLocale('twitter', {
+	relativeTime: {
+		future: "in %s",
+		past:   "%s ago",
+		s  : 'a few seconds',
+		ss : '%ds',
+		m:  "a minute",
+		mm: "%dm",
+		h:  "an hour",
+		hh: "%dh",
+		d:  "a day",
+		dd: "%dd",
+		M:  "a month",
+		MM: "%dm",
+		y:  "a year",
+		yy: "%dy"
+	}
+});
+moment().locale('en');
 
 @Component({
 	components: {PostMedia}
@@ -89,6 +110,16 @@ export default class Post extends Vue {
 
 		this.liked = newPostData.liked;
 		this.reposted = newPostData.reposted;
+	}
+
+	get creationTimeShort() : string {
+		const t = moment(this.data.creationTime).locale('twitter').fromNow(true);
+		moment().locale('en');
+		return  t;
+	}
+
+	get creationTimeLong() : string {
+		return moment(this.data.creationTime).fromNow();
 	}
 }
 </script>

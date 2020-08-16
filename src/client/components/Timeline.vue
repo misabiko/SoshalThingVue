@@ -44,6 +44,7 @@ import {TimelineData} from './TimelineContainer.vue';
 import {State} from 'vuex-class';
 import {Logins} from '../store';
 import {StuffedResponse} from '../../core/ServerResponses';
+import moment from 'moment';
 
 library.add(faEllipsisV, faSyncAlt);
 
@@ -129,11 +130,9 @@ export default class Timeline extends Vue {
 		});
 
 		for (const newPostData of newPostDatas) {
-			newPostData.creationTime = new Date(newPostData.creationTime);
-
 			let added = false;
 			for (let i = 0; i < this.posts.length && !added; i++)
-				if (newPostData.creationTime.getTime() < this.posts[i].creationTime.getTime()) {
+				if (moment(newPostData.creationTime).isBefore(this.posts[i].creationTime)) {
 					this.insertPost(newPostData, i);
 					added = true;
 				}
@@ -158,7 +157,6 @@ export default class Timeline extends Vue {
 	updateData(postData : PostData) {
 		const index = this.posts.findIndex(oldData => oldData.id == postData.id);
 		Object.assign(this.posts[index], postData);
-		this.posts[index].creationTime = new Date(this.posts[index].creationTime);
 	}
 
 	clearPosts() {

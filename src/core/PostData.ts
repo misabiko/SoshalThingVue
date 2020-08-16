@@ -1,6 +1,6 @@
 export interface PostData {
 	id : string,
-	creationTime : Date,
+	creationTime : string,
 	authorName : string,
 	authorHandle : string,
 	authorAvatar : string,

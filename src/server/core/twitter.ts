@@ -209,7 +209,7 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 	else
 		return {
 			id: tweet.id_str,
-			creationTime: new Date(tweet.created_at),
+			creationTime: tweet.created_at,
 			authorName: tweet.user.name,
 			authorHandle: tweet.user.screen_name,
 			authorAvatar: tweet.user.profile_image_url_https,
