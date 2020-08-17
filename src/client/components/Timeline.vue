@@ -24,10 +24,9 @@
 
 		.timelinePosts(ref='posts')
 			Post(
-				v-for='post of posts'
-				:key='post.id'
-				:data='post'
-				@update-data='updateData'
+				v-for='postId of posts'
+				:key='postId'
+				:postId='postId'
 				@remove='removePost($event)'
 			)
 </template>
@@ -43,19 +42,9 @@ import {SettingsData} from './TimelineSettings.vue';
 import {TimelineData} from './TimelineContainer.vue';
 import {State} from 'vuex-class';
 import {Logins} from '../store';
-import {StuffedResponse} from '../../core/ServerResponses';
 import moment from 'moment';
 
 library.add(faEllipsisV, faSyncAlt);
-
-//https://stackoverflow.com/a/57124645/2692695
-function toURI(params : { [name : string] : any }) {
-	return '?' + Object.entries(params)
-		.map(
-			([key, val]) => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`
-		)
-		.join('&');
-}
 
 @Component({
 	components: {Post, TimelineSettings}
@@ -69,13 +58,15 @@ export default class Timeline extends Vue {
 	@Ref('posts') readonly timelinePosts!: HTMLDivElement;
 
 	@State('logins') readonly logins!: Logins;
+	@State('posts') readonly storePosts!: {[id: string] : PostData};
 
 	name = this.initialData.name as string;
+	service = this.initialData.service as string;
 	endpoint = this.initialData.endpoint as string;
 	refreshRate = this.initialData.refreshRate || 90000 as number;
 	options = this.initialData.options || {} as TimelineOptions;
 	interval = undefined as number | undefined;
-	posts = [] as PostData[];
+	posts = [] as string[];
 	isOptionsOpen = !(this.initialData.name && this.initialData.endpoint) as boolean;
 
 	mounted() {
@@ -114,49 +105,45 @@ export default class Timeline extends Vue {
 		if (!this.enabled)
 			return;
 
-		const response = await fetch('/twitter/tweets/' + this.endpoint + (Object.keys(this.options).length ? toURI(this.options) : ''));
+		try {
+			const newPostIds : string[] = await this.$store.dispatch('refreshEndpoint', {
+				service: this.service,
+				endpoint: this.endpoint,
+				options: this.options,
+				timelinePosts: this.posts,
+			});
 
-		if (response.status == 401) {
-			//TODO Alert the message
-			console.error('Lost connection to Twitter');
-			this.$store.commit('setLogin', {service: 'Twitter', login: false});
-			return;
-		}else if (!response.ok)
-			throw new Error(`Timeline ${this.name}: Server error on refresh`);
-
-		const newPostDatas = await response.json().then((newData : StuffedResponse) => {
-			this.$store.commit('updateServices', newData.services);
-			return newData.posts.reverse().filter((a : PostData) => this.posts.findIndex((b : any) => b.id === a.id) < 0)
-		});
-
-		for (const newPostData of newPostDatas) {
-			let added = false;
-			for (let i = 0; i < this.posts.length && !added; i++)
-				if (moment(newPostData.creationTime).isBefore(this.posts[i].creationTime)) {
-					this.insertPost(newPostData, i);
-					added = true;
-				}
-			if (!added)
-				this.addPost(newPostData);
+			for (const id of newPostIds) {
+				let added = false;
+				for (let i = 0; i < this.posts.length && !added; i++)
+					if (moment(this.storePosts[id].creationTime).isBefore(this.getPostData(i).creationTime)) {
+						this.insertPost(id, i);
+						added = true;
+					}
+				if (!added)
+					this.addPost(id);
+			}
+		}catch (e) {
+			e.message = `Timeline ${this.name}: ${e.message}`;
+			throw e;
 		}
 	}
 
-	addPost(postData : PostData) {
-		this.posts.unshift(postData);
+	getPostData(index : number) : PostData {
+		return this.storePosts[this.posts[index]];
 	}
 
-	insertPost(postData : PostData, index : number) {
-		this.posts.splice(index, 0, postData);
+	addPost(id : string) {
+		this.posts.unshift(id);
+	}
+
+	insertPost(id : string, index : number) {
+		this.posts.splice(index, 0, id);
 	}
 
 	removePost(id : string) {
-		const index = this.posts.findIndex((post : PostData) => post.id === id);
+		const index = this.posts.findIndex(postId => postId === id);
 		this.posts.splice(index, 1);
-	}
-
-	updateData(postData : PostData) {
-		const index = this.posts.findIndex(oldData => oldData.id == postData.id);
-		Object.assign(this.posts[index], postData);
 	}
 
 	clearPosts() {

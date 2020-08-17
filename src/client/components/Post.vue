@@ -1,22 +1,22 @@
 <template lang='pug'>
-	article.post(:post-id='data.id' @mouseover='hovered = true' @mouseleave='hovered = false')
-		.repostLabel(v-if='data.reposterName')
-			p {{ data.reposterName + ' retweeted' }}
+	article.post(:post-id='postData.id' @mouseover='hovered = true' @mouseleave='hovered = false')
+		.repostLabel(v-if='postData.reposterName')
+			p {{ postData.reposterName + ' retweeted' }}
 
 		.media
 			figure.media-left
 				p.image.is-64x64: img(
-					:alt=`data.authorHandle + "'s avatar"`
-					:src='data.authorAvatar'
+					:alt=`postData.authorHandle + "'s avatar"`
+					:src='postData.authorAvatar'
 				)
 
 			.media-content
 				.content
 					span.names
-						strong.has-text-light {{ data.authorName }}
-						small {{'@' + data.authorHandle}}
+						strong.has-text-light {{ postData.authorName }}
+						small {{'@' + postData.authorHandle}}
 					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
-					p {{ data.text }}
+					p {{ postData.text }}
 
 				nav.level.is-mobile
 					.level-left
@@ -24,32 +24,32 @@
 							span.icon.is-small: FontAwesomeIcon(icon='reply')
 
 						a.level-item.repostButton(
-							:class='{repostedPostButton: reposted}'
+							:class='{repostedPostButton: postData.reposted}'
 							@click='repost'
 						)
 							span.icon.is-small: FontAwesomeIcon(icon='retweet')
 
 						a.level-item.likeButton(
-							:class='{likedPostButton: liked}'
-							@click='like'
+							:class='{likedPostButton: postData.liked}'
+							@click='toggleLike'
 						)
-							span.icon.is-small: FontAwesomeIcon(:icon="[liked ? 'fas' : 'far', 'heart']")
+							span.icon.is-small: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']")
 			//-.media-right
 		PostMedia(
-			v-if='data.images'
-			:sources='data.images'
+			v-if='postData.images'
+			:sources='postData.images'
 		)
 </template>
 
 <script lang='ts'>
-import Vue, {PropType} from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
+import {Vue, Component, Prop} from 'vue-property-decorator';
 import {PostData} from '../../core/PostData';
 import PostMedia from './PostMedia';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faHeart as fasHeart, faRetweet, faReply} from '@fortawesome/free-solid-svg-icons';
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 import moment from 'moment';
+import {Action, Getter} from 'vuex-class';
 
 library.add(fasHeart, farHeart, faRetweet, faReply);
 
@@ -77,49 +77,36 @@ moment().locale('en');
 	components: {PostMedia}
 })
 export default class Post extends Vue {
-	@Prop({
-		type: Object as PropType<PostData>,
-		required: true,
-	})
-	readonly data!: PostData;
+	@Prop({type: String, required: true})
+	readonly postId!: string;
 
-	liked = this.data.liked;
-	reposted = this.data.reposted;
+	@Getter readonly getPost!: (id: string) => PostData;
+	@Action('toggleLike') actionToggleLike!: (id : string) => void;
+	@Action('repost') actionRepost!: (id : string) => void;
+
 	hovered = false;
 
-	async like() {
-		const json = await fetch(`twitter/${this.liked ? 'unlike' : 'like'}/${this.data.id}`, {method: 'POST'})
-			.then(response => response.json());
-		const post = json.post as PostData;
-
-		this.updateData(post);
-	}
-
-	async repost() {
-		if (this.reposted)
-			return;
-
-		const json = await fetch(`twitter/retweet/${this.data.id}`, {method: 'POST'})
-			.then(response => response.json());
-		const post = json.post as PostData;
-		this.updateData(post);
-	}
-
-	updateData(newPostData : PostData) {
-		this.$emit('update-data', newPostData);
-
-		this.liked = newPostData.liked;
-		this.reposted = newPostData.reposted;
+	get postData() : PostData {
+		console.log('bleh');
+		return this.getPost(this.postId);
 	}
 
 	get creationTimeShort() : string {
-		const t = moment(this.data.creationTime).locale('twitter').fromNow(true);
+		const t = moment(this.postData.creationTime).locale('twitter').fromNow(true);
 		moment().locale('en');
 		return  t;
 	}
 
 	get creationTimeLong() : string {
-		return moment(this.data.creationTime).fromNow();
+		return moment(this.postData.creationTime).fromNow();
+	}
+
+	toggleLike() {
+		this.actionToggleLike(this.postId);
+	}
+
+	repost() {
+		this.actionRepost(this.postId);
 	}
 }
 </script>

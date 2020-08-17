@@ -17,6 +17,7 @@ import Timeline from "./Timeline.vue";
 export interface TimelineData {
 	id: number,
 	name: string,
+	service: string,
 	endpoint: string,
 	options?: {q: string},
 	refreshRate?: number,
@@ -27,13 +28,13 @@ export interface TimelineData {
 })
 export default class TimelineContainer extends Vue {
 	timelines : TimelineData[] = [
-		{id: 0, name: 'Home', endpoint: 'home_timeline'},
+		{id: 0, name: 'Home', service: 'Twitter', endpoint: 'home_timeline'},
 	];
 	endpoints = ['home_timeline', 'search'];
 
 	addTimeline() : void {
 		const id = this.getUniqueId();
-		this.timelines.push({id, name: 'Timeline #' + id, endpoint: ''});
+		this.timelines.push({id, name: 'Timeline #' + id, service: 'Twitter', endpoint: ''});
 	}
 
 	removeTimeline(id : number) : void {
