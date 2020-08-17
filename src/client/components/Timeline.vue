@@ -39,10 +39,10 @@ import TimelineSettings, {TimelineOptions} from './TimelineSettings';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import {SettingsData} from './TimelineSettings.vue';
-import {TimelineData} from './TimelineContainer.vue';
 import {State} from 'vuex-class';
 import {Logins} from '../store';
 import moment from 'moment';
+import {TimelineData} from '../../core/Timeline';
 
 library.add(faEllipsisV, faSyncAlt);
 
@@ -98,7 +98,7 @@ export default class Timeline extends Vue {
 
 	async refresh(scrollTop = false) {
 		//TODO Replace with visual update queue
-		console.log(`refreshing... (enabled: ${this.enabled})`);
+		//console.log(`refreshing... (enabled: ${this.enabled})`);
 		if (scrollTop)
 			this.scrollTop();
 

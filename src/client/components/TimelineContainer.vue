@@ -13,24 +13,23 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import Timeline from "./Timeline.vue";
-
-export interface TimelineData {
-	id: number,
-	name: string,
-	service: string,
-	endpoint: string,
-	options?: {q: string},
-	refreshRate?: number,
-}
+import {TimelineData} from '../../core/Timeline';
 
 @Component({
 	components: {Timeline}
 })
 export default class TimelineContainer extends Vue {
-	timelines : TimelineData[] = [
-		{id: 0, name: 'Home', service: 'Twitter', endpoint: 'home_timeline'},
-	];
+	timelines : TimelineData[] = [];
 	endpoints = ['home_timeline', 'search'];
+
+	mounted() {
+		this.loadTimelines();
+	}
+
+	async loadTimelines() {
+		this.timelines = await fetch('/timelines')
+			.then(response => response.json());
+	}
 
 	addTimeline() : void {
 		const id = this.getUniqueId();

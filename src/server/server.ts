@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import favicon from 'serve-favicon';
 import passport from 'passport';
 import {Twitter} from "./routes/twitter";
+import {Common} from './routes/common';
 import path from 'path';
 
 const app = express();
@@ -32,13 +33,7 @@ app.use(function (err : Error, req : Request, res : Response, _next : NextFuncti
 	res.status(500).send('Something broke!')
 })
 
+app.use('/', Common.router);
 app.use('/twitter', Twitter.router);
-app.get('/checklogins', function(req : Request, res : Response) {
-	res.json({
-		Twitter: Twitter.checkLogin(),
-		Mastodon: false,
-		Pixiv: false,
-	})
-});
 
 app.listen(3000, () => console.log('Listening at http://localhost:3000'));

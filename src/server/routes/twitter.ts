@@ -7,24 +7,24 @@ import {PostData} from '../../core/PostData';
 import passport from 'passport';
 import {RateLimitStatus, StuffedResponse} from '../../core/ServerResponses';
 
-let client = new TwitterLite({consumer_key, consumer_secret});
-
-interface AuthUser {
-	id : string,
-	username : string,
-}
-
-let authUser : AuthUser;
-
-function getRateLimits(response : TwitterResponse) : RateLimitStatus {
-	return {
-		remaining: parseInt(response._headers.get('x-rate-limit-remaining') || ''),
-		limit: parseInt(response._headers.get('x-rate-limit-limit') || ''),
-		reset: parseInt(response._headers.get('x-rate-limit-reset') || ''),
-	};
-}
-
 export namespace Twitter {
+	let client = new TwitterLite({consumer_key, consumer_secret});
+
+	interface AuthUser {
+		id : string,
+		username : string,
+	}
+
+	let authUser : AuthUser;
+
+	function getRateLimits(response : TwitterResponse) : RateLimitStatus {
+		return {
+			remaining: parseInt(response._headers.get('x-rate-limit-remaining') || ''),
+			limit: parseInt(response._headers.get('x-rate-limit-limit') || ''),
+			reset: parseInt(response._headers.get('x-rate-limit-reset') || ''),
+		};
+	}
+
 	function logRateLimit(response : TwitterResponse) {
 		console.log(`Rate: ${response._headers.get('x-rate-limit-remaining')} / ${response._headers.get('x-rate-limit-limit')}`);
 		const reset = (<unknown>response._headers.get('x-rate-limit-reset')) as number;
@@ -42,7 +42,7 @@ export namespace Twitter {
 		next(e);
 	}
 
-	async function respondRateOver(e: any, endpoint: string, res : Response, next : NextFunction) {
+	async function respondRateOver(e : any, endpoint : string, res : Response, next : NextFunction) {
 		if (e.errors) {
 			const error = e.errors.find((error : any) => error.code === 88);
 
@@ -77,7 +77,10 @@ export namespace Twitter {
 
 	async function search(req : Request, res : Response, next : NextFunction) {
 		try {
-			const response : TwitterSearchResponse = await client.get('search/tweets', {q: req.query.q, tweet_mode: 'extended'});
+			const response : TwitterSearchResponse = await client.get('search/tweets', {
+				q: req.query.q,
+				tweet_mode: 'extended'
+			});
 			console.log(`${response.search_metadata.count} tweets sent.`);
 			logRateLimit(response);
 
