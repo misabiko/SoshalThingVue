@@ -25,15 +25,12 @@
 <script lang='ts'>
 import {Vue, Component, Prop} from 'vue-property-decorator';
 import TimelineSearchOptions from './TimelineSearchOptions.vue';
+import {TimelineOptions} from '../../core/Timeline';
 
 export interface SettingsData {
 	name: string,
 	endpoint: string,
 	options: TimelineOptions
-}
-
-export interface TimelineOptions {
-	q?: string
 }
 
 @Component({

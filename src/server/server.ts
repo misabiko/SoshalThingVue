@@ -5,14 +5,16 @@ import session from 'express-session';
 import morgan from 'morgan';
 import favicon from 'serve-favicon';
 import passport from 'passport';
-import {Twitter} from "./routes/twitter";
+import {Twitter} from './routes/twitter';
 import {Common} from './routes/common';
 import path from 'path';
+
+const icoPath = path.join(__dirname, '..', 'public', 'favicon.ico');
 
 const app = express();
 
 app.use(express.static('public'));
-app.use(favicon(path.join(__dirname, '..', 'public', 'favicon.ico')));
+app.use(favicon(icoPath));
 app.use('/index.js', express.static(path.join(__dirname, 'index.js')));
 app.use('/style.css', express.static(path.join(__dirname, 'style.css')));
 
@@ -28,7 +30,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(function (err : Error, req : Request, res : Response, _next : NextFunction) {
+app.use(function(err : Error, req : Request, res : Response, _next : NextFunction) {
 	console.error(err.stack)
 	res.status(500).send('Something broke!')
 })

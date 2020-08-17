@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex, {ActionTree, GetterTree, MutationTree} from 'vuex';
 import {ServiceStatuses, StuffedResponse} from '../core/ServerResponses';
 import {PostData} from '../core/PostData';
-import {TimelineOptions} from './components/TimelineSettings.vue';
+import {TimelineOptions} from '../core/Timeline';
 
 Vue.use(Vuex);
 

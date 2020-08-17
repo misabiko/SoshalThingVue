@@ -5,7 +5,7 @@
 
 <script lang='ts'>
 import {Vue, Component, Prop, Watch} from 'vue-property-decorator';
-import {TimelineOptions} from './TimelineSettings.vue';
+import {TimelineOptions} from '../../core/Timeline';
 
 @Component
 export default class TimelineSearchOptions extends Vue {
