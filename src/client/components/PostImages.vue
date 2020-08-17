@@ -1,5 +1,5 @@
 <template lang='pug'>
-	.postMedia
+	.postImages
 		.mediaHolder(v-for='(source, index) of sources')
 			img(
 				@load='handleImageLoaded'
@@ -12,7 +12,7 @@
 import {Vue, Component, Prop} from 'vue-property-decorator';
 
 @Component
-export default class PostMedia extends Vue {
+export default class PostImages extends Vue {
 	@Prop(Array) readonly sources!: string[];
 
 	handleImageLoaded(loadEvent : Event) {
@@ -24,10 +24,6 @@ export default class PostMedia extends Vue {
 </script>
 
 <style scoped lang='sass'>
-.postMedia
-	margin-top: 1rem
-	text-align: center
-
 .mediaHolder
 	overflow: hidden
 	display: flex

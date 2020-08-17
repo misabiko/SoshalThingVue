@@ -35,21 +35,26 @@
 						)
 							span.icon.is-small: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']")
 			//-.media-right
-		PostMedia(
+		PostImages.postMedia(
 			v-if='postData.images'
 			:sources='postData.images'
+		)
+		PostVideo.postMedia(
+			v-if='postData.video'
+			:source='postData.video'
 		)
 </template>
 
 <script lang='ts'>
 import {Vue, Component, Prop} from 'vue-property-decorator';
 import {PostData} from '../../core/PostData';
-import PostMedia from './PostMedia';
+import PostImages from './PostImages.vue';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faHeart as fasHeart, faRetweet, faReply} from '@fortawesome/free-solid-svg-icons';
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 import moment from 'moment';
 import {Action, Getter} from 'vuex-class';
+import PostVideo from './PostVideo.vue';
 
 library.add(fasHeart, farHeart, faRetweet, faReply);
 
@@ -74,7 +79,7 @@ moment.defineLocale('twitter', {
 moment().locale('en');
 
 @Component({
-	components: {PostMedia}
+	components: {PostImages, PostVideo}
 })
 export default class Post extends Vue {
 	@Prop({type: String, required: true})
@@ -87,7 +92,6 @@ export default class Post extends Vue {
 	hovered = false;
 
 	get postData() : PostData {
-		console.log('bleh');
 		return this.getPost(this.postId);
 	}
 
@@ -167,6 +171,9 @@ article.post
 
 	p
 		margin-left: 1rem
+
+.postMedia
+	margin-top: 1rem
 </style>
 
 <style lang='sass'>

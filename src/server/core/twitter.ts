@@ -193,6 +193,20 @@ interface Media {
 	source_status_id_str : string
 	source_user_id : number
 	source_user_id_str : string
+	video_info?: {
+		aspect_ratio: number[]
+		variants: {
+			bitrate?: number
+			content_type: string
+			url: string
+		}[]
+	}
+	additional_media_info?: {
+		title: string
+		description: string
+		embeddable: boolean
+		monetizable: boolean
+	}
 }
 
 interface MediaSize {
@@ -205,10 +219,7 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 	if ('retweeted_status' in tweet)
 		return retweetToRepostData(tweet);
 
-	const entities = tweet.extended_entities || tweet.entities;
-	const images = entities && entities.media ?
-		entities.media.map((media : Media) => media.media_url_https) :
-		undefined;
+	const {images, video} = parseEntities(tweet);
 
 	return {
 		id: tweet.id_str,
@@ -218,6 +229,7 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 		authorAvatar: tweet.user.profile_image_url_https,
 		text: removeTextLink(tweet.full_text),
 		images,
+		video,
 		liked: tweet.favorited,
 		reposted: tweet.retweeted,
 	};
@@ -233,6 +245,47 @@ function retweetToRepostData(tweet : Tweet) : RepostData {
 		reposterAvatar: tweet.user.profile_image_url_https,
 		...tweetToPostData(tweet.retweeted_status)
 	};
+}
+
+function parseEntities(tweet : Tweet) : {images?: string[], video?: string} {
+	let images : string[] | undefined;
+	let video : string | undefined;
+
+	if (tweet.extended_entities) {
+		const media = tweet.extended_entities.media;
+
+		if (media)
+			switch(media[0].type) {
+				case 'photo':
+					images = tweet.extended_entities.media ?
+						tweet.extended_entities.media.map((media : Media) => media.media_url_https) :
+						undefined;
+					break;
+				case 'video':
+					console.log('Video format: ');
+					console.dir(media[0].video_info);
+
+					if (media[0].video_info && media[0].video_info.variants) {
+						console.dir(media[0].video_info.variants[0]);
+						video = media[0].video_info.variants[0].url;
+					}
+					break;
+				case 'animated_gif':
+					console.log('Gif format: ');
+					console.dir(media[0].video_info);
+
+					if (media[0].video_info && media[0].video_info.variants) {
+						console.dir(media[0].video_info.variants[0]);
+						video = media[0].video_info.variants[0].url;
+					}
+					break;
+			}
+	}else
+		images = tweet.entities && tweet.entities.media ?
+			[tweet.entities.media[0].media_url_https] :
+			undefined;
+
+	return {images, video};
 }
 
 export function removeTextLink(text : string) : string {
