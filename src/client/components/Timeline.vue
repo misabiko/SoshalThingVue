@@ -54,6 +54,8 @@ export default class Timeline extends Vue {
 	readonly timelineData!: TimelineData;
 	@Prop({type: Array, required: true})
 	readonly endpoints!: string[];
+	@Prop({type: Boolean, required: true})
+	readonly shouldScroll!: string[];
 
 	@Ref('posts') readonly timelinePosts!: HTMLDivElement;
 
@@ -69,9 +71,10 @@ export default class Timeline extends Vue {
 			this.resetAutoRefresh();
 		//this.$root.visible(() => this.resetAutoRefresh());
 
-		this.$el.scrollIntoView({
-			behavior: 'smooth'
-		});
+		if (this.shouldScroll)
+			this.$el.scrollIntoView({
+				behavior: 'smooth'
+			});
 	}
 
 	beforeDestroy() {
@@ -119,7 +122,7 @@ export default class Timeline extends Vue {
 					this.addPost(id);
 			}
 		}catch (e) {
-			e.message = `Timeline ${this.name}: ${e.message}`;
+			e.message = `Timeline ${this.timelineData.name}: ${e.message}`;
 			throw e;
 		}
 	}

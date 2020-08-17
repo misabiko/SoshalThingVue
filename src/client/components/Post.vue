@@ -20,7 +20,7 @@
 
 				nav.level.is-mobile
 					.level-left
-						a.level-item.commentButton
+						//a.level-item.commentButton
 							span.icon.is-small: FontAwesomeIcon(icon='reply')
 
 						a.level-item.repostButton(

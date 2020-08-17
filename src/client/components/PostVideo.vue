@@ -29,4 +29,5 @@ export default class PostVideo extends Vue {
 video
 	outline: none
 	border-radius: 8px
+	width: 100%
 </style>

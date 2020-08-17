@@ -5,6 +5,7 @@
 			:key='timeline.id'
 			:timeline-data='timeline'
 			:endpoints='endpoints'
+			:shouldScroll='shouldScroll'
 			@remove-timeline="removeTimeline($event)"
 			@update-data='onTimelinesChanged(timelines)'
 		)
@@ -23,6 +24,7 @@ import {Watch} from 'vue-property-decorator';
 export default class TimelineContainer extends Vue {
 	timelines : TimelineData[] = [];
 	endpoints = ['home_timeline', 'search'];
+	shouldScroll = false;
 
 	mounted() {
 		this.loadTimelines();
@@ -34,6 +36,8 @@ export default class TimelineContainer extends Vue {
 	}
 
 	addTimeline() : void {
+		this.shouldScroll = true;
+
 		const id = this.getUniqueId();
 		this.timelines.push({
 			id,
