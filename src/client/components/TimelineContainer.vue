@@ -1,11 +1,12 @@
 <template lang='pug'>
 	#timelineContainer
 		Timeline(
-			v-for='timeline of timelines'
+			v-for='timeline in timelines'
 			:key='timeline.id'
-			:initial-data='timeline'
+			:timeline-data='timeline'
 			:endpoints='endpoints'
 			@remove-timeline="removeTimeline($event)"
+			@update-data='onTimelinesChanged(timelines)'
 		)
 </template>
 
@@ -14,6 +15,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import Timeline from "./Timeline.vue";
 import {TimelineData} from '../../core/Timeline';
+import {Watch} from 'vue-property-decorator';
 
 @Component({
 	components: {Timeline}
@@ -33,7 +35,14 @@ export default class TimelineContainer extends Vue {
 
 	addTimeline() : void {
 		const id = this.getUniqueId();
-		this.timelines.push({id, name: 'Timeline #' + id, service: 'Twitter', endpoint: ''});
+		this.timelines.push({
+			id,
+			name: 'Timeline #' + id,
+			service: 'Twitter',
+			endpoint: '',
+			options: {},
+			refreshRate: 60000,
+		});
 	}
 
 	removeTimeline(id : number) : void {
@@ -52,6 +61,20 @@ export default class TimelineContainer extends Vue {
 			id++;
 
 		return id;
+	}
+
+	@Watch('timelines')
+	async onTimelinesChanged(newTimelines: TimelineData[]) {
+		try {
+			await fetch('/timelines', {
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify(newTimelines),
+			});
+		}catch (e) {
+			console.error('Error while trying to save the timeline settings.');
+			throw e;
+		}
 	}
 };
 </script>

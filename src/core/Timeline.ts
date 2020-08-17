@@ -3,6 +3,6 @@ export interface TimelineData {
 	name: string,
 	service: string,
 	endpoint: string,
-	options?: {q: string},
-	refreshRate?: number,
+	options: {q?: string},
+	refreshRate: number,
 }

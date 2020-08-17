@@ -57,10 +57,8 @@ const mutations = <MutationTree<State>>{
 
 	addPosts(state, postDatas : PostData[]) {
 		for (const postData of postDatas) {
-			if (state.posts.hasOwnProperty(postData.id))
-				throw new Error(`Post ${postData.id} already added to the store`);
-
-			Vue.set(state.posts, postData.id, postData);
+			if (!state.posts.hasOwnProperty(postData.id))
+				Vue.set(state.posts, postData.id, postData);
 		}
 	},
 

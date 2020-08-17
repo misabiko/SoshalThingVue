@@ -5,8 +5,14 @@ import {Twitter} from './twitter';
 import {TimelineData} from '../../core/Timeline';
 
 export namespace Common {
-	async function saveTimelines(timelines : TimelineData[]) {
-		await fs.promises.writeFile(timelinesPath, JSON.stringify(timelines));
+	async function saveTimelines(newTimelines : TimelineData[], force = false) {
+		const stringified = JSON.stringify(newTimelines);
+
+		if (force || JSON.stringify(timelines) !== stringified) {
+			console.log('Saving new timeline settings...');
+			await fs.promises.writeFile(timelinesPath, stringified);
+		}else
+			console.log('No changes in timeline settings, ignoring...');
 	}
 
 	async function checkLogins(_req : Request, res : Response) {
@@ -20,7 +26,7 @@ export namespace Common {
 	async function getTimelines(_req : Request, res : Response) {
 		try {
 			const timelines = JSON.parse(await fs.promises.readFile(timelinesPath, 'utf8'));
-			console.dir(timelines);
+
 			if (timelines instanceof Array)
 				await res.json(timelines);
 			else
@@ -28,14 +34,16 @@ export namespace Common {
 		}catch (e) {
 			if (e.code === 'ENOENT') {
 				console.log(`Couldn't read "${timelinesPath}", loading default timelines.`);
-				const timelines : TimelineData[] = [{
+				timelines = [{
 					id: 0,
 					name: 'Home',
 					service: 'Twitter',
-					endpoint: 'home_timeline'
+					endpoint: 'home_timeline',
+					options: {},
+					refreshRate: 90000,
 				}];
 
-				await saveTimelines(timelines);
+				await saveTimelines(timelines, true);
 				await res.json(timelines);
 			}else
 				throw e;
@@ -43,8 +51,7 @@ export namespace Common {
 	}
 
 	async function updateTimelines(req : Request, res : Response) {
-		console.dir(req.body);
-		if (req.body.timelines instanceof Array) {
+		if (req.body instanceof Array) {
 			await saveTimelines(req.body);
 
 			await res.sendStatus(200);
@@ -53,6 +60,7 @@ export namespace Common {
 	}
 
 	const timelinesPath = path.join(__dirname, 'timelines.json');
+	let timelines: TimelineData[];
 
 	export const router = Router();
 

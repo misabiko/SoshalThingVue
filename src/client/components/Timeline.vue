@@ -1,7 +1,7 @@
 <template lang='pug'>
 	.timeline
 		.timelineHeader(@click.self='scrollTop')
-			strong.has-text-white {{ name }}
+			strong.has-text-white {{ timelineData.name }}
 			.timelineButtons
 				button(@click='refresh(true)')
 					FontAwesomeIcon(icon='sync-alt' inverse size='lg')
@@ -11,9 +11,9 @@
 		b-collapse(:open='isOptionsOpen' animation='slide')
 			.timelineOptions
 				TimelineSettings.mb-4(
-					:name='name'
-					:endpoint='endpoint'
-					:options='options'
+					:name='timelineData.name'
+					:endpoint='timelineData.endpoint'
+					:options='timelineData.options'
 					:endpoints='endpoints'
 					@apply-settings='applySettings($event)'
 				)
@@ -35,7 +35,7 @@
 import {Vue, Component, Prop, Watch, Ref} from 'vue-property-decorator';
 import {PostData} from '../../core/PostData';
 import Post from './Post.vue';
-import TimelineSettings, {TimelineOptions} from './TimelineSettings';
+import TimelineSettings from './TimelineSettings';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import {SettingsData} from './TimelineSettings.vue';
@@ -51,7 +51,7 @@ library.add(faEllipsisV, faSyncAlt);
 })
 export default class Timeline extends Vue {
 	@Prop({type: Object, required: true})
-	readonly initialData!: TimelineData;
+	readonly timelineData!: TimelineData;
 	@Prop({type: Array, required: true})
 	readonly endpoints!: string[];
 
@@ -60,14 +60,9 @@ export default class Timeline extends Vue {
 	@State('logins') readonly logins!: Logins;
 	@State('posts') readonly storePosts!: {[id: string] : PostData};
 
-	name = this.initialData.name as string;
-	service = this.initialData.service as string;
-	endpoint = this.initialData.endpoint as string;
-	refreshRate = this.initialData.refreshRate || 90000 as number;
-	options = this.initialData.options || {} as TimelineOptions;
 	interval = undefined as number | undefined;
 	posts = [] as string[];
-	isOptionsOpen = !(this.initialData.name && this.initialData.endpoint) as boolean;
+	isOptionsOpen = !(this.timelineData.name && this.timelineData.endpoint) as boolean;
 
 	mounted() {
 		if (this.enabled)
@@ -86,7 +81,7 @@ export default class Timeline extends Vue {
 	resetAutoRefresh() {
 		//TODO Disable refreshing when not in focus
 		window.clearInterval(this.interval);
-		this.interval = window.setInterval(() => this.refresh(), this.refreshRate);
+		this.interval = window.setInterval(() => this.refresh(), this.timelineData.refreshRate);
 
 		this.refresh().then();
 	}
@@ -107,9 +102,9 @@ export default class Timeline extends Vue {
 
 		try {
 			const newPostIds : string[] = await this.$store.dispatch('refreshEndpoint', {
-				service: this.service,
-				endpoint: this.endpoint,
-				options: this.options,
+				service: this.timelineData.service,
+				endpoint: this.timelineData.endpoint,
+				options: this.timelineData.options,
 				timelinePosts: this.posts,
 			});
 
@@ -151,13 +146,15 @@ export default class Timeline extends Vue {
 	}
 
 	remove() {
-		this.$emit('remove-timeline', this.initialData.id);
+		this.$emit('remove-timeline', this.timelineData.id);
 	}
 
 	applySettings(settings : SettingsData) {
-		this.name = settings.name;
-		this.endpoint = settings.endpoint;
-		this.options = settings.options;
+		this.timelineData.name = settings.name;
+		this.timelineData.endpoint = settings.endpoint;
+		this.timelineData.options = settings.options;
+
+		this.$emit('update-data');
 	}
 
 	scrollTop() {
@@ -169,11 +166,11 @@ export default class Timeline extends Vue {
 	}
 
 	get enabled() {
-		const query = this.options && this.options.q ? this.options.q : '';
+		const query = this.timelineData.options.q ? this.timelineData.options.q : '';
 
 		return this.logins.Twitter &&
-			!!this.endpoint &&
-			(this.endpoint !== 'search' || !!query.length);
+			!!this.timelineData.endpoint &&
+			(this.timelineData.endpoint !== 'search' || !!query.length);
 	}
 
 	@Watch('enabled')
