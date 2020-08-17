@@ -1,21 +1,23 @@
 <template lang='pug'>
 	.postImages
-		.mediaHolder(v-for='(source, index) of sources')
+		.mediaHolder(v-for='(imageData, index) of images')
 			img(
 				@load='handleImageLoaded'
-				:alt="'img' + index"
-				:src='source'
+				:src='imageData.url'
 			)
 </template>
 
 <script lang='ts'>
 import {Vue, Component, Prop} from 'vue-property-decorator';
+import {PostImageData} from '../../core/PostData';
 
 @Component
 export default class PostImages extends Vue {
-	@Prop(Array) readonly sources!: string[];
+	@Prop({type: Array, required: true})
+	readonly images!: PostImageData[];
 
 	handleImageLoaded(loadEvent : Event) {
+		//TODO Redo with PostImageData
 		const img = loadEvent.target as HTMLImageElement;
 		if (img.parentElement)
 			img.parentElement.classList.add(img.width > img.height ? 'landscape' : 'portrait');

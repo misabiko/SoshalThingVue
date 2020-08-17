@@ -37,11 +37,11 @@
 			//-.media-right
 		PostImages.postMedia(
 			v-if='postData.images'
-			:sources='postData.images'
+			:images='postData.images'
 		)
 		PostVideo.postMedia(
 			v-if='postData.video'
-			:source='postData.video'
+			:video='postData.video'
 		)
 </template>
 

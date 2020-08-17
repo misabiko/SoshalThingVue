@@ -1,4 +1,4 @@
-import {PostData, RepostData} from '../../core/PostData';
+import {PostData, PostImageData, PostVideoData, RepostData} from '../../core/PostData';
 
 export interface TwitterResponse {
 	_headers : TwitterHeaders;
@@ -184,10 +184,10 @@ interface Media {
 	expanded_url : string
 	type : string
 	sizes : {
-		thumb : MediaSize[]
-		large : MediaSize[]
-		medium : MediaSize[]
-		small : MediaSize[]
+		thumb : MediaSize
+		large : MediaSize
+		medium : MediaSize
+		small : MediaSize
 	}
 	source_status_id : number
 	source_status_id_str : string
@@ -195,6 +195,7 @@ interface Media {
 	source_user_id_str : string
 	video_info?: {
 		aspect_ratio: number[]
+		duration_millis?: number
 		variants: {
 			bitrate?: number
 			content_type: string
@@ -247,42 +248,70 @@ function retweetToRepostData(tweet : Tweet) : RepostData {
 	};
 }
 
-function parseEntities(tweet : Tweet) : {images?: string[], video?: string} {
-	let images : string[] | undefined;
-	let video : string | undefined;
+function parseEntities(tweet : Tweet) : {images?: PostImageData[], video?: PostVideoData} {
+	let images : PostImageData[] | undefined;
+	let video : PostVideoData | undefined;
 
 	if (tweet.extended_entities) {
-		const media = tweet.extended_entities.media;
+		const medias = tweet.extended_entities.media;
 
-		if (media)
-			switch(media[0].type) {
+		if (medias) {
+			const media = medias[0];
+
+			switch (media.type) {
 				case 'photo':
-					images = tweet.extended_entities.media ?
-						tweet.extended_entities.media.map((media : Media) => media.media_url_https) :
-						undefined;
+					images = medias.map((media : Media) => {
+						return {
+							url: media.media_url_https,
+							sizes: media.sizes,
+						};
+					});
 					break;
 				case 'video':
-					console.log('Video format: ');
-					console.dir(media[0].video_info);
-
-					if (media[0].video_info && media[0].video_info.variants) {
-						console.dir(media[0].video_info.variants[0]);
-						video = media[0].video_info.variants[0].url;
+					if (media.video_info && media.video_info.variants) {
+						video = {
+							type: 'video',
+							url: media.media_url_https,
+							sizes: media.sizes,
+							aspectRatio: media.video_info.aspect_ratio,
+							durationMillis: media.video_info.duration_millis,
+							variants: media.video_info.variants.map(variant => {
+								return {
+									url: variant.url,
+									contentType: variant.content_type,
+									bitrate: variant.bitrate as number,
+								};
+							}),
+							autoplay: false,
+						}
 					}
 					break;
 				case 'animated_gif':
-					console.log('Gif format: ');
-					console.dir(media[0].video_info);
-
-					if (media[0].video_info && media[0].video_info.variants) {
-						console.dir(media[0].video_info.variants[0]);
-						video = media[0].video_info.variants[0].url;
+					if (media.video_info && media.video_info.variants) {
+						video = {
+							type: 'gif',
+							url: media.media_url_https,
+							sizes: media.sizes,
+							aspectRatio: media.video_info.aspect_ratio,
+							variants: media.video_info.variants.map(variant => {
+								return {
+									url: variant.url,
+									contentType: variant.content_type,
+									bitrate: variant.bitrate as number,
+								};
+							}),
+							autoplay: true,
+						}
 					}
 					break;
 			}
+		}
 	}else
 		images = tweet.entities && tweet.entities.media ?
-			[tweet.entities.media[0].media_url_https] :
+			[{
+				url: tweet.entities.media[0].media_url_https,
+				sizes: tweet.entities.media[0].sizes,
+			}] :
 			undefined;
 
 	return {images, video};
