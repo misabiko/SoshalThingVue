@@ -1,11 +1,12 @@
 const path = require('path');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const nodeExternals = require('webpack-node-externals');
 
 const serverConfig = {
-	mode: 'development',
 	target: 'node',
 	node: {__dirname: false},
+	externals: [nodeExternals()],
 	entry: path.resolve(__dirname, 'src', 'server', 'server.ts'),
 	output: {
 		filename: 'server.js',
@@ -26,8 +27,6 @@ const serverConfig = {
 };
 
 const clientConfig = {
-	mode: 'development',
-	devtool: 'inline-source-map',
 	entry: path.resolve(__dirname, 'src', 'client', 'index.ts'),
 	output: {
 		filename: 'index.js',

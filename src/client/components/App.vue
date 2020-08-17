@@ -37,7 +37,6 @@ export default class App extends Vue {
 
 <style lang='sass'>
 @use '../variables' as *
-@import '~bulma'
 
 #soshalThing
 	height: 100vh
