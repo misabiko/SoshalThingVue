@@ -79,6 +79,25 @@ const clientConfig = {
 				]
 			},
 			{
+				test: /\.scss$/,
+				use: [
+					'style-loader',
+					{
+						loader: 'css-loader',
+						options: {
+							sourceMap: true,
+						}
+					},
+					{
+						loader: 'sass-loader',
+						options: {
+							sourceMap: true,
+							implementation: require('sass'),
+						}
+					}
+				],
+			},
+			{
 				test: /\.css$/,
 				loader: 'style-loader!css-loader'
 			},

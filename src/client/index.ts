@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
+import './_bulma_overrides.sass';
 import Buefy from 'buefy';
-import 'buefy/dist/buefy.css';
 import App from './components/App.vue';
 import store from './store';
 

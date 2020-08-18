@@ -1,7 +1,7 @@
 <template lang='pug'>
 	.timeline
 		.timelineHeader(@click.self='scrollTop')
-			strong.has-text-white {{ timelineData.name }}
+			strong {{ timelineData.name }}
 			.timelineButtons
 				button(@click='refresh(true)')
 					FontAwesomeIcon(icon='sync-alt' inverse size='lg')

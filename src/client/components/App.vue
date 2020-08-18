@@ -1,5 +1,5 @@
 <template lang='pug'>
-	#soshalThing.has-text-light
+	#soshalThing
 		Sidebar(@new-timeline='newTimeline')
 		TimelineContainer(ref='timelineContainer')
 		b-modal(:active.sync='isPostModalActive')
@@ -60,7 +60,7 @@ export default class App extends Vue {
 }
 </script>
 
-<style lang='sass'>
+<style scoped lang='sass'>
 @use '../variables' as *
 
 #soshalThing

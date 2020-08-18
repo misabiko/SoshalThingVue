@@ -1,9 +1,9 @@
 <template lang='pug'>
 	div
-		b-field(label='Name' custom-class='has-text-light')
+		b-field(label='Name')
 			b-input(v-model='nameEdit')
 
-		b-field(label='Endpoint' custom-class='has-text-light')
+		b-field(label='Endpoint')
 			b-select(placeholder='Select an endpoint' v-model='endpointEdit' required)
 				option(
 					v-for='ep in endpoints'

@@ -1,9 +1,9 @@
 <template lang='pug'>
-	.serviceSettings {{ service.name }}
+	.serviceSettings.box {{ service.name }}
 		div(v-for='(rateLimit, endpoint) in rateLimits' :key='endpoint')
 			p {{ endpoint }}
 			b-progress(:value='rateLimit.remaining' :max='rateLimit.limit' show-value)
-				span.has-text-black-bis {{ rateLimit.remaining }} / {{ rateLimit.limit }}
+				span {{ rateLimit.remaining }} / {{ rateLimit.limit }}
 			p Reset {{ toRelative(rateLimit.reset) }}
 		.level(v-if='!loggedIn')
 			.level-left
@@ -48,12 +48,7 @@ export default class ServiceSettings extends Vue {
 
 <style scoped lang='sass'>
 @use '../variables' as *
-@import "~bulma/sass/utilities/_all"
-@import "~bulma/sass/elements/box"
-@import "~bulma/sass/helpers/color"
 
 .serviceSettings
-	@extend .box
-	@extend .has-text-white
 	background-color: $element-color
 </style>

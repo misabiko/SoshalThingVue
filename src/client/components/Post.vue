@@ -13,7 +13,7 @@
 			.media-content
 				.content
 					span.names
-						strong.has-text-light {{ postData.authorName }}
+						strong {{ postData.authorName }}
 						small {{'@' + postData.authorHandle}}
 					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
 					p {{ postData.text }}

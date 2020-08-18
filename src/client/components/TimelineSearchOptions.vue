@@ -1,5 +1,5 @@
 <template lang='pug'>
-	b-field(label='Query' custom-class='has-text-light')
+	b-field(label='Query')
 		b-input(v-model='query' required)
 </template>
 
