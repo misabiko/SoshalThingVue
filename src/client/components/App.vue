@@ -61,12 +61,12 @@ export default class App extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../variables' as *
+@use '../bulma_overrides' as *
 
 #soshalThing
 	height: 100vh
 	display: flex
-	background-color: $bg-color
+	background-color: $scheme-main
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif
 	-webkit-font-smoothing: antialiased
 	-moz-osx-font-smoothing: grayscale

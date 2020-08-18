@@ -1,5 +1,5 @@
 <template lang='pug'>
-	.serviceSettings.box {{ service.name }}
+	.box {{ service.name }}
 		div(v-for='(rateLimit, endpoint) in rateLimits' :key='endpoint')
 			p {{ endpoint }}
 			b-progress(:value='rateLimit.remaining' :max='rateLimit.limit' show-value)
@@ -45,10 +45,3 @@ export default class ServiceSettings extends Vue {
 	}
 };
 </script>
-
-<style scoped lang='sass'>
-@use '../variables' as *
-
-.serviceSettings
-	background-color: $element-color
-</style>

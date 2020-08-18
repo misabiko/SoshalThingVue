@@ -25,11 +25,11 @@ export default class ServiceMenu extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../variables' as *
+@use '../bulma_overrides' as *
 
 .sidebarMenu
 	width: $sidebar-menu-width
 	height: 100%
 	padding: 1rem
-	background-color: $container-color
+	background-color: $scheme-main-ter
 </style>

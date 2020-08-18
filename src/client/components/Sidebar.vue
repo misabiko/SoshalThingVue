@@ -37,12 +37,12 @@ export default class Sidebar extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../variables' as *
+@use '../bulma_overrides' as *
 
 @include pretty-scrollbar
 
 .sidebar
-	background-color: $element-color
+	background-color: $dark
 	z-index: 1
 	display: flex
 

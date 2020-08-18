@@ -129,11 +129,11 @@ export default class Post extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../variables' as *
+@use '../bulma_overrides' as *
 
 article.post
 	padding: 1rem
-	background-color: $post-color
+	background-color: $scheme-main-bis
 	margin-bottom: 2px
 
 	figure img
@@ -158,10 +158,10 @@ article.post
 			white-space: pre-line
 
 	small
-		color: $grey-text
+		color: $light
 
 	a
-		color: $grey-text
+		color: $light
 
 		&:hover.likeButton, &.likedPostButton
 			svg
@@ -179,7 +179,7 @@ article.post
 
 .repostLabel
 	margin-left: 64px
-	color: $grey-text
+	color: $light
 	font-size: smaller
 
 	p

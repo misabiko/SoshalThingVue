@@ -207,7 +207,7 @@ export default class Timeline extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../variables' as *
+@use '../bulma_overrides' as *
 
 @include pretty-scrollbar
 
@@ -225,7 +225,7 @@ export default class Timeline extends Vue {
 	height: 50px
 	line-height: 50px
 	padding-left: 25px
-	background-color: $element-color
+	background-color: $dark
 	display: flex
 	justify-content: space-between
 	//cursor: pointer
@@ -238,7 +238,7 @@ export default class Timeline extends Vue {
 		height: 100%
 
 .timelineOptions
-	background-color: $container-color
+	background-color: $scheme-main-ter
 	padding: 1rem
 
 .timelinePosts
