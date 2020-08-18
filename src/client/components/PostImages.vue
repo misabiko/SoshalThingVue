@@ -2,8 +2,9 @@
 	.postImages
 		.mediaHolder(v-for='(imageData, index) of images')
 			img(
-				@load='handleImageLoaded'
 				:src='imageData.url'
+				@load='handleImageLoaded'
+				@click="$emit('expanded', index)"
 			)
 </template>
 

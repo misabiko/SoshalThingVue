@@ -2,21 +2,35 @@
 	#soshalThing.has-text-light
 		Sidebar(@new-timeline='newTimeline')
 		TimelineContainer(ref='timelineContainer')
+		b-modal(:active.sync='isPostModalActive')
+			.card
+				.card-image: figure.image.is-4by3
+					img
+				.card-content: Post(:postId='expandedPost.id' :show-media='false')
 </template>
 
 <script lang='ts'>
-import {Vue, Component, Ref} from 'vue-property-decorator'
+import {Vue, Component, Ref, Watch} from 'vue-property-decorator'
 import TimelineContainer from './TimelineContainer';
 import Sidebar from './Sidebar';
+import Post from './Post.vue';
+import {Mutation, State} from 'vuex-class';
+import {ExpandedPost} from '../store';
 
 @Component({
 	components: {
+		Post,
 		Sidebar,
 		TimelineContainer,
 	}
 })
 export default class App extends Vue {
 	@Ref() readonly timelineContainer!: TimelineContainer
+
+	@State expandedPost!: ExpandedPost;
+	@Mutation clearExpandedPost!: () => void;
+
+	isPostModalActive = false;
 
 	mounted() {
 		this.checkLogins();
@@ -31,6 +45,17 @@ export default class App extends Vue {
 
 	newTimeline() : void {
 		this.timelineContainer.addTimeline();
+	}
+
+	@Watch('isPostModalActive')
+	onPostModalChanged(isActive: boolean) {
+		if (!isActive)
+			this.clearExpandedPost();
+	}
+
+	@Watch('expandedPost')
+	onExpandedPostChanged(post: ExpandedPost) {
+		this.isPostModalActive = !!post.id.length;
 	}
 }
 </script>

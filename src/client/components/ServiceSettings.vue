@@ -19,20 +19,20 @@ import {RateLimitStatus, ServiceStatuses} from '../../core/ServerResponses';
 import moment from 'moment';
 
 export interface ServiceData {
-	name: string,
-	loginHref: string,
-	endpoints: string[],
+	name : string,
+	loginHref : string,
+	endpoints : string[],
 }
 
 @Component
 export default class ServiceSettings extends Vue {
-	@Prop({type: Object,	required: true})
-	readonly service!: ServiceData;
+	@Prop({type: Object, required: true})
+	readonly service! : ServiceData;
 
-	@State('logins') readonly logins!: Logins;
-	@State('services') readonly services!: ServiceStatuses;
+	@State('logins') readonly logins! : Logins;
+	@State('services') readonly services! : ServiceStatuses;
 
-	toRelative(time: number) : string {
+	toRelative(time : number) : string {
 		return moment.unix(time).fromNow();
 	}
 
@@ -40,7 +40,7 @@ export default class ServiceSettings extends Vue {
 		return this.logins[this.service.name];
 	}
 
-	get rateLimits() : {[endpoint: string] : RateLimitStatus} {
+	get rateLimits() : { [endpoint : string] : RateLimitStatus } {
 		return this.services[this.service.name] || {};
 	}
 };

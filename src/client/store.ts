@@ -7,19 +7,26 @@ import {TimelineOptions} from '../core/Timeline';
 Vue.use(Vuex);
 
 export interface Logins {
-	[service: string] : boolean
+	[service : string] : boolean
+}
+
+export interface ExpandedPost {
+	id : string
+	selectedMedia : number
 }
 
 class State {
-	logins: Logins = {
+	logins : Logins = {
 		Twitter: false,
 		Mastodon: false,
 		Pixiv: false,
 	};
-
-	services: ServiceStatuses = {};
-
-	posts: {[id: string] : PostData} = {};
+	services : ServiceStatuses = {};
+	posts : { [id : string] : PostData } = {};
+	expandedPost : ExpandedPost = {
+		id: '',
+		selectedMedia: 0,
+	};
 }
 
 const getters = <GetterTree<State, State>>{
@@ -27,30 +34,30 @@ const getters = <GetterTree<State, State>>{
 };
 
 const mutations = <MutationTree<State>>{
-	updateLogins(state, payload) {
-		for (const service in payload)
-			if (payload.hasOwnProperty(service))
-				state.logins[service] = payload[service];
+	updateLogins(state, logins : Logins) {
+		for (const service in logins)
+			if (logins.hasOwnProperty(service))
+				state.logins[service] = logins[service];
 	},
 
-	setLogin(state, payload) {
-		state.logins[payload.service] = payload.login;
+	setLogin(state, login : { service : string, login : boolean }) {
+		state.logins[login.service] = login.login;
 	},
 
-	updateServices(state, payload : ServiceStatuses) {
-		for (const service in payload)
-			if (payload.hasOwnProperty(service)) {
+	updateServices(state, statuses : ServiceStatuses) {
+		for (const service in statuses)
+			if (statuses.hasOwnProperty(service)) {
 				if (!state.services.hasOwnProperty(service)) {
-					Vue.set(state.services, service, payload[service]);
+					Vue.set(state.services, service, statuses[service]);
 					continue;
 				}
 
-				for (const endpoint in payload[service])
-					if (payload[service].hasOwnProperty(endpoint)) {
+				for (const endpoint in statuses[service])
+					if (statuses[service].hasOwnProperty(endpoint)) {
 						if (!(state.services[service]).hasOwnProperty(endpoint))
-							Vue.set(state.services[service], endpoint, payload[service][endpoint]);
+							Vue.set(state.services[service], endpoint, statuses[service][endpoint]);
 						else
-							state.services[service][endpoint] = payload[service][endpoint];
+							state.services[service][endpoint] = statuses[service][endpoint];
 					}
 			}
 	},
@@ -64,11 +71,19 @@ const mutations = <MutationTree<State>>{
 
 	updatePostData(state, postData : PostData) {
 		Object.assign(state.posts[postData.id], postData);
+	},
+
+	expandPost(state, post : ExpandedPost) {
+		state.expandedPost = post;
+	},
+
+	clearExpandedPost(state) {
+		state.expandedPost.id = '';
 	}
 };
 
 const actions = <ActionTree<State, State>>{
-	async refreshEndpoint({state, commit}, payload: {service: string, endpoint: string, options: TimelineOptions}) : Promise<string[]> {
+	async refreshEndpoint({state, commit}, payload : { service : string, endpoint : string, options : TimelineOptions }) : Promise<string[]> {
 		try {
 			//TODO Use dynamic endpoint
 			const response = await fetch('/twitter/tweets/' + payload.endpoint + (Object.keys(payload.options).length ? toURI(payload.options) : ''));

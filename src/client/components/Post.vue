@@ -36,12 +36,14 @@
 							span.icon.is-small: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']")
 			//-.media-right
 		PostImages.postMedia(
-			v-if='postData.images'
+			v-if='showMedia && postData.images'
 			:images='postData.images'
+			@expanded='expandPost($event)'
 		)
 		PostVideo.postMedia(
-			v-if='postData.video'
+			v-if='showMedia && postData.video'
 			:video='postData.video'
+			@expanded='expandPost(0)'
 		)
 </template>
 
@@ -53,11 +55,13 @@ import {library} from '@fortawesome/fontawesome-svg-core';
 import {faHeart as fasHeart, faRetweet, faReply} from '@fortawesome/free-solid-svg-icons';
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 import moment from 'moment';
-import {Action, Getter} from 'vuex-class';
+import {Action, Getter, Mutation} from 'vuex-class';
 import PostVideo from './PostVideo.vue';
+import {ExpandedPost} from '../store';
 
 library.add(fasHeart, farHeart, faRetweet, faReply);
 
+//TODO Move this to external file
 moment.defineLocale('twitter', {
 	relativeTime: {
 		future: "in %s",
@@ -76,6 +80,7 @@ moment.defineLocale('twitter', {
 		yy: "%dy"
 	}
 });
+//TODO Fix locale not switching back
 moment().locale('en');
 
 @Component({
@@ -84,10 +89,14 @@ moment().locale('en');
 export default class Post extends Vue {
 	@Prop({type: String, required: true})
 	readonly postId!: string;
+	@Prop({type: Boolean, default: true})
+	readonly showMedia!: boolean;
 
 	@Getter readonly getPost!: (id: string) => PostData;
 	@Action('toggleLike') actionToggleLike!: (id : string) => void;
 	@Action('repost') actionRepost!: (id : string) => void;
+
+	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
 
 	hovered = false;
 
@@ -111,6 +120,10 @@ export default class Post extends Vue {
 
 	repost() {
 		this.actionRepost(this.postId);
+	}
+
+	expandPost(selectedMedia: number) {
+		this.storeExpandPost({id: this.postId, selectedMedia});
 	}
 }
 </script>
