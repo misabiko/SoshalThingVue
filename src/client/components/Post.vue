@@ -187,6 +187,9 @@ article.post
 
 .postMedia
 	margin-top: 1rem
+
+.svg-inline--fa.fa-w-16
+	width: 1em
 </style>
 
 <style lang='sass'>
