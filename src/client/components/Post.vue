@@ -27,13 +27,15 @@
 							:class='{repostedPostButton: postData.reposted}'
 							@click='repost'
 						)
-							span.icon.is-small: FontAwesomeIcon(icon='retweet')
+							span.icon: FontAwesomeIcon(icon='retweet' fixed-width)
+							span {{ postData.repostCount }}
 
 						a.level-item.likeButton(
 							:class='{likedPostButton: postData.liked}'
 							@click='toggleLike'
 						)
-							span.icon.is-small: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']")
+							span.icon: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']" fixed-width)
+							span {{ postData.likeCount }}
 			//-.media-right
 		PostImages.postMedia(
 			v-if='showMedia && postData.images'
@@ -164,15 +166,15 @@ article.post
 		color: $light
 
 		&:hover.likeButton, &.likedPostButton
-			svg
-				color: #e0245e
+			span
+				color: $like-color
 
 		&:hover.repostButton, &.repostedPostButton
-			svg
-				color: #17bf63
+			span
+				color: $repost-color
 
-		&:hover.commentButton svg
-			color: #1da1f2
+		&:hover.commentButton span
+			color: $comment-color
 
 .timestamp
 	float: right
@@ -190,25 +192,7 @@ article.post
 
 .svg-inline--fa.fa-w-16
 	width: 1em
-</style>
 
-<style lang='sass'>
-@use '../variables' as *
-
-.slide-left-enter-active
-	transition: 150ms ease-out
-
-.slide-left-leave-active
-	transition: 150ms ease-out
-	transition-timing-function: cubic-bezier(0, 1, 0.5, 1)
-
-.slide-left-enter-to, .slide-left-leave
-	//max-width: 40px
-	opacity: 1
-	overflow: hidden
-
-.slide-left-enter, .slide-left-leave-to
-	//max-width: 0
-	opacity: 0
-	overflow: hidden
+.svg-inline--fa.fa-w-20
+	width: 1.25em
 </style>

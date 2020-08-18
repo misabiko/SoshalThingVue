@@ -233,6 +233,8 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 		video,
 		liked: tweet.favorited,
 		reposted: tweet.retweeted,
+		likeCount: tweet.favorite_count,
+		repostCount: tweet.retweet_count,
 	};
 }
 

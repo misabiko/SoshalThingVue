@@ -9,6 +9,8 @@ export interface PostData {
 	video? : PostVideoData
 	liked : boolean
 	reposted : boolean
+	likeCount : number
+	repostCount : number
 }
 
 export interface RepostData extends PostData {
@@ -29,15 +31,15 @@ export interface PostImageData {
 }
 
 export interface PostVideoData extends PostImageData {
-	type: string
-	aspectRatio: number[]
-	durationMillis?: number
-	variants: PostVideoVariant[]
-	autoplay: boolean
+	type : string
+	aspectRatio : number[]
+	durationMillis? : number
+	variants : PostVideoVariant[]
+	autoplay : boolean
 }
 
 export interface PostVideoVariant {
-	url: string
-	contentType: string
-	bitrate: number
+	url : string
+	contentType : string
+	bitrate : number
 }
