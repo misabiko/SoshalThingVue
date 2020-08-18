@@ -11,9 +11,7 @@
 		b-collapse(:open='isOptionsOpen' animation='slide')
 			.timelineOptions
 				TimelineSettings.mb-4(
-					:name='timelineData.name'
-					:endpoint='timelineData.endpoint'
-					:options='timelineData.options'
+					:timeline-data='timelineData'
 					:endpoints='endpoints'
 					@apply-settings='applySettings($event)'
 				)
@@ -155,6 +153,7 @@ export default class Timeline extends Vue {
 	applySettings(settings : SettingsData) {
 		this.timelineData.name = settings.name;
 		this.timelineData.endpoint = settings.endpoint;
+		this.timelineData.autoRefresh = settings.autoRefresh;
 		this.timelineData.options = settings.options;
 
 		this.$emit('update-data');
@@ -176,9 +175,21 @@ export default class Timeline extends Vue {
 			(this.timelineData.endpoint !== 'search' || !!query.length);
 	}
 
+	get autoRefresh() {
+		return this.timelineData.autoRefresh;
+	}
+
 	@Watch('enabled')
-	onEnabledChanged(newEnabled: string) {
-		if (newEnabled)
+	onEnabledChanged(enabled: boolean) {
+		if (enabled && this.autoRefresh)
+			this.resetAutoRefresh();
+		else
+			this.disableAutoRefresh();
+	}
+
+	@Watch('autoRefresh')
+	onAutoRefreshChanged(autoRefresh: boolean) {
+		if (autoRefresh && this.enabled)
 			this.resetAutoRefresh();
 		else
 			this.disableAutoRefresh();

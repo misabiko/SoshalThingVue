@@ -39,6 +39,7 @@ export namespace Common {
 					name: 'Home',
 					service: 'Twitter',
 					endpoint: 'home_timeline',
+					autoRefresh: true,
 					options: {},
 					refreshRate: 90000,
 				}];

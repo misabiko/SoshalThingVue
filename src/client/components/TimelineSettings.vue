@@ -1,35 +1,38 @@
 <template lang='pug'>
 	div
 		b-field(label='Name')
-			b-input(v-model='nameEdit')
+			b-input(v-model='name')
 
 		b-field(label='Endpoint')
-			b-select(placeholder='Select an endpoint' v-model='endpointEdit' required)
+			b-select(placeholder='Select an endpoint' v-model='endpoint' required)
 				option(
 					v-for='ep in endpoints'
 					:value='ep'
 					:key='ep'
 				) {{ ep }}
 
+		b-field: b-switch(v-model='autoRefresh') Auto Refresh
+
 		TimelineSearchOptions(
-			v-if="endpointEdit === 'search'"
-			:options.sync='optionsEdit'
+			v-if="endpoint === 'search'"
+			:options.sync='options'
 		)
 
 		b-button(
 			v-if='anyChanges'
 			@click='applySettings'
-		) Apply
+		) Save
 </template>
 
 <script lang='ts'>
 import {Vue, Component, Prop} from 'vue-property-decorator';
 import TimelineSearchOptions from './TimelineSearchOptions.vue';
-import {TimelineOptions} from '../../core/Timeline';
+import {TimelineData, TimelineOptions} from '../../core/Timeline';
 
 export interface SettingsData {
 	name: string,
 	endpoint: string,
+	autoRefresh: boolean,
 	options: TimelineOptions
 }
 
@@ -37,24 +40,22 @@ export interface SettingsData {
 	components: {TimelineSearchOptions}
 })
 export default class TimelineSettings extends Vue {
-	@Prop({type: String, required: true})
-	readonly name!: string;
-	@Prop({type: String, required: true})
-	readonly endpoint!: string;
 	@Prop({type: Object, required: true})
-	readonly options!: TimelineOptions;
+	readonly timelineData!: TimelineData;
 	@Prop({type: Array, required: true})
 	readonly endpoints!: string[];
 
-	nameEdit = this.name;
-	endpointEdit = this.endpoint;
-	optionsEdit = this.options;
+	name = this.timelineData.name;
+	endpoint = this.timelineData.endpoint;
+	autoRefresh = this.timelineData.autoRefresh;
+	options = this.timelineData.options;
 
 	get changes() : {[setting : string] : boolean} {
 		return {
-			name: this.nameEdit !== this.name,
-			endpoint: this.endpointEdit !== this.endpoint,
-			options: this.optionsEdit !== this.options,
+			name: this.name !== this.timelineData.name,
+			endpoint: this.endpoint !== this.timelineData.endpoint,
+			autoRefresh: this.autoRefresh !== this.timelineData.autoRefresh,
+			options: this.options !== this.timelineData.options,
 		};
 	}
 
@@ -63,10 +64,11 @@ export default class TimelineSettings extends Vue {
 	}
 
 	applySettings() {
-		this.$emit('apply-settings', {
-			name: this.nameEdit,
-			endpoint: this.endpointEdit,
-			options: this.optionsEdit,
+		this.$emit('apply-settings', <TimelineSettings>{
+			name: this.name,
+			endpoint: this.endpoint,
+			autoRefresh: this.autoRefresh,
+			options: this.options,
 		});
 	}
 }
