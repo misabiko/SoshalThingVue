@@ -66,8 +66,6 @@ export default class App extends Vue {
 #soshalThing
 	height: 100vh
 	display: flex
-	background-color: $scheme-main
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif
 	-webkit-font-smoothing: antialiased
 	-moz-osx-font-smoothing: grayscale
 </style>
