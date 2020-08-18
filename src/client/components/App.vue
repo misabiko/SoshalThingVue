@@ -3,10 +3,7 @@
 		Sidebar(@new-timeline='newTimeline')
 		TimelineContainer(ref='timelineContainer')
 		b-modal(:active.sync='isPostModalActive')
-			.card
-				.card-image: figure.image.is-4by3
-					img
-				.card-content: Post(:postId='expandedPost.id' :show-media='false')
+			PostCard
 </template>
 
 <script lang='ts'>
@@ -16,13 +13,10 @@ import Sidebar from './Sidebar';
 import Post from './Post.vue';
 import {Mutation, State} from 'vuex-class';
 import {ExpandedPost} from '../store';
+import PostCard from './PostCard.vue';
 
 @Component({
-	components: {
-		Post,
-		Sidebar,
-		TimelineContainer,
-	}
+	components: {Post, Sidebar, TimelineContainer, PostCard}
 })
 export default class App extends Vue {
 	@Ref() readonly timelineContainer!: TimelineContainer
