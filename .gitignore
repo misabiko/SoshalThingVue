@@ -3,6 +3,10 @@ src/server/credentials.json
 dist/**
 /public/style.css*
 
+cypress/integration/examples/
+cypress/videos/
+cypress/screenshots/
+
 # dependencies
 /node_modules
 /.pnp
