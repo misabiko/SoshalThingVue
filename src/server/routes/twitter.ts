@@ -2,8 +2,7 @@ import {NextFunction, Request, Response, Router} from 'express';
 import {Profile, Strategy as TwitterStrategy} from 'passport-twitter';
 import TwitterLite from 'twitter-lite';
 import {consumer_key, consumer_secret} from '../credentials.json';
-import {tweetToPostData, TwitterResponse, TwitterSearchResponse} from '../core/twitter';
-import {PostData} from '../../core/PostData';
+import {parseTweets, Tweet, tweetToPostData, TwitterResponse, TwitterSearchResponse} from '../core/twitter';
 import passport from 'passport';
 import {RateLimitStatus, StuffedResponse} from '../../core/ServerResponses';
 
@@ -42,6 +41,17 @@ export namespace Twitter {
 		next(e);
 	}
 
+	async function respondTimelineUpdate(tweets : Tweet[], response : TwitterResponse, endpoint : string, res : Response) {
+		const {posts, reposts, timelinePosts} = parseTweets(tweets);
+
+		await res.json({
+			services: {Twitter: {[endpoint]: getRateLimits(response)}},
+			posts,
+			reposts,
+			timelinePosts,
+		} as StuffedResponse);
+	}
+
 	async function respondRateOver(e : any, endpoint : string, res : Response, next : NextFunction) {
 		if (e.errors) {
 			const error = e.errors.find((error : any) => error.code === 88);
@@ -52,6 +62,8 @@ export namespace Twitter {
 				await res.json({
 					services: {Twitter: {[endpoint]: getRateLimits(e)}},
 					posts: [],
+					reposts: [],
+					timelinePosts: {newArticles: []},
 				} as StuffedResponse);
 			}
 		}else
@@ -64,12 +76,7 @@ export namespace Twitter {
 			console.log(`${(response as any).length - 1} tweets sent.`);
 			logRateLimit(response);
 
-			const posts : PostData[] = (response as any).map(tweetToPostData);
-
-			await res.json({
-				services: {Twitter: {home_timeline: getRateLimits(response)}},
-				posts,
-			} as StuffedResponse);
+			await respondTimelineUpdate(response as any, response, 'home_timeline', res);
 		}catch (e) {
 			await respondRateOver(e, 'home_timeline', res, next);
 		}
@@ -84,12 +91,7 @@ export namespace Twitter {
 			console.log(`${response.search_metadata.count} tweets sent.`);
 			logRateLimit(response);
 
-			const posts : PostData[] = response.statuses.map(tweetToPostData);
-
-			await res.json({
-				services: {Twitter: {search: getRateLimits(response)}},
-				posts,
-			} as StuffedResponse);
+			await respondTimelineUpdate(response.statuses, response, 'search', res);
 		}catch (e) {
 			await respondRateOver(e, 'search', res, next);
 		}

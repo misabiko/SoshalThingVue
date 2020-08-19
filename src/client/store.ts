@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex, {ActionTree, GetterTree, MutationTree} from 'vuex';
-import {ServiceStatuses, StuffedResponse} from '../core/ServerResponses';
-import {PostData} from '../core/PostData';
+import {ServiceStatuses, StuffedResponse, TimelinePayload} from '../core/ServerResponses';
+import {Article, ArticleType, PostData, RepostData} from '../core/PostData';
 import {TimelineOptions} from '../core/Timeline';
 
 Vue.use(Vuex);
@@ -23,6 +23,7 @@ class State {
 	};
 	services : ServiceStatuses = {};
 	posts : { [id : string] : PostData } = {};
+	reposts : { [id : string] : RepostData } = {};
 	expandedPost : ExpandedPost = {
 		id: '',
 		selectedMedia: 0,
@@ -30,7 +31,14 @@ class State {
 }
 
 const getters = <GetterTree<State, State>>{
-	getPost: state => (id : string) => state.posts[id]
+	getPost: state => (id : string) => state.posts[id],
+	getRepost: state => (id : string) => state.reposts[id],
+	getArticleData: state => (article : Article) => {
+		if (article.type == ArticleType.Post)
+			return state.posts[article.id]
+		else
+			return state.reposts[article.id]
+	},
 };
 
 const mutations = <MutationTree<State>>{
@@ -63,10 +71,15 @@ const mutations = <MutationTree<State>>{
 	},
 
 	addPosts(state, postDatas : PostData[]) {
-		for (const postData of postDatas) {
+		for (const postData of postDatas)
 			if (!state.posts.hasOwnProperty(postData.id))
 				Vue.set(state.posts, postData.id, postData);
-		}
+	},
+
+	addReposts(state, repostDatas : RepostData[]) {
+		for (const repostData of repostDatas)
+			if (!state.reposts.hasOwnProperty(repostData.id))
+				Vue.set(state.reposts, repostData.id, repostData);
 	},
 
 	updatePostData(state, postData : PostData) {
@@ -83,7 +96,7 @@ const mutations = <MutationTree<State>>{
 };
 
 const actions = <ActionTree<State, State>>{
-	async refreshEndpoint({state, commit}, payload : { service : string, endpoint : string, options : TimelineOptions }) : Promise<string[]> {
+	async refreshEndpoint({state, commit}, payload : { service : string, endpoint : string, options : TimelineOptions }) : Promise<TimelinePayload> {
 		try {
 			//TODO Use dynamic endpoint
 			const response = await fetch('/twitter/tweets/' + payload.endpoint + (Object.keys(payload.options).length ? toURI(payload.options) : ''));
@@ -92,17 +105,17 @@ const actions = <ActionTree<State, State>>{
 				//TODO Alert the message
 				console.error('Lost connection to Twitter');
 				commit('setLogin', {service: 'Twitter', login: false});
-				return [];
+				return {newArticles: []};
 			}else if (!response.ok)
 				throw new Error(`Server error on refresh`);
 
-			const json : StuffedResponse = await response.json();
-			commit('updateServices', json.services);
+			const stuffedResponse : StuffedResponse = await response.json();
+			commit('updateServices', stuffedResponse.services);
 
-			const newPosts = json.posts.reverse().filter(postData => !state.posts.hasOwnProperty(postData.id));
-			commit('addPosts', newPosts);
+			commit('addPosts', stuffedResponse.posts);
+			commit('addReposts', stuffedResponse.reposts);
 
-			return newPosts.map(postData => postData.id);
+			return stuffedResponse.timelinePosts;
 		}catch (e) {
 			throw e;
 		}

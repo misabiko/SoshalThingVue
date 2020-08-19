@@ -1,5 +1,8 @@
 <template lang='pug'>
-	article.post(:article-id='postData.id' @mouseover='hovered = true' @mouseleave='hovered = false')
+	article.post(:article-id='repostData.id' @mouseover='hovered = true' @mouseleave='hovered = false')
+		.repostLabel(v-if='repostData.reposterName')
+			p {{ repostData.reposterName + ' retweeted' }}
+
 		.media
 			figure.media-left
 				p.image.is-64x64: img(
@@ -47,82 +50,42 @@
 </template>
 
 <script lang='ts'>
-import {Component, Prop, Vue} from 'vue-property-decorator';
-import {PostData} from '../../core/PostData';
-import PostImages from './PostImages.vue';
-import {library} from '@fortawesome/fontawesome-svg-core';
-import {faHeart as fasHeart, faReply, faRetweet} from '@fortawesome/free-solid-svg-icons';
-import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import Post from './Post.vue';
+import {PostData, RepostData} from '../../core/PostData';
+import {Prop} from 'vue-property-decorator';
+import {Getter} from 'vuex-class';
 import moment from 'moment';
-import {Action, Getter, Mutation} from 'vuex-class';
-import PostVideo from './PostVideo.vue';
-import {ExpandedPost} from '../store';
 
-library.add(fasHeart, farHeart, faRetweet, faReply);
-
-//TODO Move this to external file
-moment.defineLocale('twitter', {
-	relativeTime: {
-		future: "in %s",
-		past:   "%s ago",
-		s  : 'a few seconds',
-		ss : '%ds',
-		m:  "a minute",
-		mm: "%dm",
-		h:  "an hour",
-		hh: "%dh",
-		d:  "a day",
-		dd: "%dd",
-		M:  "a month",
-		MM: "%dm",
-		y:  "a year",
-		yy: "%dy"
-	}
-});
-//TODO Fix locale not switching back
-moment().locale('en');
-
-@Component({
-	components: {PostImages, PostVideo}
-})
-export default class Post extends Vue {
+@Component({components: {Post}})
+export default class Repost extends Vue {
 	@Prop({type: String, required: true})
-	readonly postId!: string;
-	@Prop({type: Boolean, default: true})
-	readonly showMedia!: boolean;
+	readonly repostId!: string;
 
+	@Getter readonly getRepost!: (id: string) => RepostData;
 	@Getter readonly getPost!: (id: string) => PostData;
-	@Action('toggleLike') actionToggleLike!: (id : string) => void;
-	@Action('repost') actionRepost!: (id : string) => void;
 
-	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
+	get repostData() : RepostData {
+		return this.getRepost(this.repostId);
+	}
 
-	hovered = false;
+	get postId() : string {
+		return this.repostData.repostedId;
+	}
 
 	get postData() : PostData {
 		return this.getPost(this.postId);
 	}
 
 	get creationTimeShort() : string {
-		const t = moment(this.postData.creationTime).locale('twitter').fromNow(true);
+		const t = moment(this.repostData.creationTime).locale('twitter').fromNow(true);
 		moment().locale('en');
 		return  t;
 	}
 
 	get creationTimeLong() : string {
-		return moment(this.postData.creationTime).fromNow();
-	}
-
-	toggleLike() {
-		this.actionToggleLike(this.postId);
-	}
-
-	repost() {
-		this.actionRepost(this.postId);
-	}
-
-	expandPost(selectedMedia: number) {
-		this.storeExpandPost({id: this.postId, selectedMedia});
+		return moment(this.repostData.creationTime).fromNow();
 	}
 }
 </script>
@@ -175,6 +138,14 @@ article.post
 
 .timestamp
 	float: right
+
+.repostLabel
+	margin-left: 64px
+	color: $light
+	font-size: smaller
+
+	p
+		margin-left: 1rem
 
 .postMedia
 	margin-top: 1rem

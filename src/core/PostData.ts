@@ -1,3 +1,16 @@
+//Name is a bit confusing
+export interface Article {
+	type: ArticleType
+	id: string
+}
+
+export enum ArticleType {
+	Post,
+	Repost,
+}
+
+export type ArticleData = PostData | RepostData;
+
 export interface PostData {
 	id : string
 	creationTime : string
@@ -13,10 +26,13 @@ export interface PostData {
 	repostCount : number
 }
 
-export interface RepostData extends PostData {
+export interface RepostData {
+	id : string
+	creationTime : string
 	reposterName : string
 	reposterHandle : string
 	reposterAvatar : string
+	repostedId: string
 }
 
 export interface PostImageData {
