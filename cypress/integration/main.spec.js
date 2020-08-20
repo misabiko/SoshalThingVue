@@ -42,6 +42,7 @@ describe('SoshalThing', () => {
 				cy.get('.timeline').first()
 					.get('.refreshTimeline')
 					.click()
+
 				cy.get('.timeline').first()
 					.get('.timelinePosts')
 					.children().should('have.length', $children.length)

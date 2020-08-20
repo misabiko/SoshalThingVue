@@ -112,7 +112,7 @@ export default class Timeline extends Vue {
 				options: this.timelineData.options,
 			});
 
-			for (const article of payload.newArticles) {
+			for (const article of payload.newArticles.filter((a : Article) => this.articles.findIndex((b : Article) => b.id === a.id) < 0)) {
 				const articleData = this.getArticleData(article);
 
 				let added = false;
