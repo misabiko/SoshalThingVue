@@ -3,14 +3,14 @@
 		b-collapse(:open='expanded' animation='slide-right')
 			ServiceMenu
 		#sidebarButtons
-			button(@click='expanded = !expanded')
+			button.expandSidebar(@click='expanded = !expanded')
 				span: FontAwesomeIcon(
 						:icon="expanded ? 'angle-double-left' : 'angle-double-right'"
 						fixed-width
 						inverse
 						size='2x'
 				)
-			button(@click="$emit('new-timeline')")
+			button.addTimeline(@click="$emit('new-timeline')")
 				span: FontAwesomeIcon(
 						icon='plus'
 						fixed-width

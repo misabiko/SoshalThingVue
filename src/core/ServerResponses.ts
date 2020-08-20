@@ -1,4 +1,4 @@
-import {PostData} from './PostData';
+import {Article, ArticleType, PostData, RepostData} from './PostData';
 
 export interface RateLimitStatus {
 	remaining: number;
@@ -12,8 +12,15 @@ export interface ServiceStatuses {
 	}
 }
 
+export interface TimelinePayload {
+	newArticles: Article[],
+	//modifiedArticles: Article[],
+	//removedArticles: Article[],
+}
+
 export interface StuffedResponse {
 	services: ServiceStatuses;
-
 	posts: PostData[];
+	reposts: RepostData[];
+	timelinePosts: TimelinePayload;
 }

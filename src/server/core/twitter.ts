@@ -1,4 +1,5 @@
-import {PostData, PostImageData, PostVideoData, RepostData} from '../../core/PostData';
+import {ArticleType, PostData, PostImageData, PostVideoData, RepostData} from '../../core/PostData';
+import {TimelinePayload} from '../../core/ServerResponses';
 
 export interface TwitterResponse {
 	_headers : TwitterHeaders;
@@ -216,10 +217,39 @@ interface MediaSize {
 	resize : string
 }
 
-export function tweetToPostData(tweet : Tweet) : PostData {
-	if ('retweeted_status' in tweet)
-		return retweetToRepostData(tweet);
+export function parseTweets(tweets : Tweet[]) : {posts: PostData[], reposts: RepostData[], timelinePosts : TimelinePayload} {
+	const posts : PostData[] = [];
+	const reposts : RepostData[] = [];
+	const timelinePosts : TimelinePayload = {newArticles: []};
 
+	tweets.reverse().map(tweet => {
+		const {post, repost} = parseTweet(tweet)
+		posts.push(post);
+
+		if (repost) {
+			reposts.push(repost);
+			timelinePosts.newArticles.push({type: ArticleType.Repost, id: repost.id});
+		}else
+			timelinePosts.newArticles.push({type: ArticleType.Post, id: post.id});
+	})
+
+	return {posts, reposts, timelinePosts};
+}
+
+export function parseTweet(tweet : Tweet) : {post: PostData, repost?: RepostData} {
+	if (tweet.retweeted_status)
+		return {
+			post: tweetToPostData(tweet.retweeted_status),
+			repost: retweetToRepostData(tweet),
+		}
+	else
+		return {
+			post: tweetToPostData(tweet),
+			repost: undefined,
+		}
+}
+
+export function tweetToPostData(tweet : Tweet) : PostData {
 	const {images, video} = parseEntities(tweet);
 
 	return {
@@ -233,6 +263,8 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 		video,
 		liked: tweet.favorited,
 		reposted: tweet.retweeted,
+		likeCount: tweet.favorite_count,
+		repostCount: tweet.retweet_count,
 	};
 }
 
@@ -241,10 +273,12 @@ function retweetToRepostData(tweet : Tweet) : RepostData {
 		throw new Error('Tweet doesn\'t include retweeted_status.');
 
 	return {
+		id: tweet.id_str,
+		creationTime: tweet.created_at,
 		reposterName: tweet.user.name,
 		reposterHandle: tweet.user.screen_name,
 		reposterAvatar: tweet.user.profile_image_url_https,
-		...tweetToPostData(tweet.retweeted_status)
+		repostedId: tweet.retweeted_status.id_str,
 	};
 }
 

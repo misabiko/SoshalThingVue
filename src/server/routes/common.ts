@@ -9,7 +9,7 @@ export namespace Common {
 		const stringified = JSON.stringify(newTimelines);
 
 		if (force || JSON.stringify(timelines) !== stringified) {
-			console.log('Saving new timeline settings...');
+			console.log(`Saving new timeline settings "${timelinesPath}"...`);
 			await fs.promises.writeFile(timelinesPath, stringified);
 		}else
 			console.log('No changes in timeline settings, ignoring...');

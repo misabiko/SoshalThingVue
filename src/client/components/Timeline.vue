@@ -3,9 +3,9 @@
 		.timelineHeader(@click.self='scrollTop')
 			strong {{ timelineData.name }}
 			.timelineButtons
-				button(@click='refresh(true)')
+				button.refreshTimeline(@click='refresh(true)')
 					FontAwesomeIcon(icon='sync-alt' inverse size='lg')
-				button(@click='isOptionsOpen = !isOptionsOpen')
+				button.openTimelineOptions(@click='isOptionsOpen = !isOptionsOpen')
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
 
 		b-collapse(:open='isOptionsOpen' animation='slide')
@@ -21,31 +21,32 @@
 					.level-right: b-button.level-item(@click='remove' type='is-danger') Remove
 
 		.timelinePosts(ref='posts')
-			Post(
-				v-for='postId of posts'
-				:key='postId'
-				:postId='postId'
-				@remove='removePost($event)'
+			ArticleComponent(
+				v-for='article in articles'
+				:key='article.id'
+				:article='article'
+				@remove='removeArticle($event)'
 			)
 </template>
 
 <script lang='ts'>
-import {Vue, Component, Prop, Watch, Ref} from 'vue-property-decorator';
-import {PostData} from '../../core/PostData';
-import Post from './Post.vue';
+import {Component, Prop, Ref, Vue, Watch} from 'vue-property-decorator';
+import {Action, Getter, State} from 'vuex-class';
+import {SettingsData} from './TimelineSettings.vue';
+import ArticleComponent from './ArticleComponent.vue';
 import TimelineSettings from './TimelineSettings';
+import {TimelinePayload} from '../../core/ServerResponses';
+import {Article, ArticleData} from '../../core/PostData';
+import {TimelineData, TimelineOptions} from '../../core/Timeline';
+import {Logins} from '../store';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
-import {SettingsData} from './TimelineSettings.vue';
-import {State} from 'vuex-class';
-import {Logins} from '../store';
 import moment from 'moment';
-import {TimelineData} from '../../core/Timeline';
 
 library.add(faEllipsisV, faSyncAlt);
 
 @Component({
-	components: {Post, TimelineSettings}
+	components: {ArticleComponent, TimelineSettings}
 })
 export default class Timeline extends Vue {
 	@Prop({type: Object, required: true})
@@ -58,10 +59,13 @@ export default class Timeline extends Vue {
 	@Ref('posts') readonly timelinePosts!: HTMLDivElement;
 
 	@State('logins') readonly logins!: Logins;
-	@State('posts') readonly storePosts!: {[id: string] : PostData};
+
+	@Getter readonly getArticleData!: (article : Article) => ArticleData;
+
+	@Action refreshEndpoint!: (payload : { service : string, endpoint : string, options : TimelineOptions }) => Promise<TimelinePayload>;
 
 	interval = undefined as number | undefined;
-	posts = [] as string[];
+	articles = [] as Article[];
 	isOptionsOpen = !(this.timelineData.name && this.timelineData.endpoint) as boolean;
 
 	mounted() {
@@ -102,22 +106,23 @@ export default class Timeline extends Vue {
 			return;
 
 		try {
-			const newPostIds : string[] = await this.$store.dispatch('refreshEndpoint', {
+			const payload : TimelinePayload = await this.refreshEndpoint({
 				service: this.timelineData.service,
 				endpoint: this.timelineData.endpoint,
 				options: this.timelineData.options,
-				timelinePosts: this.posts,
 			});
 
-			for (const id of newPostIds) {
+			for (const article of payload.newArticles.filter((a : Article) => this.articles.findIndex((b : Article) => b.id === a.id) < 0)) {
+				const articleData = this.getArticleData(article);
+
 				let added = false;
-				for (let i = 0; i < this.posts.length && !added; i++)
-					if (moment(this.storePosts[id].creationTime).isBefore(this.getPostData(i).creationTime)) {
-						this.insertPost(id, i);
+				for (let i = 0; i < this.articles.length && !added; i++)
+					if (moment(articleData.creationTime).isBefore(this.getArticleData(this.articles[i]).creationTime)) {
+						this.insertArticle(article, i);
 						added = true;
 					}
 				if (!added)
-					this.addPost(id);
+					this.addArticle(article);
 			}
 		}catch (e) {
 			e.message = `Timeline ${this.timelineData.name}: ${e.message}`;
@@ -125,25 +130,21 @@ export default class Timeline extends Vue {
 		}
 	}
 
-	getPostData(index : number) : PostData {
-		return this.storePosts[this.posts[index]];
+	addArticle(article : Article) {
+		this.articles.unshift(article);
 	}
 
-	addPost(id : string) {
-		this.posts.unshift(id);
+	insertArticle(article : Article, index : number) {
+		this.articles.splice(index, 0, article);
 	}
 
-	insertPost(id : string, index : number) {
-		this.posts.splice(index, 0, id);
-	}
-
-	removePost(id : string) {
-		const index = this.posts.findIndex(postId => postId === id);
-		this.posts.splice(index, 1);
+	removeArticle(id : string) {
+		const index = this.articles.findIndex(article => article.id === id);
+		this.articles.splice(index, 1);
 	}
 
 	clearPosts() {
-		this.posts = [];
+		this.articles = [];
 	}
 
 	remove() {
