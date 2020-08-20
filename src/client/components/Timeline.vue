@@ -3,9 +3,9 @@
 		.timelineHeader(@click.self='scrollTop')
 			strong {{ timelineData.name }}
 			.timelineButtons
-				button(@click='refresh(true)')
+				button.refreshTimeline(@click='refresh(true)')
 					FontAwesomeIcon(icon='sync-alt' inverse size='lg')
-				button(@click='isOptionsOpen = !isOptionsOpen')
+				button.openTimelineOptions(@click='isOptionsOpen = !isOptionsOpen')
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
 
 		b-collapse(:open='isOptionsOpen' animation='slide')

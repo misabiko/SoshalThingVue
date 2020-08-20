@@ -1,8 +1,9 @@
 .idea/
-src/server/credentials.json
-src/server/access.json
 dist/**
 /public/style.css*
+src/server/credentials.json
+src/server/access.json
+src/server/routes/timelines.json
 
 cypress/integration/examples/
 cypress/videos/
