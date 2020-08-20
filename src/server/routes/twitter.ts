@@ -2,7 +2,7 @@ import {NextFunction, Request, Response, Router} from 'express';
 import {Profile, Strategy as TwitterStrategy} from 'passport-twitter';
 import TwitterLite from 'twitter-lite';
 import {consumer_key, consumer_secret} from '../credentials.json';
-import {parseTweets, Tweet, tweetToPostData, TwitterResponse, TwitterSearchResponse} from '../core/twitter';
+import {parseTweets, Tweet, tweetToPostData, TwitterResponse, TwitterSearchResponse} from '../twitter';
 import passport from 'passport';
 import {RateLimitStatus, StuffedResponse} from '../../core/ServerResponses';
 
