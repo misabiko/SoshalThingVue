@@ -4,11 +4,11 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import {Configuration} from 'webpack';
 //import nodeExternals from 'webpack-node-externals';
 
-const serverConfig = <Configuration>{
+export const serverConfig = <Configuration>{
 	target: 'node',
 	node: {__dirname: false},
 	//externals: [nodeExternals()],
-	entry: path.resolve(__dirname, 'src', 'server', 'server.ts'),
+	entry: path.resolve(__dirname, 'src', 'server', 'index.ts'),
 	output: {
 		filename: 'server.js',
 		path: path.resolve(__dirname, 'dist'),
@@ -27,7 +27,7 @@ const serverConfig = <Configuration>{
 	},
 };
 
-const clientConfig = <Configuration>{
+export const clientConfig = <Configuration>{
 	entry: path.resolve(__dirname, 'src', 'client', 'index.ts'),
 	output: {
 		filename: 'index.js',

@@ -1,17 +1,14 @@
+import path from "path";
+// @ts-ignore
+import {clientConfig} from './webpack.common';
 import {merge} from 'webpack-merge';
-import common from './webpack.common';
 import {Configuration} from 'webpack';
+import configure from './src/server/configure';
 
-const serverConfig = <Configuration>{
-	mode: 'development',
-};
-
-const clientConfig = <Configuration>{
-	mode: 'development',
-	devtool: 'inline-source-map',
-};
-
-export default [
-	merge(common[0], serverConfig),
-	merge(common[1], clientConfig)
-];
+export default merge(clientConfig, <Configuration>{
+	devServer: {
+		contentBase: path.resolve(__dirname, 'public'),
+		before: configure,
+		port: 3000,
+	},
+});
