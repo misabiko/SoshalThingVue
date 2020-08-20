@@ -204,4 +204,21 @@ export namespace Twitter {
 	router.post('/like/:id', preventUnauthorized, like);
 	router.post('/unlike/:id', preventUnauthorized, unlike);
 	router.post('/retweet/:id', preventUnauthorized, retweet);
+
+	/*router.get('/access', async function(req: Request, res : Response) {
+		const {access_token_key, access_token_secret, id, username} = await import('../access.json');
+
+		client = new TwitterLite({
+			consumer_key,
+			consumer_secret,
+			access_token_key,
+			access_token_secret,
+		});
+
+		authUser = {id,	username};
+
+		req.user = authUser;
+
+		res.sendStatus(200);
+	});*/
 }

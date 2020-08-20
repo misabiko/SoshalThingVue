@@ -1,5 +1,6 @@
 .idea/
 src/server/credentials.json
+src/server/access.json
 dist/**
 /public/style.css*
 
