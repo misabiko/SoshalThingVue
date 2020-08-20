@@ -2,9 +2,10 @@ import {NextFunction, Request, Response, Router} from 'express';
 import {Profile, Strategy as TwitterStrategy} from 'passport-twitter';
 import TwitterLite from 'twitter-lite';
 import {consumer_key, consumer_secret} from '../credentials.json';
-import {parseTweets, Tweet, tweetToPostData, TwitterResponse, TwitterSearchResponse} from '../twitter';
 import passport from 'passport';
 import {RateLimitStatus, StuffedResponse} from '../../core/ServerResponses';
+import {parseTweets, tweetToPostData} from '../twitter';
+import {Tweet, TwitterResponse, TwitterSearchResponse} from '../twitter/types';
 
 export namespace Twitter {
 	let client = new TwitterLite({consumer_key, consumer_secret});
@@ -42,12 +43,13 @@ export namespace Twitter {
 	}
 
 	async function respondTimelineUpdate(tweets : Tweet[], response : TwitterResponse, endpoint : string, res : Response) {
-		const {posts, reposts, timelinePosts} = parseTweets(tweets);
+		const {posts, reposts, quotes, timelinePosts} = parseTweets(tweets);
 
 		await res.json({
 			services: {Twitter: {[endpoint]: getRateLimits(response)}},
 			posts,
 			reposts,
+			quotes,
 			timelinePosts,
 		} as StuffedResponse);
 	}
@@ -63,6 +65,7 @@ export namespace Twitter {
 					services: {Twitter: {[endpoint]: getRateLimits(e)}},
 					posts: [],
 					reposts: [],
+					quotes: [],
 					timelinePosts: {newArticles: []},
 				} as StuffedResponse);
 			}

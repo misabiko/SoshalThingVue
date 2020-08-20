@@ -1,37 +1,45 @@
-import {ArticleType, PostData, PostImageData, PostVideoData, RepostData} from '../../core/PostData';
+import {ArticleType, PostData, PostImageData, PostVideoData, QuoteData, RepostData} from '../../core/PostData';
 import {TimelinePayload} from '../../core/ServerResponses';
-import {Tweet} from './types';
+import {Media, Tweet} from './types';
 
-export function parseTweets(tweets : Tweet[]) : {posts: PostData[], reposts: RepostData[], timelinePosts : TimelinePayload} {
+export function parseTweets(tweets : Tweet[]) : { posts : PostData[], reposts : RepostData[], quotes : QuoteData[], timelinePosts : TimelinePayload } {
 	const posts : PostData[] = [];
 	const reposts : RepostData[] = [];
+	const quotes : QuoteData[] = [];
 	const timelinePosts : TimelinePayload = {newArticles: []};
 
 	tweets.reverse().map(tweet => {
-		const {post, repost} = parseTweet(tweet)
+		const {post, repost, quote} = parseTweet(tweet);
 		posts.push(post);
 
 		if (repost) {
 			reposts.push(repost);
 			timelinePosts.newArticles.push({type: ArticleType.Repost, id: repost.id});
+		}else if (quote) {
+			quotes.push(quote);
+			timelinePosts.newArticles.push({type: ArticleType.Quote, id: quote.id});
 		}else
 			timelinePosts.newArticles.push({type: ArticleType.Post, id: post.id});
-	})
+	});
 
-	return {posts, reposts, timelinePosts};
+	return {posts, reposts, quotes, timelinePosts};
 }
 
-export function parseTweet(tweet : Tweet) : {post: PostData, repost?: RepostData} {
+export function parseTweet(tweet : Tweet) : { post : PostData, repost? : RepostData, quote? : QuoteData } {
 	if (tweet.retweeted_status)
 		return {
 			post: tweetToPostData(tweet.retweeted_status),
 			repost: retweetToRepostData(tweet),
-		}
+		};
+	else if (tweet.quoted_status)
+		return {
+			post: tweetToPostData(tweet.quoted_status),
+			quote: quoteToQuoteData(tweet),
+		};
 	else
 		return {
 			post: tweetToPostData(tweet),
-			repost: undefined,
-		}
+		};
 }
 
 export function tweetToPostData(tweet : Tweet) : PostData {
@@ -67,7 +75,26 @@ function retweetToRepostData(tweet : Tweet) : RepostData {
 	};
 }
 
-function parseEntities(tweet : Tweet) : {images?: PostImageData[], video?: PostVideoData} {
+function quoteToQuoteData(tweet : Tweet) : QuoteData {
+	if (!tweet.quoted_status)
+		throw new Error('Tweet isn\'t a quoted tweet.');
+
+	return {
+		id: tweet.id_str,
+		creationTime: tweet.created_at,
+		reposterName: tweet.user.name,
+		reposterHandle: tweet.user.screen_name,
+		reposterAvatar: tweet.user.profile_image_url_https,
+		repostedId: tweet.quoted_status.id_str,
+		text: tweet.full_text,
+		liked: tweet.favorited,
+		reposted: tweet.retweeted,
+		likeCount: tweet.favorite_count,
+		repostCount: tweet.retweet_count,
+	};
+}
+
+function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : PostVideoData } {
 	let images : PostImageData[] | undefined;
 	let video : PostVideoData | undefined;
 
@@ -102,7 +129,7 @@ function parseEntities(tweet : Tweet) : {images?: PostImageData[], video?: PostV
 								};
 							}),
 							autoplay: false,
-						}
+						};
 					}
 					break;
 				case 'animated_gif':
@@ -120,7 +147,7 @@ function parseEntities(tweet : Tweet) : {images?: PostImageData[], video?: PostV
 								};
 							}),
 							autoplay: true,
-						}
+						};
 					}
 					break;
 			}
