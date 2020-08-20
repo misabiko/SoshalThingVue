@@ -52,19 +52,27 @@
 <script lang='ts'>
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import Post from './Post.vue';
 import {PostData, RepostData} from '../../core/PostData';
 import {Prop} from 'vue-property-decorator';
-import {Getter} from 'vuex-class';
+import {Action, Getter, Mutation} from 'vuex-class';
 import moment from 'moment';
+import {ExpandedPost} from '../store';
+import PostVideo from './PostVideo.vue';
+import PostImages from './PostImages.vue';
 
-@Component({components: {Post}})
+@Component({components: {PostImages, PostVideo}})
 export default class Repost extends Vue {
 	@Prop({type: String, required: true})
 	readonly repostId!: string;
+	@Prop({type: Boolean, default: true})
+	readonly showMedia!: boolean;
 
 	@Getter readonly getRepost!: (id: string) => RepostData;
 	@Getter readonly getPost!: (id: string) => PostData;
+	@Action('toggleLike') actionToggleLike!: (id : string) => void;
+	@Action('repost') actionRepost!: (id : string) => void;
+
+	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
 
 	get repostData() : RepostData {
 		return this.getRepost(this.repostId);
@@ -86,6 +94,18 @@ export default class Repost extends Vue {
 
 	get creationTimeLong() : string {
 		return moment(this.repostData.creationTime).fromNow();
+	}
+
+	toggleLike() {
+		this.actionToggleLike(this.postId);
+	}
+
+	repost() {
+		this.actionRepost(this.postId);
+	}
+
+	expandPost(selectedMedia: number) {
+		this.storeExpandPost({id: this.postId, selectedMedia});
 	}
 }
 </script>

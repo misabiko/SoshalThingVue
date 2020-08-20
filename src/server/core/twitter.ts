@@ -237,10 +237,16 @@ export function parseTweets(tweets : Tweet[]) : {posts: PostData[], reposts: Rep
 }
 
 export function parseTweet(tweet : Tweet) : {post: PostData, repost?: RepostData} {
-	return {
-		post: tweetToPostData(tweet),
-		repost: ('retweeted_status' in tweet) ? retweetToRepostData(tweet) : undefined,
-	}
+	if (tweet.retweeted_status)
+		return {
+			post: tweetToPostData(tweet.retweeted_status),
+			repost: retweetToRepostData(tweet),
+		}
+	else
+		return {
+			post: tweetToPostData(tweet),
+			repost: undefined,
+		}
 }
 
 export function tweetToPostData(tweet : Tweet) : PostData {
