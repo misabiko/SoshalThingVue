@@ -1,12 +1,13 @@
-const path = require('path');
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const nodeExternals = require('webpack-node-externals');
+import path from 'path';
+import {VueLoaderPlugin} from 'vue-loader';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import {Configuration} from 'webpack';
+//import nodeExternals from 'webpack-node-externals';
 
-const serverConfig = {
+const serverConfig = <Configuration>{
 	target: 'node',
 	node: {__dirname: false},
-	externals: [nodeExternals()],
+	//externals: [nodeExternals()],
 	entry: path.resolve(__dirname, 'src', 'server', 'server.ts'),
 	output: {
 		filename: 'server.js',
@@ -26,7 +27,7 @@ const serverConfig = {
 	},
 };
 
-const clientConfig = {
+const clientConfig = <Configuration>{
 	entry: path.resolve(__dirname, 'src', 'client', 'index.ts'),
 	output: {
 		filename: 'index.js',
@@ -92,7 +93,7 @@ const clientConfig = {
 						loader: 'sass-loader',
 						options: {
 							sourceMap: true,
-							implementation: require('sass'),
+							implementation: import('sass'),
 						}
 					}
 				],
@@ -115,4 +116,4 @@ const clientConfig = {
 	],
 };
 
-module.exports = [serverConfig, clientConfig];
+export default [serverConfig, clientConfig] as Configuration[];
