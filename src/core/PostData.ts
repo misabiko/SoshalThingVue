@@ -28,11 +28,11 @@ export interface PostData {
 
 export interface RepostData {
 	id : string
+	repostedId: string
 	creationTime : string
 	reposterName : string
 	reposterHandle : string
 	reposterAvatar : string
-	repostedId: string
 }
 
 export interface PostImageData {

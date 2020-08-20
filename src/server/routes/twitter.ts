@@ -205,7 +205,8 @@ export namespace Twitter {
 	router.post('/unlike/:id', preventUnauthorized, unlike);
 	router.post('/retweet/:id', preventUnauthorized, retweet);
 
-	/*router.get('/access', async function(req: Request, res : Response) {
+	//TODO Find a way to enable this only in tests
+	/*router.get('/access', async function(req : Request, res : Response, next : NextFunction) {
 		const {access_token_key, access_token_secret, id, username} = await import('../access.json');
 
 		client = new TwitterLite({
@@ -215,10 +216,15 @@ export namespace Twitter {
 			access_token_secret,
 		});
 
-		authUser = {id,	username};
+		authUser = {id, username};
 
 		req.user = authUser;
 
-		res.sendStatus(200);
+		req.login(authUser, function(error) {
+			if (error)
+				next(error);
+			else
+				res.sendStatus(200);
+		});
 	});*/
 }
