@@ -8,6 +8,8 @@ src/server/routes/timelines.json
 cypress/integration/examples/
 cypress/videos/
 cypress/screenshots/
+/coverage/
+/.nyc_output
 
 # dependencies
 /node_modules

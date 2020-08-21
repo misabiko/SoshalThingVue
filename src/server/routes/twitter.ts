@@ -96,7 +96,10 @@ export namespace Twitter {
 
 			await respondTimelineUpdate(response.statuses, response, 'search', res);
 		}catch (e) {
-			await respondRateOver(e, 'search', res, next);
+			if (e.errors && e.errors.find((error : {code : number, message : string}) => error.code === 25))
+				return next(new Error('Twitter: ' + e.errors[0].message));
+			else
+				await respondRateOver(e, 'search', res, next);
 		}
 	}
 
