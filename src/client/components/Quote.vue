@@ -4,7 +4,7 @@
 		:post-data='postData'
 		:show-media='false'
 	)
-		slot(v-slot:extra-content)
+		template(v-slot:extra-content)
 			.quotedPost
 				span.names
 					strong {{ postData.authorName }}
