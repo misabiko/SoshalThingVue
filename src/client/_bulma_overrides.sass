@@ -1,5 +1,9 @@
-@import 'variables'
 @import '~bulma/sass/utilities/_all'
+
+$sidebar-menu-width: 350px
+$like-color: #e0245e
+$repost-color: #17bf63
+$comment-color: #1da1f2
 
 $scheme-main: #14151f
 $scheme-main-bis: #1f202e
@@ -27,6 +31,28 @@ $button-background-color: $white
 
 $progress-text-color: $dark
 $progress-value-background-color: $grey-dark
+
+@mixin borderless-button($pad: 0)
+	padding: $pad
+	border: none
+	background: none
+	outline: none
+	cursor: pointer
+
+	&:hover svg
+		color: $link
+
+	&:active
+		margin-top: 1px
+
+@mixin pretty-scrollbar
+	::-webkit-scrollbar
+		width: 12px
+		height: 12px
+
+	::-webkit-scrollbar-thumb
+		border-radius: 0
+		background-color: $scheme-main-ter
 
 @import '~bulma'
 @import '~buefy/src/scss/buefy'
