@@ -1,7 +1,7 @@
 <template lang='pug'>
 	.card
 		.card-image
-			b-carousel(indicator=false autoplay=false)
+			b-carousel(:indicator='false' :autoplay='false')
 				b-carousel-item(v-for='(image, index) in images' :key='index')
 					figure.image: img(:src='image.url')
 		.card-content: Post(v-if='expandedPost.id.length' :postId="expandedPost.id" :show-media='false')
@@ -29,3 +29,9 @@ export default class PostCard extends Vue {
 	}
 }
 </script>
+
+<style lang='sass'>
+@use '../bulma_overrides' as *
+
+@include pretty-scrollbar
+</style>
