@@ -27,9 +27,10 @@ import Quote from './Quote.vue';
 import {Article, ArticleType} from '../../core/PostData';
 
 @Component({components: {Post, Repost, Quote}})
-export default class ArticleComponent extends Vue {
+export default class ArticleGeneric extends Vue {
 	@Prop({type: Object, required: true})
 	readonly article!: Article;
+
 	//TODO Redo with render function
 	get isPost() {
 		return this.article.type === ArticleType.Post;

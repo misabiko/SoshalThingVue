@@ -36,12 +36,8 @@ export interface RepostData {
 	reposterAvatar : string;
 }
 
-export interface QuoteData extends RepostData {
-	text : string;
-	liked : boolean;
-	reposted : boolean;
-	likeCount : number;
-	repostCount : number;
+export interface QuoteData extends PostData {
+	quotedId : string;
 }
 
 export interface PostImageData {

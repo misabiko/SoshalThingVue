@@ -1,4 +1,4 @@
-import {Article, ArticleType, PostData, QuoteData, RepostData} from './PostData';
+import {Article, PostData, QuoteData, RepostData} from './PostData';
 
 export interface RateLimitStatus {
 	remaining: number;

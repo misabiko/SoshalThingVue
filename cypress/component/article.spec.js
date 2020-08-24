@@ -7,7 +7,7 @@ import {ExpandedPost, Logins} from "../../src/client/store";
 
 describe('Quote component', () => {
 	/*
-	ArticleComponent(
+	ArticleGeneric(
 		v-for='article in articles'
 		:key='article.id'
 		:article='article'

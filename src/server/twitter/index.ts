@@ -83,15 +83,15 @@ function quoteToQuoteData(tweet : Tweet) : QuoteData {
 	return {
 		id: tweet.id_str,
 		creationTime: tweet.created_at,
-		reposterName: tweet.user.name,
-		reposterHandle: tweet.user.screen_name,
-		reposterAvatar: tweet.user.profile_image_url_https,
-		repostedId: tweet.quoted_status.id_str,
-		text: tweet.full_text,
+		authorName: tweet.user.name,
+		authorHandle: tweet.user.screen_name,
+		authorAvatar: tweet.user.profile_image_url_https,
+		text: removeTextLink(tweet.full_text),
 		liked: tweet.favorited,
 		reposted: tweet.retweeted,
 		likeCount: tweet.favorite_count,
 		repostCount: tweet.retweet_count,
+		quotedId: tweet.quoted_status.id_str,
 	};
 }
 
