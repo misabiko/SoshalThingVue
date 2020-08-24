@@ -1,5 +1,8 @@
 {
 	"baseUrl": "http://localhost:3000",
 	"experimentalFetchPolyfill": true,
-	"experimentalComponentTesting": true
+	"experimentalComponentTesting": true,
+	"env": {
+		"coverage": false
+	}
 }
