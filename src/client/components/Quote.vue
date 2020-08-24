@@ -69,4 +69,21 @@ export default class Quote extends Vue {
 	border: 2px solid $scheme-main-ter
 	border-radius: 6px
 	padding: 16px
+
+	.names
+		text-overflow: ellipsis
+		white-space: nowrap
+		overflow: hidden
+		display: inline-block
+		max-width: 300px
+
+	span
+		*
+			vertical-align: middle
+
+		strong
+			margin-right: 0.5rem
+
+	p
+		white-space: pre-line
 </style>
