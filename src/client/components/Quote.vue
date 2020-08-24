@@ -1,7 +1,7 @@
 <template lang='pug'>
 	ArticleSkeleton.quote(
 		:article-id='quoteId'
-		:post-data='postData'
+		:post-data='quoteData'
 		:show-media='false'
 	)
 		template(v-slot:extra-content)
