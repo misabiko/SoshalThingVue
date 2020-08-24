@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex, {ActionTree, GetterTree, MutationTree} from 'vuex';
 import {ServiceStatuses, StuffedResponse, TimelinePayload} from '../core/ServerResponses';
-import {Article, ArticleType, PostData, RepostData} from '../core/PostData';
+import {Article, ArticleType, PostData, QuoteData, RepostData} from '../core/PostData';
 import {TimelineOptions} from '../core/Timeline';
 
 Vue.use(Vuex);
@@ -24,6 +24,7 @@ class State {
 	services : ServiceStatuses = {};
 	posts : { [id : string] : PostData } = {};
 	reposts : { [id : string] : RepostData } = {};
+	quotes : { [id : string] : QuoteData } = {};
 	expandedPost : ExpandedPost = {
 		id: '',
 		selectedMedia: 0,
@@ -33,11 +34,18 @@ class State {
 const getters = <GetterTree<State, State>>{
 	getPost: state => (id : string) => state.posts[id],
 	getRepost: state => (id : string) => state.reposts[id],
+	getQuote: state => (id : string) => state.quotes[id],
 	getArticleData: state => (article : Article) => {
-		if (article.type == ArticleType.Post)
-			return state.posts[article.id]
-		else
-			return state.reposts[article.id]
+		switch(article.type) {
+			case ArticleType.Post:
+				return state.posts[article.id];
+			case ArticleType.Repost:
+				return state.reposts[article.id];
+			case ArticleType.Quote:
+				return state.quotes[article.id];
+			default:
+				return undefined;
+		}
 	},
 };
 
@@ -82,6 +90,12 @@ const mutations = <MutationTree<State>>{
 				Vue.set(state.reposts, repostData.id, repostData);
 	},
 
+	addQuotes(state, quoteDatas : QuoteData[]) {
+		for (const quoteData of quoteDatas)
+			if (!state.quotes.hasOwnProperty(quoteData.id))
+				Vue.set(state.quotes, quoteData.id, quoteData);
+	},
+
 	updatePostData(state, postData : PostData) {
 		Object.assign(state.posts[postData.id], postData);
 	},
@@ -92,7 +106,7 @@ const mutations = <MutationTree<State>>{
 
 	clearExpandedPost(state) {
 		state.expandedPost.id = '';
-	}
+	},
 };
 
 const actions = <ActionTree<State, State>>{
@@ -114,6 +128,7 @@ const actions = <ActionTree<State, State>>{
 
 			commit('addPosts', stuffedResponse.posts);
 			commit('addReposts', stuffedResponse.reposts);
+			commit('addQuotes', stuffedResponse.quotes);
 
 			return stuffedResponse.timelinePosts;
 		}catch (e) {
@@ -144,15 +159,14 @@ const actions = <ActionTree<State, State>>{
 		const json = await fetch(`twitter/retweet/${id}`, {method: 'POST'}).then(response => response.json());
 
 		commit('updatePostData', json.post);
-	}
+	},
 };
 
+//TODO Remove this
 //https://stackoverflow.com/a/57124645/2692695
 function toURI(params : { [name : string] : any }) {
 	return '?' + Object.entries(params)
-		.map(
-			([key, val]) => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`
-		)
+		.map(([key, val]) => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
 		.join('&');
 }
 

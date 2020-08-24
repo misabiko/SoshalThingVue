@@ -85,7 +85,7 @@ export default class TimelineContainer extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../variables' as *
+@use '../bulma_overrides' as *
 
 @include pretty-scrollbar
 

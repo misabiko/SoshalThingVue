@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {Twitter} from '../src/server/routes/twitter';
-import {removeTextLink} from '../src/server/core/twitter';
+import {removeTextLink} from '../src/server/twitter';
 
 describe('Twitter', function() {
 	describe('tweet text parsing', function() {

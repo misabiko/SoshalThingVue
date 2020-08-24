@@ -1,0 +1,53 @@
+{
+	"services": {
+		"Twitter": {
+			"search": {
+				"remaining": 172,
+				"limit": 180,
+				"reset": 1597970916
+			}
+		}
+	},
+	"posts": [
+		{
+			"id": "1296589883872555008",
+			"creationTime": "Thu Aug 20 23:28:12 +0000 2020",
+			"authorName": "misabiko",
+			"authorHandle": "misabiko",
+			"authorAvatar": "https://pbs.twimg.com/profile_images/1261463636670918657/uaS8UOce_normal.jpg",
+			"text": "test tweet\n#soshalTest",
+			"liked": false,
+			"reposted": false,
+			"likeCount": 0,
+			"repostCount": 0
+		}
+	],
+	"reposts": [],
+	"quotes": [
+		{
+			"id": "1296589955129577472",
+			"creationTime": "Thu Aug 20 23:28:29 +0000 2020",
+			"reposterName": "misabiko",
+			"reposterHandle": "misabiko",
+			"reposterAvatar": "https://pbs.twimg.com/profile_images/1261463636670918657/uaS8UOce_normal.jpg",
+			"repostedId": "1296589883872555008",
+			"text": "quoted test tweet\n#soshalTest https://t.co/8KqaD48usW",
+			"liked": false,
+			"reposted": false,
+			"likeCount": 1,
+			"repostCount": 0
+		}
+	],
+	"timelinePosts": {
+		"newArticles": [
+			{
+				"type": 0,
+				"id": "1296589883872555008"
+			},
+			{
+				"type": 2,
+				"id": "1296589955129577472"
+			}
+		]
+	}
+}

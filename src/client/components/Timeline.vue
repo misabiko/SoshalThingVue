@@ -21,7 +21,7 @@
 					.level-right: b-button.level-item(@click='remove' type='is-danger') Remove
 
 		.timelinePosts(ref='posts')
-			ArticleComponent(
+			ArticleGeneric(
 				v-for='article in articles'
 				:key='article.id'
 				:article='article'
@@ -33,8 +33,8 @@
 import {Component, Prop, Ref, Vue, Watch} from 'vue-property-decorator';
 import {Action, Getter, State} from 'vuex-class';
 import {SettingsData} from './TimelineSettings.vue';
-import ArticleComponent from './ArticleComponent.vue';
-import TimelineSettings from './TimelineSettings';
+import ArticleGeneric from './ArticleGeneric.vue';
+import TimelineSettings from './TimelineSettings.vue';
 import {TimelinePayload} from '../../core/ServerResponses';
 import {Article, ArticleData} from '../../core/PostData';
 import {TimelineData, TimelineOptions} from '../../core/Timeline';
@@ -46,7 +46,7 @@ import moment from 'moment';
 library.add(faEllipsisV, faSyncAlt);
 
 @Component({
-	components: {ArticleComponent, TimelineSettings}
+	components: {ArticleGeneric, TimelineSettings}
 })
 export default class Timeline extends Vue {
 	@Prop({type: Object, required: true})
@@ -116,11 +116,15 @@ export default class Timeline extends Vue {
 				const articleData = this.getArticleData(article);
 
 				let added = false;
-				for (let i = 0; i < this.articles.length && !added; i++)
-					if (moment(articleData.creationTime).isBefore(this.getArticleData(this.articles[i]).creationTime)) {
+				for (let i = 0; i < this.articles.length && !added; i++) {
+					const articleTime = articleData.creationTime;
+					const thisArticleTime = this.getArticleData(this.articles[i]).creationTime;
+
+					if (moment(articleTime).isBefore(thisArticleTime)) {
 						this.insertArticle(article, i);
 						added = true;
 					}
+				}
 				if (!added)
 					this.addArticle(article);
 			}

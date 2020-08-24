@@ -65,7 +65,7 @@ export default class Sidebar extends Vue {
 </style>
 
 <style lang='sass'>
-@use '../variables' as *
+@use '../bulma_overrides' as *
 
 .slide-right-enter-active
 	transition: 150ms ease-out
