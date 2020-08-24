@@ -61,8 +61,10 @@ import {Prop} from 'vue-property-decorator';
 import {Action, Getter, Mutation} from 'vuex-class';
 import moment from 'moment';
 import {ExpandedPost} from '../store';
+import PostImages from './PostImages.vue';
+import PostVideo from './PostVideo.vue';
 
-@Component
+@Component({components: {PostImages, PostVideo}})
 export default class Quote extends Vue {
 	@Prop({type: String, required: true})
 	readonly quoteId!: string;
@@ -177,4 +179,9 @@ article.article
 
 .svg-inline--fa.fa-w-20
 	width: 1.25em
+
+.quotedPost
+	border: 2px solid $scheme-main-ter
+	border-radius: 6px
+	padding: 16px
 </style>
