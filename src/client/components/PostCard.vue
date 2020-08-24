@@ -25,7 +25,12 @@ export default class PostCard extends Vue {
 		if (!this.expandedPost.id.length)
 			return [];
 
-		return this.getPost(this.expandedPost.id).images || [];
+		const images = this.getPost(this.expandedPost.id).images || [];
+		if (images.length)
+			for (let i = 0; i < this.expandedPost.selectedMedia; ++i)
+				images.push(images.shift() as PostImageData);
+
+		return images;
 	}
 }
 </script>
