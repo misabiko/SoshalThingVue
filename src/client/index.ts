@@ -11,7 +11,7 @@ Vue.use(Buefy);
 
 Vue.config.productionTip = false;
 
-new Vue({
+(window as any).app = new Vue({
 	el: '#soshalThing',
 	template: '<App/>',
 	components: {App},
