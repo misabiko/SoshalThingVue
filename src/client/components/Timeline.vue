@@ -116,11 +116,15 @@ export default class Timeline extends Vue {
 				const articleData = this.getArticleData(article);
 
 				let added = false;
-				for (let i = 0; i < this.articles.length && !added; i++)
-					if (moment(articleData.creationTime).isBefore(this.getArticleData(this.articles[i]).creationTime)) {
+				for (let i = 0; i < this.articles.length && !added; i++) {
+					const articleTime = articleData.creationTime;
+					const thisArticleTime = this.getArticleData(this.articles[i]).creationTime;
+
+					if (moment(articleTime).isBefore(thisArticleTime)) {
 						this.insertArticle(article, i);
 						added = true;
 					}
+				}
 				if (!added)
 					this.addArticle(article);
 			}

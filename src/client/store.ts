@@ -34,11 +34,18 @@ class State {
 const getters = <GetterTree<State, State>>{
 	getPost: state => (id : string) => state.posts[id],
 	getRepost: state => (id : string) => state.reposts[id],
+	getQuote: state => (id : string) => state.quotes[id],
 	getArticleData: state => (article : Article) => {
-		if (article.type == ArticleType.Post)
-			return state.posts[article.id];
-		else
-			return state.reposts[article.id];
+		switch(article.type) {
+			case ArticleType.Post:
+				return state.posts[article.id];
+			case ArticleType.Repost:
+				return state.reposts[article.id];
+			case ArticleType.Quote:
+				return state.quotes[article.id];
+			default:
+				return undefined;
+		}
 	},
 };
 
@@ -155,6 +162,7 @@ const actions = <ActionTree<State, State>>{
 	},
 };
 
+//TODO Remove this
 //https://stackoverflow.com/a/57124645/2692695
 function toURI(params : { [name : string] : any }) {
 	return '?' + Object.entries(params)

@@ -1,5 +1,5 @@
 <template lang='pug'>
-	article.post(:article-id='repostData.id' @mouseover='hovered = true' @mouseleave='hovered = false')
+	article.article.repost(:article-id='repostData.id' @mouseover='hovered = true' @mouseleave='hovered = false')
 		.repostLabel(v-if='repostData.reposterName')
 			p {{ repostData.reposterName + ' retweeted' }}
 
@@ -113,7 +113,7 @@ export default class Repost extends Vue {
 <style scoped lang='sass'>
 @use '../bulma_overrides' as *
 
-article.post
+article.article
 	padding: 1rem
 	background-color: $scheme-main-bis
 	margin-bottom: 2px

@@ -10,7 +10,8 @@ export function parseTweets(tweets : Tweet[]) : { posts : PostData[], reposts : 
 
 	tweets.reverse().map(tweet => {
 		const {post, repost, quote} = parseTweet(tweet);
-		posts.push(post);
+		if (!posts.some(p => p.id === post.id))
+			posts.push(post);
 
 		if (repost) {
 			reposts.push(repost);

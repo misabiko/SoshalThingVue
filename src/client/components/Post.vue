@@ -1,5 +1,5 @@
 <template lang='pug'>
-	article.post(:article-id='postData.id' @mouseover='hovered = true' @mouseleave='hovered = false')
+	article.article.post(:article-id='postData.id' @mouseover='hovered = true' @mouseleave='hovered = false')
 		.media
 			figure.media-left
 				p.image.is-64x64: img(
@@ -130,7 +130,7 @@ export default class Post extends Vue {
 <style scoped lang='sass'>
 @use '../bulma_overrides' as *
 
-article.post
+article.article
 	padding: 1rem
 	background-color: $scheme-main-bis
 	margin-bottom: 2px

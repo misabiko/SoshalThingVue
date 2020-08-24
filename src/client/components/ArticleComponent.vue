@@ -6,9 +6,15 @@
 		@remove='removeArticle($event)'
 	)
 	Repost(
-		v-else
+		v-else-if='isRepost'
 		:key='article.id'
 		:repostId='article.id'
+		@remove='removeArticle($event)'
+	)
+	Quote(
+		v-else
+		:key='article.id'
+		:quoteId='article.id'
 		@remove='removeArticle($event)'
 	)
 </template>
@@ -17,15 +23,20 @@
 import {Vue, Component, Prop} from 'vue-property-decorator';
 import Post from './Post.vue';
 import Repost from './Repost.vue';
+import Quote from './Quote.vue';
 import {Article, ArticleType} from '../../core/PostData';
 
-@Component({components: {Post, Repost}})
+@Component({components: {Post, Repost, Quote}})
 export default class ArticleComponent extends Vue {
 	@Prop({type: Object, required: true})
 	readonly article!: Article;
-
+	//TODO Redo with render function
 	get isPost() {
 		return this.article.type === ArticleType.Post;
+	}
+
+	get isRepost() {
+		return this.article.type === ArticleType.Repost;
 	}
 }
 </script>
