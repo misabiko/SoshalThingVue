@@ -60,6 +60,8 @@ import {faHeart as fasHeart, faReply, faRetweet} from '@fortawesome/free-solid-s
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 import moment from 'moment';
 import {ExpandedPost} from '../store';
+import PostImages from './PostImages.vue';
+import PostVideo from './PostVideo.vue';
 
 library.add(fasHeart, farHeart, faRetweet, faReply);
 
@@ -85,7 +87,7 @@ moment.defineLocale('twitter', {
 //TODO Fix locale not switching back
 moment().locale('en');
 
-@Component
+@Component({components: {PostImages, PostVideo}})
 export default class ArticleSkeleton extends Vue {
 	@Prop({type: String, required: true})
 	readonly articleId!: string;
