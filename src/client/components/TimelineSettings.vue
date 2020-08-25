@@ -11,7 +11,8 @@
 					:key='ep'
 				) {{ ep }}
 
-		b-field: b-switch(v-model='autoRefresh') Auto Refresh
+		b-field: b-switch(v-model='enabled' @input='applySettings') Enabled
+		b-field: b-switch(v-model='autoRefresh' @input='applySettings') Auto Refresh
 
 		TimelineSearchOptions(
 			v-if="endpoint === 'search'"
@@ -30,10 +31,11 @@ import TimelineSearchOptions from './TimelineSearchOptions.vue';
 import {TimelineData, TimelineOptions} from '../../core/Timeline';
 
 export interface SettingsData {
-	name: string,
-	endpoint: string,
-	autoRefresh: boolean,
-	options: TimelineOptions
+	name: string;
+	endpoint: string;
+	enabled: boolean;
+	autoRefresh: boolean;
+	options: TimelineOptions;
 }
 
 @Component({
@@ -47,6 +49,7 @@ export default class TimelineSettings extends Vue {
 
 	name = this.timelineData.name;
 	endpoint = this.timelineData.endpoint;
+	enabled = this.timelineData.enabled;
 	autoRefresh = this.timelineData.autoRefresh;
 	options = this.timelineData.options;
 
@@ -54,7 +57,6 @@ export default class TimelineSettings extends Vue {
 		return {
 			name: this.name !== this.timelineData.name,
 			endpoint: this.endpoint !== this.timelineData.endpoint,
-			autoRefresh: this.autoRefresh !== this.timelineData.autoRefresh,
 			options: this.options !== this.timelineData.options,
 		};
 	}
@@ -67,6 +69,7 @@ export default class TimelineSettings extends Vue {
 		this.$emit('apply-settings', <TimelineSettings>{
 			name: this.name,
 			endpoint: this.endpoint,
+			enabled: this.enabled,
 			autoRefresh: this.autoRefresh,
 			options: this.options,
 		});

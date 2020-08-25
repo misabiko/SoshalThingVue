@@ -158,6 +158,7 @@ export default class Timeline extends Vue {
 	applySettings(settings : SettingsData) {
 		this.timelineData.name = settings.name;
 		this.timelineData.endpoint = settings.endpoint;
+		this.timelineData.enabled = settings.enabled;
 		this.timelineData.autoRefresh = settings.autoRefresh;
 		this.timelineData.options = settings.options;
 
