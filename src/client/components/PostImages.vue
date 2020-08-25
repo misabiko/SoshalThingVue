@@ -1,12 +1,11 @@
 <template lang='pug'>
-	.postImages
+	.postImages(:class='{postImagesCompact: compact}')
 		.mediaHolder(
 			v-for='(imageData, index) of images'
-			:class='{mediaHolderCompact: compact}'
+			:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(index)]"
 		)
 			img(
 				:src='imageData.url'
-				@load='handleImageLoaded'
 				@click="$emit('expanded', index)"
 			)
 </template>
@@ -22,16 +21,23 @@ export default class PostImages extends Vue {
 	@Prop({type: Boolean})
 	readonly compact!: boolean;
 
-	handleImageLoaded(loadEvent : Event) {
-		//TODO Redo with PostImageData
-		const img = loadEvent.target as HTMLImageElement;
-		if (img.parentElement)
-			img.parentElement.classList.add(img.width > img.height ? 'landscape' : 'portrait');
+	imageFormatClass(index : number) : string {
+		const sizeIndex = Object.keys(this.images[index].sizes).find(sizeName => sizeName !== 'thumb');
+		if (!sizeIndex)
+			return 'portrait';
+
+		const size : {w : number; h : number; resize : string;} = this.images[index].sizes[sizeIndex];
+
+		return size.w > size.h ? 'landscape' : 'portrait';
 	}
 }
 </script>
 
 <style scoped lang='sass'>
+.postImagesCompact
+	display: flex
+	flex-wrap: wrap
+
 .mediaHolder
 	overflow: hidden
 	display: flex
@@ -48,4 +54,7 @@ export default class PostImages extends Vue {
 
 	&.mediaHolderCompact
 		max-height: 16vh
+
+		&:not(:only-child)
+			max-width: 50%
 </style>
