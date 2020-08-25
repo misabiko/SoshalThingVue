@@ -45,6 +45,7 @@ export default class TimelineContainer extends Vue {
 			service: 'Twitter',
 			endpoint: '',
 			autoRefresh: true,
+			enabled: true,
 			options: {},
 			refreshRate: 60000,
 		});

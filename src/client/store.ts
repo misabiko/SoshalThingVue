@@ -124,7 +124,11 @@ const mutations = <MutationTree<State>>{
 const actions = <ActionTree<State, State>>{
 	async refreshEndpoint({state, commit}, payload : { service : string, endpoint : string, options : TimelineOptions }) : Promise<TimelinePayload> {
 		//TODO Use dynamic endpoint
-		const response = await fetch('/twitter/tweets/' + payload.endpoint + (Object.keys(payload.options).length ? toURI(payload.options) : ''));
+		let options = new URLSearchParams(payload.options as any).toString();
+		if (options.length)
+			options = '?' + options;
+
+		const response = await fetch(`/twitter/tweets/${payload.endpoint}${options}`);
 
 		if (response.status == 401) {
 			//TODO Alert the message
@@ -169,14 +173,6 @@ const actions = <ActionTree<State, State>>{
 		commit('updateArticleData', json);
 	},
 };
-
-//TODO Remove this
-//https://stackoverflow.com/a/57124645/2692695
-function toURI(params : { [name : string] : any }) {
-	return '?' + Object.entries(params)
-		.map(([key, val]) => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
-		.join('&');
-}
 
 export default new Vuex.Store({
 	state: new State(),

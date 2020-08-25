@@ -46,23 +46,23 @@ import moment from 'moment';
 library.add(faEllipsisV, faSyncAlt);
 
 @Component({
-	components: {ArticleGeneric, TimelineSettings}
+	components: {ArticleGeneric, TimelineSettings},
 })
 export default class Timeline extends Vue {
 	@Prop({type: Object, required: true})
-	readonly timelineData!: TimelineData;
+	readonly timelineData! : TimelineData;
 	@Prop({type: Array, required: true})
-	readonly endpoints!: string[];
+	readonly endpoints! : string[];
 	@Prop({type: Boolean, required: true})
-	readonly shouldScroll!: string[];
+	readonly shouldScroll! : string[];
 
-	@Ref('posts') readonly timelinePosts!: HTMLDivElement;
+	@Ref('posts') readonly timelinePosts! : HTMLDivElement;
 
-	@State('logins') readonly logins!: Logins;
+	@State('logins') readonly logins! : Logins;
 
-	@Getter readonly getArticleData!: (article : Article) => ArticleData;
+	@Getter readonly getArticleData! : (article : Article) => ArticleData;
 
-	@Action refreshEndpoint!: (payload : { service : string, endpoint : string, options : TimelineOptions }) => Promise<TimelinePayload>;
+	@Action refreshEndpoint! : (payload : { service : string, endpoint : string, options : TimelineOptions }) => Promise<TimelinePayload>;
 
 	interval = undefined as number | undefined;
 	articles = [] as Article[];
@@ -75,7 +75,7 @@ export default class Timeline extends Vue {
 
 		if (this.shouldScroll)
 			this.$el.scrollIntoView({
-				behavior: 'smooth'
+				behavior: 'smooth',
 			});
 	}
 
@@ -176,6 +176,7 @@ export default class Timeline extends Vue {
 		const query = this.timelineData.options.q ? this.timelineData.options.q : '';
 
 		return this.logins.Twitter &&
+			this.timelineData.enabled &&
 			!!this.timelineData.endpoint &&
 			(this.timelineData.endpoint !== 'search' || !!query.length);
 	}
@@ -185,7 +186,7 @@ export default class Timeline extends Vue {
 	}
 
 	@Watch('enabled')
-	onEnabledChanged(enabled: boolean) {
+	onEnabledChanged(enabled : boolean) {
 		if (enabled && this.autoRefresh)
 			this.resetAutoRefresh();
 		else
@@ -193,7 +194,7 @@ export default class Timeline extends Vue {
 	}
 
 	@Watch('autoRefresh')
-	onAutoRefreshChanged(autoRefresh: boolean) {
+	onAutoRefreshChanged(autoRefresh : boolean) {
 		if (autoRefresh && this.enabled)
 			this.resetAutoRefresh();
 		else
@@ -201,7 +202,7 @@ export default class Timeline extends Vue {
 	}
 
 	@Watch('endpoint')
-	onEndpointChanged(newEndpoint: string, oldEndpoint: string) {
+	onEndpointChanged(newEndpoint : string, oldEndpoint : string) {
 		if (newEndpoint === oldEndpoint)
 			return;
 

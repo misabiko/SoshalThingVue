@@ -1,5 +1,56 @@
 describe('SoshalThing', () => {
-	it("shouldn't auto refresh")
+	it("enabled as false shouldn't auto refresh", () => {
+		cy.fixture('manyTimelines').then($timelines => {
+			cy.getTimelines(
+				{
+					timelines: $timelines.map(timeline => {
+						timeline.enabled = false
+						return timeline
+					}),
+					fetchStubs: stub => {
+						stub.withArgs('/twitter/tweets/home_timeline').callsFake(fetch)
+
+						for (const timeline of $timelines)
+							if (timeline.endpoint === 'search')
+								stub.withArgs('/twitter/tweets/search?' + new URLSearchParams(timeline.options).toString()).callsFake(fetch)
+					},
+				}
+			)
+		})
+
+		//TODO Remove once fetch polyfill is used
+		cy.wait(4000)
+
+		cy.get('.timeline').should('have.length', 8)
+			.each($timeline => {
+				expect($timeline.find('.article').length).be.equal(0)
+			})
+	})
+
+	it("enabled as true should auto refresh", () => {
+		cy.fixture('manyTimelines').then(timelines => {
+			cy.getTimelines(
+				{
+					timelines,
+					fetchStubs: stub => {
+						stub.withArgs('/twitter/tweets/home_timeline').callsFake(fetch)
+
+						for (const timeline of timelines)
+							if (timeline.endpoint === 'search')
+								stub.withArgs('/twitter/tweets/search?' + new URLSearchParams(timeline.options).toString()).callsFake(fetch)
+					},
+				}
+			)
+		})
+
+		//TODO Remove once fetch polyfill is used
+		cy.wait(4000)
+
+		cy.get('.timeline').should('have.length', 8)
+			.each($timeline => {
+				expect($timeline.find('.article').length).be.above(0)
+			})
+	})
 
 	it('get indicator that session is active')
 
@@ -60,6 +111,11 @@ describe('SoshalThing', () => {
 		describe('Quotes', () => {
 			it("quotes show up well", () => {
 				cy.getQuoteTimeline()
+
+				cy.get('.timeline').should('have.length', 1)
+					.first()
+					.get('.refreshTimeline')
+					.click()
 
 				cy.get('.timelinePosts').children('.quote')
 					.each(quoteElement => {

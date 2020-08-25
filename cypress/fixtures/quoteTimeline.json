@@ -1,13 +1,1 @@
-[
-	{
-		"id": 0,
-		"name": "Quotes",
-		"service": "Twitter",
-		"endpoint": "search",
-		"autoRefresh": false,
-		"options": {
-			"q": "from:misabiko #soshalTest"
-		},
-		"refreshRate": 90000
-	}
-]
+[{"id":0,"name":"Quotes","service":"Twitter","endpoint":"search","autoRefresh":false,"enabled":true,"options":{"q":"from:misabiko #soshalTest"},"refreshRate":90000}]
