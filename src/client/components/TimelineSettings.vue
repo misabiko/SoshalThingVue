@@ -1,8 +1,5 @@
 <template lang='pug'>
 	div
-		b-field(label='Name')
-			b-input(v-model='name')
-
 		b-field(label='Endpoint')
 			b-select(placeholder='Select an endpoint' v-model='endpoint' required)
 				option(
@@ -31,7 +28,6 @@ import TimelineSearchOptions from './TimelineSearchOptions.vue';
 import {TimelineData, TimelineOptions} from '../../core/Timeline';
 
 export interface SettingsData {
-	name: string;
 	endpoint: string;
 	enabled: boolean;
 	autoRefresh: boolean;
@@ -46,8 +42,9 @@ export default class TimelineSettings extends Vue {
 	readonly timelineData!: TimelineData;
 	@Prop({type: Array, required: true})
 	readonly endpoints!: string[];
+	@Prop({type: Boolean})
+	readonly changesOutside!: boolean;
 
-	name = this.timelineData.name;
 	endpoint = this.timelineData.endpoint;
 	enabled = this.timelineData.enabled;
 	autoRefresh = this.timelineData.autoRefresh;
@@ -55,19 +52,17 @@ export default class TimelineSettings extends Vue {
 
 	get changes() : {[setting : string] : boolean} {
 		return {
-			name: this.name !== this.timelineData.name,
 			endpoint: this.endpoint !== this.timelineData.endpoint,
 			options: this.options !== this.timelineData.options,
 		};
 	}
 
 	get anyChanges() : boolean {
-		return Object.values(this.changes).some(change => change);
+		return this.changesOutside || Object.values(this.changes).some(change => change);
 	}
 
 	applySettings() {
 		this.$emit('apply-settings', <TimelineSettings>{
-			name: this.name,
 			endpoint: this.endpoint,
 			enabled: this.enabled,
 			autoRefresh: this.autoRefresh,

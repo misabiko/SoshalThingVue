@@ -1,7 +1,10 @@
 <template lang='pug'>
 	.timeline
 		.timelineHeader(@click.self='scrollTop')
-			strong {{ timelineData.name }}
+			//b-field(label='Name')
+			b-input(v-if='isOptionsOpen' v-model='nameEdit')
+			strong(v-else) {{ timelineData.name }}
+
 			.timelineButtons
 				button.refreshTimeline(@click='refresh(true)')
 					FontAwesomeIcon(icon='sync-alt' inverse size='lg')
@@ -13,6 +16,7 @@
 				TimelineSettings.mb-4(
 					:timeline-data='timelineData'
 					:endpoints='endpoints'
+					:changesOutside='outsideChanges'
 					@apply-settings='applySettings($event)'
 				)
 
@@ -67,6 +71,7 @@ export default class Timeline extends Vue {
 	interval = undefined as number | undefined;
 	articles = [] as Article[];
 	isOptionsOpen = !(this.timelineData.name && this.timelineData.endpoint) as boolean;
+	nameEdit = this.timelineData.name;
 
 	mounted() {
 		if (this.enabled)
@@ -156,11 +161,12 @@ export default class Timeline extends Vue {
 	}
 
 	applySettings(settings : SettingsData) {
-		this.timelineData.name = settings.name;
 		this.timelineData.endpoint = settings.endpoint;
 		this.timelineData.enabled = settings.enabled;
 		this.timelineData.autoRefresh = settings.autoRefresh;
 		this.timelineData.options = settings.options;
+
+		this.timelineData.name = this.nameEdit;
 
 		this.$emit('update-data');
 	}
@@ -186,6 +192,10 @@ export default class Timeline extends Vue {
 		return this.timelineData.autoRefresh;
 	}
 
+	get outsideChanges() {
+		return this.nameEdit !== this.timelineData.name;
+	}
+
 	@Watch('enabled')
 	onEnabledChanged(enabled : boolean) {
 		if (enabled && this.autoRefresh)
@@ -209,6 +219,12 @@ export default class Timeline extends Vue {
 
 		this.clearPosts();
 		this.resetAutoRefresh();
+	}
+
+	@Watch('isOptionsOpen')
+	onOptionsCollapseToggled(optionsOpened : boolean) {
+		if (!optionsOpened)
+			this.nameEdit = this.timelineData.name;
 	}
 }
 </script>
