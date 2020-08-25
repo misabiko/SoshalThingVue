@@ -112,7 +112,19 @@ export namespace Twitter {
 
 			await res.json(parseTweet(response));
 		}catch (e) {
-			parseQueryErrors(e, next);
+			if (e.errors && e.errors.find((error : {code : number, message : string}) => error.code === 139)) {
+				try {
+					const response = await client.get('statuses/show', {
+						id: req.params.id,
+						tweet_mode: 'extended'
+					});
+
+					await res.json(parseTweet(response));
+				}catch (showError) {
+					parseQueryErrors(showError, next);
+				}
+			}else
+				parseQueryErrors(e, next);
 		}
 	}
 
@@ -125,7 +137,22 @@ export namespace Twitter {
 
 			await res.json(parseTweet(response));
 		}catch (e) {
-			parseQueryErrors(e, next);
+			if (
+				e.errors && e.errors.find((error : {code : number, message : string}) => error.code === 144) &&
+				parseInt(req.params.id) > 1000
+			) {
+				try {
+					const response = await client.get('statuses/show', {
+						id: req.params.id,
+						tweet_mode: 'extended'
+					});
+
+					await res.json(parseTweet(response));
+				}catch (showError) {
+					parseQueryErrors(showError, next);
+				}
+			}else
+				parseQueryErrors(e, next);
 		}
 	}
 
