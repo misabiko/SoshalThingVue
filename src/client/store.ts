@@ -97,7 +97,19 @@ const mutations = <MutationTree<State>>{
 	},
 
 	updatePostData(state, postData : PostData) {
+		if (!postData)
+			throw new Error(`PostData ${postData} isn't valid.`);
+
 		Object.assign(state.posts[postData.id], postData);
+	},
+
+	updateArticleData(state, payload: {post?: PostData, repost?: RepostData, quote?: QuoteData}) {
+		if (payload.post && state.posts[payload.post.id])
+			Object.assign(state.posts[payload.post.id], payload.post);
+		if (payload.repost && state.reposts[payload.repost.id])
+			Object.assign(state.reposts[payload.repost.id], payload.repost);
+		if (payload.quote && state.quotes[payload.quote.id])
+			Object.assign(state.quotes[payload.quote.id], payload.quote);
 	},
 
 	expandPost(state, post : ExpandedPost) {
@@ -111,41 +123,37 @@ const mutations = <MutationTree<State>>{
 
 const actions = <ActionTree<State, State>>{
 	async refreshEndpoint({state, commit}, payload : { service : string, endpoint : string, options : TimelineOptions }) : Promise<TimelinePayload> {
-		try {
-			//TODO Use dynamic endpoint
-			const response = await fetch('/twitter/tweets/' + payload.endpoint + (Object.keys(payload.options).length ? toURI(payload.options) : ''));
+		//TODO Use dynamic endpoint
+		const response = await fetch('/twitter/tweets/' + payload.endpoint + (Object.keys(payload.options).length ? toURI(payload.options) : ''));
 
-			if (response.status == 401) {
-				//TODO Alert the message
-				console.error('Lost connection to Twitter');
-				commit('setLogin', {service: 'Twitter', login: false});
-				return {newArticles: []};
-			}else if (!response.ok)
-				throw new Error(`Server error on refresh`);
+		if (response.status == 401) {
+			//TODO Alert the message
+			console.error('Lost connection to Twitter');
+			commit('setLogin', {service: 'Twitter', login: false});
+			return {newArticles: []};
+		}else if (!response.ok)
+			throw new Error(`Server error on refresh`);
 
-			const stuffedResponse : StuffedResponse = await response.json();
-			commit('updateServices', stuffedResponse.services);
+		const stuffedResponse : StuffedResponse = await response.json();
+		commit('updateServices', stuffedResponse.services);
 
-			commit('addPosts', stuffedResponse.posts);
-			commit('addReposts', stuffedResponse.reposts);
-			commit('addQuotes', stuffedResponse.quotes);
+		commit('addPosts', stuffedResponse.posts);
+		commit('addReposts', stuffedResponse.reposts);
+		commit('addQuotes', stuffedResponse.quotes);
 
-			return stuffedResponse.timelinePosts;
-		}catch (e) {
-			throw e;
-		}
+		return stuffedResponse.timelinePosts;
 	},
 
 	async like({commit}, id : string) {
 		const json = await fetch(`twitter/like/${id}`, {method: 'POST'}).then(response => response.json());
 
-		commit('updatePostData', json.post);
+		commit('updateArticleData', json);
 	},
 
 	async unlike({commit}, id : string) {
 		const json = await fetch(`twitter/unlike/${id}`, {method: 'POST'}).then(response => response.json());
 
-		commit('updatePostData', json.post);
+		commit('updateArticleData', json);
 	},
 
 	toggleLike({state, dispatch}, id : string) {
@@ -158,7 +166,7 @@ const actions = <ActionTree<State, State>>{
 
 		const json = await fetch(`twitter/retweet/${id}`, {method: 'POST'}).then(response => response.json());
 
-		commit('updatePostData', json.post);
+		commit('updateArticleData', json);
 	},
 };
 

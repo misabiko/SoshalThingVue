@@ -4,7 +4,7 @@ import TwitterLite from 'twitter-lite';
 import {consumer_key, consumer_secret} from '../credentials.json';
 import passport from 'passport';
 import {RateLimitStatus, StuffedResponse} from '../../core/ServerResponses';
-import {parseTweets, tweetToPostData} from '../twitter';
+import {parseTweet, parseTweets} from '../twitter';
 import {Tweet, TwitterResponse, TwitterSearchResponse} from '../twitter/types';
 
 export namespace Twitter {
@@ -110,9 +110,7 @@ export namespace Twitter {
 				tweet_mode: 'extended',
 			});
 
-			await res.json({
-				post: tweetToPostData(response),
-			});
+			await res.json(parseTweet(response));
 		}catch (e) {
 			parseQueryErrors(e, next);
 		}
@@ -125,9 +123,7 @@ export namespace Twitter {
 				tweet_mode: 'extended',
 			});
 
-			await res.json({
-				post: tweetToPostData(response),
-			});
+			await res.json(parseTweet(response));
 		}catch (e) {
 			parseQueryErrors(e, next);
 		}
@@ -140,9 +136,7 @@ export namespace Twitter {
 				tweet_mode: 'extended',
 			});
 
-			await res.json({
-				post: tweetToPostData(response),
-			});
+			await res.json(parseTweet(response));
 		}catch (e) {
 			parseQueryErrors(e, next);
 		}

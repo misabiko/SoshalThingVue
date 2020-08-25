@@ -98,8 +98,8 @@ export default class ArticleSkeleton extends Vue {
 
 	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
 
-	@Action('toggleLike') actionToggleLike!: (id : string) => void;
 	@Action('repost') actionRepost!: (id : string) => void;
+	@Action('toggleLike') actionToggleLike!: (id : string) => void;
 
 	hovered = false;
 
