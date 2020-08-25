@@ -29,6 +29,7 @@
 				v-for='article in articles'
 				:key='article.id'
 				:article='article'
+				:compact-media='timelineData.compactMedia'
 				@remove='removeArticle($event)'
 			)
 </template>
@@ -164,6 +165,7 @@ export default class Timeline extends Vue {
 		this.timelineData.endpoint = settings.endpoint;
 		this.timelineData.enabled = settings.enabled;
 		this.timelineData.autoRefresh = settings.autoRefresh;
+		this.timelineData.compactMedia = settings.compactMedia;
 		this.timelineData.options = settings.options;
 
 		this.timelineData.name = this.nameEdit;

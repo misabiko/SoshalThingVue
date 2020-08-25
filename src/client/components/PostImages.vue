@@ -1,6 +1,9 @@
 <template lang='pug'>
 	.postImages
-		.mediaHolder(v-for='(imageData, index) of images')
+		.mediaHolder(
+			v-for='(imageData, index) of images'
+			:class='{mediaHolderCompact: compact}'
+		)
 			img(
 				:src='imageData.url'
 				@load='handleImageLoaded'
@@ -16,6 +19,8 @@ import {PostImageData} from '../../core/PostData';
 export default class PostImages extends Vue {
 	@Prop({type: Array, required: true})
 	readonly images!: PostImageData[];
+	@Prop({type: Boolean})
+	readonly compact!: boolean;
 
 	handleImageLoaded(loadEvent : Event) {
 		//TODO Redo with PostImageData
@@ -40,4 +45,7 @@ export default class PostImages extends Vue {
 	img
 		align-self: center
 		width: 100%
+
+	&.mediaHolderCompact
+		max-height: 16vh
 </style>

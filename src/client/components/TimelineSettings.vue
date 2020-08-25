@@ -10,6 +10,7 @@
 
 		b-field: b-switch(v-model='enabled' @input='applySettings') Enabled
 		b-field: b-switch(v-model='autoRefresh' @input='applySettings') Auto Refresh
+		b-field: b-switch(v-model='compactMedia' @input='applySettings') Compact Media
 
 		TimelineSearchOptions(
 			v-if="endpoint === 'search'"
@@ -31,6 +32,7 @@ export interface SettingsData {
 	endpoint: string;
 	enabled: boolean;
 	autoRefresh: boolean;
+	compactMedia: boolean;
 	options: TimelineOptions;
 }
 
@@ -48,6 +50,7 @@ export default class TimelineSettings extends Vue {
 	endpoint = this.timelineData.endpoint;
 	enabled = this.timelineData.enabled;
 	autoRefresh = this.timelineData.autoRefresh;
+	compactMedia = this.timelineData.compactMedia;
 	options = this.timelineData.options;
 
 	get changes() : {[setting : string] : boolean} {
@@ -66,6 +69,7 @@ export default class TimelineSettings extends Vue {
 			endpoint: this.endpoint,
 			enabled: this.enabled,
 			autoRefresh: this.autoRefresh,
+			compactMedia: this.compactMedia,
 			options: this.options,
 		});
 	}

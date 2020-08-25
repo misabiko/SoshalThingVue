@@ -3,6 +3,7 @@
 		:article-id='repostId'
 		:post-data='postData'
 		:show-media='showMedia'
+		:compact-media='compactMedia'
 	)
 		template(v-slot:header)
 			.repostLabel(v-if='repostData.reposterName')
@@ -25,6 +26,8 @@ export default class Repost extends Vue {
 	readonly repostId!: string;
 	@Prop({type: Boolean, default: true})
 	readonly showMedia!: boolean;
+	@Prop({type: Boolean})
+	readonly compactMedia!: boolean;
 
 	@Getter readonly getRepost!: (id: string) => RepostData;
 	@Getter readonly getPost!: (id: string) => PostData;

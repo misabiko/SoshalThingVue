@@ -14,6 +14,7 @@
 				PostImages.postMedia(
 					v-if='showMedia && postData.images'
 					:images='postData.images'
+					:compact='compactMedia'
 					@expanded='expandPost($event)'
 				)
 				PostVideo.postMedia(
@@ -40,6 +41,8 @@ export default class Quote extends Vue {
 	readonly quoteId!: string;
 	@Prop({type: Boolean, default: true})
 	readonly showMedia!: boolean;
+	@Prop({type: Boolean})
+	readonly compactMedia!: boolean;
 
 	@Getter readonly getQuote!: (id: string) => QuoteData;
 	@Getter readonly getPost!: (id: string) => PostData;

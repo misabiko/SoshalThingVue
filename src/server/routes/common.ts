@@ -41,6 +41,7 @@ export namespace Common {
 					endpoint: 'home_timeline',
 					autoRefresh: true,
 					enabled: true,
+					compactMedia: true,
 					options: {},
 					refreshRate: 90000,
 				}];

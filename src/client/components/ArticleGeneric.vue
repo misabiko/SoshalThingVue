@@ -3,18 +3,21 @@
 		v-if='isPost'
 		:key='article.id'
 		:postId='article.id'
+		:compact-media='compactMedia'
 		@remove='removeArticle($event)'
 	)
 	Repost(
 		v-else-if='isRepost'
 		:key='article.id'
 		:repostId='article.id'
+		:compact-media='compactMedia'
 		@remove='removeArticle($event)'
 	)
 	Quote(
 		v-else
 		:key='article.id'
 		:quoteId='article.id'
+		:compact-media='compactMedia'
 		@remove='removeArticle($event)'
 	)
 </template>
@@ -30,6 +33,8 @@ import {Article, ArticleType} from '../../core/PostData';
 export default class ArticleGeneric extends Vue {
 	@Prop({type: Object, required: true})
 	readonly article!: Article;
+	@Prop({type: Boolean})
+	readonly compactMedia!: boolean;
 
 	//TODO Redo with render function
 	get isPost() {

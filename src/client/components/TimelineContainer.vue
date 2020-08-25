@@ -46,6 +46,7 @@ export default class TimelineContainer extends Vue {
 			endpoint: '',
 			autoRefresh: true,
 			enabled: true,
+			compactMedia: true,
 			options: {},
 			refreshRate: 60000,
 		});

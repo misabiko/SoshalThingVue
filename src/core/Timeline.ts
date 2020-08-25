@@ -5,6 +5,7 @@ export interface TimelineData {
 	endpoint: string;
 	autoRefresh: boolean;
 	enabled: boolean;
+	compactMedia: boolean;
 	refreshRate: number;
 	options: TimelineOptions;
 }

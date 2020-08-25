@@ -3,6 +3,7 @@
 		:article-id='postId'
 		:post-data='postData'
 		:show-media='showMedia'
+		:compact-media='compactMedia'
 	)
 </template>
 
@@ -22,6 +23,8 @@ export default class Post extends Vue {
 	readonly postId!: string;
 	@Prop({type: Boolean, default: true})
 	readonly showMedia!: boolean;
+	@Prop({type: Boolean})
+	readonly compactMedia!: boolean;
 
 	@Getter readonly getPost!: (id: string) => PostData;
 

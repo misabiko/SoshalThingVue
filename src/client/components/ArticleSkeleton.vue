@@ -42,6 +42,7 @@
 			PostImages.postMedia(
 				v-if='showMedia && postData.images'
 				:images='postData.images'
+				:compact='compactMedia'
 				@expanded='expandPost($event)'
 			)
 			PostVideo.postMedia(
@@ -95,6 +96,8 @@ export default class ArticleSkeleton extends Vue {
 	readonly showMedia!: boolean;
 	@Prop({type: Object, required: true})
 	readonly postData!: PostData;
+	@Prop({type: Boolean})
+	readonly compactMedia!: boolean;
 
 	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
 
