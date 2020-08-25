@@ -1,4 +1,12 @@
-import {ArticleType, PostData, PostImageData, PostVideoData, QuoteData, RepostData} from '../../core/PostData';
+import {
+	ArticleType,
+	PostData,
+	PostImageData,
+	PostVideoData,
+	QuoteData,
+	RepostData,
+	UserMentionData,
+} from '../../core/PostData';
 import {TimelinePayload} from '../../core/ServerResponses';
 import {Media, Tweet} from './types';
 
@@ -44,7 +52,7 @@ export function parseTweet(tweet : Tweet) : { post : PostData, repost? : RepostD
 }
 
 export function tweetToPostData(tweet : Tweet) : PostData {
-	const {images, video} = parseEntities(tweet);
+	const {images, video, userMentions} = parseEntities(tweet);
 
 	return {
 		id: tweet.id_str,
@@ -59,6 +67,8 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 		reposted: tweet.retweeted,
 		likeCount: tweet.favorite_count,
 		repostCount: tweet.retweet_count,
+		userMentions,
+		rawObject: tweet,
 	};
 }
 
@@ -73,6 +83,7 @@ function retweetToRepostData(tweet : Tweet) : RepostData {
 		reposterHandle: tweet.user.screen_name,
 		reposterAvatar: tweet.user.profile_image_url_https,
 		repostedId: tweet.retweeted_status.id_str,
+		rawObject: tweet,
 	};
 }
 
@@ -92,12 +103,14 @@ function quoteToQuoteData(tweet : Tweet) : QuoteData {
 		likeCount: tweet.favorite_count,
 		repostCount: tweet.retweet_count,
 		quotedId: tweet.quoted_status.id_str,
+		rawObject: tweet,
 	};
 }
 
-function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : PostVideoData } {
+function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : PostVideoData, userMentions? : UserMentionData[] } {
 	let images : PostImageData[] | undefined;
 	let video : PostVideoData | undefined;
+	let userMentions : UserMentionData[] | undefined;
 
 	if (tweet.extended_entities) {
 		const medias = tweet.extended_entities.media;
@@ -161,7 +174,14 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 			}] :
 			undefined;
 
-	return {images, video};
+	userMentions = tweet.entities.user_mentions.map(user_mention => ({
+		id: user_mention.id_str,
+		handle: user_mention.screen_name,
+		name: user_mention.name,
+		indices: user_mention.indices,
+	}));
+
+	return {images, video, userMentions};
 }
 
 export function removeTextLink(text : string) : string {

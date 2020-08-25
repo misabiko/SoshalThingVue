@@ -25,6 +25,8 @@ export interface PostData {
 	reposted : boolean;
 	likeCount : number;
 	repostCount : number;
+	userMentions? : UserMentionData[];
+	rawObject? : any;
 }
 
 export interface RepostData {
@@ -34,10 +36,18 @@ export interface RepostData {
 	reposterName : string;
 	reposterHandle : string;
 	reposterAvatar : string;
+	rawObject? : any;	//TODO Remove these for production
 }
 
 export interface QuoteData extends PostData {
 	quotedId : string;
+}
+
+export interface UserMentionData {
+	id : string;
+	handle : string;
+	name : string;
+	indices: number[];
 }
 
 export interface PostImageData {
