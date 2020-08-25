@@ -2,7 +2,7 @@
 	.postImages(:class='{postImagesCompact: compact}')
 		.mediaHolder(
 			v-for='(imageData, index) of images'
-			:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(index)]"
+			:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(index), images.length === 3 && index === 2 ? 'thirdImage' : '']"
 		)
 			img(
 				:src='imageData.url'
@@ -56,5 +56,28 @@ export default class PostImages extends Vue {
 		max-height: 16vh
 
 		&:not(:only-child)
-			max-width: 50%
+			margin: 2px
+			max-width: 49%
+
+			&.landscape img
+				width: unset
+				height: 110%
+
+			&.portrait img
+				width: 110%
+				height: unset
+
+		img
+			object-fit: cover
+
+		&.thirdImage
+			max-width: unset
+
+			&.landscape img
+				width: unset
+				height: 175%
+
+			&.portrait img
+				width: 175%
+				height: unset
 </style>
