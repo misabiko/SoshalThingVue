@@ -54,6 +54,7 @@ export default class PostImages extends Vue {
 
 	&.mediaHolderCompact
 		max-height: 16vh
+		width: 100%
 
 		&:not(:only-child)
 			margin: 2px

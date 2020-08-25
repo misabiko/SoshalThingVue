@@ -37,12 +37,18 @@
 						)
 							span.icon: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']" fixed-width)
 							span {{ postData.likeCount }}
+
+						a.level-item.compactOverrideButton(
+							v-if='postData.images'
+							@click="toggleExpandOverride"
+						)
+							span.icon: FontAwesomeIcon(:icon='compactOverrideIcon' fixed-width)
 			//-.media-right
 		slot(name='footer')
 			PostImages.postMedia(
 				v-if='showMedia && postData.images'
 				:images='postData.images'
-				:compact='compactMedia'
+				:compact='compactOverride === null ? compactMedia : compactOverride'
 				@expanded='expandPost($event)'
 			)
 			PostVideo.postMedia(
@@ -57,14 +63,14 @@ import {Vue, Component, Prop} from 'vue-property-decorator';
 import {Action, Mutation} from 'vuex-class';
 import {PostData} from '../../core/PostData';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faHeart as fasHeart, faReply, faRetweet} from '@fortawesome/free-solid-svg-icons';
+import {faCompress, faExpand, faHeart as fasHeart, faReply, faRetweet} from '@fortawesome/free-solid-svg-icons';
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 import moment from 'moment';
 import {ExpandedPost} from '../store';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
 
-library.add(fasHeart, farHeart, faRetweet, faReply);
+library.add(fasHeart, farHeart, faRetweet, faReply, faExpand, faCompress);
 
 //TODO Move this to external file
 moment.defineLocale('twitter', {
@@ -105,6 +111,7 @@ export default class ArticleSkeleton extends Vue {
 	@Action('toggleLike') actionToggleLike!: (id : string) => void;
 
 	hovered = false;
+	compactOverride : boolean | null = null;
 
 	repost() {
 		this.actionRepost(this.postData.id);
@@ -118,6 +125,13 @@ export default class ArticleSkeleton extends Vue {
 		this.storeExpandPost({id: this.postData.id, selectedMedia});
 	}
 
+	toggleExpandOverride() {
+		if (this.compactOverride === null)
+			this.compactOverride = !this.compactMedia;
+		else
+			this.compactOverride = !this.compactOverride;
+	}
+
 	get creationTimeShort() : string {
 		const t = moment(this.postData.creationTime).locale('twitter').fromNow(true);
 		moment().locale('en');
@@ -126,6 +140,16 @@ export default class ArticleSkeleton extends Vue {
 
 	get creationTimeLong() : string {
 		return moment(this.postData.creationTime).fromNow();
+	}
+
+	get compactOverrideIcon() : string | undefined {
+		if (!this.postData.images)
+			return;
+
+		if (this.compactOverride === null)
+			return this.compactMedia ? 'expand' : 'compress';
+		else
+			return this.compactOverride ? 'expand' : 'compress';
 	}
 }
 </script>
@@ -165,6 +189,9 @@ article.article
 	a
 		color: $light
 
+		&:hover span
+			color: $link
+
 		&:hover.likeButton, &.likedPostButton
 			span
 				color: $like-color
@@ -181,6 +208,10 @@ article.article
 
 .postMedia
 	margin-top: 1rem
+
+//TODO width: getFaW(.fa-w-14) * 0.0625em
+.svg-inline--fa.fa-w-14
+	width: 0.875em
 
 .svg-inline--fa.fa-w-16
 	width: 1em
