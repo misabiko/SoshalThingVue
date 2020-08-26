@@ -99,6 +99,16 @@
 			]
 		}
 	],
+	"externalLinks": [
+		{
+			"truncatedURL": "youtu.be/oLBzpKteVsY",
+			"fullURL": "https://youtu.be/oLBzpKteVsY",
+			"indices": [
+				180,
+				202
+			]
+		}
+	],
 	"rawObject": {
 		"created_at": "Tue Aug 25 23:11:44 +0000 2020",
 		"id": 1298397679731400700,

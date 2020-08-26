@@ -20,6 +20,7 @@
 						:text='postData.text'
 						:user-mentions='postData.userMentions'
 						:hashtags='postData.hashtags'
+						:external-links='postData.externalLinks'
 						:images='postData.images'
 						:video='postData.video'
 					)

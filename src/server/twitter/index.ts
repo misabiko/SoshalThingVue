@@ -1,5 +1,6 @@
 import {
 	ArticleType,
+	ExternalLinkData,
 	HashtagData,
 	PostData,
 	PostImageData,
@@ -53,7 +54,7 @@ export function parseTweet(tweet : Tweet) : { post : PostData, repost? : RepostD
 }
 
 export function tweetToPostData(tweet : Tweet) : PostData {
-	const {images, video, userMentions, hashtags} = parseEntities(tweet);
+	const {images, video, userMentions, hashtags, externalLinks} = parseEntities(tweet);
 
 	return {
 		id: tweet.id_str,
@@ -70,6 +71,7 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 		repostCount: tweet.retweet_count,
 		userMentions,
 		hashtags,
+		externalLinks,
 		rawObject: tweet,
 	};
 }
@@ -109,11 +111,12 @@ function quoteToQuoteData(tweet : Tweet) : QuoteData {
 	};
 }
 
-function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : PostVideoData, userMentions? : UserMentionData[], hashtags? : HashtagData[] } {
+function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : PostVideoData, userMentions? : UserMentionData[], hashtags? : HashtagData[], externalLinks? : ExternalLinkData[] } {
 	let images : PostImageData[] | undefined;
 	let video : PostVideoData | undefined;
 	let userMentions : UserMentionData[] | undefined;
 	let hashtags : HashtagData[] | undefined;
+	let externalLinks : ExternalLinkData[] | undefined;
 
 	if (tweet.extended_entities) {
 		const medias = tweet.extended_entities.media;
@@ -193,7 +196,13 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 		indices: [hashtag.indices[0], hashtag.indices[1] - 1],
 	}));
 
-	return {images, video, userMentions, hashtags};
+	externalLinks = tweet.entities.urls.map(url => ({
+		truncatedURL: url.display_url,
+		fullURL: url.expanded_url,
+		indices: [url.indices[0], url.indices[1] - 1],
+	}));
+
+	return {images, video, userMentions, hashtags, externalLinks};
 }
 
 //TODO Remove the removeTextLink func

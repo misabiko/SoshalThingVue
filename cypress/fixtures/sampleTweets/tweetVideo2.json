@@ -64,10 +64,20 @@
 	},
 	"liked": false,
 	"reposted": false,
-	"likeCount": 437,
-	"repostCount": 43,
+	"likeCount": 866,
+	"repostCount": 88,
 	"userMentions": [],
 	"hashtags": [],
+	"externalLinks": [
+		{
+			"truncatedURL": "vt.tiktok.com/ZSf4eVjJ/",
+			"fullURL": "https://vt.tiktok.com/ZSf4eVjJ/",
+			"indices": [
+				45,
+				67
+			]
+		}
+	],
 	"rawObject": {
 		"created_at": "Wed Aug 26 04:56:14 +0000 2020",
 		"id": 1298484375600808000,
@@ -236,16 +246,16 @@
 				}
 			},
 			"protected": false,
-			"followers_count": 92188,
-			"friends_count": 2304,
-			"listed_count": 905,
+			"followers_count": 94909,
+			"friends_count": 2303,
+			"listed_count": 922,
 			"created_at": "Tue Mar 06 13:08:54 +0000 2018",
-			"favourites_count": 32466,
+			"favourites_count": 32476,
 			"utc_offset": null,
 			"time_zone": null,
 			"geo_enabled": false,
 			"verified": false,
-			"statuses_count": 6613,
+			"statuses_count": 6618,
 			"lang": null,
 			"contributors_enabled": false,
 			"is_translator": false,
@@ -275,8 +285,8 @@
 		"place": null,
 		"contributors": null,
 		"is_quote_status": false,
-		"retweet_count": 43,
-		"favorite_count": 437,
+		"retweet_count": 88,
+		"favorite_count": 866,
 		"favorited": false,
 		"retweeted": false,
 		"possibly_sensitive": false,

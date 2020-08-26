@@ -30,6 +30,7 @@ export interface PostData {
 	repostCount : number;
 	userMentions? : UserMentionData[];
 	hashtags? : HashtagData[];
+	externalLinks? : ExternalLinkData[];
 	rawObject? : any;
 }
 
@@ -56,6 +57,12 @@ export interface UserMentionData {
 
 export interface HashtagData {
 	text: string;
+	indices: Indices;
+}
+
+export interface ExternalLinkData {
+	truncatedURL: string;
+	fullURL: string;
 	indices: Indices;
 }
 

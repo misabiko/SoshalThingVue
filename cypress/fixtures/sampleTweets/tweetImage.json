@@ -38,8 +38,8 @@
 	],
 	"liked": true,
 	"reposted": false,
-	"likeCount": 34,
-	"repostCount": 6,
+	"likeCount": 69,
+	"repostCount": 9,
 	"userMentions": [],
 	"hashtags": [
 		{
@@ -50,6 +50,7 @@
 			]
 		}
 	],
+	"externalLinks": [],
 	"rawObject": {
 		"created_at": "Wed Aug 26 05:40:33 +0000 2020",
 		"id": 1298495528574095400,
@@ -176,7 +177,7 @@
 			"friends_count": 195,
 			"listed_count": 19,
 			"created_at": "Sat Dec 17 04:27:55 +0000 2016",
-			"favourites_count": 7488,
+			"favourites_count": 7490,
 			"utc_offset": null,
 			"time_zone": null,
 			"geo_enabled": false,
@@ -211,8 +212,8 @@
 		"place": null,
 		"contributors": null,
 		"is_quote_status": false,
-		"retweet_count": 6,
-		"favorite_count": 34,
+		"retweet_count": 9,
+		"favorite_count": 69,
 		"favorited": true,
 		"retweeted": false,
 		"possibly_sensitive": false,
