@@ -30,13 +30,7 @@ function userMentionToAnchor(createElement : CreateElement, userMention : UserMe
 }
 
 function prependItem(createElement : CreateElement, paragraph : ParagraphItem[], splicedIndex : number, text : string, item : ParagraphItem) {
-	console.log('prepend');
-	console.dir(paragraph[splicedIndex]);
-	console.dir(item);
-
-	const secondPart1 = item.indices[1] + 1 - paragraph[splicedIndex].indices[0];
-	const secondPart = text.substring(secondPart1);
-	console.log(`secondPart ${secondPart1} "${secondPart}"`);
+	const secondPart = text.substring(item.indices[1] + 1 - paragraph[splicedIndex].indices[0]);
 
 	paragraph.splice(
 		splicedIndex, 1,
@@ -46,13 +40,7 @@ function prependItem(createElement : CreateElement, paragraph : ParagraphItem[],
 }
 
 function appendItem(createElement : CreateElement, paragraph : ParagraphItem[], splicedIndex : number, text : string, item : ParagraphItem) {
-	console.log('append');
-	console.dir(paragraph[splicedIndex]);
-	console.dir(item);
-	const firstPart1 = 0;
-	const firstPart2 = item.indices[0] - paragraph[splicedIndex].indices[0];
-	const firstPart = text.substring(firstPart1, firstPart2);
-	console.log(`firstPart ${firstPart1} ${firstPart2} "${firstPart}"`);
+	const firstPart = text.substring(0, item.indices[0] - paragraph[splicedIndex].indices[0]);
 
 	paragraph.splice(
 		splicedIndex, 1,
@@ -62,17 +50,8 @@ function appendItem(createElement : CreateElement, paragraph : ParagraphItem[], 
 }
 
 function insertItem(createElement : CreateElement, paragraph : ParagraphItem[], splicedIndex : number, text : string, item : ParagraphItem) {
-	console.log('insert');
-	console.dir(paragraph[splicedIndex]);
-	console.dir(item);
-	const firstPart1 = 0;
-	const firstPart2 = item.indices[0] - paragraph[splicedIndex].indices[0];
-	const firstPart = text.substring(firstPart1, firstPart2);
-	console.log(`firstPart ${firstPart1} ${firstPart2} "${firstPart}"`);
-
-	const secondPart1 = item.indices[1] + 1 - paragraph[splicedIndex].indices[0];
-	const secondPart = text.substring(secondPart1);
-	console.log(`secondPart ${secondPart1} "${secondPart}"`);
+	const firstPart = text.substring(0, item.indices[0] - paragraph[splicedIndex].indices[0]);
+	const secondPart = text.substring(item.indices[1] + 1 - paragraph[splicedIndex].indices[0]);
 
 	paragraph.splice(
 		splicedIndex, 1,
@@ -95,14 +74,12 @@ export default class ArticleParagraph extends Vue {
 		];
 
 		for (const userMention of this.userMentions) {
-			console.dir(Array.from(paragraph));
 			const elIndex = paragraph.findIndex(e => e.indices[0] <= userMention.indices[0] && e.indices[1] >= userMention.indices[1]);
 
 			const el = paragraph[elIndex];
 			const text = (el.node.children ? el.node.children[0].text : '') as string;
 
 			if (el.indices[0] === userMention.indices[0] && el.indices[1] === userMention.indices[1]) {
-				console.log('replace whole');
 				paragraph.splice(
 					elIndex, 1,
 					userMentionToAnchor(createElement, userMention),
@@ -122,26 +99,11 @@ export default class ArticleParagraph extends Vue {
 					createElement, paragraph,
 					elIndex, text, userMentionToAnchor(createElement, userMention)
 				);
-
-			/*console.log('elIndex: ' + elIndex);
-			console.dir(el);
-			const elText = (el.node.children ? el.node.children[0].text : '') as string;
-
-			console.log('firstPart1: ' + 0)
-			console.log('firstPart2: ' + userMention.indices[0])
-			const firstPart = elText.substring(0, userMention.indices[0]);
-
-			console.log('secondPart1: ' + ((userMention.indices[1] - userMention.indices[0] + 1) + userMention.indices[0] - el.indices[0]))
-			const secondPart = elText.substring((userMention.indices[1] - userMention.indices[0] + 1) + userMention.indices[0] - el.indices[0]);*/
 		}
 
 		return createElement('p', {
 			class: 'articleParagraph',
 		}, paragraph.map(el => el.node));
-
-		/*return createElement('p', {
-			class: 'articleParagraph',
-		}, this.text);*/
 	}
 }
 </script>
