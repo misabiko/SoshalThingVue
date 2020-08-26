@@ -181,9 +181,6 @@ article.article
 			strong
 				margin-right: 0.5rem
 
-		p
-			white-space: pre-line
-
 	small
 		color: $light
 

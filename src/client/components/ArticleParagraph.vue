@@ -20,7 +20,9 @@ function userMentionToAnchor(createElement : CreateElement, userMention : UserMe
 	return {
 		node: createElement('a', {
 				attrs: {
-					src: 'https://twitter.com/' + userMention.handle,
+					href: 'https://twitter.com/' + userMention.handle,
+					target: '_blank',
+					rel: 'noopener noreferrer',
 				},
 				class: 'articleUserMention',
 			}, '@' + userMention.handle
@@ -109,5 +111,6 @@ export default class ArticleParagraph extends Vue {
 </script>
 
 <style scoped lang='sass'>
-
+p.articleParagraph
+	white-space: pre-line
 </style>
