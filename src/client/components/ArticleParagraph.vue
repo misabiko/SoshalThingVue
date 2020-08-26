@@ -9,14 +9,14 @@ interface ParagraphItem {
 	indices: Indices,
 }
 
-function textWithIndices(createElement : CreateElement, text : string, startIndex : number) {
+function textWithIndices(createElement : CreateElement, text : string, startIndex : number) : ParagraphItem {
 	return {
 		node: createElement('span', text),
 		indices: [startIndex, startIndex + text.length - 1] as Indices,
 	}
 }
 
-function userMentionToAnchor(createElement : CreateElement, userMention : UserMentionData) {
+function userMentionToAnchor(createElement : CreateElement, userMention : UserMentionData) : ParagraphItem {
 	return {
 		node: createElement('a', {
 				attrs: {
@@ -84,6 +84,48 @@ function insertItem(createElement : CreateElement, paragraph : ParagraphItem[], 
 	);
 }
 
+function addItems(createElement : CreateElement, paragraph : ParagraphItem[], items : { indices: Indices }[], renderer : Function) {
+	for (const item of items) {
+		const elIndex = paragraph.findIndex(e => e.indices[0] <= item.indices[0] && e.indices[1] >= item.indices[1]);
+
+		if (elIndex < 0)
+			throw new Error(`${item} doesn't fit in the post.`);
+
+		const el = paragraph[elIndex];
+		const text = (el.node.children ? el.node.children[0].text : '') as string;
+
+		if (el.indices[0] === item.indices[0] && el.indices[1] === item.indices[1]) {
+			paragraph.splice(
+				elIndex, 1,
+				renderer(createElement, item),
+			);
+		}else if (el.indices[0] === item.indices[0])
+			prependItem(
+				createElement, paragraph, el,
+				elIndex, text, renderer(createElement, item)
+			);
+		else if (el.indices[1] === item.indices[1])
+			appendItem(
+				createElement, paragraph, el,
+				elIndex, text, renderer(createElement, item)
+			);
+		else
+			insertItem(
+				createElement, paragraph, el,
+				elIndex, text, renderer(createElement, item)
+			);
+
+		/*console.dir(Array.from(paragraph));
+		let lastIndex = -1;
+		for (const i of paragraph) {
+			if (i.indices[0] < lastIndex || i.indices[0] > i.indices[1])
+				throw new Error("Paragraph isn't in the right order.");
+
+			lastIndex = i.indices[1];
+		}*/
+	}
+}
+
 @Component
 export default class ArticleParagraph extends Vue {
 	@Prop({type: String, required: true})
@@ -94,89 +136,13 @@ export default class ArticleParagraph extends Vue {
 	readonly hashtags! : HashtagData[];
 
 	render(createElement : CreateElement) {
-		const paragraph : ParagraphItem[] = [
+		const paragraph = [
 			textWithIndices(createElement, this.text, 0),
 		];
 
-		for (const userMention of this.userMentions) {
-			const elIndex = paragraph.findIndex(e => e.indices[0] <= userMention.indices[0] && e.indices[1] >= userMention.indices[1]);
+		addItems(createElement, paragraph, this.userMentions, userMentionToAnchor);
 
-			if (elIndex < 0)
-				throw new Error(`${userMention} doesn't fit in the post.`);
-
-			const el = paragraph[elIndex];
-			const text = (el.node.children ? el.node.children[0].text : '') as string;
-
-			if (el.indices[0] === userMention.indices[0] && el.indices[1] === userMention.indices[1]) {
-				paragraph.splice(
-					elIndex, 1,
-					userMentionToAnchor(createElement, userMention),
-				);
-			}else if (el.indices[0] === userMention.indices[0])
-				prependItem(
-					createElement, paragraph, el,
-					elIndex, text, userMentionToAnchor(createElement, userMention)
-				);
-			else if (el.indices[1] === userMention.indices[1])
-				appendItem(
-					createElement, paragraph, el,
-					elIndex, text, userMentionToAnchor(createElement, userMention)
-				);
-			else
-				insertItem(
-					createElement, paragraph, el,
-					elIndex, text, userMentionToAnchor(createElement, userMention)
-				);
-
-			/*console.dir(Array.from(paragraph));
-			let lastIndex = -1;
-			for (const item of paragraph) {
-				if (item.indices[0] < lastIndex || item.indices[0] > item.indices[1])
-					throw new Error("Paragraph isn't in the right order.");
-
-				lastIndex = item.indices[1];
-			}*/
-		}
-
-		for (const hashtag of this.hashtags) {
-			const elIndex = paragraph.findIndex(e => e.indices[0] <= hashtag.indices[0] && e.indices[1] >= hashtag.indices[1]);
-
-			if (elIndex < 0)
-				throw new Error(`${hashtag} doesn't fit in the post.`);
-
-			const el = paragraph[elIndex];
-			const text = (el.node.children ? el.node.children[0].text : '') as string;
-
-			if (el.indices[0] === hashtag.indices[0] && el.indices[1] === hashtag.indices[1]) {
-				paragraph.splice(
-					elIndex, 1,
-					hashtagToAnchor(createElement, hashtag),
-				);
-			}else if (el.indices[0] === hashtag.indices[0])
-				prependItem(
-					createElement, paragraph, el,
-					elIndex, text, hashtagToAnchor(createElement, hashtag)
-				);
-			else if (el.indices[1] === hashtag.indices[1])
-				appendItem(
-					createElement, paragraph, el,
-					elIndex, text, hashtagToAnchor(createElement, hashtag)
-				);
-			else
-				insertItem(
-					createElement, paragraph, el,
-					elIndex, text, hashtagToAnchor(createElement, hashtag)
-				);
-
-			/*console.dir(Array.from(paragraph));
-			let lastIndex = -1;
-			for (const item of paragraph) {
-				if (item.indices[0] < lastIndex || item.indices[0] > item.indices[1])
-					throw new Error("Paragraph isn't in the right order.");
-
-				lastIndex = item.indices[1];
-			}*/
-		}
+		addItems(createElement, paragraph, this.hashtags, userMentionToAnchor);
 
 		if (paragraph[0].indices[0] !== 0 || paragraph[paragraph.length - 1].indices[1] !== this.text.length - 1)
 			throw new Error(`Paragraph endings aren't 0 and ${this.text.length - 1}`);
