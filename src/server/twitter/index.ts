@@ -127,7 +127,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 						return {
 							url: media.media_url_https,
 							sizes: media.sizes,
-							indices: media.indices,
+							indices: [media.indices[0], media.indices[1] - 1],
 						};
 					});
 					break;
@@ -147,7 +147,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 								};
 							}),
 							autoplay: false,
-							indices: media.indices,
+							indices: [media.indices[0], media.indices[1] - 1],
 						};
 					}
 					break;
@@ -166,7 +166,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 								};
 							}),
 							autoplay: true,
-							indices: media.indices,
+							indices: [media.indices[0], media.indices[1] - 1],
 						};
 					}
 					break;
@@ -177,7 +177,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 			[{
 				url: tweet.entities.media[0].media_url_https,
 				sizes: tweet.entities.media[0].sizes,
-				indices: tweet.entities.media[0].indices,
+				indices: [tweet.entities.media[0].indices[0], tweet.entities.media[0].indices[1] - 1],
 			}] :
 			undefined;
 
@@ -185,13 +185,11 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 		id: user_mention.id_str,
 		handle: user_mention.screen_name,
 		name: user_mention.name,
-		//Twitter's last index is the following index, so I'm returning the actual last index
 		indices: [user_mention.indices[0], user_mention.indices[1] - 1],
 	}));
 
 	hashtags = tweet.entities.hashtags.map(hashtag => ({
 		text: hashtag.text,
-		//Twitter's last index is the following index, so I'm returning the actual last index
 		indices: [hashtag.indices[0], hashtag.indices[1] - 1],
 	}));
 

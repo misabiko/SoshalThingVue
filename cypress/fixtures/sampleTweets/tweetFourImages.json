@@ -1,0 +1,442 @@
+{
+	"id": "1298468439518924800",
+	"creationTime": "Wed Aug 26 03:52:55 +0000 2020",
+	"authorName": "やす",
+	"authorHandle": "takeyasu510",
+	"authorAvatar": "https://pbs.twimg.com/profile_images/1284800927468105729/ERKhlY_w_normal.png",
+	"text": "赤蛮奇の流れが来てるみたいなので流れに乗ります\nフォローしてる人の影響でばんきもコンスタントに描いてたりする https://t.co/r3OG65v0vX",
+	"images": [
+		{
+			"url": "https://pbs.twimg.com/media/EgUWGB4UcAAn4aw.jpg",
+			"sizes": {
+				"medium": {
+					"w": 1200,
+					"h": 960,
+					"resize": "fit"
+				},
+				"thumb": {
+					"w": 150,
+					"h": 150,
+					"resize": "crop"
+				},
+				"small": {
+					"w": 680,
+					"h": 544,
+					"resize": "fit"
+				},
+				"large": {
+					"w": 1280,
+					"h": 1024,
+					"resize": "fit"
+				}
+			},
+			"indices": [
+				55,
+				77
+			]
+		},
+		{
+			"url": "https://pbs.twimg.com/media/EgUWG_9UwAAVQdB.jpg",
+			"sizes": {
+				"large": {
+					"w": 1734,
+					"h": 1235,
+					"resize": "fit"
+				},
+				"thumb": {
+					"w": 150,
+					"h": 150,
+					"resize": "crop"
+				},
+				"small": {
+					"w": 680,
+					"h": 484,
+					"resize": "fit"
+				},
+				"medium": {
+					"w": 1200,
+					"h": 855,
+					"resize": "fit"
+				}
+			},
+			"indices": [
+				55,
+				77
+			]
+		},
+		{
+			"url": "https://pbs.twimg.com/media/EgUWH-rUMAIADwf.jpg",
+			"sizes": {
+				"large": {
+					"w": 1199,
+					"h": 953,
+					"resize": "fit"
+				},
+				"thumb": {
+					"w": 150,
+					"h": 150,
+					"resize": "crop"
+				},
+				"small": {
+					"w": 680,
+					"h": 540,
+					"resize": "fit"
+				},
+				"medium": {
+					"w": 1199,
+					"h": 953,
+					"resize": "fit"
+				}
+			},
+			"indices": [
+				55,
+				77
+			]
+		},
+		{
+			"url": "https://pbs.twimg.com/media/EgUWIoBU0AATO3s.jpg",
+			"sizes": {
+				"thumb": {
+					"w": 150,
+					"h": 150,
+					"resize": "crop"
+				},
+				"large": {
+					"w": 1200,
+					"h": 1200,
+					"resize": "fit"
+				},
+				"medium": {
+					"w": 1200,
+					"h": 1200,
+					"resize": "fit"
+				},
+				"small": {
+					"w": 680,
+					"h": 680,
+					"resize": "fit"
+				}
+			},
+			"indices": [
+				55,
+				77
+			]
+		}
+	],
+	"liked": false,
+	"reposted": false,
+	"likeCount": 98,
+	"repostCount": 28,
+	"userMentions": [],
+	"hashtags": [],
+	"rawObject": {
+		"created_at": "Wed Aug 26 03:52:55 +0000 2020",
+		"id": 1298468439518924800,
+		"id_str": "1298468439518924800",
+		"full_text": "赤蛮奇の流れが来てるみたいなので流れに乗ります\nフォローしてる人の影響でばんきもコンスタントに描いてたりする https://t.co/r3OG65v0vX",
+		"truncated": false,
+		"display_text_range": [
+			0,
+			54
+		],
+		"entities": {
+			"hashtags": [],
+			"symbols": [],
+			"user_mentions": [],
+			"urls": [],
+			"media": [
+				{
+					"id": 1298468360405938200,
+					"id_str": "1298468360405938176",
+					"indices": [
+						55,
+						78
+					],
+					"media_url": "http://pbs.twimg.com/media/EgUWGB4UcAAn4aw.jpg",
+					"media_url_https": "https://pbs.twimg.com/media/EgUWGB4UcAAn4aw.jpg",
+					"url": "https://t.co/r3OG65v0vX",
+					"display_url": "pic.twitter.com/r3OG65v0vX",
+					"expanded_url": "https://twitter.com/takeyasu510/status/1298468439518924800/photo/1",
+					"type": "photo",
+					"sizes": {
+						"medium": {
+							"w": 1200,
+							"h": 960,
+							"resize": "fit"
+						},
+						"thumb": {
+							"w": 150,
+							"h": 150,
+							"resize": "crop"
+						},
+						"small": {
+							"w": 680,
+							"h": 544,
+							"resize": "fit"
+						},
+						"large": {
+							"w": 1280,
+							"h": 1024,
+							"resize": "fit"
+						}
+					}
+				}
+			]
+		},
+		"extended_entities": {
+			"media": [
+				{
+					"id": 1298468360405938200,
+					"id_str": "1298468360405938176",
+					"indices": [
+						55,
+						78
+					],
+					"media_url": "http://pbs.twimg.com/media/EgUWGB4UcAAn4aw.jpg",
+					"media_url_https": "https://pbs.twimg.com/media/EgUWGB4UcAAn4aw.jpg",
+					"url": "https://t.co/r3OG65v0vX",
+					"display_url": "pic.twitter.com/r3OG65v0vX",
+					"expanded_url": "https://twitter.com/takeyasu510/status/1298468439518924800/photo/1",
+					"type": "photo",
+					"sizes": {
+						"medium": {
+							"w": 1200,
+							"h": 960,
+							"resize": "fit"
+						},
+						"thumb": {
+							"w": 150,
+							"h": 150,
+							"resize": "crop"
+						},
+						"small": {
+							"w": 680,
+							"h": 544,
+							"resize": "fit"
+						},
+						"large": {
+							"w": 1280,
+							"h": 1024,
+							"resize": "fit"
+						}
+					}
+				},
+				{
+					"id": 1298468377069928400,
+					"id_str": "1298468377069928448",
+					"indices": [
+						55,
+						78
+					],
+					"media_url": "http://pbs.twimg.com/media/EgUWG_9UwAAVQdB.jpg",
+					"media_url_https": "https://pbs.twimg.com/media/EgUWG_9UwAAVQdB.jpg",
+					"url": "https://t.co/r3OG65v0vX",
+					"display_url": "pic.twitter.com/r3OG65v0vX",
+					"expanded_url": "https://twitter.com/takeyasu510/status/1298468439518924800/photo/1",
+					"type": "photo",
+					"sizes": {
+						"large": {
+							"w": 1734,
+							"h": 1235,
+							"resize": "fit"
+						},
+						"thumb": {
+							"w": 150,
+							"h": 150,
+							"resize": "crop"
+						},
+						"small": {
+							"w": 680,
+							"h": 484,
+							"resize": "fit"
+						},
+						"medium": {
+							"w": 1200,
+							"h": 855,
+							"resize": "fit"
+						}
+					}
+				},
+				{
+					"id": 1298468393905827800,
+					"id_str": "1298468393905827842",
+					"indices": [
+						55,
+						78
+					],
+					"media_url": "http://pbs.twimg.com/media/EgUWH-rUMAIADwf.jpg",
+					"media_url_https": "https://pbs.twimg.com/media/EgUWH-rUMAIADwf.jpg",
+					"url": "https://t.co/r3OG65v0vX",
+					"display_url": "pic.twitter.com/r3OG65v0vX",
+					"expanded_url": "https://twitter.com/takeyasu510/status/1298468439518924800/photo/1",
+					"type": "photo",
+					"sizes": {
+						"large": {
+							"w": 1199,
+							"h": 953,
+							"resize": "fit"
+						},
+						"thumb": {
+							"w": 150,
+							"h": 150,
+							"resize": "crop"
+						},
+						"small": {
+							"w": 680,
+							"h": 540,
+							"resize": "fit"
+						},
+						"medium": {
+							"w": 1199,
+							"h": 953,
+							"resize": "fit"
+						}
+					}
+				},
+				{
+					"id": 1298468405003997200,
+					"id_str": "1298468405003997184",
+					"indices": [
+						55,
+						78
+					],
+					"media_url": "http://pbs.twimg.com/media/EgUWIoBU0AATO3s.jpg",
+					"media_url_https": "https://pbs.twimg.com/media/EgUWIoBU0AATO3s.jpg",
+					"url": "https://t.co/r3OG65v0vX",
+					"display_url": "pic.twitter.com/r3OG65v0vX",
+					"expanded_url": "https://twitter.com/takeyasu510/status/1298468439518924800/photo/1",
+					"type": "photo",
+					"sizes": {
+						"thumb": {
+							"w": 150,
+							"h": 150,
+							"resize": "crop"
+						},
+						"large": {
+							"w": 1200,
+							"h": 1200,
+							"resize": "fit"
+						},
+						"medium": {
+							"w": 1200,
+							"h": 1200,
+							"resize": "fit"
+						},
+						"small": {
+							"w": 680,
+							"h": 680,
+							"resize": "fit"
+						}
+					}
+				}
+			]
+		},
+		"source": "<a href=\"http://twitter.com/download/android\" rel=\"nofollow\">Twitter for Android</a>",
+		"in_reply_to_status_id": null,
+		"in_reply_to_status_id_str": null,
+		"in_reply_to_user_id": null,
+		"in_reply_to_user_id_str": null,
+		"in_reply_to_screen_name": null,
+		"user": {
+			"id": 1102237768049020900,
+			"id_str": "1102237768049020928",
+			"name": "やす",
+			"screen_name": "takeyasu510",
+			"location": "愛知県　田舎らへん",
+			"description": "東方のレトロ音源アレンジをしてるよ。\nサークル「わいえむ2612」で活動（したいな）\nすけぶ→https://t.co/FQ1enZtajm\nbooth →https://t.co/Jleszstqva\npixiv→https://t.co/zzY2oZwduz\nFANBOXで毎",
+			"url": "https://t.co/Eh55SqnnIn",
+			"entities": {
+				"url": {
+					"urls": [
+						{
+							"url": "https://t.co/Eh55SqnnIn",
+							"expanded_url": "https://yasuyasuyaya.fanbox.cc/",
+							"display_url": "yasuyasuyaya.fanbox.cc",
+							"indices": [
+								0,
+								23
+							]
+						}
+					]
+				},
+				"description": {
+					"urls": [
+						{
+							"url": "https://t.co/FQ1enZtajm",
+							"expanded_url": "http://skeb.jp/@takeyasu510",
+							"display_url": "skeb.jp/@takeyasu510",
+							"indices": [
+								47,
+								70
+							]
+						},
+						{
+							"url": "https://t.co/Jleszstqva",
+							"expanded_url": "http://takeyasu510.booth.pm",
+							"display_url": "takeyasu510.booth.pm",
+							"indices": [
+								78,
+								101
+							]
+						},
+						{
+							"url": "https://t.co/zzY2oZwduz",
+							"expanded_url": "https://www.pixiv.net/users/7873465",
+							"display_url": "pixiv.net/users/7873465",
+							"indices": [
+								108,
+								131
+							]
+						}
+					]
+				}
+			},
+			"protected": false,
+			"followers_count": 2066,
+			"friends_count": 737,
+			"listed_count": 25,
+			"created_at": "Sun Mar 03 16:02:17 +0000 2019",
+			"favourites_count": 10227,
+			"utc_offset": null,
+			"time_zone": null,
+			"geo_enabled": false,
+			"verified": false,
+			"statuses_count": 9539,
+			"lang": null,
+			"contributors_enabled": false,
+			"is_translator": false,
+			"is_translation_enabled": false,
+			"profile_background_color": "F5F8FA",
+			"profile_background_image_url": null,
+			"profile_background_image_url_https": null,
+			"profile_background_tile": false,
+			"profile_image_url": "http://pbs.twimg.com/profile_images/1284800927468105729/ERKhlY_w_normal.png",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/1284800927468105729/ERKhlY_w_normal.png",
+			"profile_banner_url": "https://pbs.twimg.com/profile_banners/1102237768049020928/1594783257",
+			"profile_link_color": "1DA1F2",
+			"profile_sidebar_border_color": "C0DEED",
+			"profile_sidebar_fill_color": "DDEEF6",
+			"profile_text_color": "333333",
+			"profile_use_background_image": true,
+			"has_extended_profile": true,
+			"default_profile": true,
+			"default_profile_image": false,
+			"following": false,
+			"follow_request_sent": false,
+			"notifications": false,
+			"translator_type": "none"
+		},
+		"geo": null,
+		"coordinates": null,
+		"place": null,
+		"contributors": null,
+		"is_quote_status": false,
+		"retweet_count": 28,
+		"favorite_count": 98,
+		"favorited": false,
+		"retweeted": false,
+		"possibly_sensitive": false,
+		"possibly_sensitive_appealable": false,
+		"lang": "ja"
+	}
+}
