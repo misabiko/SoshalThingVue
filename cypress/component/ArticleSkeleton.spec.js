@@ -57,4 +57,15 @@ describe('ArticleParagraph', () => {
 			.should('not.have.text', 'ToxicxEternity')
 			.should('not.have.text', 'HomykSmash')
 	})
+
+	it("shouldn't give an undefined element", () => {
+		cy.fixture('tweetElUndefined').then(postData => {
+			mount(ArticleParagraph, {
+				propsData: {
+					text: postData.text,
+					userMentions: postData.userMentions,
+				}
+			})
+		})
+	})
 })

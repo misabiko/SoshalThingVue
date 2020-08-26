@@ -60,7 +60,7 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 		authorName: tweet.user.name,
 		authorHandle: tweet.user.screen_name,
 		authorAvatar: tweet.user.profile_image_url_https,
-		text: removeTextLink(tweet.full_text),
+		text: tweet.full_text,
 		images,
 		video,
 		liked: tweet.favorited,
@@ -97,7 +97,7 @@ function quoteToQuoteData(tweet : Tweet) : QuoteData {
 		authorName: tweet.user.name,
 		authorHandle: tweet.user.screen_name,
 		authorAvatar: tweet.user.profile_image_url_https,
-		text: removeTextLink(tweet.full_text),
+		text: tweet.full_text,
 		liked: tweet.favorited,
 		reposted: tweet.retweeted,
 		likeCount: tweet.favorite_count,
@@ -185,6 +185,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 	return {images, video, userMentions};
 }
 
+//TODO Remove the removeTextLink func
 export function removeTextLink(text : string) : string {
 	const lastIndex = text.lastIndexOf('https://t.co');
 

@@ -1,0 +1,221 @@
+{
+	"id": "1298397679731400704",
+	"creationTime": "Tue Aug 25 23:11:44 +0000 2020",
+	"authorName": "YouTube PAPASON",
+	"authorHandle": "Starwine1",
+	"authorAvatar": "https://pbs.twimg.com/profile_images/882231804307963905/wjaf_q8f_normal.jpg",
+	"text": "PAPASON - 오늘도 파워! BALLONS OVER BAGAN - 트라이얼스 라이징 - Trials Rising #Game,#MobileGame,#New,#gamedev,#screenshotsaturday,#mobilegamer,#Gamer,#gaming,#gamerslife,#STEAM,#Trials_Rising  https://t.co/JdUSLXqDhT 출처 @YouTube",
+	"liked": false,
+	"reposted": false,
+	"likeCount": 1,
+	"repostCount": 0,
+	"userMentions": [
+		{
+			"id": "10228272",
+			"handle": "YouTube",
+			"name": "YouTube",
+			"indices": [
+				207,
+				214
+			]
+		}
+	],
+	"rawObject": {
+		"created_at": "Tue Aug 25 23:11:44 +0000 2020",
+		"id": 1298397679731400700,
+		"id_str": "1298397679731400704",
+		"full_text": "PAPASON - 오늘도 파워! BALLONS OVER BAGAN - 트라이얼스 라이징 - Trials Rising #Game,#MobileGame,#New,#gamedev,#screenshotsaturday,#mobilegamer,#Gamer,#gaming,#gamerslife,#STEAM,#Trials_Rising  https://t.co/JdUSLXqDhT 출처 @YouTube",
+		"truncated": false,
+		"display_text_range": [
+			0,
+			215
+		],
+		"entities": {
+			"hashtags": [
+				{
+					"text": "Game",
+					"indices": [
+						65,
+						70
+					]
+				},
+				{
+					"text": "MobileGame",
+					"indices": [
+						71,
+						82
+					]
+				},
+				{
+					"text": "New",
+					"indices": [
+						83,
+						87
+					]
+				},
+				{
+					"text": "gamedev",
+					"indices": [
+						88,
+						96
+					]
+				},
+				{
+					"text": "screenshotsaturday",
+					"indices": [
+						97,
+						116
+					]
+				},
+				{
+					"text": "mobilegamer",
+					"indices": [
+						117,
+						129
+					]
+				},
+				{
+					"text": "Gamer",
+					"indices": [
+						130,
+						136
+					]
+				},
+				{
+					"text": "gaming",
+					"indices": [
+						137,
+						144
+					]
+				},
+				{
+					"text": "gamerslife",
+					"indices": [
+						145,
+						156
+					]
+				},
+				{
+					"text": "STEAM",
+					"indices": [
+						157,
+						163
+					]
+				},
+				{
+					"text": "Trials_Rising",
+					"indices": [
+						164,
+						178
+					]
+				}
+			],
+			"symbols": [],
+			"user_mentions": [
+				{
+					"screen_name": "YouTube",
+					"name": "YouTube",
+					"id": 10228272,
+					"id_str": "10228272",
+					"indices": [
+						207,
+						215
+					]
+				}
+			],
+			"urls": [
+				{
+					"url": "https://t.co/JdUSLXqDhT",
+					"expanded_url": "https://youtu.be/oLBzpKteVsY",
+					"display_url": "youtu.be/oLBzpKteVsY",
+					"indices": [
+						180,
+						203
+					]
+				}
+			]
+		},
+		"metadata": {
+			"result_type": "recent",
+			"iso_language_code": "ko"
+		},
+		"source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+		"in_reply_to_status_id": null,
+		"in_reply_to_status_id_str": null,
+		"in_reply_to_user_id": null,
+		"in_reply_to_user_id_str": null,
+		"in_reply_to_screen_name": null,
+		"user": {
+			"id": 171802479,
+			"id_str": "171802479",
+			"name": "YouTube PAPASON",
+			"screen_name": "Starwine1",
+			"location": "대한민국 서울",
+			"description": "🧑🏻",
+			"url": "https://t.co/IcKOAlMbsn",
+			"entities": {
+				"url": {
+					"urls": [
+						{
+							"url": "https://t.co/IcKOAlMbsn",
+							"expanded_url": "https://www.youtube.com/channel/UC7rwVbXEXib2K-H4jCZPRSA/join#tab=4",
+							"display_url": "youtube.com/channel/UC7rwV…",
+							"indices": [
+								0,
+								23
+							]
+						}
+					]
+				},
+				"description": {
+					"urls": []
+				}
+			},
+			"protected": false,
+			"followers_count": 2796,
+			"friends_count": 2857,
+			"listed_count": 35,
+			"created_at": "Wed Jul 28 05:46:16 +0000 2010",
+			"favourites_count": 7840,
+			"utc_offset": null,
+			"time_zone": null,
+			"geo_enabled": false,
+			"verified": false,
+			"statuses_count": 22822,
+			"lang": null,
+			"contributors_enabled": false,
+			"is_translator": false,
+			"is_translation_enabled": false,
+			"profile_background_color": "FFFFFF",
+			"profile_background_image_url": "http://abs.twimg.com/images/themes/theme1/bg.png",
+			"profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme1/bg.png",
+			"profile_background_tile": true,
+			"profile_image_url": "http://pbs.twimg.com/profile_images/882231804307963905/wjaf_q8f_normal.jpg",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/882231804307963905/wjaf_q8f_normal.jpg",
+			"profile_banner_url": "https://pbs.twimg.com/profile_banners/171802479/1499175597",
+			"profile_link_color": "1C806A",
+			"profile_sidebar_border_color": "0E0F0F",
+			"profile_sidebar_fill_color": "E6F7F6",
+			"profile_text_color": "000000",
+			"profile_use_background_image": true,
+			"has_extended_profile": false,
+			"default_profile": false,
+			"default_profile_image": false,
+			"following": false,
+			"follow_request_sent": false,
+			"notifications": false,
+			"translator_type": "none"
+		},
+		"geo": null,
+		"coordinates": null,
+		"place": null,
+		"contributors": null,
+		"is_quote_status": false,
+		"retweet_count": 0,
+		"favorite_count": 1,
+		"favorited": false,
+		"retweeted": false,
+		"possibly_sensitive": false,
+		"lang": "ko"
+	}
+}
