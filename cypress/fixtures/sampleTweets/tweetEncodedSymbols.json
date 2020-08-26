@@ -1,0 +1,139 @@
+{
+	"id": "1298640876839636993",
+	"creationTime": "Wed Aug 26 15:18:07 +0000 2020",
+	"authorName": "白色キャンバス",
+	"authorHandle": "yg_siro",
+	"authorAvatar": "https://pbs.twimg.com/profile_images/1297563398473830400/6krmoZL2_normal.jpg",
+	"text": "君の知らない物語 / supercell(Covered by コバソロ &amp; SiN &amp; てっぺい &amp; taichi.) https://t.co/wQmMBIpKix @YouTubeより 声が好き",
+	"liked": false,
+	"reposted": false,
+	"likeCount": 0,
+	"repostCount": 0,
+	"userMentions": [
+		{
+			"id": "10228272",
+			"handle": "YouTube",
+			"name": "YouTube",
+			"indices": [
+				97,
+				104
+			]
+		}
+	],
+	"hashtags": [],
+	"externalLinks": [
+		{
+			"truncatedURL": "youtu.be/y5a22nvv508",
+			"fullURL": "https://youtu.be/y5a22nvv508",
+			"indices": [
+				73,
+				95
+			]
+		}
+	],
+	"rawObject": {
+		"created_at": "Wed Aug 26 15:18:07 +0000 2020",
+		"id": 1298640876839637000,
+		"id_str": "1298640876839636993",
+		"full_text": "君の知らない物語 / supercell(Covered by コバソロ &amp; SiN &amp; てっぺい &amp; taichi.) https://t.co/wQmMBIpKix @YouTubeより 声が好き",
+		"truncated": false,
+		"display_text_range": [
+			0,
+			112
+		],
+		"entities": {
+			"hashtags": [],
+			"symbols": [],
+			"user_mentions": [
+				{
+					"screen_name": "YouTube",
+					"name": "YouTube",
+					"id": 10228272,
+					"id_str": "10228272",
+					"indices": [
+						97,
+						105
+					]
+				}
+			],
+			"urls": [
+				{
+					"url": "https://t.co/wQmMBIpKix",
+					"expanded_url": "https://youtu.be/y5a22nvv508",
+					"display_url": "youtu.be/y5a22nvv508",
+					"indices": [
+						73,
+						96
+					]
+				}
+			]
+		},
+		"source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+		"in_reply_to_status_id": null,
+		"in_reply_to_status_id_str": null,
+		"in_reply_to_user_id": null,
+		"in_reply_to_user_id_str": null,
+		"in_reply_to_screen_name": null,
+		"user": {
+			"id": 114178175,
+			"id_str": "114178175",
+			"name": "白色キャンバス",
+			"screen_name": "yg_siro",
+			"location": "宮城県仙台市",
+			"description": "呟きはらくがきメイン。 油彩筆の感覚でGペン使うのがマイブーム 別名義：夜神シロ(yagamisiro)。男。",
+			"url": null,
+			"entities": {
+				"description": {
+					"urls": []
+				}
+			},
+			"protected": false,
+			"followers_count": 4848,
+			"friends_count": 1360,
+			"listed_count": 109,
+			"created_at": "Sun Feb 14 12:19:34 +0000 2010",
+			"favourites_count": 7326,
+			"utc_offset": null,
+			"time_zone": null,
+			"geo_enabled": false,
+			"verified": false,
+			"statuses_count": 13836,
+			"lang": null,
+			"contributors_enabled": false,
+			"is_translator": false,
+			"is_translation_enabled": false,
+			"profile_background_color": "FFFFFF",
+			"profile_background_image_url": "http://abs.twimg.com/images/themes/theme19/bg.gif",
+			"profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme19/bg.gif",
+			"profile_background_tile": false,
+			"profile_image_url": "http://pbs.twimg.com/profile_images/1297563398473830400/6krmoZL2_normal.jpg",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/1297563398473830400/6krmoZL2_normal.jpg",
+			"profile_banner_url": "https://pbs.twimg.com/profile_banners/114178175/1598101411",
+			"profile_link_color": "E81C4F",
+			"profile_sidebar_border_color": "FFFFFF",
+			"profile_sidebar_fill_color": "F6FFD1",
+			"profile_text_color": "333333",
+			"profile_use_background_image": true,
+			"has_extended_profile": true,
+			"default_profile": false,
+			"default_profile_image": false,
+			"following": true,
+			"follow_request_sent": false,
+			"notifications": false,
+			"translator_type": "none"
+		},
+		"geo": null,
+		"coordinates": null,
+		"place": null,
+		"contributors": null,
+		"is_quote_status": false,
+		"retweet_count": 0,
+		"favorite_count": 0,
+		"favorited": false,
+		"retweeted": false,
+		"possibly_sensitive": false,
+		"possibly_sensitive_appealable": false,
+		"lang": "ja",
+		"_headers": {}
+	}
+}

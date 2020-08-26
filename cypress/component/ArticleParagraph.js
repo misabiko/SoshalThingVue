@@ -158,5 +158,21 @@ describe('ArticleParagraph', () => {
 			cy.get('a.articleHashtag')
 				.should('have.length', 3)
 		})
+
+		it('tweetYoutubeEnd', () => {
+			mountParagraph('tweetYoutubeEnd')
+
+			cy.get('.articleParagraph')
+				.children().should('have.length', 18)
+
+			cy.get('.articleParagraph > span')
+				.should('have.length', 9)
+
+			cy.get('a.articleExternalLink')
+				.should('have.length', 2)
+
+			cy.get('a.articleHashtag')
+				.should('have.length', 7)
+		})
 	})
 })

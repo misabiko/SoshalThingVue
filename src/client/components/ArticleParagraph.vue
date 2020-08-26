@@ -10,6 +10,7 @@ import {
 } from '../../core/PostData';
 import {CreateElement} from 'vue';
 import {VNode} from 'vue/types/vnode';
+import he from 'he';
 
 interface ParagraphItem {
 	node : VNode,
@@ -18,7 +19,7 @@ interface ParagraphItem {
 
 function textWithIndices(createElement : CreateElement, text : string, startIndex : number, offset = 0) : ParagraphItem {
 	const item = {
-		node: createElement('span', text),
+		node: createElement('span', he.decode(text)),
 		indices: [startIndex, startIndex + text.length - 1 + offset] as Indices,
 	}
 	//console.log('textWithIndices ', item);
@@ -166,6 +167,10 @@ function addItems(createElement : CreateElement, paragraph : ParagraphItem[], it
 	for (const item of items) {
 		/*console.log('Paragraph: ', Array.from(paragraph));
 		console.log('Item: ', item);*/
+
+		if (totalOffset)
+			item.indices = item.indices.map(index => index + totalOffset) as Indices;
+
 		const elIndex = paragraph.findIndex(e => e.indices[0] <= item.indices[0] && e.indices[1] >= item.indices[1]);
 
 		if (elIndex < 0) {
@@ -175,9 +180,6 @@ function addItems(createElement : CreateElement, paragraph : ParagraphItem[], it
 
 		const el = paragraph[elIndex];
 		const text = (el.node.children ? el.node.children[0].text : '') as string;
-
-		if (totalOffset)
-			item.indices = item.indices.map(index => index + totalOffset) as Indices;
 
 		const indiceOffset = getIndiceOffset ? getIndiceOffset(item) : 0;
 		totalOffset += indiceOffset;
@@ -308,7 +310,7 @@ export default class ArticleParagraph extends Vue {
 					};
 					removeItems(createElement, paragraph, [item]);
 				}else
-					removeItems(createElement, paragraph, [this.images[this.images.length - 1]]);
+					removeItems(createElement, paragraph, [{indices: this.images[this.images.length - 1].indices}]);
 			}
 
 			if (this.video) {
@@ -322,7 +324,7 @@ export default class ArticleParagraph extends Vue {
 					};
 					removeItems(createElement, paragraph, [item]);
 				}else
-					removeItems(createElement, paragraph, [this.video]);
+					removeItems(createElement, paragraph, [{indices: this.video.indices}]);
 			}
 
 			//Exaggerated way to "paragraph.trimEnd()"
