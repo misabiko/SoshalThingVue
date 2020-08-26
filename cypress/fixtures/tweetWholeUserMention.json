@@ -4,7 +4,7 @@
 	"authorName": "유해",
 	"authorHandle": "Uhay024",
 	"authorAvatar": "https://pbs.twimg.com/profile_images/1052186836179738624/lmd1w7h0_normal.jpg",
-	"text": "@RaksorToviks",
+	"text": "@RaksorToviks https://t.co/UCdUKlbXP0",
 	"images": [
 		{
 			"url": "https://pbs.twimg.com/media/EgSaSshUMAAkAEj.png",
@@ -29,7 +29,11 @@
 					"h": 150,
 					"resize": "crop"
 				}
-			}
+			},
+			"indices": [
+				14,
+				37
+			]
 		}
 	],
 	"liked": false,
@@ -47,6 +51,7 @@
 			]
 		}
 	],
+	"hashtags": [],
 	"rawObject": {
 		"created_at": "Tue Aug 25 18:51:44 +0000 2020",
 		"id": 1298332246613479400,
@@ -152,10 +157,6 @@
 				}
 			]
 		},
-		"metadata": {
-			"iso_language_code": "und",
-			"result_type": "recent"
-		},
 		"source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
 		"in_reply_to_status_id": 1298331370524012500,
 		"in_reply_to_status_id_str": "1298331370524012544",
@@ -176,11 +177,11 @@
 				}
 			},
 			"protected": false,
-			"followers_count": 831,
-			"friends_count": 978,
+			"followers_count": 834,
+			"friends_count": 979,
 			"listed_count": 9,
 			"created_at": "Wed Aug 16 07:11:40 +0000 2017",
-			"favourites_count": 21113,
+			"favourites_count": 21115,
 			"utc_offset": null,
 			"time_zone": null,
 			"geo_enabled": false,
@@ -219,6 +220,8 @@
 		"favorited": false,
 		"retweeted": false,
 		"possibly_sensitive": false,
-		"lang": "und"
+		"possibly_sensitive_appealable": false,
+		"lang": "und",
+		"_headers": {}
 	}
 }

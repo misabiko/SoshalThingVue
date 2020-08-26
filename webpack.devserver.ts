@@ -7,11 +7,11 @@ import configure from './src/server/configure';
 
 export default merge(clientConfig, <Configuration>{
 	mode: 'development',
-	devServer: {
+	/*devServer: {
 		contentBase: path.resolve(__dirname, 'public'),
 		before: configure,
 		port: 3000,
-	},
+	},*/
 	module: {
 		rules: [
 			{

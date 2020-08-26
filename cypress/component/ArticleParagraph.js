@@ -8,6 +8,7 @@ describe('ArticleParagraph', () => {
 				propsData: {
 					text: postData.text,
 					userMentions: postData.userMentions,
+					hashtags: postData.hashtags,
 				}
 			})
 		})
@@ -24,6 +25,7 @@ describe('ArticleParagraph', () => {
 				propsData: {
 					text: postData.text,
 					userMentions: postData.userMentions,
+					hashtags: postData.hashtags,
 				}
 			})
 		})
@@ -45,6 +47,7 @@ describe('ArticleParagraph', () => {
 				propsData: {
 					text: postData.text,
 					userMentions: postData.userMentions,
+					hashtags: postData.hashtags,
 				}
 			})
 		})
@@ -64,6 +67,7 @@ describe('ArticleParagraph', () => {
 				propsData: {
 					text: postData.text,
 					userMentions: postData.userMentions,
+					hashtags: postData.hashtags,
 				}
 			})
 		})

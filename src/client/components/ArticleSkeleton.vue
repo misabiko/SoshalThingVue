@@ -15,7 +15,11 @@
 						strong {{ postData.authorName }}
 						small {{'@' + postData.authorHandle}}
 					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
-					ArticleParagraph(:text='postData.text' :user-mentions='postData.userMentions')
+					ArticleParagraph(
+						:text='postData.text'
+						:user-mentions='postData.userMentions'
+						:hashtags='postData.hashtags'
+					)
 
 				slot(name='extra-content')
 

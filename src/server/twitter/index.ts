@@ -1,5 +1,6 @@
 import {
 	ArticleType,
+	HashtagData,
 	PostData,
 	PostImageData,
 	PostVideoData,
@@ -52,7 +53,7 @@ export function parseTweet(tweet : Tweet) : { post : PostData, repost? : RepostD
 }
 
 export function tweetToPostData(tweet : Tweet) : PostData {
-	const {images, video, userMentions} = parseEntities(tweet);
+	const {images, video, userMentions, hashtags} = parseEntities(tweet);
 
 	return {
 		id: tweet.id_str,
@@ -68,6 +69,7 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 		likeCount: tweet.favorite_count,
 		repostCount: tweet.retweet_count,
 		userMentions,
+		hashtags,
 		rawObject: tweet,
 	};
 }
@@ -107,10 +109,11 @@ function quoteToQuoteData(tweet : Tweet) : QuoteData {
 	};
 }
 
-function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : PostVideoData, userMentions? : UserMentionData[] } {
+function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : PostVideoData, userMentions? : UserMentionData[], hashtags? : HashtagData[] } {
 	let images : PostImageData[] | undefined;
 	let video : PostVideoData | undefined;
 	let userMentions : UserMentionData[] | undefined;
+	let hashtags : HashtagData[] | undefined;
 
 	if (tweet.extended_entities) {
 		const medias = tweet.extended_entities.media;
@@ -124,6 +127,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 						return {
 							url: media.media_url_https,
 							sizes: media.sizes,
+							indices: media.indices,
 						};
 					});
 					break;
@@ -143,6 +147,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 								};
 							}),
 							autoplay: false,
+							indices: media.indices,
 						};
 					}
 					break;
@@ -161,6 +166,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 								};
 							}),
 							autoplay: true,
+							indices: media.indices,
 						};
 					}
 					break;
@@ -171,6 +177,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 			[{
 				url: tweet.entities.media[0].media_url_https,
 				sizes: tweet.entities.media[0].sizes,
+				indices: tweet.entities.media[0].indices,
 			}] :
 			undefined;
 
@@ -182,7 +189,13 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 		indices: [user_mention.indices[0], user_mention.indices[1] - 1],
 	}));
 
-	return {images, video, userMentions};
+	hashtags = tweet.entities.hashtags.map(hashtag => ({
+		text: hashtag.text,
+		//Twitter's last index is the following index, so I'm returning the actual last index
+		indices: [hashtag.indices[0], hashtag.indices[1] - 1],
+	}));
+
+	return {images, video, userMentions, hashtags};
 }
 
 //TODO Remove the removeTextLink func

@@ -89,17 +89,35 @@ export namespace Twitter {
 		try {
 			const response : TwitterSearchResponse = await client.get('search/tweets', {
 				q: req.query.q,
-				tweet_mode: 'extended'
+				tweet_mode: 'extended',
 			});
 			console.log(`${response.search_metadata.count} tweets sent.`);
 			logRateLimit(response);
 
 			await respondTimelineUpdate(response.statuses, response, 'search', res);
 		}catch (e) {
-			if (e.errors && e.errors.find((error : {code : number, message : string}) => error.code === 25))
+			if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 25))
 				return next(new Error('Twitter: ' + e.errors[0].message));
 			else
 				await respondRateOver(e, 'search', res, next);
+		}
+	}
+
+	async function status(req : Request, res : Response, next : NextFunction) {
+		try {
+			const response = await client.get('statuses/show', {
+				id: req.params.id,
+				tweet_mode: 'extended',
+			});
+			console.log(`1 tweet sent.`);
+			logRateLimit(response);
+
+			await res.json(parseTweet(response));
+		}catch (e) {
+			if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 25))
+				return next(new Error('Twitter: ' + e.errors[0].message));
+			else
+				await respondRateOver(e, 'status', res, next);
 		}
 	}
 
@@ -112,11 +130,11 @@ export namespace Twitter {
 
 			await res.json(parseTweet(response));
 		}catch (e) {
-			if (e.errors && e.errors.find((error : {code : number, message : string}) => error.code === 139)) {
+			if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 139)) {
 				try {
 					const response = await client.get('statuses/show', {
 						id: req.params.id,
-						tweet_mode: 'extended'
+						tweet_mode: 'extended',
 					});
 
 					await res.json(parseTweet(response));
@@ -138,13 +156,13 @@ export namespace Twitter {
 			await res.json(parseTweet(response));
 		}catch (e) {
 			if (
-				e.errors && e.errors.find((error : {code : number, message : string}) => error.code === 144) &&
+				e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 144) &&
 				parseInt(req.params.id) > 1000
 			) {
 				try {
 					const response = await client.get('statuses/show', {
 						id: req.params.id,
-						tweet_mode: 'extended'
+						tweet_mode: 'extended',
 					});
 
 					await res.json(parseTweet(response));
@@ -211,7 +229,7 @@ export namespace Twitter {
 			}catch (e) {
 				done(e);
 			}
-		}
+		},
 	));
 
 	function preventUnauthorized(req : Request, res : Response, next : NextFunction) {
@@ -228,6 +246,7 @@ export namespace Twitter {
 	}));
 	router.get('/tweets/home_timeline', preventUnauthorized, homeTimeline);
 	router.get('/tweets/search', preventUnauthorized, search);
+	router.get('/tweets/status/:id', preventUnauthorized, status);
 	router.post('/like/:id', preventUnauthorized, like);
 	router.post('/unlike/:id', preventUnauthorized, unlike);
 	router.post('/retweet/:id', preventUnauthorized, retweet);

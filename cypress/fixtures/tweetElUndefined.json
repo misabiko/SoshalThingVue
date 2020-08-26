@@ -20,6 +20,85 @@
 			]
 		}
 	],
+	"hashtags": [
+		{
+			"text": "Game",
+			"indices": [
+				65,
+				69
+			]
+		},
+		{
+			"text": "MobileGame",
+			"indices": [
+				71,
+				81
+			]
+		},
+		{
+			"text": "New",
+			"indices": [
+				83,
+				86
+			]
+		},
+		{
+			"text": "gamedev",
+			"indices": [
+				88,
+				95
+			]
+		},
+		{
+			"text": "screenshotsaturday",
+			"indices": [
+				97,
+				115
+			]
+		},
+		{
+			"text": "mobilegamer",
+			"indices": [
+				117,
+				128
+			]
+		},
+		{
+			"text": "Gamer",
+			"indices": [
+				130,
+				135
+			]
+		},
+		{
+			"text": "gaming",
+			"indices": [
+				137,
+				143
+			]
+		},
+		{
+			"text": "gamerslife",
+			"indices": [
+				145,
+				155
+			]
+		},
+		{
+			"text": "STEAM",
+			"indices": [
+				157,
+				162
+			]
+		},
+		{
+			"text": "Trials_Rising",
+			"indices": [
+				164,
+				177
+			]
+		}
+	],
 	"rawObject": {
 		"created_at": "Tue Aug 25 23:11:44 +0000 2020",
 		"id": 1298397679731400700,
@@ -135,10 +214,6 @@
 				}
 			]
 		},
-		"metadata": {
-			"result_type": "recent",
-			"iso_language_code": "ko"
-		},
 		"source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
 		"in_reply_to_status_id": null,
 		"in_reply_to_status_id_str": null,
@@ -216,6 +291,8 @@
 		"favorited": false,
 		"retweeted": false,
 		"possibly_sensitive": false,
-		"lang": "ko"
+		"possibly_sensitive_appealable": false,
+		"lang": "ko",
+		"_headers": {}
 	}
 }

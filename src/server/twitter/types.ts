@@ -1,3 +1,5 @@
+import {Indices} from '../../core/PostData';
+
 export interface TwitterResponse {
 	_headers : TwitterHeaders;
 }
@@ -173,7 +175,7 @@ export interface Entities {
 }
 
 export interface Hashtag {
-	indices : number[];
+	indices : Indices;
 	text : string;
 }
 
@@ -182,7 +184,7 @@ export interface Media {
 	expanded_url : string;
 	id : number;
 	id_str : string;
-	indices : number[];
+	indices : Indices;
 	media_url : string;
 	media_url_https : string;
 	sizes : {
@@ -223,20 +225,20 @@ export interface MediaSize {
 export interface TweetURL {
 	display_url : string;
 	expanded_url : string;
-	indices : number[];
+	indices : Indices;
 	url : string;
 }
 
 export interface UserMention {
 	id : number;
 	id_str : string;
-	indices : number[];
+	indices : Indices;
 	name : string;
 	screen_name : string;
 }
 
 export interface Symbol {
-	indices : number[];
+	indices : Indices;
 	text : string;
 }
 

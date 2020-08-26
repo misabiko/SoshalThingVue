@@ -12,6 +12,9 @@ export enum ArticleType {
 
 export type ArticleData = PostData | RepostData;
 
+//Last index is the actual last index, not the following one like twitter gives
+export type Indices = [number, number]
+
 export interface PostData {
 	id : string;
 	creationTime : string;
@@ -26,6 +29,7 @@ export interface PostData {
 	likeCount : number;
 	repostCount : number;
 	userMentions? : UserMentionData[];
+	hashtags? : HashtagData[];
 	rawObject? : any;
 }
 
@@ -47,8 +51,12 @@ export interface UserMentionData {
 	id : string;
 	handle : string;
 	name : string;
-	//Last index is the actual last index, not the following one like twitter gives
-	indices: [number, number];
+	indices: Indices;
+}
+
+export interface HashtagData {
+	text: string;
+	indices: Indices;
 }
 
 export interface PostImageData {
@@ -60,6 +68,7 @@ export interface PostImageData {
 			resize : string;
 		}
 	}
+	indices: Indices;
 }
 
 export interface PostVideoData extends PostImageData {
@@ -68,6 +77,7 @@ export interface PostVideoData extends PostImageData {
 	durationMillis? : number;
 	variants : PostVideoVariant[];
 	autoplay : boolean;
+	indices: Indices;
 }
 
 export interface PostVideoVariant {

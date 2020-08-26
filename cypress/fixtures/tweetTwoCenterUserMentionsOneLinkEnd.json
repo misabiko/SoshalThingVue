@@ -4,11 +4,11 @@
 	"authorName": "Jerod C.",
 	"authorHandle": "The8BitDrummer",
 	"authorAvatar": "https://pbs.twimg.com/profile_images/1191987034069581824/qz7f9TBI_normal.jpg",
-	"text": "Dude... @ToxicxEternity and @HomykSmash... How are y’all this good!? \n\nDefinitely my new favorite cover of Live and Learn! \n",
+	"text": "Dude... @ToxicxEternity and @HomykSmash... How are y’all this good!? \n\nDefinitely my new favorite cover of Live and Learn! \n\nhttps://t.co/eNpYH3K21H",
 	"liked": false,
 	"reposted": false,
-	"likeCount": 56,
-	"repostCount": 5,
+	"likeCount": 64,
+	"repostCount": 6,
 	"userMentions": [
 		{
 			"id": "1270960436",
@@ -29,6 +29,7 @@
 			]
 		}
 	],
+	"hashtags": [],
 	"rawObject": {
 		"created_at": "Tue Aug 25 19:13:57 +0000 2020",
 		"id": 1298337838338113500,
@@ -76,10 +77,6 @@
 				}
 			]
 		},
-		"metadata": {
-			"iso_language_code": "en",
-			"result_type": "recent"
-		},
 		"source": "<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>",
 		"in_reply_to_status_id": null,
 		"in_reply_to_status_id_str": null,
@@ -123,16 +120,16 @@
 				}
 			},
 			"protected": false,
-			"followers_count": 23504,
+			"followers_count": 23515,
 			"friends_count": 189,
 			"listed_count": 56,
 			"created_at": "Tue Mar 25 06:08:22 +0000 2014",
-			"favourites_count": 28056,
+			"favourites_count": 28059,
 			"utc_offset": null,
 			"time_zone": null,
 			"geo_enabled": false,
 			"verified": false,
-			"statuses_count": 11113,
+			"statuses_count": 11114,
 			"lang": null,
 			"contributors_enabled": false,
 			"is_translator": false,
@@ -162,11 +159,13 @@
 		"place": null,
 		"contributors": null,
 		"is_quote_status": false,
-		"retweet_count": 5,
-		"favorite_count": 56,
+		"retweet_count": 6,
+		"favorite_count": 64,
 		"favorited": false,
 		"retweeted": false,
 		"possibly_sensitive": false,
-		"lang": "en"
+		"possibly_sensitive_appealable": false,
+		"lang": "en",
+		"_headers": {}
 	}
 }
