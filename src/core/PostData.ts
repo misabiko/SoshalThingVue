@@ -47,7 +47,8 @@ export interface UserMentionData {
 	id : string;
 	handle : string;
 	name : string;
-	indices: number[];
+	//Last index is the actual last index, not the following one like twitter gives
+	indices: [number, number];
 }
 
 export interface PostImageData {

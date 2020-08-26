@@ -118,10 +118,10 @@ describe('SoshalThing', () => {
 					.click()
 
 				cy.get('.timelinePosts').children('.quote')
-					.each(quoteElement => {
-						const quotedText = quoteElement.find('.quotedPost > p').first().text()
+					.each($quoteElement => {
+						const quotedText = $quoteElement.find('.quotedPost > p').first().text()
 
-						cy.wrap(quoteElement).find('.content > p')
+						cy.wrap($quoteElement).find('.content > p')
 							.should('not.have.text', quotedText)
 					})
 

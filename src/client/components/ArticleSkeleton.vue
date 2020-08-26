@@ -15,7 +15,7 @@
 						strong {{ postData.authorName }}
 						small {{'@' + postData.authorHandle}}
 					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
-					p {{ postData.text }}
+					ArticleParagraph(:text='postData.text' :user-mentions='postData.userMentions')
 
 				slot(name='extra-content')
 
@@ -69,6 +69,7 @@ import moment from 'moment';
 import {ExpandedPost} from '../store';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
+import ArticleParagraph from './ArticleParagraph.vue';
 
 library.add(fasHeart, farHeart, faRetweet, faReply, faExpand, faCompress);
 
@@ -94,7 +95,7 @@ moment.defineLocale('twitter', {
 //TODO Fix locale not switching back
 moment().locale('en');
 
-@Component({components: {PostImages, PostVideo}})
+@Component({components: {ArticleParagraph, PostImages, PostVideo}})
 export default class ArticleSkeleton extends Vue {
 	@Prop({type: String, required: true})
 	readonly articleId!: string;

@@ -178,7 +178,8 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 		id: user_mention.id_str,
 		handle: user_mention.screen_name,
 		name: user_mention.name,
-		indices: user_mention.indices,
+		//Twitter's last index is the following index, so I'm returning the actual last index
+		indices: [user_mention.indices[0], user_mention.indices[1] - 1],
 	}));
 
 	return {images, video, userMentions};

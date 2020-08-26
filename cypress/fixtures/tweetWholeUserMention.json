@@ -1,0 +1,224 @@
+{
+	"id": "1298332246613479424",
+	"creationTime": "Tue Aug 25 18:51:44 +0000 2020",
+	"authorName": "유해",
+	"authorHandle": "Uhay024",
+	"authorAvatar": "https://pbs.twimg.com/profile_images/1052186836179738624/lmd1w7h0_normal.jpg",
+	"text": "@RaksorToviks",
+	"images": [
+		{
+			"url": "https://pbs.twimg.com/media/EgSaSshUMAAkAEj.png",
+			"sizes": {
+				"medium": {
+					"w": 314,
+					"h": 269,
+					"resize": "fit"
+				},
+				"small": {
+					"w": 314,
+					"h": 269,
+					"resize": "fit"
+				},
+				"large": {
+					"w": 314,
+					"h": 269,
+					"resize": "fit"
+				},
+				"thumb": {
+					"w": 150,
+					"h": 150,
+					"resize": "crop"
+				}
+			}
+		}
+	],
+	"liked": false,
+	"reposted": false,
+	"likeCount": 1,
+	"repostCount": 0,
+	"userMentions": [
+		{
+			"id": "2577783199",
+			"handle": "RaksorToviks",
+			"name": "Raksor Toviks",
+			"indices": [
+				0,
+				12
+			]
+		}
+	],
+	"rawObject": {
+		"created_at": "Tue Aug 25 18:51:44 +0000 2020",
+		"id": 1298332246613479400,
+		"id_str": "1298332246613479424",
+		"full_text": "@RaksorToviks https://t.co/UCdUKlbXP0",
+		"truncated": false,
+		"display_text_range": [
+			13,
+			13
+		],
+		"entities": {
+			"hashtags": [],
+			"symbols": [],
+			"user_mentions": [
+				{
+					"screen_name": "RaksorToviks",
+					"name": "Raksor Toviks",
+					"id": 2577783199,
+					"id_str": "2577783199",
+					"indices": [
+						0,
+						13
+					]
+				}
+			],
+			"urls": [],
+			"media": [
+				{
+					"id": 1298332238568763400,
+					"id_str": "1298332238568763392",
+					"indices": [
+						14,
+						37
+					],
+					"media_url": "http://pbs.twimg.com/media/EgSaSshUMAAkAEj.png",
+					"media_url_https": "https://pbs.twimg.com/media/EgSaSshUMAAkAEj.png",
+					"url": "https://t.co/UCdUKlbXP0",
+					"display_url": "pic.twitter.com/UCdUKlbXP0",
+					"expanded_url": "https://twitter.com/Uhay024/status/1298332246613479424/photo/1",
+					"type": "photo",
+					"sizes": {
+						"medium": {
+							"w": 314,
+							"h": 269,
+							"resize": "fit"
+						},
+						"small": {
+							"w": 314,
+							"h": 269,
+							"resize": "fit"
+						},
+						"large": {
+							"w": 314,
+							"h": 269,
+							"resize": "fit"
+						},
+						"thumb": {
+							"w": 150,
+							"h": 150,
+							"resize": "crop"
+						}
+					}
+				}
+			]
+		},
+		"extended_entities": {
+			"media": [
+				{
+					"id": 1298332238568763400,
+					"id_str": "1298332238568763392",
+					"indices": [
+						14,
+						37
+					],
+					"media_url": "http://pbs.twimg.com/media/EgSaSshUMAAkAEj.png",
+					"media_url_https": "https://pbs.twimg.com/media/EgSaSshUMAAkAEj.png",
+					"url": "https://t.co/UCdUKlbXP0",
+					"display_url": "pic.twitter.com/UCdUKlbXP0",
+					"expanded_url": "https://twitter.com/Uhay024/status/1298332246613479424/photo/1",
+					"type": "photo",
+					"sizes": {
+						"medium": {
+							"w": 314,
+							"h": 269,
+							"resize": "fit"
+						},
+						"small": {
+							"w": 314,
+							"h": 269,
+							"resize": "fit"
+						},
+						"large": {
+							"w": 314,
+							"h": 269,
+							"resize": "fit"
+						},
+						"thumb": {
+							"w": 150,
+							"h": 150,
+							"resize": "crop"
+						}
+					}
+				}
+			]
+		},
+		"metadata": {
+			"iso_language_code": "und",
+			"result_type": "recent"
+		},
+		"source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+		"in_reply_to_status_id": 1298331370524012500,
+		"in_reply_to_status_id_str": "1298331370524012544",
+		"in_reply_to_user_id": 2577783199,
+		"in_reply_to_user_id_str": "2577783199",
+		"in_reply_to_screen_name": "RaksorToviks",
+		"user": {
+			"id": 897717479946039300,
+			"id_str": "897717479946039300",
+			"name": "유해",
+			"screen_name": "Uhay024",
+			"location": "",
+			"description": "프로필 사진은 이분이 그리셨어요!\n은여우 @V_v_peculiosa",
+			"url": null,
+			"entities": {
+				"description": {
+					"urls": []
+				}
+			},
+			"protected": false,
+			"followers_count": 831,
+			"friends_count": 978,
+			"listed_count": 9,
+			"created_at": "Wed Aug 16 07:11:40 +0000 2017",
+			"favourites_count": 21113,
+			"utc_offset": null,
+			"time_zone": null,
+			"geo_enabled": false,
+			"verified": false,
+			"statuses_count": 731,
+			"lang": null,
+			"contributors_enabled": false,
+			"is_translator": false,
+			"is_translation_enabled": false,
+			"profile_background_color": "000000",
+			"profile_background_image_url": "http://abs.twimg.com/images/themes/theme1/bg.png",
+			"profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme1/bg.png",
+			"profile_background_tile": false,
+			"profile_image_url": "http://pbs.twimg.com/profile_images/1052186836179738624/lmd1w7h0_normal.jpg",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/1052186836179738624/lmd1w7h0_normal.jpg",
+			"profile_link_color": "FAB81E",
+			"profile_sidebar_border_color": "000000",
+			"profile_sidebar_fill_color": "000000",
+			"profile_text_color": "000000",
+			"profile_use_background_image": false,
+			"has_extended_profile": true,
+			"default_profile": false,
+			"default_profile_image": false,
+			"following": false,
+			"follow_request_sent": false,
+			"notifications": false,
+			"translator_type": "none"
+		},
+		"geo": null,
+		"coordinates": null,
+		"place": null,
+		"contributors": null,
+		"is_quote_status": false,
+		"retweet_count": 0,
+		"favorite_count": 1,
+		"favorited": false,
+		"retweeted": false,
+		"possibly_sensitive": false,
+		"lang": "und"
+	}
+}
