@@ -130,7 +130,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 						return {
 							url: media.media_url_https,
 							sizes: media.sizes,
-							indices: [media.indices[0], media.indices[1] - 1],
+							indices: [media.indices[0], media.indices[1] - (media.indices[1] === tweet.full_text.length ? 1 : 0)],
 						};
 					});
 					break;
@@ -150,7 +150,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 								};
 							}),
 							autoplay: false,
-							indices: [media.indices[0], media.indices[1] - 1],
+							indices: [media.indices[0], media.indices[1] - (media.indices[1] === tweet.full_text.length ? 1 : 0)],
 						};
 					}
 					break;
@@ -169,7 +169,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 								};
 							}),
 							autoplay: true,
-							indices: [media.indices[0], media.indices[1] - 1],
+							indices: [media.indices[0], media.indices[1] - (media.indices[1] === tweet.full_text.length ? 1 : 0)],
 						};
 					}
 					break;
@@ -180,7 +180,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 			[{
 				url: tweet.entities.media[0].media_url_https,
 				sizes: tweet.entities.media[0].sizes,
-				indices: [tweet.entities.media[0].indices[0], tweet.entities.media[0].indices[1] - 1],
+				indices: [tweet.entities.media[0].indices[0], tweet.entities.media[0].indices[1] - (tweet.entities.media[0].indices[1] === tweet.full_text.length ? 1 : 0)],
 			}] :
 			undefined;
 

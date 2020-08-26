@@ -59,6 +59,7 @@ export interface Tweet {
 	full_text : string;
 	source : string;
 	truncated : boolean;
+	display_text_range: Indices;
 	in_reply_to_status_id : number;
 	in_reply_to_status_id_str : string;
 	in_reply_to_user_id : number;
