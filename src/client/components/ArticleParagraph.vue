@@ -1,13 +1,6 @@
 <script lang='ts'>
-import {Vue, Component, Prop} from 'vue-property-decorator';
-import {
-	ExternalLinkData,
-	HashtagData,
-	Indices,
-	PostImageData,
-	PostVideoData,
-	UserMentionData,
-} from '../../core/PostData';
+import {Component, Prop, Vue} from 'vue-property-decorator';
+import {ExternalLinkData, HashtagData, Indices, PostData, UserMentionData} from '../../core/PostData';
 import {CreateElement} from 'vue';
 import {VNode} from 'vue/types/vnode';
 import he from 'he';
@@ -18,12 +11,10 @@ interface ParagraphItem {
 }
 
 function textWithIndices(createElement : CreateElement, text : string, startIndex : number, offset = 0) : ParagraphItem {
-	const item = {
+	return {
 		node: createElement('span', he.decode(text)),
 		indices: [startIndex, startIndex + text.length - 1 + offset] as Indices,
-	}
-	//console.log('textWithIndices ', item);
-	return item;
+	};
 }
 
 function userMentionToAnchor(createElement : CreateElement, userMention : UserMentionData) : ParagraphItem {
@@ -37,7 +28,7 @@ function userMentionToAnchor(createElement : CreateElement, userMention : UserMe
 				class: 'articleUserMention',
 			}, '@' + userMention.handle,
 		),
-		indices: userMention.indices,
+		indices: [...userMention.indices] as Indices,
 	};
 }
 
@@ -52,7 +43,7 @@ function hashtagToAnchor(createElement : CreateElement, hashtag : HashtagData) {
 				class: 'articleHashtag',
 			}, '#' + hashtag.text,
 		),
-		indices: hashtag.indices,
+		indices: [...hashtag.indices] as Indices,
 	};
 }
 
@@ -67,12 +58,12 @@ function externalLinkToAnchor(createElement : CreateElement, externalLink : Exte
 				class: 'articleExternalLink',
 			}, externalLink.truncatedURL,
 		),
-		indices: externalLink.indices,
+		indices: [...externalLink.indices] as Indices,
 	};
 }
 
 function getExternalLinkIndexOffset(externalLink : ExternalLinkData) {
-	//console.log(externalLink);
+	//console.log('externalLink: ', externalLink);
 	const baseLength = externalLink.indices[1] - externalLink.indices[0] + 1;
 	return externalLink.truncatedURL.length - baseLength;
 }
@@ -83,13 +74,13 @@ function offsetParagraph(paragraph : ParagraphItem[], startIndex : number, indic
 }
 
 function replaceWithItem(createElement : CreateElement, paragraph : ParagraphItem[], splicedEl : ParagraphItem, splicedIndex : number, text : string, item : ParagraphItem, indiceOffset = 0) {
-	/*console.log('replace ' +  item.indices);
-	console.log('text ' +  splicedEl.indices);*/
+	/*console.log('replace ' + item.indices);
+	console.log('text ' + splicedEl.indices);*/
 
 	if (indiceOffset) {
 		offsetParagraph(paragraph, splicedIndex, indiceOffset);
 		item.indices[1] += indiceOffset;
-		//console.log('replace offseted ' +  item.indices);
+		//console.log('replace offseted ' + item.indices);
 	}
 
 	paragraph.splice(
@@ -99,16 +90,16 @@ function replaceWithItem(createElement : CreateElement, paragraph : ParagraphIte
 }
 
 function prependItem(createElement : CreateElement, paragraph : ParagraphItem[], splicedEl : ParagraphItem, splicedIndex : number, text : string, item : ParagraphItem, indiceOffset = 0) {
-	/*console.log('prepend ' +  item.indices);
-	console.log('text ' +  splicedEl.indices);*/
+	/*console.log('prepend ' + item.indices);
+	console.log('text ' + splicedEl.indices);*/
 
 	const secondPart = text.substring(item.indices[1] + 1 - splicedEl.indices[0]);
-	//console.log('secondPart: ' +  secondPart);
+	//console.log('secondPart: ' + secondPart);
 
 	if (indiceOffset) {
 		offsetParagraph(paragraph, splicedIndex, indiceOffset);
 		item.indices[1] += indiceOffset;
-		//console.log('prepend offseted ' +  item.indices);
+		//console.log('prepend offseted ' + item.indices);
 	}
 
 	paragraph.splice(
@@ -119,16 +110,16 @@ function prependItem(createElement : CreateElement, paragraph : ParagraphItem[],
 }
 
 function appendItem(createElement : CreateElement, paragraph : ParagraphItem[], splicedEl : ParagraphItem, splicedIndex : number, text : string, item : ParagraphItem, indiceOffset = 0) {
-	/*console.log('append ' +  item.indices);
-	console.log('text ' +  splicedEl.indices);*/
+	/*console.log('append ' + item.indices);
+	console.log('text ' + splicedEl.indices);*/
 
 	const firstPart = text.substring(0, item.indices[0] - splicedEl.indices[0]);
-	//console.log('firstPart: ' +  firstPart);
+	//console.log('firstPart: ' + firstPart);
 
 	if (indiceOffset) {
 		offsetParagraph(paragraph, splicedIndex, indiceOffset);
 		item.indices[1] += indiceOffset;
-		//console.log('append offseted ' +  item.indices);
+		//console.log('append offseted ' + item.indices);
 	}
 
 	paragraph.splice(
@@ -165,7 +156,7 @@ function addItems(createElement : CreateElement, paragraph : ParagraphItem[], it
 	let totalOffset = 0;
 
 	for (const item of items) {
-		/*console.log('Paragraph: ', Array.from(paragraph));
+		/*console.log('\nParagraph: ', Array.from(paragraph));
 		console.log('Item: ', item);*/
 
 		if (totalOffset)
@@ -175,7 +166,7 @@ function addItems(createElement : CreateElement, paragraph : ParagraphItem[], it
 
 		if (elIndex < 0) {
 			console.error('Item: ', item);
-			throw new Error("Item doesn't fit in the post.");
+			throw new Error('Item doesn\'t fit in the post.');
 		}
 
 		const el = paragraph[elIndex];
@@ -269,62 +260,58 @@ function removeItems(createElement : CreateElement, paragraph : ParagraphItem[],
 export default class ArticleParagraph extends Vue {
 	@Prop({type: String, required: true})
 	readonly articleId! : string;
-	@Prop({type: String, required: true})
-	readonly text! : string;
-	@Prop({type: Array, default: () => []})
-	readonly userMentions! : UserMentionData[];
-	@Prop({type: Array, default: () => []})
-	readonly hashtags! : HashtagData[];
-	@Prop({type: Array, default: () => []})
-	readonly externalLinks! : ExternalLinkData[];
-	@Prop({type: Array, default: () => []})
-	readonly images! : PostImageData[];
-	@Prop({type: Object})
-	readonly video! : PostVideoData;
+	@Prop({type: Object, required: true})
+	readonly postData! : PostData;
 
 	render(createElement : CreateElement) {
+		const userMentions = this.postData.userMentions || [];
+		const hashtags = this.postData.hashtags || [];
+		const externalLinks = this.postData.externalLinks || [];
+		const images = this.postData.images || [];
+		const video = this.postData.video;
+
 		const paragraph = [
-			textWithIndices(createElement, this.text, 0),
+			textWithIndices(createElement, this.postData.text, 0),
 		];
 
 		try {
 			let totalOffset = 0;
 
-			addItems(createElement, paragraph, this.userMentions, userMentionToAnchor);
+			addItems(createElement, paragraph, userMentions, userMentionToAnchor);
 
-			addItems(createElement, paragraph, this.hashtags, hashtagToAnchor);
+			addItems(createElement, paragraph, hashtags, hashtagToAnchor);
 
-			totalOffset += addItems(createElement, paragraph, this.externalLinks, externalLinkToAnchor, getExternalLinkIndexOffset);
+			totalOffset += addItems(createElement, paragraph, externalLinks, externalLinkToAnchor, getExternalLinkIndexOffset);
 
-			/*if (paragraph[0].indices[0] !== 0 || paragraph[paragraph.length - 1].indices[1] !== this.text.length - 1) {
+			/*if (paragraph[0].indices[0] !== 0 || paragraph[paragraph.length - 1].indices[1] !== this.postData.text.length - 1) {
 				console.error('Paragraph: ');
 				console.dir(Array.from(paragraph));
-				throw new Error(`Paragraph endings aren't 0 and ${this.text.length - 1}`);
+				throw new Error(`Paragraph endings aren't 0 and ${this.postData.text.length - 1}`);
 			}*/
 
 			//So far, it looks like twitter media objects all use the same indices (link at the end of tweet)
-			if (this.images.length) {
+			if (images.length) {
 				if (totalOffset) {
 					const item = {
-						indices: this.images[this.images.length - 1].indices.map(index => index + totalOffset) as Indices,
+						indices: images[images.length - 1].indices.map((index : number) => index + totalOffset) as Indices,
 					};
 					removeItems(createElement, paragraph, [item]);
 				}else
-					removeItems(createElement, paragraph, [{indices: this.images[this.images.length - 1].indices}]);
+					removeItems(createElement, paragraph, [{indices: images[images.length - 1].indices}]);
 			}
 
-			if (this.video) {
+			if (video) {
 				//For some reason *some* video indices are 1 index off (see tweet 1298496152560644097)
-				/*if (this.video.indices[1] === this.text.length - 2)	//As in, lastIndex + 1
+				/*if (this.video.indices[1] === this.postData.text.length - 2)	//As in, lastIndex + 1
 					removeItems(createElement, paragraph, [{indices: [this.video.indices[0], this.video.indices[1] + 1]}]);
 				else*/
 				if (totalOffset) {
 					const item = {
-						indices: this.video.indices.map(index => index + totalOffset) as Indices,
+						indices: video.indices.map(index => index + totalOffset) as Indices,
 					};
 					removeItems(createElement, paragraph, [item]);
 				}else
-					removeItems(createElement, paragraph, [{indices: this.video.indices}]);
+					removeItems(createElement, paragraph, [{indices: video.indices}]);
 			}
 
 			//Exaggerated way to "paragraph.trimEnd()"
@@ -338,14 +325,16 @@ export default class ArticleParagraph extends Vue {
 		}catch (e) {
 			console.error(`Error on ${this.articleId}`);
 			console.error('Paragraph: ', paragraph);
-			console.error('Text: ', this.text);
+			console.error('Text: ', this.postData.text);
 
 			console.error(e);
 
 			return createElement('p', {
 				class: 'articleParagraph',
-			}, `Error parsing tweet ${this.articleId}\n${this.text}`);
+			}, `Error parsing tweet ${this.articleId}\n${this.postData.text}`);
 		}
+
+		//console.log('Final paragraph: ', paragraph);
 
 		return createElement('p', {
 			class: 'articleParagraph',

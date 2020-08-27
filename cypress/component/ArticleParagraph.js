@@ -6,12 +6,7 @@ function mountParagraph(fixture) {
 		mount(ArticleParagraph, {
 			propsData: {
 				articleId: postData.id,
-				text: postData.text,
-				userMentions: postData.userMentions,
-				hashtags: postData.hashtags,
-				externalLinks: postData.externalLinks,
-				images: postData.images,
-				video: postData.video,
+				postData,
 			}
 		})
 	})
@@ -19,7 +14,7 @@ function mountParagraph(fixture) {
 
 describe('ArticleParagraph', () => {
 	describe('User Mentions', () => {
-		it('should replace whole text with user mention anchor', () => {
+		it('tweetWholeUserMention', () => {
 			mountParagraph('tweetWholeUserMention')
 
 			cy.get('.articleParagraph')
@@ -28,7 +23,7 @@ describe('ArticleParagraph', () => {
 				.contains('@RaksorToviks')
 		})
 
-		it('should replace the start mention with user mention anchor', () => {
+		it('tweetStartUserMention', () => {
 			mountParagraph('tweetStartUserMention')
 
 			cy.get('.articleParagraph')
@@ -42,7 +37,7 @@ describe('ArticleParagraph', () => {
 				.should('have.text', '@misabiko')
 		})
 
-		it('should replace the two middle mentions with user mention anchors', () => {
+		it('tweetTwoCenterUserMentionsOneLinkEnd', () => {
 			mountParagraph('tweetTwoCenterUserMentionsOneLinkEnd')
 
 			cy.get('.articleParagraph > span')
@@ -56,13 +51,13 @@ describe('ArticleParagraph', () => {
 	})
 
 	describe('Hashtags', () => {
-		it("shouldn't give an undefined element", () => {
+		it("tweetElUndefined", () => {
 			mountParagraph('tweetElUndefined')
 		})
 	})
 
 	describe('Media URLs', () => {
-		it('should remove the image url', () => {
+		it('tweetImage', () => {
 			mountParagraph('tweetImage')
 
 			cy.get('.articleParagraph')
@@ -76,7 +71,7 @@ describe('ArticleParagraph', () => {
 				.should('have.text', '#artstylebend')
 		})
 
-		it('should remove the video url', () => {
+		it('tweetVideo', () => {
 			mountParagraph('tweetVideo')
 
 			cy.get('.articleParagraph')
@@ -86,21 +81,21 @@ describe('ArticleParagraph', () => {
 				.should('have.text', 'Using animated UVs and shape keys to animate the eyes this time around 🙏')
 		})
 
-		it('should remove the other video url?', () => {
+		it('tweetVideo2', () => {
 			mountParagraph('tweetVideo2')
 
 			cy.get('.articleParagraph')
 				.children().should('have.length', 2)
 		})
 
-		it('should remove url for multiple images', () => {
+		it('tweetFourImages', () => {
 			mountParagraph('tweetFourImages')
 
 			cy.get('.articleParagraph')
 				.children().should('have.length', 1)
 		})
 
-		it('should leave nothing on media post without message', () => {
+		it('tweetOnlyImage', () => {
 			mountParagraph('tweetOnlyImage')
 
 			cy.get('.articleParagraph')
@@ -109,7 +104,7 @@ describe('ArticleParagraph', () => {
 	})
 
 	describe('External Links', () => {
-		it('should replace external links with ', () => {
+		it('tweetLinks', () => {
 			mountParagraph('tweetLinks')
 
 			cy.get('.articleParagraph')
@@ -130,7 +125,7 @@ describe('ArticleParagraph', () => {
 				.eq(1).should('have.text', 'nicovideo.jp/watch/sm374166…')
 		})
 
-		it('should replace external link at the end, and remove media url', () => {
+		it('tweetExternalLinkEnd', () => {
 			mountParagraph('tweetExternalLinkEnd')
 
 			cy.get('.articleParagraph')
@@ -143,7 +138,7 @@ describe('ArticleParagraph', () => {
 				.should('have.text', 'sakugabooru.com/post/show/1278…')
 		})
 
-		it('should handle ending hashtags properly with an external link and media', () => {
+		it('tweetExternalLinksWithEndHashtags', () => {
 			mountParagraph('tweetExternalLinksWithEndHashtags')
 
 			cy.get('.articleParagraph')

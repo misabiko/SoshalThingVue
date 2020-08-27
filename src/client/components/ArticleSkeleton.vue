@@ -17,12 +17,7 @@
 					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
 					ArticleParagraph(
 						:article-id='articleId'
-						:text='postData.text'
-						:user-mentions='postData.userMentions'
-						:hashtags='postData.hashtags'
-						:external-links='postData.externalLinks'
-						:images='postData.images'
-						:video='postData.video'
+						:post-data='postData'
 					)
 
 				slot(name='extra-content')
