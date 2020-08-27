@@ -256,6 +256,17 @@ function removeItems(createElement : CreateElement, paragraph : ParagraphItem[],
 	}
 }
 
+function cloneProp<T extends { indices : Indices }>(prop : T) : T {
+	return {
+		...prop,
+		indices: [prop.indices[0], prop.indices[1]] as Indices,
+	};
+}
+
+function clonePropArray<T extends { indices : Indices }>(prop : T[]) : T[] {
+	return prop.map(item => cloneProp(item));
+}
+
 @Component
 export default class ArticleParagraph extends Vue {
 	@Prop({type: String, required: true})
@@ -264,11 +275,11 @@ export default class ArticleParagraph extends Vue {
 	readonly postData! : PostData;
 
 	render(createElement : CreateElement) {
-		const userMentions = this.postData.userMentions || [];
-		const hashtags = this.postData.hashtags || [];
-		const externalLinks = this.postData.externalLinks || [];
-		const images = this.postData.images || [];
-		const video = this.postData.video;
+		const userMentions = this.postData.userMentions ? clonePropArray(this.postData.userMentions) : [];
+		const hashtags = this.postData.hashtags ? clonePropArray(this.postData.hashtags) : [];
+		const externalLinks = this.postData.externalLinks ? clonePropArray(this.postData.externalLinks) : [];
+		const images = this.postData.images ? clonePropArray(this.postData.images) : [];
+		const video = this.postData.video ? cloneProp(this.postData.video) : undefined;
 
 		const paragraph = [
 			textWithIndices(createElement, this.postData.text, 0),
@@ -321,6 +332,12 @@ export default class ArticleParagraph extends Vue {
 					paragraph.pop();
 				else if (!text.endsWith('  ') && text.endsWith(' '))
 					(paragraph[paragraph.length - 1].node.children as VNode[])[0].text = text.trimEnd();
+			}
+
+			if (totalOffset && externalLinks.length > 1 && externalLinks[externalLinks.length - 1].indices[1] === (this.postData.externalLinks as ExternalLinkData[])[externalLinks.length - 1].indices[1]) {
+				/*console.dir(externalLinks);
+				console.dir(this.postData.externalLinks);*/
+				throw new ReferenceError('Base data was modified by local copy');
 			}
 		}catch (e) {
 			console.error(`Error on ${this.articleId}`);

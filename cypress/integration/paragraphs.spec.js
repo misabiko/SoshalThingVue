@@ -2,8 +2,6 @@ import {ArticleType} from "../../src/core/PostData";
 
 describe('Paragraphs', () => {
 	it('should parse the paragraph twice for the same post', () => {
-		cy.request('twitter/access')
-
 		const timelines = [
 			{
 				id: 0,
@@ -72,6 +70,8 @@ describe('Paragraphs', () => {
 			Pixiv: false,
 		};
 
+		cy.request('twitter/access')
+
 		cy.visit('/', {
 			onBeforeLoad(win) {
 				const stub = cy.stub(win, 'fetch')
@@ -102,6 +102,118 @@ describe('Paragraphs', () => {
 						})
 					})
 			},
+		})
+	})
+
+	it('problematic case 1', () => {
+		const timelines = [{
+				id: 0,
+				name: "Timeline #1",
+				service: "Twitter",
+				endpoint: "search",
+				autoRefresh: false,
+				enabled: true,
+				compactMedia: false,
+				options: {"q": "bloop"},
+				refreshRate: 60000
+		}]
+
+		const services = {
+			Twitter: true,
+			Mastodon: false,
+			Pixiv: false,
+		}
+
+		cy.request('twitter/access')
+
+		cy.request('twitter/tweets/status/1298811009977577472').its('body').then(statusResponse => {
+			cy.visit('/', {
+				onBeforeLoad(win) {
+					const stub = cy.stub(win, 'fetch')
+					stub.withArgs('/checkLogins')
+						.resolves({
+							ok: true,
+							json: () => services,
+						})
+					stub.withArgs('/timelines')
+						.resolves({
+							ok: true,
+							json: () => timelines
+						})
+					stub.withArgs('/twitter/tweets/search?q=bloop')
+						.resolves({
+							ok: true,
+							json: () => ({
+								services,
+								posts: [statusResponse.post],
+								reposts: [statusResponse.repost],
+								quotes: [],
+								timelinePosts: {
+									newArticles: [{
+										type: ArticleType.Post,
+										id: '1298810035217154053',
+									}]
+								},
+							})
+						})
+				},
+			})
+		})
+	})
+
+	it.only('problematic case 2', () => {
+		const timelines = [{
+			id: 0,
+			name: "Timeline #1",
+			service: "Twitter",
+			endpoint: "search",
+			autoRefresh: false,
+			enabled: true,
+			compactMedia: false,
+			options: {"q": "bloop"},
+			refreshRate: 60000
+		}]
+
+		const services = {
+			Twitter: true,
+			Mastodon: false,
+			Pixiv: false,
+		}
+
+		cy.request('twitter/access')
+
+		cy.request('twitter/tweets/status/1298821800952909824').its('body').then(statusResponse => {
+			cy.visit('/', {
+				onBeforeLoad(win) {
+					const stub = cy.stub(win, 'fetch')
+					stub.withArgs('/checkLogins')
+						.resolves({
+							ok: true,
+							json: () => services,
+						})
+					stub.withArgs('/timelines')
+						.resolves({
+							ok: true,
+							json: () => timelines
+						})
+					stub.withArgs('/twitter/tweets/search?q=bloop')
+						.resolves({
+							ok: true,
+							json: () => ({
+								services,
+								posts: [statusResponse.post],
+								reposts: [],
+								quotes: [],
+								timelinePosts: {
+									newArticles: [{
+										type: ArticleType.Post,
+										id: '1298821800952909824',
+									}]
+								},
+							})
+						})
+				},
+			})
 		})
 	})
 })
