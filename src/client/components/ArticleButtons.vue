@@ -1,28 +1,35 @@
 <template lang='pug'>
-	nav.level.is-mobile
-		.level-left
-			//a.level-item.commentButton
-				span.icon.is-small: FontAwesomeIcon(icon='reply')
+	nav.level.is-mobile: .level-left
+		//a.level-item.commentButton
+			span.icon.is-small: FontAwesomeIcon(icon='reply')
 
-			a.level-item.repostButton(
-				:class='{repostedPostButton: postData.reposted}'
-				@click='repost'
-			)
-				span.icon: FontAwesomeIcon(icon='retweet' fixed-width)
-				span {{ postData.repostCount }}
+		a.level-item.postButton.repostButton(
+			:class='{repostedPostButton: postData.reposted}'
+			@click='repost'
+		)
+			span.icon: FontAwesomeIcon(icon='retweet' fixed-width)
+			span {{ postData.repostCount }}
 
-			a.level-item.likeButton(
-				:class='{likedPostButton: postData.liked}'
-				@click='toggleLike'
-			)
-				span.icon: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']" fixed-width)
-				span {{ postData.likeCount }}
+		a.level-item.postButton.likeButton(
+			:class='{likedPostButton: postData.liked}'
+			@click='toggleLike'
+		)
+			span.icon: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']" fixed-width)
+			span {{ postData.likeCount }}
 
-			a.level-item.compactOverrideButton(
-				v-if='postData.images'
-				@click="toggleExpandOverride"
-			)
-				span.icon: FontAwesomeIcon(:icon='compactOverrideIcon' fixed-width)
+		a.level-item.postButton.compactOverrideButton(
+			v-if='postData.images'
+			@click="toggleExpandOverride"
+		)
+			span.icon: FontAwesomeIcon(:icon='compactOverrideIcon' fixed-width)
+
+		b-dropdown
+			a.level-item.postButton.postMenu(slot='trigger')
+				span.icon: FontAwesomeIcon(icon='ellipsis-h' fixed-width)
+
+			b-dropdown-item(v-clipboard:copy='postURL') Copy link to this post
+			b-dropdown-item Hide this post
+			b-dropdown-item Remove this post
 </template>
 
 <script lang='ts'>
@@ -30,6 +37,11 @@ import {Component, Prop, Vue} from 'vue-property-decorator';
 import {Action} from 'vuex-class';
 import {PostData} from '../../core/PostData';
 import {CompactOverride} from './ArticleSkeleton.vue';
+import {library} from '@fortawesome/fontawesome-svg-core';
+import {faCompress, faExpand, faHeart as fasHeart, faReply, faRetweet, faEllipsisH} from '@fortawesome/free-solid-svg-icons';
+import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
+
+library.add(fasHeart, farHeart, faRetweet, faReply, faExpand, faCompress, faEllipsisH);
 
 @Component
 export default class ArticleButtons extends Vue {
@@ -67,13 +79,17 @@ export default class ArticleButtons extends Vue {
 		else
 			return this.compactOverride === CompactOverride.Compact ? 'expand' : 'compress';
 	}
+
+	get postURL() {
+		return `https://twitter.com/${this.postData.authorHandle}/status/${this.postData.id}`;
+	}
 }
 </script>
 
 <style scoped lang='sass'>
 @use '../bulma_overrides' as *
 
-a
+.postButton
 	color: $light
 
 	&:hover span

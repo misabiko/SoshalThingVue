@@ -42,17 +42,12 @@
 import {Vue, Component, Prop} from 'vue-property-decorator';
 import {Mutation} from 'vuex-class';
 import {PostData} from '../../core/PostData';
-import {library} from '@fortawesome/fontawesome-svg-core';
-import {faCompress, faExpand, faHeart as fasHeart, faReply, faRetweet} from '@fortawesome/free-solid-svg-icons';
-import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 import moment from 'moment';
 import {ExpandedPost} from '../store';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
 import ArticleParagraph from './ArticleParagraph.vue';
 import ArticleButtons from './ArticleButtons.vue';
-
-library.add(fasHeart, farHeart, faRetweet, faReply, faExpand, faCompress);
 
 //TODO Move this to external file
 moment.defineLocale('twitter', {
