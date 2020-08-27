@@ -1,40 +1,49 @@
 <template lang='pug'>
-	nav.level.is-mobile: .level-left
-		//a.level-item.commentButton
-			span.icon.is-small: FontAwesomeIcon(icon='reply')
+	nav.level.is-mobile
+		.level-left
+			template(v-if='!hidden')
+				//a.level-item.commentButton
+					span.icon.is-small: FontAwesomeIcon(icon='reply')
 
-		a.level-item.postButton.repostButton(
-			:class='{repostedPostButton: postData.reposted}'
-			@click='repost'
-		)
-			span.icon: FontAwesomeIcon(icon='retweet' fixed-width)
-			span {{ postData.repostCount }}
+				a.level-item.postButton.repostButton(
+					:class='{repostedPostButton: postData.reposted}'
+					@click='repost'
+				)
+					span.icon: FontAwesomeIcon(icon='retweet' fixed-width)
+					span {{ postData.repostCount }}
 
-		a.level-item.postButton.likeButton(
-			:class='{likedPostButton: postData.liked}'
-			@click='toggleLike'
-		)
-			span.icon: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']" fixed-width)
-			span {{ postData.likeCount }}
+				a.level-item.postButton.likeButton(
+					:class='{likedPostButton: postData.liked}'
+					@click='toggleLike'
+				)
+					span.icon: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']" fixed-width)
+					span {{ postData.likeCount }}
 
-		a.level-item.postButton.compactOverrideButton(
-			v-if='postData.images'
-			@click="toggleExpandOverride"
-		)
-			span.icon: FontAwesomeIcon(:icon='compactOverrideIcon' fixed-width)
+				a.level-item.postButton.compactOverrideButton(
+					v-if='postData.images'
+					@click="toggleExpandOverride"
+				)
+					span.icon: FontAwesomeIcon(:icon='compactOverrideIcon' fixed-width)
 
-		b-dropdown.postMenu
-			a.level-item.postButton.postMenuButton(slot='trigger')
-				span.icon: FontAwesomeIcon(icon='ellipsis-h' fixed-width)
+				b-dropdown.postMenu
+					a.level-item.postButton.postMenuButton(slot='trigger')
+						span.icon: FontAwesomeIcon(icon='ellipsis-h' fixed-width)
 
-			b-dropdown-item(
-				v-clipboard:copy='postURL'
-				v-clipboard:success='onCopySuccess'
-				v-clipboard:error='onCopyError'
-				:focusable='false'
-			) Copy link to this post
-			b-dropdown-item(:focusable='false') Hide this post
-			b-dropdown-item(:focusable='false') Remove this post
+					b-dropdown-item(
+						:focusable='false'
+						v-clipboard:copy='postURL'
+						v-clipboard:success='onCopySuccess'
+						v-clipboard:error='onCopyError'
+					) Copy link to this post
+					b-dropdown-item(
+						:focusable='false'
+						@click="$emit('update:hidden', true)"
+					) Hide this post
+					b-dropdown-item(:focusable='false') Remove this post
+
+		.level-right
+			a.level-item.postButton.showButton(v-if='hidden' @click="$emit('update:hidden', false)")
+				span.icon: FontAwesomeIcon(icon='eye' fixed-width)
 </template>
 
 <script lang='ts'>
@@ -43,10 +52,10 @@ import {Action} from 'vuex-class';
 import {PostData} from '../../core/PostData';
 import {CompactOverride} from './ArticleSkeleton.vue';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faCompress, faExpand, faHeart as fasHeart, faReply, faRetweet, faEllipsisH} from '@fortawesome/free-solid-svg-icons';
+import {faCompress, faExpand, faHeart as fasHeart, faReply, faRetweet, faEllipsisH, faEye} from '@fortawesome/free-solid-svg-icons';
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 
-library.add(fasHeart, farHeart, faRetweet, faReply, faExpand, faCompress, faEllipsisH);
+library.add(fasHeart, farHeart, faRetweet, faReply, faExpand, faCompress, faEllipsisH, faEye);
 
 @Component
 export default class ArticleButtons extends Vue {
@@ -56,6 +65,8 @@ export default class ArticleButtons extends Vue {
 	readonly compactMedia!: boolean;
 	@Prop({type: Number, required: true})
 	readonly compactOverride!: CompactOverride;
+	@Prop({type: Boolean, required: true})
+	readonly hidden!: boolean;
 
 	@Action('repost') actionRepost!: (id : string) => void;
 	@Action('toggleLike') actionToggleLike!: (id : string) => void;
@@ -129,6 +140,9 @@ export default class ArticleButtons extends Vue {
 
 .svg-inline--fa.fa-w-16
 	width: 1em
+
+.svg-inline--fa.fa-w-18
+	width: 1.125em
 
 .svg-inline--fa.fa-w-20
 	width: 1.25em

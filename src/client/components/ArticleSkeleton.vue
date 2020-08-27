@@ -9,7 +9,14 @@
 					:src='postData.authorAvatar'
 				)
 
-			.media-content
+			.media-content(v-if='hidden')
+				.content
+					span.names
+						strong {{ postData.authorName }}
+						small {{'@' + postData.authorHandle}}
+					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
+				ArticleButtons(:post-data='postData' :compact-media='compactMedia' :compact-override.sync='compactOverride' :hidden.sync='hidden')
+			.media-content(v-else)
 				.content
 					span.names
 						strong {{ postData.authorName }}
@@ -22,9 +29,9 @@
 
 				slot(name='extra-content')
 
-				ArticleButtons(:post-data='postData' :compact-media='compactMedia' :compact-override.sync='compactOverride')
+				ArticleButtons(:post-data='postData' :compact-media='compactMedia' :compact-override.sync='compactOverride' :hidden.sync='hidden')
 			//-.media-right
-		slot(name='footer')
+		slot(name='footer' v-if='!hidden')
 			PostImages.postMedia(
 				v-if='showMedia && postData.images'
 				:images='postData.images'
@@ -91,6 +98,7 @@ export default class ArticleSkeleton extends Vue {
 	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
 
 	hovered = false;
+	hidden = false;
 	compactOverride = CompactOverride.Inherit;
 
 	expandPost(selectedMedia: number) {
