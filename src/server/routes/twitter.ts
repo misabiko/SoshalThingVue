@@ -43,8 +43,9 @@ export namespace Twitter {
 		next(e);
 	}
 
-	async function respondTimelineUpdate(tweets : Tweet[], response : TwitterResponse, endpoint : string, options: TimelineOptions, res : Response) {
-		const {posts, reposts, quotes, timelinePosts} = parseTweets(tweets, options);
+	async function respondTimelineUpdate(tweets : Tweet[], response : TwitterResponse, endpoint : string, options: TimelineOptions, reverse: boolean, res : Response) {
+		const {posts, reposts, quotes, timelinePosts} = parseTweets(tweets, options, reverse);
+		console.log(`${timelinePosts.newArticles.length} tweets sent.`);
 
 		await res.json({
 			services: {Twitter: {[endpoint]: getRateLimits(response)}},
@@ -79,6 +80,7 @@ export namespace Twitter {
 			q: query.q,
 			since: query.since,
 			max: query.max,
+			count: parseInt(query.count),
 			includeReposts: query.includeReposts !== 'false',
 			onlyWithMedia: query.onlyWithMedia !== 'false',
 		}
@@ -89,14 +91,14 @@ export namespace Twitter {
 			const options = parseTimelineOptions(req.query);
 
 			const response : TwitterResponse = await client.get('statuses/home_timeline', {
-				...(req.query.since ? {since_id: req.query.since} : {}),
-				...(req.query.max ? {max_id: req.query.max} : {}),
+				...(options.since ? {since_id: options.since} : {}),
+				...(options.max ? {max_id: options.max} : {}),
+				...(options.count ? {count: options.count} : {}),
 				tweet_mode: 'extended',
 			});
-			console.log(`${(response as any).length - 1} tweets sent.`);
 			logRateLimit(response);
 
-			await respondTimelineUpdate(response as any, response, 'home_timeline', options, res);
+			await respondTimelineUpdate(response as any, response, 'home_timeline', options, !!options.since, res);
 		}catch (e) {
 			await respondRateOver(e, 'home_timeline', res, next);
 		}
@@ -107,13 +109,15 @@ export namespace Twitter {
 			const options = parseTimelineOptions(req.query);
 
 			const response : TwitterSearchResponse = await client.get('search/tweets', {
-				q: req.query.q,
+				...(options.since ? {since_id: options.since} : {}),
+				...(options.max ? {max_id: options.max} : {}),
+				...(options.count ? {count: options.count} : {}),
+				q: options.q,
 				tweet_mode: 'extended',
 			});
-			console.log(`${response.search_metadata.count} tweets sent.`);
 			logRateLimit(response);
 
-			await respondTimelineUpdate(response.statuses, response, 'search', options, res);
+			await respondTimelineUpdate(response.statuses, response, 'search', options, !!options.since, res);
 		}catch (e) {
 			if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 25))
 				return next(new Error('Twitter: ' + e.errors[0].message));

@@ -14,13 +14,13 @@ import {Media, Tweet} from './types';
 import he from 'he';
 import {TimelineOptions} from '../../core/Timeline';
 
-export function parseTweets(tweets : Tweet[], options : TimelineOptions = {includeReposts: true, onlyWithMedia: false}) : { posts : PostData[], reposts : RepostData[], quotes : QuoteData[], timelinePosts : TimelinePayload } {
+export function parseTweets(tweets : Tweet[], options : TimelineOptions = {includeReposts: true, onlyWithMedia: false}, reverse = true) : { posts : PostData[], reposts : RepostData[], quotes : QuoteData[], timelinePosts : TimelinePayload } {
 	const posts : PostData[] = [];
 	const reposts : RepostData[] = [];
 	const quotes : QuoteData[] = [];
 	const timelinePosts : TimelinePayload = {newArticles: []};
 
-	tweets.reverse().map(tweet => {
+	(reverse ? tweets.reverse() : tweets).map(tweet => {
 		const {post, repost, quote} = parseTweet(tweet);
 		if (!options.includeReposts && repost)
 			return;

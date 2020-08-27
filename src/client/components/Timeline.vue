@@ -6,7 +6,7 @@
 			strong(v-else) {{ timelineData.name }}
 
 			.timelineButtons
-				button.refreshTimeline(@click='refresh(true)')
+				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true, count: articles.length ? 20 : 50})')
 					FontAwesomeIcon(icon='sync-alt' inverse size='lg')
 				button.openTimelineOptions(@click='isOptionsOpen = !isOptionsOpen')
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
@@ -24,7 +24,7 @@
 					.level-left: b-button.level-item(@click='clearPosts') Clear
 					.level-right: b-button.level-item(@click='remove' type='is-danger') Remove
 
-		.timelinePosts(ref='posts')
+		.timelinePosts(ref='posts' @scroll='onScroll')
 			ArticleGeneric(
 				v-for='article in articles'
 				:key='article.id'
@@ -73,6 +73,7 @@ export default class Timeline extends Vue {
 	articles = [] as Article[];
 	isOptionsOpen = !(this.timelineData.name && this.timelineData.endpoint) as boolean;
 	nameEdit = this.timelineData.name;
+	lastBottomRefresh = moment();
 
 	mounted() {
 		if (this.enabled)
@@ -89,12 +90,13 @@ export default class Timeline extends Vue {
 		this.disableAutoRefresh();
 	}
 
-	resetAutoRefresh() {
+	resetAutoRefresh(refresh = true) {
 		//TODO Disable refreshing when not in focus
 		window.clearInterval(this.interval);
 		this.interval = window.setInterval(() => this.refresh(), this.timelineData.refreshRate);
 
-		this.refresh().then();
+		if (refresh)
+			this.refresh().then();
 	}
 
 	disableAutoRefresh() {
@@ -102,7 +104,7 @@ export default class Timeline extends Vue {
 		this.interval = undefined;
 	}
 
-	async refresh(scrollTop = false) {
+	async refresh({scrollTop = false, bottom = false, resetTimer = false, count = 0} = {}) {
 		//TODO Replace with visual update queue
 		//console.log(`refreshing... (enabled: ${this.enabled})`);
 		if (scrollTop)
@@ -113,11 +115,20 @@ export default class Timeline extends Vue {
 
 		try {
 			let options = this.timelineData.options;
-			if (this.timelineData.endpoint === 'home_timeline' && this.articles.length)
-				options = {
-					...options,
-					since: this.articles[0].id,
-				};
+			if (this.articles.length) {
+				if (bottom)
+					options = {
+						...options,
+						max: this.articles[this.articles.length - 1].id,
+						count: count || 150,
+					};
+				else
+					options = {
+						...options,
+						since: this.articles[0].id,
+						count: count || (this.articles.length < 10 ? 150 : 20),
+					};
+			}
 
 			const payload : TimelinePayload = await this.refreshEndpoint({
 				service: this.timelineData.service,
@@ -125,34 +136,16 @@ export default class Timeline extends Vue {
 				options,
 			});
 
-			for (const article of payload.newArticles.filter((a : Article) => this.articles.findIndex((b : Article) => b.id === a.id) < 0)) {
-				const articleData = this.getArticleData(article);
+			this.articles.push(...payload.newArticles.filter((a : Article) => this.articles.findIndex((b : Article) => b.id === a.id) < 0));
 
-				let added = false;
-				for (let i = 0; i < this.articles.length && !added; i++) {
-					const articleTime = articleData.creationTime;
-					const thisArticleTime = this.getArticleData(this.articles[i]).creationTime;
+			this.articles.sort((a : Article, b : Article) => moment(this.getArticleData(a).creationTime).milliseconds() - moment(this.getArticleData(b).creationTime).milliseconds())
 
-					if (moment(articleTime).isBefore(thisArticleTime)) {
-						this.insertArticle(article, i);
-						added = true;
-					}
-				}
-				if (!added)
-					this.addArticle(article);
-			}
+			if (resetTimer)
+				this.resetAutoRefresh(false);
 		}catch (e) {
 			e.message = `Timeline ${this.timelineData.name}: ${e.message}`;
 			throw e;
 		}
-	}
-
-	addArticle(article : Article) {
-		this.articles.unshift(article);
-	}
-
-	insertArticle(article : Article, index : number) {
-		this.articles.splice(index, 0, article);
 	}
 
 	removeArticle(id : string) {
@@ -186,6 +179,13 @@ export default class Timeline extends Vue {
 			left: 0,
 			behavior: 'smooth',
 		});
+	}
+
+	onScroll({target: {scrollTop, clientHeight, scrollHeight}} : { target : Element }) {
+		if (scrollTop + clientHeight >= scrollHeight && moment().diff(this.lastBottomRefresh) > 10000) {
+			this.refresh({bottom: true, resetTimer: true});
+			this.lastBottomRefresh = moment();
+		}
 	}
 
 	get enabled() {
