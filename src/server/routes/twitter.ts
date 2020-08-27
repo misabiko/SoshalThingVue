@@ -251,14 +251,18 @@ export namespace Twitter {
 	router.post('/unlike/:id', preventUnauthorized, unlike);
 	router.post('/retweet/:id', preventUnauthorized, retweet);
 
-	// @ts-ignore
-	import('./testAccess')
-		.then(obj => {
-			obj.default(router, (newClient : TwitterLite, newAuthUser : Twitter.AuthUser) => {
-				client = newClient;
-				authUser = newAuthUser;
+	if (process.env.NODE_ENV === 'development') {
+		// @ts-ignore
+		import('./testAccess')
+			.then(obj => {
+				obj.default(router, (newClient : TwitterLite, newAuthUser : Twitter.AuthUser) => {
+					client = newClient;
+					authUser = newAuthUser;
+				});
+				console.log('testAccess.ts loaded.');
+			})
+			.catch(error => {
+				console.log('testAccess.ts not found, ignoring.');
 			});
-			console.log('testAccess.ts loaded.');
-		})
-		.catch(error => {console.log('testAccess.ts not found, ignoring.')});
+	}
 }

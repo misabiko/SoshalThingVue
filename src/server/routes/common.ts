@@ -62,7 +62,7 @@ export namespace Common {
 			res.sendStatus(400);
 	}
 
-	const timelinesPath = path.join(__dirname, 'timelines.json');
+	const timelinesPath = process.env.SOSHAL_TIMELINE_PATH || path.join(__dirname, 'timelines.json');
 	let timelines: TimelineData[];
 
 	export const router = Router();
