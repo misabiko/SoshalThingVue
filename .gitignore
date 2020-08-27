@@ -4,6 +4,7 @@ dist/**
 src/server/credentials.json
 src/server/access.json
 src/server/routes/timelines.json
+testAccess.*
 
 cypress/integration/examples/
 cypress/videos/

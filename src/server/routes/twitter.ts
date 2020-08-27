@@ -10,7 +10,7 @@ import {Tweet, TwitterResponse, TwitterSearchResponse} from '../twitter/types';
 export namespace Twitter {
 	let client = new TwitterLite({consumer_key, consumer_secret});
 
-	interface AuthUser {
+	export interface AuthUser {
 		id : string,
 		username : string,
 	}
@@ -251,26 +251,11 @@ export namespace Twitter {
 	router.post('/unlike/:id', preventUnauthorized, unlike);
 	router.post('/retweet/:id', preventUnauthorized, retweet);
 
-	//TODO Find a way to enable this only in tests
-	/*router.get('/access', async function(req : Request, res : Response, next : NextFunction) {
-		const {access_token_key, access_token_secret, id, username} = await import('../access.json');
-
-		client = new TwitterLite({
-			consumer_key,
-			consumer_secret,
-			access_token_key,
-			access_token_secret,
-		});
-
-		authUser = {id, username};
-
-		req.user = authUser;
-
-		req.login(authUser, function(error) {
-			if (error)
-				next(error);
-			else
-				res.sendStatus(200);
-		});
-	});*/
+	// @ts-ignore
+	import('./testAccess')
+		.then(obj => {
+			obj.default(router, client, authUser);
+			console.log('testAccess.ts loaded.');
+		})
+		.catch(error => {console.log('testAccess.ts not found, ignoring.')});
 }
