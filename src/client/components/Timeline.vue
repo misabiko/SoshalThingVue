@@ -112,10 +112,17 @@ export default class Timeline extends Vue {
 			return;
 
 		try {
+			let options = this.timelineData.options;
+			if (this.timelineData.endpoint === 'home_timeline' && this.articles.length)
+				options = {
+					...options,
+					since: this.articles[0].id,
+				};
+
 			const payload : TimelinePayload = await this.refreshEndpoint({
 				service: this.timelineData.service,
 				endpoint: this.timelineData.endpoint,
-				options: this.timelineData.options,
+				options,
 			});
 
 			for (const article of payload.newArticles.filter((a : Article) => this.articles.findIndex((b : Article) => b.id === a.id) < 0)) {

@@ -42,7 +42,9 @@ export namespace Common {
 					autoRefresh: true,
 					enabled: true,
 					compactMedia: true,
-					options: {},
+					options: {
+						includeReposts: true,
+					},
 					refreshRate: 90000,
 				}];
 

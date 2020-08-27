@@ -12,8 +12,9 @@ import {
 import {TimelinePayload} from '../../core/ServerResponses';
 import {Media, Tweet} from './types';
 import he from 'he';
+import {TimelineOptions} from '../../core/Timeline';
 
-export function parseTweets(tweets : Tweet[]) : { posts : PostData[], reposts : RepostData[], quotes : QuoteData[], timelinePosts : TimelinePayload } {
+export function parseTweets(tweets : Tweet[], options : TimelineOptions = {includeReposts: true}) : { posts : PostData[], reposts : RepostData[], quotes : QuoteData[], timelinePosts : TimelinePayload } {
 	const posts : PostData[] = [];
 	const reposts : RepostData[] = [];
 	const quotes : QuoteData[] = [];
@@ -21,6 +22,9 @@ export function parseTweets(tweets : Tweet[]) : { posts : PostData[], reposts : 
 
 	tweets.reverse().map(tweet => {
 		const {post, repost, quote} = parseTweet(tweet);
+		if (!options.includeReposts && repost)
+			return;
+
 		if (!posts.some(p => p.id === post.id))
 			posts.push(post);
 

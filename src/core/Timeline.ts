@@ -12,4 +12,7 @@ export interface TimelineData {
 
 export interface TimelineOptions {
 	q?: string;
+	since?: string;
+	max?: string;
+	includeReposts: boolean;
 }

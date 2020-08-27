@@ -47,7 +47,9 @@ export default class TimelineContainer extends Vue {
 			autoRefresh: true,
 			enabled: true,
 			compactMedia: true,
-			options: {},
+			options: {
+				includeReposts: true,
+			},
 			refreshRate: 60000,
 		});
 	}

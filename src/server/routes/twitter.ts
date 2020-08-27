@@ -6,6 +6,7 @@ import passport from 'passport';
 import {RateLimitStatus, StuffedResponse} from '../../core/ServerResponses';
 import {parseTweet, parseTweets} from '../twitter';
 import {Tweet, TwitterResponse, TwitterSearchResponse} from '../twitter/types';
+import {TimelineOptions} from '../../core/Timeline';
 
 export namespace Twitter {
 	let client = new TwitterLite({consumer_key, consumer_secret});
@@ -42,8 +43,8 @@ export namespace Twitter {
 		next(e);
 	}
 
-	async function respondTimelineUpdate(tweets : Tweet[], response : TwitterResponse, endpoint : string, res : Response) {
-		const {posts, reposts, quotes, timelinePosts} = parseTweets(tweets);
+	async function respondTimelineUpdate(tweets : Tweet[], response : TwitterResponse, endpoint : string, options: TimelineOptions, res : Response) {
+		const {posts, reposts, quotes, timelinePosts} = parseTweets(tweets, options);
 
 		await res.json({
 			services: {Twitter: {[endpoint]: getRateLimits(response)}},
@@ -73,13 +74,28 @@ export namespace Twitter {
 			parseQueryErrors(e, next);
 	}
 
-	async function homeTimeline(_req : Request, res : Response, next : NextFunction) {
+	function parseTimelineOptions(query : any) : TimelineOptions {
+		return {
+			q: query.q,
+			since: query.since,
+			max: query.max,
+			includeReposts: query.includeReposts !== 'false',
+		}
+	}
+
+	async function homeTimeline(req : Request, res : Response, next : NextFunction) {
 		try {
-			const response : TwitterResponse = await client.get('statuses/home_timeline', {tweet_mode: 'extended'});
+			const options = parseTimelineOptions(req.query);
+
+			const response : TwitterResponse = await client.get('statuses/home_timeline', {
+				...(req.query.since ? {since_id: req.query.since} : {}),
+				...(req.query.max ? {max_id: req.query.max} : {}),
+				tweet_mode: 'extended',
+			});
 			console.log(`${(response as any).length - 1} tweets sent.`);
 			logRateLimit(response);
 
-			await respondTimelineUpdate(response as any, response, 'home_timeline', res);
+			await respondTimelineUpdate(response as any, response, 'home_timeline', options, res);
 		}catch (e) {
 			await respondRateOver(e, 'home_timeline', res, next);
 		}
@@ -87,6 +103,8 @@ export namespace Twitter {
 
 	async function search(req : Request, res : Response, next : NextFunction) {
 		try {
+			const options = parseTimelineOptions(req.query);
+
 			const response : TwitterSearchResponse = await client.get('search/tweets', {
 				q: req.query.q,
 				tweet_mode: 'extended',
@@ -94,7 +112,7 @@ export namespace Twitter {
 			console.log(`${response.search_metadata.count} tweets sent.`);
 			logRateLimit(response);
 
-			await respondTimelineUpdate(response.statuses, response, 'search', res);
+			await respondTimelineUpdate(response.statuses, response, 'search', options, res);
 		}catch (e) {
 			if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 25))
 				return next(new Error('Twitter: ' + e.errors[0].message));
