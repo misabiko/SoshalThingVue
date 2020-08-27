@@ -23,17 +23,18 @@
 		)
 			span.icon: FontAwesomeIcon(:icon='compactOverrideIcon' fixed-width)
 
-		b-dropdown
-			a.level-item.postButton.postMenu(slot='trigger')
+		b-dropdown.postMenu
+			a.level-item.postButton.postMenuButton(slot='trigger')
 				span.icon: FontAwesomeIcon(icon='ellipsis-h' fixed-width)
 
 			b-dropdown-item(
 				v-clipboard:copy='postURL'
 				v-clipboard:success='onCopySuccess'
 				v-clipboard:error='onCopyError'
+				:focusable='false'
 			) Copy link to this post
-			b-dropdown-item Hide this post
-			b-dropdown-item Remove this post
+			b-dropdown-item(:focusable='false') Hide this post
+			b-dropdown-item(:focusable='false') Remove this post
 </template>
 
 <script lang='ts'>
@@ -105,7 +106,7 @@ export default class ArticleButtons extends Vue {
 	color: $light
 
 	&:hover span
-		color: $link
+		color: $primary
 
 	&:hover.likeButton, &.likedPostButton
 		span
@@ -117,6 +118,10 @@ export default class ArticleButtons extends Vue {
 
 	&:hover.commentButton span
 		color: $comment-color
+
+.postMenu .dropdown-item:hover
+	color: $white
+	background-color: $primary
 
 //TODO width: getFaW(.fa-w-14) * 0.0625em
 .svg-inline--fa.fa-w-14
