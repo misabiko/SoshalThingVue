@@ -42,7 +42,6 @@ export default class PostImages extends Vue {
 	overflow: hidden
 	display: flex
 	justify-content: center
-	max-height: 50vh
 	border-radius: 8px
 
 	&:not(:last-child)
