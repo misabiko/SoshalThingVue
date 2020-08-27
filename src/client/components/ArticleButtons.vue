@@ -27,7 +27,11 @@
 			a.level-item.postButton.postMenu(slot='trigger')
 				span.icon: FontAwesomeIcon(icon='ellipsis-h' fixed-width)
 
-			b-dropdown-item(v-clipboard:copy='postURL') Copy link to this post
+			b-dropdown-item(
+				v-clipboard:copy='postURL'
+				v-clipboard:success='onCopySuccess'
+				v-clipboard:error='onCopyError'
+			) Copy link to this post
 			b-dropdown-item Hide this post
 			b-dropdown-item Remove this post
 </template>
@@ -68,6 +72,14 @@ export default class ArticleButtons extends Vue {
 			this.$emit('update:compact-override', this.compactMedia ? CompactOverride.Expand : CompactOverride.Compact);
 		else
 			this.$emit('update:compact-override', this.compactOverride === CompactOverride.Compact ? CompactOverride.Expand : CompactOverride.Compact);
+	}
+
+	onCopySuccess() {
+		this.$buefy.toast.open('Link copied to clipboard!');
+	}
+
+	onCopyError() {
+		this.$buefy.toast.open({type: 'is-danger', message: 'Failed to copy to clipboard'});
 	}
 
 	get compactOverrideIcon() : string | undefined {
