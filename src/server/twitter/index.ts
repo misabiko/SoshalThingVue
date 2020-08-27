@@ -58,7 +58,7 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 
 	return {
 		id: tweet.id_str,
-		creationTime: tweet.created_at,
+		creationTime: new Date(tweet.created_at).toISOString(),
 		authorName: tweet.user.name,
 		authorHandle: tweet.user.screen_name,
 		authorAvatar: tweet.user.profile_image_url_https,
@@ -82,7 +82,7 @@ function retweetToRepostData(tweet : Tweet) : RepostData {
 
 	return {
 		id: tweet.id_str,
-		creationTime: tweet.created_at,
+		creationTime: new Date(tweet.created_at).toISOString(),
 		reposterName: tweet.user.name,
 		reposterHandle: tweet.user.screen_name,
 		reposterAvatar: tweet.user.profile_image_url_https,
@@ -97,7 +97,7 @@ function quoteToQuoteData(tweet : Tweet) : QuoteData {
 
 	return {
 		id: tweet.id_str,
-		creationTime: tweet.created_at,
+		creationTime: new Date(tweet.created_at).toISOString(),
 		authorName: tweet.user.name,
 		authorHandle: tweet.user.screen_name,
 		authorAvatar: tweet.user.profile_image_url_https,
