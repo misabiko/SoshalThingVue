@@ -15,4 +15,5 @@ export interface TimelineOptions {
 	since?: string;
 	max?: string;
 	includeReposts: boolean;
+	onlyWithMedia: boolean;
 }

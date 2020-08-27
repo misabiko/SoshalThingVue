@@ -80,6 +80,7 @@ export namespace Twitter {
 			since: query.since,
 			max: query.max,
 			includeReposts: query.includeReposts !== 'false',
+			onlyWithMedia: query.onlyWithMedia !== 'false',
 		}
 	}
 

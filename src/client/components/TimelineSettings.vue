@@ -12,6 +12,7 @@
 		b-field: b-switch(v-model='autoRefresh' @input='applySettings') Auto Refresh
 		b-field: b-switch(v-model='compactMedia' @input='applySettings') Compact Media
 		b-field: b-switch(v-model='options.includeReposts' @input='applySettings') Include Reposts
+		b-field: b-switch(v-model='options.onlyWithMedia' @input='applySettings') Only With Media
 
 		TimelineSearchOptions(
 			v-if="endpoint === 'search'"

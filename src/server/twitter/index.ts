@@ -14,7 +14,7 @@ import {Media, Tweet} from './types';
 import he from 'he';
 import {TimelineOptions} from '../../core/Timeline';
 
-export function parseTweets(tweets : Tweet[], options : TimelineOptions = {includeReposts: true}) : { posts : PostData[], reposts : RepostData[], quotes : QuoteData[], timelinePosts : TimelinePayload } {
+export function parseTweets(tweets : Tweet[], options : TimelineOptions = {includeReposts: true, onlyWithMedia: false}) : { posts : PostData[], reposts : RepostData[], quotes : QuoteData[], timelinePosts : TimelinePayload } {
 	const posts : PostData[] = [];
 	const reposts : RepostData[] = [];
 	const quotes : QuoteData[] = [];
@@ -23,6 +23,9 @@ export function parseTweets(tweets : Tweet[], options : TimelineOptions = {inclu
 	tweets.reverse().map(tweet => {
 		const {post, repost, quote} = parseTweet(tweet);
 		if (!options.includeReposts && repost)
+			return;
+
+		if (options.onlyWithMedia && !(post.images || post.video))
 			return;
 
 		if (!posts.some(p => p.id === post.id))
