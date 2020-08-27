@@ -12,6 +12,19 @@ function mountParagraph(fixture) {
 	})
 }
 
+function mountParagraphRequest(tweetId) {
+	cy.request('twitter/access')
+
+	cy.request('twitter/tweets/status/' + tweetId).its('body').then(statusResponse => {
+		mount(ArticleParagraph, {
+			propsData: {
+				articleId: statusResponse.post.id,
+				postData: statusResponse.post,
+			}
+		})
+	})
+}
+
 describe('ArticleParagraph', () => {
 	describe('User Mentions', () => {
 		it('tweetWholeUserMention', () => {
@@ -53,6 +66,21 @@ describe('ArticleParagraph', () => {
 	describe('Hashtags', () => {
 		it("tweetElUndefined", () => {
 			mountParagraph('tweetElUndefined')
+		})
+
+		it.only('hashtags in middle', () => {
+			mountParagraphRequest('1298893373206671360')
+
+			cy.get('.articleParagraph')
+				.children().should('have.length', 14)
+
+			cy.get('.articleParagraph > span')
+				.should('have.length', 7)
+				.should('not.have.text', '#')
+				.first().should('have.text', 'We just wanted to say thank you! For continuing to play & support us! 💛💙💜 Our leaderboards continue to grow and Mount Frosty gets bigger!\n\n')
+
+			cy.get('a.articleHashtag')
+				.should('have.length', 7)
 		})
 	})
 

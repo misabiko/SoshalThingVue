@@ -3,7 +3,6 @@ import {Component, Prop, Vue} from 'vue-property-decorator';
 import {ExternalLinkData, HashtagData, Indices, PostData, UserMentionData} from '../../core/PostData';
 import {CreateElement} from 'vue';
 import {VNode} from 'vue/types/vnode';
-import he from 'he';
 
 interface ParagraphItem {
 	node : VNode,
@@ -12,7 +11,7 @@ interface ParagraphItem {
 
 function textWithIndices(createElement : CreateElement, text : string, startIndex : number, offset = 0) : ParagraphItem {
 	return {
-		node: createElement('span', he.decode(text)),
+		node: createElement('span', text),
 		indices: [startIndex, startIndex + text.length - 1 + offset] as Indices,
 	};
 }

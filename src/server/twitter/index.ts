@@ -11,6 +11,7 @@ import {
 } from '../../core/PostData';
 import {TimelinePayload} from '../../core/ServerResponses';
 import {Media, Tweet} from './types';
+import he from 'he';
 
 export function parseTweets(tweets : Tweet[]) : { posts : PostData[], reposts : RepostData[], quotes : QuoteData[], timelinePosts : TimelinePayload } {
 	const posts : PostData[] = [];
@@ -62,7 +63,7 @@ export function tweetToPostData(tweet : Tweet) : PostData {
 		authorName: tweet.user.name,
 		authorHandle: tweet.user.screen_name,
 		authorAvatar: tweet.user.profile_image_url_https,
-		text: tweet.full_text,
+		text: he.decode(tweet.full_text),
 		images,
 		video,
 		liked: tweet.favorited,
@@ -101,7 +102,7 @@ function quoteToQuoteData(tweet : Tweet) : QuoteData {
 		authorName: tweet.user.name,
 		authorHandle: tweet.user.screen_name,
 		authorAvatar: tweet.user.profile_image_url_https,
-		text: tweet.full_text,
+		text: he.decode(tweet.full_text),
 		liked: tweet.favorited,
 		reposted: tweet.retweeted,
 		likeCount: tweet.favorite_count,
@@ -118,6 +119,8 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 	let hashtags : HashtagData[] | undefined;
 	let externalLinks : ExternalLinkData[] | undefined;
 
+	const fullText = he.decode(tweet.full_text);
+
 	if (tweet.extended_entities) {
 		const medias = tweet.extended_entities.media;
 
@@ -130,7 +133,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 						return {
 							url: media.media_url_https,
 							sizes: media.sizes,
-							indices: [media.indices[0], media.indices[1] - (media.indices[1] === tweet.full_text.length ? 1 : 0)],
+							indices: [media.indices[0], media.indices[1] >= fullText.length ? fullText.length - 1 : media.indices[1]],
 						};
 					});
 					break;
@@ -150,7 +153,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 								};
 							}),
 							autoplay: false,
-							indices: [media.indices[0], media.indices[1] - (media.indices[1] === tweet.full_text.length ? 1 : 0)],
+							indices: [media.indices[0], media.indices[1] >= fullText.length ? fullText.length - 1 : media.indices[1]],
 						};
 					}
 					break;
@@ -169,7 +172,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 								};
 							}),
 							autoplay: true,
-							indices: [media.indices[0], media.indices[1] - (media.indices[1] === tweet.full_text.length ? 1 : 0)],
+							indices: [media.indices[0], media.indices[1] >= fullText.length ? fullText.length - 1 : media.indices[1]],
 						};
 					}
 					break;
@@ -180,7 +183,7 @@ function parseEntities(tweet : Tweet) : { images? : PostImageData[], video? : Po
 			[{
 				url: tweet.entities.media[0].media_url_https,
 				sizes: tweet.entities.media[0].sizes,
-				indices: [tweet.entities.media[0].indices[0], tweet.entities.media[0].indices[1] - (tweet.entities.media[0].indices[1] === tweet.full_text.length ? 1 : 0)],
+				indices: [tweet.entities.media[0].indices[0], tweet.entities.media[0].indices[1] >= fullText.length ? fullText.length - 1 : tweet.entities.media[0].indices[1]],
 			}] :
 			undefined;
 

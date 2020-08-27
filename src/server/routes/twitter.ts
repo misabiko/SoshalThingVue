@@ -254,7 +254,10 @@ export namespace Twitter {
 	// @ts-ignore
 	import('./testAccess')
 		.then(obj => {
-			obj.default(router, client, authUser);
+			obj.default(router, (newClient : TwitterLite, newAuthUser : Twitter.AuthUser) => {
+				client = newClient;
+				authUser = newAuthUser;
+			});
 			console.log('testAccess.ts loaded.');
 		})
 		.catch(error => {console.log('testAccess.ts not found, ignoring.')});
