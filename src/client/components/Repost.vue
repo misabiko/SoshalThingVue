@@ -1,5 +1,6 @@
 <template lang='pug'>
 	ArticleSkeleton.repost(
+		:service='service'
 		:article-id='repostId'
 		:post-data='postData'
 		:show-media='showMedia'
@@ -15,13 +16,15 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import {PostData, RepostData} from '../../core/PostData';
 import {Prop} from 'vue-property-decorator';
-import {Getter} from 'vuex-class';
 import ArticleSkeleton from './ArticleSkeleton.vue';
 import PostVideo from './PostVideo.vue';
 import PostImages from './PostImages.vue';
+import {Service} from '../services/service';
 
 @Component({components: {ArticleSkeleton, PostImages, PostVideo}})
 export default class Repost extends Vue {
+	@Prop({type: Object, required: true})
+	readonly service!: Service;
 	@Prop({type: String, required: true})
 	readonly repostId!: string;
 	@Prop({type: Boolean, default: true})
@@ -29,11 +32,8 @@ export default class Repost extends Vue {
 	@Prop({type: Boolean})
 	readonly compactMedia!: boolean;
 
-	@Getter readonly getRepost!: (id: string) => RepostData;
-	@Getter readonly getPost!: (id: string) => PostData;
-
 	get repostData() : RepostData {
-		return this.getRepost(this.repostId);
+		return this.service.reposts[this.repostId];
 	}
 
 	get postId() : string {
@@ -41,7 +41,7 @@ export default class Repost extends Vue {
 	}
 
 	get postData() : PostData {
-		return this.getPost(this.postId);
+		return this.service.posts[this.postId];
 	}
 }
 </script>

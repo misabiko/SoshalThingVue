@@ -7,14 +7,14 @@
 
 				a.level-item.postButton.repostButton(
 					:class='{repostedPostButton: postData.reposted}'
-					@click='repost'
+					@click='service.repost(postData.id)'
 				)
 					span.icon: FontAwesomeIcon(icon='retweet' fixed-width)
 					span {{ postData.repostCount }}
 
 				a.level-item.postButton.likeButton(
 					:class='{likedPostButton: postData.liked}'
-					@click='toggleLike'
+					@click='service.toggleLike(postData.id)'
 				)
 					span.icon: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']" fixed-width)
 					span {{ postData.likeCount }}
@@ -48,36 +48,35 @@
 
 <script lang='ts'>
 import {Component, Prop, Vue} from 'vue-property-decorator';
-import {Action} from 'vuex-class';
 import {PostData} from '../../core/PostData';
 import {CompactOverride} from './ArticleSkeleton.vue';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faCompress, faExpand, faHeart as fasHeart, faReply, faRetweet, faEllipsisH, faEye} from '@fortawesome/free-solid-svg-icons';
+import {
+	faCompress,
+	faExpand,
+	faHeart as fasHeart,
+	faReply,
+	faRetweet,
+	faEllipsisH,
+	faEye,
+} from '@fortawesome/free-solid-svg-icons';
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
+import {Service} from '../services/service';
 
 library.add(fasHeart, farHeart, faRetweet, faReply, faExpand, faCompress, faEllipsisH, faEye);
 
 @Component
 export default class ArticleButtons extends Vue {
 	@Prop({type: Object, required: true})
-	readonly postData!: PostData;
+	readonly service! : Service;
+	@Prop({type: Object, required: true})
+	readonly postData! : PostData;
 	@Prop({type: Boolean, required: true})
-	readonly compactMedia!: boolean;
+	readonly compactMedia! : boolean;
 	@Prop({type: Number, required: true})
-	readonly compactOverride!: CompactOverride;
+	readonly compactOverride! : CompactOverride;
 	@Prop({type: Boolean, required: true})
-	readonly hidden!: boolean;
-
-	@Action('repost') actionRepost!: (id : string) => void;
-	@Action('toggleLike') actionToggleLike!: (id : string) => void;
-
-	repost() {
-		this.actionRepost(this.postData.id);
-	}
-
-	toggleLike() {
-		this.actionToggleLike(this.postData.id);
-	}
+	readonly hidden! : boolean;
 
 	toggleExpandOverride() {
 		if (this.compactOverride === CompactOverride.Inherit)

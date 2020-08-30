@@ -1,5 +1,6 @@
 <template lang='pug'>
 	ArticleSkeleton.post(
+		:service='service'
 		:article-id='postId'
 		:post-data='postData'
 		:show-media='showMedia'
@@ -9,16 +10,18 @@
 
 <script lang='ts'>
 import {Component, Prop, Vue} from 'vue-property-decorator';
-import {Getter} from 'vuex-class';
 import {PostData} from '../../core/PostData';
 import ArticleSkeleton from './ArticleSkeleton.vue';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
+import {Service} from '../services/service';
 
 @Component({
 	components: {ArticleSkeleton, PostImages, PostVideo}
 })
 export default class Post extends Vue {
+	@Prop({type: Object, required: true})
+	readonly service!: Service;
 	@Prop({type: String, required: true})
 	readonly postId!: string;
 	@Prop({type: Boolean, default: true})
@@ -26,10 +29,8 @@ export default class Post extends Vue {
 	@Prop({type: Boolean})
 	readonly compactMedia!: boolean;
 
-	@Getter readonly getPost!: (id: string) => PostData;
-
 	get postData() : PostData {
-		return this.getPost(this.postId);
+		return this.service.posts[this.postId];
 	}
 }
 </script>

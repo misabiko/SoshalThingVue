@@ -27,6 +27,7 @@
 			ArticleGeneric(
 				v-for='article in articles'
 				:key='article.id'
+				:service='service'
 				:article='article'
 				:compact-media='timelineData.compactMedia'
 				@remove='removeArticle($event)'
@@ -35,13 +36,12 @@
 
 <script lang='ts'>
 import {Component, Prop, Ref, Vue, Watch} from 'vue-property-decorator';
-import {Action, Getter} from 'vuex-class';
 import {SettingsData} from './TimelineSettings.vue';
 import ArticleGeneric from './ArticleGeneric.vue';
 import TimelineSettings from './TimelineSettings.vue';
 import {TimelinePayload} from '../../core/ServerResponses';
-import {Article, ArticleData} from '../../core/PostData';
-import {TimelineData, TimelineOptions} from '../../core/Timeline';
+import {Article} from '../../core/PostData';
+import {TimelineData} from '../../core/Timeline';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
@@ -58,10 +58,6 @@ export default class Timeline extends Vue {
 	readonly shouldScroll! : string[];
 
 	@Ref('posts') readonly timelinePosts! : HTMLDivElement;
-
-	@Getter readonly getArticleData! : (article : Article) => ArticleData;
-
-	@Action refreshEndpoint! : (payload : { service : string, endpoint : string, options : TimelineOptions }) => Promise<TimelinePayload>;
 
 	interval = undefined as number | undefined;
 	articles = [] as Article[];
@@ -125,11 +121,10 @@ export default class Timeline extends Vue {
 					};
 			}
 
-			const payload : TimelinePayload = await this.refreshEndpoint({
-				service: this.timelineData.service,
-				endpoint: this.timelineData.endpoint,
-				options,
-			});
+			const payload : TimelinePayload = await this.service.refreshEndpoint(
+				this.timelineData.endpoint,
+				options
+			);
 
 			const newArticles = payload.newArticles.filter((a : Article) =>
 				this.articles.findIndex(
@@ -138,7 +133,7 @@ export default class Timeline extends Vue {
 			);
 			this.articles.push(...newArticles);
 
-			this.articles.sort((a : Article, b : Article) => moment(this.getArticleData(a).creationTime).milliseconds() - moment(this.getArticleData(b).creationTime).milliseconds())
+			this.articles.sort((a : Article, b : Article) => moment(this.service.getArticleData(a).creationTime).milliseconds() - moment(this.service.getArticleData(b).creationTime).milliseconds())
 
 			if (resetTimer)
 				this.resetAutoRefresh(false);

@@ -15,7 +15,13 @@
 						strong {{ postData.authorName }}
 						small {{'@' + postData.authorHandle}}
 					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
-				ArticleButtons(:post-data='postData' :compact-media='compactMedia' :compact-override.sync='compactOverride' :hidden.sync='hidden')
+				ArticleButtons(
+					:service='service'
+					:post-data='postData'
+					:compact-media='compactMedia'
+					:compact-override.sync='compactOverride'
+					:hidden.sync='hidden'
+				)
 			.media-content(v-else)
 				.content
 					span.names
@@ -29,7 +35,13 @@
 
 				slot(name='extra-content')
 
-				ArticleButtons(:post-data='postData' :compact-media='compactMedia' :compact-override.sync='compactOverride' :hidden.sync='hidden')
+				ArticleButtons(
+					:service='service'
+					:post-data='postData'
+					:compact-media='compactMedia'
+					:compact-override.sync='compactOverride'
+					:hidden.sync='hidden'
+				)
 			//-.media-right
 		slot(name='footer' v-if='!hidden')
 			PostImages.postMedia(
@@ -55,6 +67,7 @@ import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
 import ArticleParagraph from './ArticleParagraph.vue';
 import ArticleButtons from './ArticleButtons.vue';
+import {Service} from '../services/service';
 
 //TODO Move this to external file
 moment.defineLocale('twitter', {
@@ -86,6 +99,8 @@ export enum CompactOverride {
 
 @Component({components: {ArticleButtons, ArticleParagraph, PostImages, PostVideo}})
 export default class ArticleSkeleton extends Vue {
+	@Prop({type: Object, required: true})
+	readonly service!: Service;
 	@Prop({type: String, required: true})
 	readonly articleId!: string;
 	@Prop({type: Boolean, default: true})

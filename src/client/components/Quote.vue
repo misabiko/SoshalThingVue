@@ -1,5 +1,6 @@
 <template lang='pug'>
 	ArticleSkeleton.quote(
+		:service='service'
 		:article-id='quoteId'
 		:post-data='quoteData'
 		:show-media='false'
@@ -29,14 +30,17 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import {PostData, QuoteData} from '../../core/PostData';
 import {Prop} from 'vue-property-decorator';
-import {Action, Getter, Mutation} from 'vuex-class';
+import {Mutation} from 'vuex-class';
 import {ExpandedPost} from '../store';
 import ArticleSkeleton from './ArticleSkeleton.vue';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
+import {Service} from '../services/service';
 
 @Component({components: {ArticleSkeleton, PostImages, PostVideo}})
 export default class Quote extends Vue {
+	@Prop({type: Object, required: true})
+	readonly service!: Service;
 	@Prop({type: String, required: true})
 	readonly quoteId!: string;
 	@Prop({type: Boolean, default: true})
@@ -44,15 +48,10 @@ export default class Quote extends Vue {
 	@Prop({type: Boolean})
 	readonly compactMedia!: boolean;
 
-	@Getter readonly getQuote!: (id: string) => QuoteData;
-	@Getter readonly getPost!: (id: string) => PostData;
-	@Action('toggleLike') actionToggleLike!: (id : string) => void;
-	@Action('repost') actionRepost!: (id : string) => void;
-
 	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
 
 	get quoteData() : QuoteData {
-		return this.getQuote(this.quoteId);
+		return this.service.quotes[this.quoteId];
 	}
 
 	get postId() : string {
@@ -60,7 +59,7 @@ export default class Quote extends Vue {
 	}
 
 	get postData() : PostData {
-		return this.getPost(this.postId);
+		return this.service.posts[this.postId];
 	}
 }
 </script>

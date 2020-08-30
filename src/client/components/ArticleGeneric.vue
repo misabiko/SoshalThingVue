@@ -2,6 +2,7 @@
 	Post(
 		v-if='isPost'
 		:key='article.id'
+		:service='service'
 		:postId='article.id'
 		:compact-media='compactMedia'
 		@remove='removeArticle($event)'
@@ -9,6 +10,7 @@
 	Repost(
 		v-else-if='isRepost'
 		:key='article.id'
+		:service='service'
 		:repostId='article.id'
 		:compact-media='compactMedia'
 		@remove='removeArticle($event)'
@@ -16,6 +18,7 @@
 	Quote(
 		v-else
 		:key='article.id'
+		:service='service'
 		:quoteId='article.id'
 		:compact-media='compactMedia'
 		@remove='removeArticle($event)'
@@ -28,9 +31,12 @@ import Post from './Post.vue';
 import Repost from './Repost.vue';
 import Quote from './Quote.vue';
 import {Article, ArticleType} from '../../core/PostData';
+import {Service} from '../services/service';
 
 @Component({components: {Post, Repost, Quote}})
 export default class ArticleGeneric extends Vue {
+	@Prop({type: Object, required: true})
+	readonly service!: Service;
 	@Prop({type: Object, required: true})
 	readonly article!: Article;
 	@Prop({type: Boolean})
@@ -46,7 +52,3 @@ export default class ArticleGeneric extends Vue {
 	}
 }
 </script>
-
-<style scoped lang='sass'>
-
-</style>

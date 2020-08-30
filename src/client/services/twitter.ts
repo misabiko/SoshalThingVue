@@ -1,5 +1,4 @@
 import {Endpoint, Service} from './service';
-
 export default class TwitterService extends Service {
 	constructor() {
 		super('Twitter', '/twitter/login');
@@ -16,5 +15,26 @@ export default class TwitterService extends Service {
 				180,
 			),
 		);
+	}
+
+	async like(id : string) {
+		const json = await fetch(`twitter/like/${id}`, {method: 'POST'}).then(response => response.json());
+
+		this.updateArticleData(json);
+	}
+
+	async unlike(id : string) {
+		const json = await fetch(`twitter/unlike/${id}`, {method: 'POST'}).then(response => response.json());
+
+		this.updateArticleData(json);
+	}
+
+	async repost(id : string) {
+		if (this.posts[id].reposted)
+			return;
+
+		const json = await fetch(`twitter/retweet/${id}`, {method: 'POST'}).then(response => response.json());
+
+		this.updateArticleData(json);
 	}
 }
