@@ -14,7 +14,7 @@ Vue.use(VueClipboard);
 
 Vue.config.productionTip = false;
 
-(window as any).app = new Vue({
+(window as any).SoshalThing = new Vue({
 	el: '#soshalThing',
 	template: '<App/>',
 	components: {App},
