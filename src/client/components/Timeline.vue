@@ -73,7 +73,8 @@ export default class Timeline extends Vue {
 	articles = [] as Article[];
 	isOptionsOpen = !(this.timelineData.name && this.timelineData.endpoint) as boolean;
 	nameEdit = this.timelineData.name;
-	lastBottomRefresh = moment();
+	lastBottomRefreshTime = moment();
+	bottomRefreshCount = 20;
 
 	mounted() {
 		if (this.enabled)
@@ -104,14 +105,14 @@ export default class Timeline extends Vue {
 		this.interval = undefined;
 	}
 
-	async refresh({scrollTop = false, bottom = false, resetTimer = false, count = 0} = {}) {
+	async refresh({scrollTop = false, bottom = false, resetTimer = false, count = 0} = {}) : Promise<number> {
 		//TODO Replace with visual update queue
 		//console.log(`refreshing... (enabled: ${this.enabled})`);
 		if (scrollTop)
 			this.scrollTop();
 
 		if (!this.enabled)
-			return;
+			return 0;
 
 		try {
 			let options = this.timelineData.options;
@@ -120,7 +121,7 @@ export default class Timeline extends Vue {
 					options = {
 						...options,
 						max: this.articles[this.articles.length - 1].id,
-						count: count || 150,
+						count: count || this.bottomRefreshCount,
 					};
 				else
 					options = {
@@ -136,12 +137,19 @@ export default class Timeline extends Vue {
 				options,
 			});
 
-			this.articles.push(...payload.newArticles.filter((a : Article) => this.articles.findIndex((b : Article) => b.id === a.id) < 0));
+			const newArticles = payload.newArticles.filter((a : Article) =>
+				this.articles.findIndex(
+					(b : Article) => b.id === a.id
+				) < 0
+			);
+			this.articles.push(...newArticles);
 
 			this.articles.sort((a : Article, b : Article) => moment(this.getArticleData(a).creationTime).milliseconds() - moment(this.getArticleData(b).creationTime).milliseconds())
 
 			if (resetTimer)
 				this.resetAutoRefresh(false);
+
+			return newArticles.length;
 		}catch (e) {
 			e.message = `Timeline ${this.timelineData.name}: ${e.message}`;
 			throw e;
@@ -182,9 +190,18 @@ export default class Timeline extends Vue {
 	}
 
 	onScroll({target: {scrollTop, clientHeight, scrollHeight}} : { target : Element }) {
-		if (scrollTop + clientHeight >= scrollHeight && moment().diff(this.lastBottomRefresh) > 10000) {
-			this.refresh({bottom: true, resetTimer: true});
-			this.lastBottomRefresh = moment();
+		if (scrollTop + clientHeight >= Math.max(0, scrollHeight - 5000)) {
+			if (moment().diff(this.lastBottomRefreshTime) > 10000) {
+				this.refresh({bottom: true, resetTimer: true})
+					.then(articleCount => {
+						if (articleCount)
+							this.bottomRefreshCount = 20;
+						else if (this.bottomRefreshCount < 200)
+							this.bottomRefreshCount += this.bottomRefreshCount == 20 ? 30 : 50;
+					});
+
+				this.lastBottomRefreshTime = moment();
+			}
 		}
 	}
 
