@@ -10,14 +10,14 @@
 					@click='service.repost(postData.id)'
 				)
 					span.icon: FontAwesomeIcon(icon='retweet' fixed-width)
-					span {{ postData.repostCount }}
+					span {{ animatedRepostCount }}
 
 				a.level-item.postButton.likeButton(
 					:class='{likedPostButton: postData.liked}'
 					@click='service.toggleLike(postData.id)'
 				)
 					span.icon: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']" fixed-width)
-					span {{ postData.likeCount }}
+					span {{ animatedLikeCount }}
 
 				a.level-item.postButton.compactOverrideButton(
 					v-if='postData.images'
@@ -47,7 +47,7 @@
 </template>
 
 <script lang='ts'>
-import {Component, Prop, Vue} from 'vue-property-decorator';
+import {Vue, Component, Prop, Watch} from 'vue-property-decorator';
 import {PostData} from '../../core/PostData';
 import {CompactOverride} from './ArticleSkeleton.vue';
 import {library} from '@fortawesome/fontawesome-svg-core';
@@ -62,6 +62,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 import {Service} from '../services/service';
+import gsap from 'gsap';
 
 library.add(fasHeart, farHeart, faRetweet, faReply, faExpand, faCompress, faEllipsisH, faEye);
 
@@ -77,6 +78,9 @@ export default class ArticleButtons extends Vue {
 	readonly compactOverride! : CompactOverride;
 	@Prop({type: Boolean, required: true})
 	readonly hidden! : boolean;
+
+	tweenedLikeCount = this.likeCount;
+	tweenedRepostCount = this.repostCount;
 
 	toggleExpandOverride() {
 		if (this.compactOverride === CompactOverride.Inherit)
@@ -105,6 +109,33 @@ export default class ArticleButtons extends Vue {
 
 	get postURL() {
 		return `https://twitter.com/${this.postData.authorHandle}/status/${this.postData.id}`;
+		//TODO Move to TwitterService
+	}
+
+	get likeCount() {
+		return this.postData.likeCount;
+	}
+
+	get repostCount() {
+		return this.postData.repostCount;
+	}
+
+	get animatedLikeCount() {
+		return this.tweenedLikeCount.toFixed(0);
+	}
+
+	get animatedRepostCount() {
+		return this.tweenedRepostCount.toFixed(0);
+	}
+
+	@Watch('likeCount')
+	onLikeCountChange(newLikeCount : number) {
+		gsap.to(this.$data, {duration: 0.5, ease:'power2.out', tweenedLikeCount: newLikeCount});
+	}
+
+	@Watch('repostCount')
+	onRepostCountChange(newRepostCount : number) {
+		gsap.to(this.$data, {duration: 0.5, ease:'power2.out', tweenedRepostCount: newRepostCount});
 	}
 }
 </script>
