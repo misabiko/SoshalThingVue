@@ -45,7 +45,7 @@ import {TimelineData} from '../../core/Timeline';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
-import {Service} from '../services/service';
+import {Endpoint, Service} from '../services/service';
 import {SoshalState} from '../store';
 
 library.add(faEllipsisV, faSyncAlt);
@@ -60,6 +60,7 @@ export default class Timeline extends Vue {
 	@Ref('posts') readonly timelinePosts! : HTMLDivElement;
 
 	interval = undefined as number | undefined;
+	timeout = undefined as number | undefined;
 	articles = [] as Article[];
 	isOptionsOpen = !(this.timelineData.name && this.timelineData.endpoint) as boolean;
 	nameEdit = this.timelineData.name;
@@ -81,13 +82,19 @@ export default class Timeline extends Vue {
 		this.disableAutoRefresh();
 	}
 
-	resetAutoRefresh(refresh = true) {
+	resetAutoRefresh({refresh = true, timeout = 0} = {}) {
 		//TODO Disable refreshing when not in focus
 		window.clearInterval(this.interval);
-		this.interval = window.setInterval(() => this.refresh(), this.timelineData.refreshRate);
+		window.clearTimeout(this.timeout);
 
-		if (refresh)
-			this.refresh().then();
+		if (timeout)
+			this.timeout = window.setTimeout(() => this.resetAutoRefresh(), timeout);
+		else {
+			this.interval = window.setInterval(() => this.refresh(), this.timelineData.refreshRate);
+
+			if (refresh)
+				this.refresh().then();
+		}
 	}
 
 	disableAutoRefresh() {
@@ -133,10 +140,22 @@ export default class Timeline extends Vue {
 			);
 			this.articles.push(...newArticles);
 
-			this.articles.sort((a : Article, b : Article) => moment(this.service.getArticleData(a).creationTime).milliseconds() - moment(this.service.getArticleData(b).creationTime).milliseconds())
+			this.articles.sort((a : Article, b : Article) =>
+				moment(this.service.getArticleData(a).creationTime).milliseconds() - moment(this.service.getArticleData(b).creationTime).milliseconds()
+			)
+
+			const untilReset = moment.duration(moment.unix(this.endpoint.rateLimitStatus.reset).diff(moment())).asMilliseconds();
 
 			if (resetTimer)
-				this.resetAutoRefresh(false);
+				this.resetAutoRefresh({
+					refresh: false,
+					timeout: this.endpoint.rateLimitStatus.remaining ? 0 : untilReset + 1000
+				});
+			else if (!this.endpoint.rateLimitStatus.remaining)
+				this.resetAutoRefresh({
+					refresh: false,
+					timeout: untilReset + 1000
+				});
 
 			return newArticles.length;
 		}catch (e) {
@@ -196,6 +215,10 @@ export default class Timeline extends Vue {
 
 	get service() : Service {
 		return (this.$store.state as SoshalState).services[this.timelineData.service];
+	}
+
+	get endpoint() : Endpoint {
+		return this.service.endpoints[this.timelineData.endpoint];
 	}
 
 	get enabled() {
