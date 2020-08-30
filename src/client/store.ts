@@ -16,6 +16,7 @@ export class SoshalState {
 		id: '',
 		selectedMedia: 0,
 	};
+	sidebarExpanded = false;
 }
 
 const mutations = <MutationTree<SoshalState>>{
@@ -26,9 +27,13 @@ const mutations = <MutationTree<SoshalState>>{
 	clearExpandedPost(state) {
 		state.expandedPost.id = '';
 	},
+
+	setSidebarExpanded(state, expanded : boolean) {
+		state.sidebarExpanded = expanded;
+	}
 };
 
-export default new Vuex.Store({
+export const store = new Vuex.Store({
 	state: new SoshalState(),
 	mutations,
 });

@@ -25,14 +25,20 @@ import Component from 'vue-class-component';
 import ServiceMenu from './ServiceMenu';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faPlus, faAngleDoubleLeft, faAngleDoubleRight} from '@fortawesome/free-solid-svg-icons';
+import {SoshalState} from '../store';
 
 library.add(faPlus, faAngleDoubleLeft, faAngleDoubleRight);
 
-@Component({
-	components: {ServiceMenu}
-})
+@Component({components: {ServiceMenu}})
 export default class Sidebar extends Vue {
-	expanded = false;
+	get expanded() : boolean {
+		return (this.$store.state as SoshalState).sidebarExpanded;
+	}
+
+	set expanded(value : boolean) {
+		this.$store.commit('setSidebarExpanded', value);
+	}
+
 };
 </script>
 

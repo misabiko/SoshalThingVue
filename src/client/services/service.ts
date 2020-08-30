@@ -2,6 +2,8 @@ import {RateLimitStatus, StuffedResponse, TimelinePayload} from '../../core/Serv
 import {TimelineOptions} from '../../core/Timeline';
 import {Article, ArticleType, PostData, QuoteData, RepostData} from '../../core/PostData';
 import Vue from 'vue';
+import {SnackbarProgrammatic as Snackbar} from 'buefy';
+import {store} from '../store';
 
 export abstract class Service {
 	endpoints : { [name : string] : Endpoint } = {};
@@ -60,6 +62,21 @@ export abstract class Service {
 	}
 
 	abstract async repost(id : string) : Promise<void>;
+
+	lostConnection() {
+		const message = 'Lost connection to ' + this.name;
+		Snackbar.open({
+			message,
+			type: 'is-danger',
+			indefinite: true,
+			actionText: 'Open Menu',
+			onAction() {
+				store.commit('setSidebarExpanded', true);
+			}
+		})
+		console.error(message);
+		this.loggedIn = false;
+	}
 }
 
 export class Endpoint {
@@ -86,9 +103,7 @@ export class Endpoint {
 		const response = await fetch(this.url + options);
 
 		if (response.status == 401) {
-			//TODO Alert the message
-			console.error('Lost connection to ' + service.name);
-			service.loggedIn = false;
+			service.lostConnection();
 			return {newArticles: []};
 		}else if (!response.ok)
 			throw new Error(`Server error on refresh`);
