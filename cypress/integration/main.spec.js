@@ -66,11 +66,7 @@ describe('SoshalThing', () => {
 							stub.withArgs('/checkLogins')
 								.resolves({
 									ok: true,
-									json: () => ({
-										Twitter: true,
-										Mastodon: false,
-										Pixiv: false,
-									}),
+									json: () => ({Twitter: true}),
 								})
 							stub.withArgs('/timelines')
 								.resolves({

@@ -13,11 +13,7 @@ function testPost(tweetId) {
 		refreshRate: 60000
 	}]
 
-	const services = {
-		Twitter: true,
-		Mastodon: false,
-		Pixiv: false,
-	}
+	const services = {Twitter: true}
 
 	cy.request('twitter/access')
 
@@ -120,11 +116,7 @@ describe('Paragraphs', () => {
 			}]
 		}];
 
-		const services = {
-			Twitter: true,
-			Mastodon: false,
-			Pixiv: false,
-		};
+		const services = {Twitter: true};
 
 		cy.request('twitter/access')
 

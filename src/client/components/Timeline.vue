@@ -1,7 +1,6 @@
 <template lang='pug'>
 	.timeline
 		.timelineHeader(@click.self='scrollTop')
-			//b-field(label='Name')
 			b-input(v-if='isOptionsOpen' v-model='nameEdit')
 			strong(v-else) {{ timelineData.name }}
 
@@ -15,8 +14,8 @@
 			.timelineOptions
 				TimelineSettings.mb-4(
 					:timeline-data='timelineData'
-					:endpoints='endpoints'
 					:changesOutside='outsideChanges'
+					:service='service'
 					@apply-settings='applySettings($event)'
 				)
 
@@ -36,34 +35,28 @@
 
 <script lang='ts'>
 import {Component, Prop, Ref, Vue, Watch} from 'vue-property-decorator';
-import {Action, Getter, State} from 'vuex-class';
+import {Action, Getter} from 'vuex-class';
 import {SettingsData} from './TimelineSettings.vue';
 import ArticleGeneric from './ArticleGeneric.vue';
 import TimelineSettings from './TimelineSettings.vue';
 import {TimelinePayload} from '../../core/ServerResponses';
 import {Article, ArticleData} from '../../core/PostData';
 import {TimelineData, TimelineOptions} from '../../core/Timeline';
-import {Logins} from '../store';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
+import {Service} from '../services/service';
 
 library.add(faEllipsisV, faSyncAlt);
 
-@Component({
-	components: {ArticleGeneric, TimelineSettings},
-})
+@Component({components: {ArticleGeneric, TimelineSettings}})
 export default class Timeline extends Vue {
 	@Prop({type: Object, required: true})
 	readonly timelineData! : TimelineData;
-	@Prop({type: Array, required: true})
-	readonly endpoints! : string[];
 	@Prop({type: Boolean, required: true})
 	readonly shouldScroll! : string[];
 
 	@Ref('posts') readonly timelinePosts! : HTMLDivElement;
-
-	@State('logins') readonly logins! : Logins;
 
 	@Getter readonly getArticleData! : (article : Article) => ArticleData;
 
@@ -205,10 +198,14 @@ export default class Timeline extends Vue {
 		}
 	}
 
+	get service() : Service {
+		return (this.$store.getters as any).getService(this.timelineData.service);
+	}
+
 	get enabled() {
 		const query = this.timelineData.options.q ? this.timelineData.options.q : '';
 
-		return this.logins.Twitter &&
+		return this.service.loggedIn &&
 			this.timelineData.enabled &&
 			!!this.timelineData.endpoint &&
 			(this.timelineData.endpoint !== 'search' || !!query.length);

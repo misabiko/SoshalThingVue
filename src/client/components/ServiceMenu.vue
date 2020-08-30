@@ -1,7 +1,7 @@
 <template lang='pug'>
 	.sidebarMenu
 		ServiceSettings(
-			v-for='service of services'
+			v-for='service in services'
 			:key='service.name'
 			:service='service'
 		)
@@ -10,18 +10,16 @@
 <script lang='ts'>
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import {State} from 'vuex-class';
 import ServiceSettings from './ServiceSettings';
+import {Service} from '../services/service';
 
 @Component({
 	components: {ServiceSettings}
 })
 export default class ServiceMenu extends Vue {
-	services = [
-		{name: 'Twitter', loginHref: '/twitter/login', endpoints: ['home_timeline', 'search']},
-		{name: 'Mastodon', loginHref: '' , endpoints: []},
-		{name: 'Pixiv', loginHref: '' , endpoints: []},
-	];
-};
+	@State services!: {[name : string] : Service}
+}
 </script>
 
 <style scoped lang='sass'>

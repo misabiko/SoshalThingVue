@@ -17,9 +17,7 @@ export namespace Common {
 
 	async function checkLogins(_req : Request, res : Response) {
 		await res.json({
-			Twitter: Twitter.checkLogin(),
-			Mastodon: false,
-			Pixiv: false,
+			Twitter: Twitter.checkLogin()
 		})
 	}
 

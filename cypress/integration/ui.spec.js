@@ -24,11 +24,7 @@ describe('UI', () => {
 					cy.stub(win, 'fetch').withArgs('/checkLogins')
 						.resolves({
 							ok: true,
-							json: () => ({
-								Twitter: true,
-								Mastodon: false,
-								Pixiv: false,
-							}),
+							json: () => ({Twitter: true}),
 						})
 				},
 			})

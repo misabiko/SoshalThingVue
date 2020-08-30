@@ -4,7 +4,6 @@
 			v-for='timeline in timelines'
 			:key='timeline.id'
 			:timeline-data='timeline'
-			:endpoints='endpoints'
 			:shouldScroll='shouldScroll'
 			@remove-timeline="removeTimeline($event)"
 			@update-data='onTimelinesChanged(timelines)'
@@ -23,7 +22,6 @@ import {Watch} from 'vue-property-decorator';
 })
 export default class TimelineContainer extends Vue {
 	timelines : TimelineData[] = [];
-	endpoints = ['home_timeline', 'search'];
 	shouldScroll = false;
 
 	mounted() {

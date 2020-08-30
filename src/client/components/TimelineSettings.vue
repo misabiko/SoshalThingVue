@@ -3,9 +3,9 @@
 		b-field(label='Endpoint')
 			b-select(placeholder='Select an endpoint' v-model='endpoint' required)
 				option(
-					v-for='ep in endpoints'
-					:value='ep'
-					:key='ep'
+					v-for='ep in service.endpoints'
+					:value='ep.name'
+					:key='ep.name'
 				) {{ ep }}
 
 		b-field: b-switch(v-model='enabled' @input='applySettings') Enabled
@@ -29,6 +29,7 @@
 import {Vue, Component, Prop} from 'vue-property-decorator';
 import TimelineSearchOptions from './TimelineSearchOptions.vue';
 import {TimelineData, TimelineOptions} from '../../core/Timeline';
+import {Service} from '../services/service';
 
 export interface SettingsData {
 	endpoint: string;
@@ -44,10 +45,10 @@ export interface SettingsData {
 export default class TimelineSettings extends Vue {
 	@Prop({type: Object, required: true})
 	readonly timelineData!: TimelineData;
-	@Prop({type: Array, required: true})
-	readonly endpoints!: string[];
 	@Prop({type: Boolean})
 	readonly changesOutside!: boolean;
+	@Prop({type: Object, required: true})
+	readonly service!: Service;
 
 	endpoint = this.timelineData.endpoint;
 	enabled = this.timelineData.enabled;

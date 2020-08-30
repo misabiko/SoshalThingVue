@@ -32,11 +32,7 @@ Cypress.Commands.add('getTimelines', ({timelines, fetchStubs}) => {
 			stub.withArgs('/checkLogins')
 				.resolves({
 					ok: true,
-					json: () => ({
-						Twitter: true,
-						Mastodon: false,
-						Pixiv: false,
-					}),
+					json: () => ({Twitter: true}),
 				})
 			if (timelines)
 				stub.withArgs('/timelines')

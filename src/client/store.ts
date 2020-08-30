@@ -3,12 +3,10 @@ import Vuex, {ActionTree, GetterTree, MutationTree} from 'vuex';
 import {ServiceStatuses, StuffedResponse, TimelinePayload} from '../core/ServerResponses';
 import {Article, ArticleType, PostData, QuoteData, RepostData} from '../core/PostData';
 import {TimelineOptions} from '../core/Timeline';
+import TwitterService from './services/twitter';
+import {Service} from './services/service';
 
 Vue.use(Vuex);
-
-export interface Logins {
-	[service : string] : boolean
-}
 
 export interface ExpandedPost {
 	id : string
@@ -16,12 +14,7 @@ export interface ExpandedPost {
 }
 
 class State {
-	logins : Logins = {
-		Twitter: false,
-		Mastodon: false,
-		Pixiv: false,
-	};
-	services : ServiceStatuses = {};
+	services : { [name : string] : Service } = {Twitter: new TwitterService()};
 	posts : { [id : string] : PostData } = {};
 	reposts : { [id : string] : RepostData } = {};
 	quotes : { [id : string] : QuoteData } = {};
@@ -32,11 +25,12 @@ class State {
 }
 
 const getters = <GetterTree<State, State>>{
+	getService: state => (name : string) => state.services[name],
 	getPost: state => (id : string) => state.posts[id],
 	getRepost: state => (id : string) => state.reposts[id],
 	getQuote: state => (id : string) => state.quotes[id],
 	getArticleData: state => (article : Article) => {
-		switch(article.type) {
+		switch (article.type) {
 			case ArticleType.Post:
 				return state.posts[article.id];
 			case ArticleType.Repost:
@@ -50,32 +44,18 @@ const getters = <GetterTree<State, State>>{
 };
 
 const mutations = <MutationTree<State>>{
-	updateLogins(state, logins : Logins) {
-		for (const service in logins)
-			if (logins.hasOwnProperty(service))
-				state.logins[service] = logins[service];
-	},
-
-	setLogin(state, login : { service : string, login : boolean }) {
-		state.logins[login.service] = login.login;
+	updateLogins(state, logins : { [service : string] : boolean }) {
+		for (const service in logins) if (logins.hasOwnProperty(service))
+			state.services[service].loggedIn = logins[service];
 	},
 
 	updateServices(state, statuses : ServiceStatuses) {
-		for (const service in statuses)
-			if (statuses.hasOwnProperty(service)) {
-				if (!state.services.hasOwnProperty(service)) {
-					Vue.set(state.services, service, statuses[service]);
-					continue;
-				}
-
-				for (const endpoint in statuses[service])
-					if (statuses[service].hasOwnProperty(endpoint)) {
-						if (!(state.services[service]).hasOwnProperty(endpoint))
-							Vue.set(state.services[service], endpoint, statuses[service][endpoint]);
-						else
-							state.services[service][endpoint] = statuses[service][endpoint];
-					}
-			}
+		for (const service in statuses) if (statuses.hasOwnProperty(service)) {
+			if (!state.services.hasOwnProperty(service))
+				console.error(`Service ${service} has not been added.`);
+			else
+				state.services[service].updateRates(statuses[service]);
+		}
 	},
 
 	addPosts(state, postDatas : PostData[]) {
@@ -103,7 +83,7 @@ const mutations = <MutationTree<State>>{
 		Object.assign(state.posts[postData.id], postData);
 	},
 
-	updateArticleData(state, payload: {post?: PostData, repost?: RepostData, quote?: QuoteData}) {
+	updateArticleData(state, payload : { post? : PostData, repost? : RepostData, quote? : QuoteData }) {
 		if (payload.post && state.posts[payload.post.id])
 			Object.assign(state.posts[payload.post.id], payload.post);
 		if (payload.repost && state.reposts[payload.repost.id])
@@ -133,7 +113,7 @@ const actions = <ActionTree<State, State>>{
 		if (response.status == 401) {
 			//TODO Alert the message
 			console.error('Lost connection to Twitter');
-			commit('setLogin', {service: 'Twitter', login: false});
+			state.services['Twitter'].loggedIn = false;
 			return {newArticles: []};
 		}else if (!response.ok)
 			throw new Error(`Server error on refresh`);
