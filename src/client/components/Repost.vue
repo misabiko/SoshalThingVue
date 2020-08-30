@@ -8,7 +8,8 @@
 	)
 		template(v-slot:header)
 			.repostLabel(v-if='repostData.reposterName')
-				p {{ repostData.reposterName + ' retweeted' }}
+				a(:href='service.getUserURL(repostData.reposterHandle)' target='_blank' rel='noopener noreferrer')
+					| {{ repostData.reposterName + ' retweeted' }}
 </template>
 
 <script lang='ts'>
@@ -54,6 +55,10 @@ export default class Repost extends Vue {
 	color: $light
 	font-size: smaller
 
-	p
+	a
 		margin-left: 1rem
+		color: $light
+
+		&:hover
+			text-decoration: underline
 </style>

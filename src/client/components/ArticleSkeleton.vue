@@ -11,7 +11,7 @@
 
 			.media-content(v-if='hidden')
 				.content
-					span.names
+					a.names(:href='service.getUserURL(postData.authorHandle)' target='_blank' rel='noopener noreferrer')
 						strong {{ postData.authorName }}
 						small {{'@' + postData.authorHandle}}
 					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
@@ -24,7 +24,7 @@
 				)
 			.media-content(v-else)
 				.content
-					span.names
+					a.names(:href='service.getUserURL(postData.authorHandle)' target='_blank' rel='noopener noreferrer')
 						strong {{ postData.authorName }}
 						small {{'@' + postData.authorHandle}}
 					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
@@ -158,12 +158,15 @@ article.article
 			display: inline-block
 			max-width: 300px
 
-		span
-			*
-				vertical-align: middle
-
 			strong
 				margin-right: 0.5rem
+				color: $white-ter
+
+			&:hover > *
+				text-decoration: underline
+
+		span *
+				vertical-align: middle
 
 	small
 		color: $light

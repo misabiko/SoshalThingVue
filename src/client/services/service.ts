@@ -77,6 +77,8 @@ export abstract class Service {
 		console.error(message);
 		this.loggedIn = false;
 	}
+
+	abstract getUserURL(handle : string) : string;
 }
 
 export class Endpoint {

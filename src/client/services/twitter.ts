@@ -37,4 +37,8 @@ export default class TwitterService extends Service {
 
 		this.updateArticleData(json);
 	}
+
+	getUserURL(handle : string) : string {
+		return 'https://twitter.com/' + handle;
+	}
 }
