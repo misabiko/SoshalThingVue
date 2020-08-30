@@ -133,7 +133,6 @@ export default class ArticleButtons extends Vue {
 	color: $white
 	background-color: $primary
 
-//TODO width: getFaW(.fa-w-14) * 0.0625em
 .svg-inline--fa.fa-w-14
 	width: 0.875em
 
