@@ -117,7 +117,7 @@ export default class ArticleSkeleton extends Vue {
 	compactOverride = CompactOverride.Inherit;
 
 	expandPost(selectedMedia: number) {
-		this.storeExpandPost({id: this.postData.id, selectedMedia});
+		this.storeExpandPost({service: this.service, id: this.postData.id, selectedMedia});
 	}
 
 	get creationTimeShort() : string {

@@ -6,6 +6,7 @@ import {Service} from './services/service';
 Vue.use(Vuex);
 
 export interface ExpandedPost {
+	service? : Service;
 	id : string
 	selectedMedia : number
 }

@@ -1,31 +1,29 @@
 <template lang='pug'>
 	.card
 		.card-image
-			b-carousel(:indicator='false' :autoplay='false')
+			b-carousel(:arrow='images.length > 1' :indicator='false' :autoplay='false')
 				b-carousel-item(v-for='(image, index) in images' :key='index')
 					figure.image: img(:src='image.url')
-		.card-content: Post(v-if='expandedPost.id.length' :postId="expandedPost.id" :show-media='false')
+		.card-content: Post(v-if='expandedPost.id.length' :service='expandedPost.service' :postId="expandedPost.id" :show-media='false')
 </template>
 
 <script lang='ts'>
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import {Getter, State} from 'vuex-class';
+import {State} from 'vuex-class';
 import Post from './Post.vue';
 import {ExpandedPost} from '../store';
-import {PostData, PostImageData} from '../../core/PostData';
+import {PostImageData} from '../../core/PostData';
 
 @Component({components: {Post}})
 export default class PostCard extends Vue {
 	@State expandedPost!: ExpandedPost;
 
-	@Getter readonly getPost!: (id: string) => PostData;
-
 	get images() : PostImageData[] {
-		if (!this.expandedPost.id.length)
+		if (!(this.expandedPost.id.length && this.expandedPost.service))
 			return [];
 
-		const post = this.getPost(this.expandedPost.id);
+		const post = this.expandedPost.service.posts[this.expandedPost.id];
 
 		if (post.images && post.images.length) {
 			const imagesCopy = Array.from(post.images);
