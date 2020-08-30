@@ -46,6 +46,7 @@ import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 import {Service} from '../services/service';
+import {SoshalState} from '../store';
 
 library.add(faEllipsisV, faSyncAlt);
 
@@ -199,7 +200,7 @@ export default class Timeline extends Vue {
 	}
 
 	get service() : Service {
-		return (this.$store.getters as any).getService(this.timelineData.service);
+		return (this.$store.state as SoshalState).services[this.timelineData.service];
 	}
 
 	get enabled() {

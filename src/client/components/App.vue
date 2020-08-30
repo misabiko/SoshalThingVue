@@ -12,7 +12,7 @@ import TimelineContainer from './TimelineContainer';
 import Sidebar from './Sidebar';
 import Post from './Post.vue';
 import {Mutation, State} from 'vuex-class';
-import {ExpandedPost} from '../store';
+import {ExpandedPost, SoshalState} from '../store';
 import PostCard from './PostCard.vue';
 
 @Component({
@@ -34,7 +34,8 @@ export default class App extends Vue {
 		const json = await fetch('/checkLogins')
 			.then(response => response.json());
 
-		this.$store.commit('updateLogins', json);
+		for (const service in json) if (json.hasOwnProperty(service))
+			(this.$store.state as SoshalState).services[service].loggedIn = json[service];
 	}
 
 	newTimeline() : void {

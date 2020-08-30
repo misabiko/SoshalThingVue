@@ -1,10 +1,10 @@
 import Vue from 'vue';
 import Vuex, {ActionTree, GetterTree, MutationTree} from 'vuex';
-import {ServiceStatuses, StuffedResponse, TimelinePayload} from '../core/ServerResponses';
+import {TimelinePayload} from '../core/ServerResponses';
 import {Article, ArticleType, PostData, QuoteData, RepostData} from '../core/PostData';
 import {TimelineOptions} from '../core/Timeline';
 import TwitterService from './services/twitter';
-import {Service} from './services/service';
+import {AuthError, Service} from './services/service';
 
 Vue.use(Vuex);
 
@@ -13,7 +13,7 @@ export interface ExpandedPost {
 	selectedMedia : number
 }
 
-class State {
+export class SoshalState {
 	services : { [name : string] : Service } = {Twitter: new TwitterService()};
 	posts : { [id : string] : PostData } = {};
 	reposts : { [id : string] : RepostData } = {};
@@ -24,8 +24,7 @@ class State {
 	};
 }
 
-const getters = <GetterTree<State, State>>{
-	getService: state => (name : string) => state.services[name],
+const getters = <GetterTree<SoshalState, SoshalState>>{
 	getPost: state => (id : string) => state.posts[id],
 	getRepost: state => (id : string) => state.reposts[id],
 	getQuote: state => (id : string) => state.quotes[id],
@@ -43,21 +42,7 @@ const getters = <GetterTree<State, State>>{
 	},
 };
 
-const mutations = <MutationTree<State>>{
-	updateLogins(state, logins : { [service : string] : boolean }) {
-		for (const service in logins) if (logins.hasOwnProperty(service))
-			state.services[service].loggedIn = logins[service];
-	},
-
-	updateServices(state, statuses : ServiceStatuses) {
-		for (const service in statuses) if (statuses.hasOwnProperty(service)) {
-			if (!state.services.hasOwnProperty(service))
-				console.error(`Service ${service} has not been added.`);
-			else
-				state.services[service].updateRates(statuses[service]);
-		}
-	},
-
+const mutations = <MutationTree<SoshalState>>{
 	addPosts(state, postDatas : PostData[]) {
 		for (const postData of postDatas)
 			if (!state.posts.hasOwnProperty(postData.id))
@@ -101,31 +86,19 @@ const mutations = <MutationTree<State>>{
 	},
 };
 
-const actions = <ActionTree<State, State>>{
+const actions = <ActionTree<SoshalState, SoshalState>>{
 	async refreshEndpoint({state, commit}, payload : { service : string, endpoint : string, options : TimelineOptions }) : Promise<TimelinePayload> {
-		//TODO Use dynamic endpoint
-		let options = new URLSearchParams(payload.options as any).toString();
-		if (options.length)
-			options = '?' + options;
-
-		const response = await fetch(`/twitter/tweets/${payload.endpoint}${options}`);
-
-		if (response.status == 401) {
-			//TODO Alert the message
-			console.error('Lost connection to Twitter');
-			state.services['Twitter'].loggedIn = false;
-			return {newArticles: []};
-		}else if (!response.ok)
-			throw new Error(`Server error on refresh`);
-
-		const stuffedResponse : StuffedResponse = await response.json();
-		commit('updateServices', stuffedResponse.services);
-
-		commit('addPosts', stuffedResponse.posts);
-		commit('addReposts', stuffedResponse.reposts);
-		commit('addQuotes', stuffedResponse.quotes);
-
-		return stuffedResponse.timelinePosts;
+		try {
+			return await state.services[payload.service].endpoints[payload.endpoint].refresh(commit, payload.options);
+		}catch (e) {
+			if (e instanceof AuthError) {
+				//TODO Alert the message
+				console.error('Lost connection to ' + payload.service);
+				state.services[payload.service].loggedIn = false;
+				return {newArticles: []};
+			}else
+				throw e;
+		}
 	},
 
 	async like({commit}, id : string) {
@@ -155,7 +128,7 @@ const actions = <ActionTree<State, State>>{
 };
 
 export default new Vuex.Store({
-	state: new State(),
+	state: new SoshalState(),
 	getters,
 	mutations,
 	actions,

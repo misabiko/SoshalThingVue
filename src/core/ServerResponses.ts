@@ -19,7 +19,7 @@ export interface TimelinePayload {
 }
 
 export interface StuffedResponse {
-	services: ServiceStatuses;
+	rateLimitStatus: RateLimitStatus;
 	posts: PostData[];
 	reposts: RepostData[];
 	quotes: QuoteData[];

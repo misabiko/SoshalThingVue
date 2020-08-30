@@ -4,13 +4,17 @@ export default class TwitterService extends Service {
 	constructor() {
 		super('Twitter', '/twitter/login');
 
-		this.endpoints['home_timeline'] = new Endpoint(
-			'home_timeline',
-			15,
-		);
-		this.endpoints['search'] = new Endpoint(
-			'search',
-			180,
+		this.addEndpoints(
+			new Endpoint(
+				'home_timeline',
+				'/twitter/tweets/home_timeline',
+				15,
+			),
+			new Endpoint(
+				'search',
+				'/twitter/tweets/search',
+				180,
+			),
 		);
 	}
 }

@@ -48,7 +48,7 @@ export namespace Twitter {
 		console.log(`${timelinePosts.newArticles.length} tweets sent.`);
 
 		await res.json({
-			services: {Twitter: {[endpoint]: getRateLimits(response)}},
+			rateLimitStatus: getRateLimits(response),
 			posts,
 			reposts,
 			quotes,
@@ -64,7 +64,7 @@ export namespace Twitter {
 				console.log('Rate limit will reset on', new Date(e._headers.get('x-rate-limit-reset') * 1000));
 
 				await res.json({
-					services: {Twitter: {[endpoint]: getRateLimits(e)}},
+					rateLimitStatus: getRateLimits(e),
 					posts: [],
 					reposts: [],
 					quotes: [],
@@ -284,7 +284,7 @@ export namespace Twitter {
 				});
 				console.log('testAccess.ts loaded.');
 			})
-			.catch(error => {
+			.catch(() => {
 				console.log('testAccess.ts not found, ignoring.');
 			});
 	}
