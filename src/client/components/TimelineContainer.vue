@@ -11,16 +11,16 @@
 </template>
 
 <script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import {Vue, Component, Watch} from 'vue-property-decorator';
+import {Mutation, State} from 'vuex-class';
 import Timeline from "./Timeline.vue";
 import {TimelineData} from '../../core/Timeline';
-import {Watch} from 'vue-property-decorator';
 
-@Component({
-	components: {Timeline}
-})
+@Component({components: {Timeline}})
 export default class TimelineContainer extends Vue {
+	@State userTimelineBuffer!: string[];
+	@Mutation clearUserTimelines!: () => void;
+
 	timelines : TimelineData[] = [];
 	shouldScroll = false;
 
@@ -83,6 +83,34 @@ export default class TimelineContainer extends Vue {
 			console.error('Error while trying to save the timeline settings.');
 			throw e;
 		}
+	}
+
+	@Watch('userTimelineBuffer')
+	onNewUserTimeline(handles: string[]) {
+		if (!handles.length)
+			return;
+
+		for (const userHandle of handles) {
+			this.shouldScroll = true;
+
+			this.timelines.push({
+				id: this.getUniqueId(),
+				name: userHandle,
+				service: 'Twitter',
+				endpoint: 'user_timeline',
+				autoRefresh: true,
+				enabled: true,
+				compactMedia: false,
+				options: {
+					includeReposts: false,
+					onlyWithMedia: false,
+					userHandle,
+				},
+				refreshRate: 60000,
+			});
+		}
+
+		this.clearUserTimelines();
 	}
 };
 </script>

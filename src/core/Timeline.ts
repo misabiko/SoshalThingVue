@@ -15,6 +15,8 @@ export interface TimelineOptions {
 	since?: string;
 	max?: string;
 	count?: number;
+	userId?: string;
+	userHandle?: string;
 	includeReposts: boolean;
 	onlyWithMedia: boolean;
 }

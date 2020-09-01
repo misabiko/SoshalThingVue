@@ -6,7 +6,7 @@
 					v-for='ep in service.endpoints'
 					:value='ep.name'
 					:key='ep.name'
-				) {{ ep }}
+				) {{ ep.name }}
 
 		b-field: b-switch(v-model='enabled' @input='applySettings') Enabled
 		b-field: b-switch(v-model='autoRefresh' @input='applySettings') Auto Refresh
@@ -16,6 +16,10 @@
 
 		TimelineSearchOptions(
 			v-if="endpoint === 'search'"
+			:options.sync='options'
+		)
+		TimelineUserOptions(
+			v-if="endpoint === 'user_timeline'"
 			:options.sync='options'
 		)
 
@@ -30,6 +34,7 @@ import {Vue, Component, Prop} from 'vue-property-decorator';
 import TimelineSearchOptions from './TimelineSearchOptions.vue';
 import {TimelineData, TimelineOptions} from '../../core/Timeline';
 import {Service} from '../services/service';
+import TimelineUserOptions from './TimelineUserOptions.vue';
 
 export interface SettingsData {
 	endpoint: string;
@@ -39,9 +44,7 @@ export interface SettingsData {
 	options: TimelineOptions;
 }
 
-@Component({
-	components: {TimelineSearchOptions}
-})
+@Component({components: {TimelineSearchOptions, TimelineUserOptions}})
 export default class TimelineSettings extends Vue {
 	@Prop({type: Object, required: true})
 	readonly timelineData!: TimelineData;

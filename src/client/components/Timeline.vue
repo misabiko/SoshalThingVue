@@ -5,7 +5,7 @@
 			strong(v-else) {{ timelineData.name }}
 
 			.timelineButtons
-				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true, count: articles.length ? 20 : 50})')
+				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true})')
 					FontAwesomeIcon(icon='sync-alt' inverse size='lg')
 				button.openTimelineOptions(@click='isOptionsOpen = !isOptionsOpen')
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
@@ -65,6 +65,7 @@ export default class Timeline extends Vue {
 	isOptionsOpen = !(this.timelineData.name && this.timelineData.endpoint) as boolean;
 	nameEdit = this.timelineData.name;
 	lastBottomRefreshTime = moment();
+	topRefreshCount = 20;
 	bottomRefreshCount = 20;
 
 	mounted() {
@@ -126,7 +127,11 @@ export default class Timeline extends Vue {
 						since: this.articles[0].id,
 						count: count || (this.articles.length < 10 ? 150 : 20),
 					};
-			}
+			}else
+				options = {
+					...options,
+					count: count || this.topRefreshCount,
+				};
 
 			const payload : TimelinePayload = await this.service.refreshEndpoint(
 				this.timelineData.endpoint,
@@ -138,11 +143,17 @@ export default class Timeline extends Vue {
 					(b : Article) => b.id === a.id
 				) < 0
 			);
-			this.articles.push(...newArticles);
 
-			this.articles.sort((a : Article, b : Article) =>
-				moment(this.service.getArticleData(a).creationTime).milliseconds() - moment(this.service.getArticleData(b).creationTime).milliseconds()
-			)
+			if (newArticles.length) {
+				this.topRefreshCount = 20;
+
+				this.articles.push(...newArticles);
+
+				this.articles.sort((a : Article, b : Article) =>
+					moment(this.service.getArticleData(a).creationTime).milliseconds() - moment(this.service.getArticleData(b).creationTime).milliseconds()
+				)
+			}else
+				this.incrementCountTop();
 
 			const untilReset = moment.duration(moment.unix(this.endpoint.rateLimitStatus.reset).diff(moment())).asMilliseconds();
 
@@ -162,6 +173,16 @@ export default class Timeline extends Vue {
 			e.message = `Timeline ${this.timelineData.name}: ${e.message}`;
 			throw e;
 		}
+	}
+
+	incrementCountTop() {
+		if (this.topRefreshCount < 200)
+			this.topRefreshCount += this.topRefreshCount == 20 ? 30 : 50;
+	}
+
+	incrementCountBottom() {
+		if (this.bottomRefreshCount < 200)
+			this.bottomRefreshCount += this.bottomRefreshCount == 20 ? 30 : 50;
 	}
 
 	removeArticle(id : string) {
@@ -204,8 +225,8 @@ export default class Timeline extends Vue {
 					.then(articleCount => {
 						if (articleCount)
 							this.bottomRefreshCount = 20;
-						else if (this.bottomRefreshCount < 200)
-							this.bottomRefreshCount += this.bottomRefreshCount == 20 ? 30 : 50;
+						else
+							this.incrementCountBottom();
 					});
 
 				this.lastBottomRefreshTime = moment();
@@ -223,11 +244,13 @@ export default class Timeline extends Vue {
 
 	get enabled() {
 		const query = this.timelineData.options.q ? this.timelineData.options.q : '';
+		const userHandle = this.timelineData.options.userHandle ? this.timelineData.options.userHandle : '';
 
 		return this.service.loggedIn &&
 			this.timelineData.enabled &&
 			!!this.timelineData.endpoint &&
-			(this.timelineData.endpoint !== 'search' || !!query.length);
+			(this.timelineData.endpoint !== 'search' || !!query.length) &&
+			(this.timelineData.endpoint !== 'user_timeline' || !!userHandle.length);
 	}
 
 	get autoRefresh() {

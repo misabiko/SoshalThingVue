@@ -44,6 +44,7 @@ export namespace Twitter {
 	}
 
 	async function respondTimelineUpdate(tweets : Tweet[], response : TwitterResponse, endpoint : string, options: TimelineOptions, reverse: boolean, res : Response) {
+		console.log(tweets.length + ' tweets received.')
 		const {posts, reposts, quotes, timelinePosts} = parseTweets(tweets, options, reverse);
 		console.log(`${timelinePosts.newArticles.length} tweets sent.`);
 
@@ -81,6 +82,8 @@ export namespace Twitter {
 			since: query.since,
 			max: query.max,
 			count: parseInt(query.count),
+			userId: query.userId,
+			userHandle: query.userHandle,
 			includeReposts: query.includeReposts !== 'false',
 			onlyWithMedia: query.onlyWithMedia !== 'false',
 		}
@@ -104,6 +107,26 @@ export namespace Twitter {
 		}
 	}
 
+	async function userTimeline(req : Request, res : Response, next : NextFunction) {
+		try {
+			const options = parseTimelineOptions(req.query);
+
+			const response : TwitterResponse = await client.get('statuses/user_timeline', {
+				...(options.since ? {since_id: options.since} : {}),
+				...(options.max ? {max_id: options.max} : {}),
+				...(options.count ? {count: options.count} : {}),
+				...(options.userId ? {user_id: options.userId} : {}),
+				...(options.userHandle ? {screen_name: options.userHandle} : {}),
+				tweet_mode: 'extended',
+			});
+			logRateLimit(response);
+
+			await respondTimelineUpdate(response as any, response, 'user_timeline', options, !!options.since, res);
+		}catch (e) {
+			await respondRateOver(e, 'user_timeline', res, next);
+		}
+	}
+
 	async function search(req : Request, res : Response, next : NextFunction) {
 		try {
 			const options = parseTimelineOptions(req.query);
@@ -113,6 +136,7 @@ export namespace Twitter {
 				...(options.max ? {max_id: options.max} : {}),
 				...(options.count ? {count: options.count} : {}),
 				q: options.q,
+				result_type: 'recent',
 				tweet_mode: 'extended',
 			});
 			logRateLimit(response);
@@ -268,6 +292,7 @@ export namespace Twitter {
 		//failureRedirect: '/' TODO Have a way to signal failure
 	}));
 	router.get('/tweets/home_timeline', preventUnauthorized, homeTimeline);
+	router.get('/tweets/user_timeline', preventUnauthorized, userTimeline);
 	router.get('/tweets/search', preventUnauthorized, search);
 	router.get('/tweets/status/:id', preventUnauthorized, status);
 	router.post('/like/:id', preventUnauthorized, like);

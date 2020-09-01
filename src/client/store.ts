@@ -18,6 +18,7 @@ export class SoshalState {
 		selectedMedia: 0,
 	};
 	sidebarExpanded = false;
+	userTimelineBuffer : string[] = [];
 }
 
 const mutations = <MutationTree<SoshalState>>{
@@ -31,6 +32,14 @@ const mutations = <MutationTree<SoshalState>>{
 
 	setSidebarExpanded(state, expanded : boolean) {
 		state.sidebarExpanded = expanded;
+	},
+
+	addUserTimeline(state, handle : string) {
+		state.userTimelineBuffer.push(handle);
+	},
+
+	clearUserTimelines(state) {
+		state.userTimelineBuffer = [];
 	}
 };
 

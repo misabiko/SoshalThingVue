@@ -10,6 +10,11 @@ export default class TwitterService extends Service {
 				15,
 			),
 			new Endpoint(
+				'user_timeline',
+				'/twitter/tweets/user_timeline',
+				900,
+			),
+			new Endpoint(
 				'search',
 				'/twitter/tweets/search',
 				180,

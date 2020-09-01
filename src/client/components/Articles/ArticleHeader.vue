@@ -1,6 +1,11 @@
 <template lang='pug'>
 	.articleHeader
-		a.names(:href='service.getUserURL(handle)' target='_blank' rel='noopener noreferrer')
+		a.names(
+			:href='service.getUserURL(handle)'
+			target='_blank'
+			rel='noopener noreferrer'
+			@click.left.prevent='addUserTimeline(handle)'
+		)
 			strong {{ userName }}
 			small {{'@' + handle}}
 		span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
@@ -8,6 +13,7 @@
 
 <script lang='ts'>
 import {Vue, Component, Prop} from 'vue-property-decorator';
+import {Mutation} from 'vuex-class';
 import {Service} from '../../services/service';
 import moment from 'moment';
 
@@ -42,6 +48,8 @@ export default class ArticleHeader extends Vue {
 	readonly userName!: string;
 	@Prop({type: String, required: true})
 	readonly creationTime!: string;
+
+	@Mutation addUserTimeline!: (handle : string) => void;
 
 	get creationTimeShort() : string {
 		const t = moment(this.creationTime).locale('twitter').fromNow(true);
