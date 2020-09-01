@@ -13,6 +13,9 @@
 		"cypress": "npx cypress open",
 		"webpack:dev-server": "webpack-dev-server --config webpack.devserver.ts"
 	},
+	"bin": {
+		"SoshalThing": "./scripts/cli.js"
+	},
 	"dependencies": {
 		"@fortawesome/fontawesome-free": "^5.14.0",
 		"@fortawesome/fontawesome-svg-core": "^1.2.30",
@@ -35,6 +38,7 @@
 		"passport": "^0.4.1",
 		"passport-twitter": "^1.0.4",
 		"serve-favicon": "^2.5.0",
+		"shelljs": "^0.8.4",
 		"twitter-lite": "^0.14.0",
 		"vue": "^2.6.11",
 		"vue-class-component": "^7.2.5",
