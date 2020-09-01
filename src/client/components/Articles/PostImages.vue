@@ -12,7 +12,7 @@
 
 <script lang='ts'>
 import {Vue, Component, Prop} from 'vue-property-decorator';
-import {PostImageData} from '../../core/PostData';
+import {PostImageData} from '../../../core/PostData';
 
 @Component
 export default class PostImages extends Vue {

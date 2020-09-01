@@ -12,7 +12,7 @@
 
 <script lang='ts'>
 import {Vue, Component, Prop} from 'vue-property-decorator';
-import {PostVideoData, PostVideoVariant} from '../../core/PostData';
+import {PostVideoData, PostVideoVariant} from '../../../core/PostData';
 
 @Component
 export default class PostVideo extends Vue {

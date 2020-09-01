@@ -12,8 +12,8 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import {State} from 'vuex-class';
 import Post from './Post.vue';
-import {ExpandedPost} from '../store';
-import {PostImageData} from '../../core/PostData';
+import {ExpandedPost} from '../../store';
+import {PostImageData} from '../../../core/PostData';
 
 @Component({components: {Post}})
 export default class PostCard extends Vue {
@@ -39,7 +39,7 @@ export default class PostCard extends Vue {
 </script>
 
 <style lang='sass'>
-@use '../bulma_overrides' as *
+@use '../../bulma_overrides' as *
 
 @include pretty-scrollbar
 </style>

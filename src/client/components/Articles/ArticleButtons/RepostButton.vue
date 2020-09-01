@@ -24,7 +24,7 @@ export default class RepostButton extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../bulma_overrides' as *
+@use '../../../bulma_overrides' as *
 
 .svg-inline--fa.fa-w-20
 	width: 1.25em

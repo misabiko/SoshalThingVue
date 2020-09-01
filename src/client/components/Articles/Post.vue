@@ -10,11 +10,11 @@
 
 <script lang='ts'>
 import {Component, Prop, Vue} from 'vue-property-decorator';
-import {PostData} from '../../core/PostData';
+import {PostData} from '../../../core/PostData';
 import ArticleSkeleton from './ArticleSkeleton.vue';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
-import {Service} from '../services/service';
+import {Service} from '../../services/service';
 
 @Component({
 	components: {ArticleSkeleton, PostImages, PostVideo}

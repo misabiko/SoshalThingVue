@@ -37,7 +37,7 @@
 <script lang='ts'>
 import {Component, Prop, Ref, Vue, Watch} from 'vue-property-decorator';
 import {SettingsData} from './TimelineSettings.vue';
-import ArticleGeneric from './ArticleGeneric.vue';
+import ArticleGeneric from './Articles/ArticleGeneric.vue';
 import TimelineSettings from './TimelineSettings.vue';
 import {TimelinePayload} from '../../core/ServerResponses';
 import {Article} from '../../core/PostData';

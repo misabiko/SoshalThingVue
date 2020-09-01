@@ -15,12 +15,12 @@
 <script lang='ts'>
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import {PostData, RepostData} from '../../core/PostData';
+import {PostData, RepostData} from '../../../core/PostData';
 import {Prop} from 'vue-property-decorator';
 import ArticleSkeleton from './ArticleSkeleton.vue';
 import PostVideo from './PostVideo.vue';
 import PostImages from './PostImages.vue';
-import {Service} from '../services/service';
+import {Service} from '../../services/service';
 
 @Component({components: {ArticleSkeleton, PostImages, PostVideo}})
 export default class Repost extends Vue {
@@ -48,7 +48,7 @@ export default class Repost extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../bulma_overrides' as *
+@use '../../bulma_overrides' as *
 
 .repostLabel
 	margin-left: 64px

@@ -47,8 +47,8 @@
 import {Vue, Component, Prop, Watch} from 'vue-property-decorator';
 import LikeButton from './LikeButton.vue';
 import RepostButton from './RepostButton.vue';
-import {PostData} from '../../core/PostData';
-import {CompactOverride} from './ArticleSkeleton.vue';
+import {PostData} from '../../../../core/PostData';
+import {CompactOverride} from '../ArticleSkeleton.vue';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {
 	faCompress,
@@ -57,7 +57,7 @@ import {
 	faEllipsisH,
 	faEye,
 } from '@fortawesome/free-solid-svg-icons';
-import {Service} from '../services/service';
+import {Service} from '../../../services/service';
 import gsap from 'gsap';
 
 library.add(faReply, faExpand, faCompress, faEllipsisH, faEye);
@@ -137,7 +137,7 @@ export default class ArticleButtons extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../bulma_overrides' as *
+@use '../../../bulma_overrides' as *
 
 .postButton
 	color: $light

@@ -10,10 +10,10 @@
 import {Vue, Component, Ref, Watch} from 'vue-property-decorator'
 import TimelineContainer from './TimelineContainer';
 import Sidebar from './Sidebar';
-import Post from './Post.vue';
+import Post from './Articles/Post.vue';
 import {Mutation, State} from 'vuex-class';
 import {ExpandedPost, SoshalState} from '../store';
-import PostCard from './PostCard.vue';
+import PostCard from './Articles/PostCard.vue';
 
 @Component({
 	components: {Post, Sidebar, TimelineContainer, PostCard}

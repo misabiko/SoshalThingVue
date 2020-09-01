@@ -30,8 +30,8 @@ import {Vue, Component, Prop} from 'vue-property-decorator';
 import Post from './Post.vue';
 import Repost from './Repost.vue';
 import Quote from './Quote.vue';
-import {Article, ArticleType} from '../../core/PostData';
-import {Service} from '../services/service';
+import {Article, ArticleType} from '../../../core/PostData';
+import {Service} from '../../services/service';
 
 @Component({components: {Post, Repost, Quote}})
 export default class ArticleGeneric extends Vue {

@@ -60,14 +60,14 @@
 <script lang='ts'>
 import {Vue, Component, Prop} from 'vue-property-decorator';
 import {Mutation} from 'vuex-class';
-import {PostData} from '../../core/PostData';
+import {PostData} from '../../../core/PostData';
 import moment from 'moment';
-import {ExpandedPost} from '../store';
+import {ExpandedPost} from '../../store';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
 import ArticleParagraph from './ArticleParagraph.vue';
-import ArticleButtons from './ArticleButtons.vue';
-import {Service} from '../services/service';
+import ArticleButtons from './ArticleButtons/ArticleButtons.vue';
+import {Service} from '../../services/service';
 
 //TODO Move this to external file
 moment.defineLocale('twitter', {
@@ -140,7 +140,7 @@ export default class ArticleSkeleton extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../bulma_overrides' as *
+@use '../../bulma_overrides' as *
 
 article.article
 	padding: 1rem

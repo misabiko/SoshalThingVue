@@ -28,14 +28,14 @@
 <script lang='ts'>
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import {PostData, QuoteData} from '../../core/PostData';
+import {PostData, QuoteData} from '../../../core/PostData';
 import {Prop} from 'vue-property-decorator';
 import {Mutation} from 'vuex-class';
-import {ExpandedPost} from '../store';
+import {ExpandedPost} from '../../store';
 import ArticleSkeleton from './ArticleSkeleton.vue';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
-import {Service} from '../services/service';
+import {Service} from '../../services/service';
 
 @Component({components: {ArticleSkeleton, PostImages, PostVideo}})
 export default class Quote extends Vue {
@@ -65,7 +65,7 @@ export default class Quote extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../bulma_overrides' as *
+@use '../../bulma_overrides' as *
 
 .quotedPost
 	border: 2px solid $scheme-main-ter

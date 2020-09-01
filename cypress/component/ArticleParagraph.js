@@ -1,5 +1,5 @@
 import {mount} from "cypress-vue-unit-test";
-import ArticleParagraph from "../../src/client/components/ArticleParagraph";
+import ArticleParagraph from "../../src/client/components/Articles/ArticleParagraph";
 
 function mountParagraph(fixture) {
 	cy.fixture('sampleTweets/' + fixture).then(postData => {

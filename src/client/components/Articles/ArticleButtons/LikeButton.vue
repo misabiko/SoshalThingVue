@@ -28,7 +28,7 @@ export default class LikeButton extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../bulma_overrides' as *
+@use '../../../bulma_overrides' as *
 
 .svg-inline--fa.fa-w-16
 	width: 1em

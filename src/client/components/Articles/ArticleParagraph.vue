@@ -1,6 +1,6 @@
 <script lang='ts'>
 import {Component, Prop, Vue} from 'vue-property-decorator';
-import {ExternalLinkData, HashtagData, Indices, PostData, UserMentionData} from '../../core/PostData';
+import {ExternalLinkData, HashtagData, Indices, PostData, UserMentionData} from '../../../core/PostData';
 import {CreateElement} from 'vue';
 import {VNode} from 'vue/types/vnode';
 
