@@ -10,11 +10,12 @@
 				)
 
 			.media-content(v-if='hidden')
-				.content
-					a.names(:href='service.getUserURL(postData.authorHandle)' target='_blank' rel='noopener noreferrer')
-						strong {{ postData.authorName }}
-						small {{'@' + postData.authorHandle}}
-					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
+				.content: ArticleHeader(
+					:service='service'
+					:handle='postData.authorHandle'
+					:userName='postData.authorName'
+					:creationTime='postData.creationTime'
+				)
 				ArticleButtons(
 					:service='service'
 					:post-data='postData'
@@ -24,14 +25,13 @@
 				)
 			.media-content(v-else)
 				.content
-					a.names(:href='service.getUserURL(postData.authorHandle)' target='_blank' rel='noopener noreferrer')
-						strong {{ postData.authorName }}
-						small {{'@' + postData.authorHandle}}
-					span.timestamp: small(:title='creationTimeLong') {{ creationTimeShort }}
-					ArticleParagraph(
-						:article-id='articleId'
-						:post-data='postData'
+					ArticleHeader(
+						:service='service'
+						:handle='postData.authorHandle'
+						:userName='postData.authorName'
+						:creationTime='postData.creationTime'
 					)
+					ArticleParagraph(:article-id='articleId' :post-data='postData')
 
 				slot(name='extra-content')
 
@@ -60,36 +60,14 @@
 <script lang='ts'>
 import {Vue, Component, Prop} from 'vue-property-decorator';
 import {Mutation} from 'vuex-class';
-import {PostData} from '../../../core/PostData';
-import moment from 'moment';
-import {ExpandedPost} from '../../store';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
 import ArticleParagraph from './ArticleParagraph.vue';
 import ArticleButtons from './ArticleButtons/ArticleButtons.vue';
+import ArticleHeader from './ArticleHeader.vue';
 import {Service} from '../../services/service';
-
-//TODO Move this to external file
-moment.defineLocale('twitter', {
-	relativeTime: {
-		future: "in %s",
-		past:   "%s ago",
-		s  : 'a few seconds',
-		ss : '%ds',
-		m:  "a minute",
-		mm: "%dm",
-		h:  "an hour",
-		hh: "%dh",
-		d:  "a day",
-		dd: "%dd",
-		M:  "a month",
-		MM: "%dm",
-		y:  "a year",
-		yy: "%dy"
-	}
-});
-//TODO Fix locale not switching back
-moment().locale('en');
+import {PostData} from '../../../core/PostData';
+import {ExpandedPost} from '../../store';
 
 export enum CompactOverride {
 	Inherit = 0,
@@ -97,7 +75,7 @@ export enum CompactOverride {
 	Expand,
 }
 
-@Component({components: {ArticleButtons, ArticleParagraph, PostImages, PostVideo}})
+@Component({components: {ArticleHeader: ArticleHeader, ArticleButtons, ArticleParagraph, PostImages, PostVideo}})
 export default class ArticleSkeleton extends Vue {
 	@Prop({type: Object, required: true})
 	readonly service!: Service;
@@ -120,16 +98,6 @@ export default class ArticleSkeleton extends Vue {
 		this.storeExpandPost({service: this.service, id: this.postData.id, selectedMedia});
 	}
 
-	get creationTimeShort() : string {
-		const t = moment(this.postData.creationTime).locale('twitter').fromNow(true);
-		moment().locale('en');
-		return  t;
-	}
-
-	get creationTimeLong() : string {
-		return moment(this.postData.creationTime).fromNow();
-	}
-
 	get compact() {
 		if (this.compactOverride === CompactOverride.Inherit)
 			return this.compactMedia;
@@ -149,30 +117,6 @@ article.article
 
 	figure img
 		border-radius: 4px
-
-	.content
-		.names
-			text-overflow: ellipsis
-			white-space: nowrap
-			overflow: hidden
-			display: inline-block
-			max-width: 300px
-
-			strong
-				margin-right: 0.5rem
-				color: $white-ter
-
-			&:hover > *
-				text-decoration: underline
-
-		span *
-				vertical-align: middle
-
-	small
-		color: $light
-
-.timestamp
-	float: right
 
 .postMedia
 	margin-top: 1rem

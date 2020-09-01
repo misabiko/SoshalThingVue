@@ -7,10 +7,13 @@
 	)
 		template(v-slot:extra-content)
 			.quotedPost
-				a.names(:href='service.getUserURL(postData.authorHandle)' target='_blank' rel='noopener noreferrer')
-					strong {{ postData.authorName }}
-					small {{'@' + postData.authorHandle}}
-				p {{ postData.text }}
+				ArticleHeader(
+					:service='service'
+					:handle='postData.authorHandle'
+					:userName='postData.authorName'
+					:creationTime='postData.creationTime'
+				)
+				ArticleParagraph(:article-id='postId' :post-data='postData')
 
 				PostImages.postMedia(
 					v-if='showMedia && postData.images'
@@ -33,11 +36,13 @@ import {Prop} from 'vue-property-decorator';
 import {Mutation} from 'vuex-class';
 import {ExpandedPost} from '../../store';
 import ArticleSkeleton from './ArticleSkeleton.vue';
+import ArticleParagraph from './ArticleParagraph.vue';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
 import {Service} from '../../services/service';
+import ArticleHeader from './ArticleHeader.vue';
 
-@Component({components: {ArticleSkeleton, PostImages, PostVideo}})
+@Component({components: {ArticleSkeleton, ArticleParagraph, ArticleHeader, PostImages, PostVideo}})
 export default class Quote extends Vue {
 	@Prop({type: Object, required: true})
 	readonly service!: Service;
