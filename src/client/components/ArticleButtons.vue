@@ -4,20 +4,17 @@
 			template(v-if='!hidden')
 				//a.level-item.commentButton
 					span.icon.is-small: FontAwesomeIcon(icon='reply')
-
-				a.level-item.postButton.repostButton(
-					:class='{repostedPostButton: postData.reposted}'
-					@click='service.repost(postData.id)'
+				RepostButton.level-item(
+					:reposted='postData.reposted'
+					:count='animatedRepostCount'
+					@repost='service.repost(postData.id)'
 				)
-					span.icon: FontAwesomeIcon(icon='retweet' fixed-width)
-					span {{ animatedRepostCount }}
 
-				a.level-item.postButton.likeButton(
-					:class='{likedPostButton: postData.liked}'
-					@click='service.toggleLike(postData.id)'
+				LikeButton.level-item(
+					:liked='postData.liked'
+					:count='animatedLikeCount'
+					@like='service.toggleLike(postData.id)'
 				)
-					span.icon: FontAwesomeIcon(:icon="[postData.liked ? 'fas' : 'far', 'heart']" fixed-width)
-					span {{ animatedLikeCount }}
 
 				a.level-item.postButton.compactOverrideButton(
 					v-if='postData.images'
@@ -48,25 +45,24 @@
 
 <script lang='ts'>
 import {Vue, Component, Prop, Watch} from 'vue-property-decorator';
+import LikeButton from './LikeButton.vue';
+import RepostButton from './RepostButton.vue';
 import {PostData} from '../../core/PostData';
 import {CompactOverride} from './ArticleSkeleton.vue';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {
 	faCompress,
 	faExpand,
-	faHeart as fasHeart,
 	faReply,
-	faRetweet,
 	faEllipsisH,
 	faEye,
 } from '@fortawesome/free-solid-svg-icons';
-import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 import {Service} from '../services/service';
 import gsap from 'gsap';
 
-library.add(fasHeart, farHeart, faRetweet, faReply, faExpand, faCompress, faEllipsisH, faEye);
+library.add(faReply, faExpand, faCompress, faEllipsisH, faEye);
 
-@Component
+@Component({components:{RepostButton, LikeButton}})
 export default class ArticleButtons extends Vue {
 	@Prop({type: Object, required: true})
 	readonly service! : Service;
@@ -120,12 +116,12 @@ export default class ArticleButtons extends Vue {
 		return this.postData.repostCount;
 	}
 
-	get animatedLikeCount() {
-		return this.tweenedLikeCount.toFixed(0);
+	get animatedLikeCount() : number {
+		return Math.round(this.tweenedLikeCount);
 	}
 
-	get animatedRepostCount() {
-		return this.tweenedRepostCount.toFixed(0);
+	get animatedRepostCount() : number {
+		return Math.round(this.tweenedRepostCount);
 	}
 
 	@Watch('likeCount')
@@ -149,14 +145,6 @@ export default class ArticleButtons extends Vue {
 	&:hover span
 		color: $primary
 
-	&:hover.likeButton, &.likedPostButton
-		span
-			color: $like-color
-
-	&:hover.repostButton, &.repostedPostButton
-		span
-			color: $repost-color
-
 	&:hover.commentButton span
 		color: $comment-color
 
@@ -167,12 +155,6 @@ export default class ArticleButtons extends Vue {
 .svg-inline--fa.fa-w-14
 	width: 0.875em
 
-.svg-inline--fa.fa-w-16
-	width: 1em
-
 .svg-inline--fa.fa-w-18
 	width: 1.125em
-
-.svg-inline--fa.fa-w-20
-	width: 1.25em
 </style>
