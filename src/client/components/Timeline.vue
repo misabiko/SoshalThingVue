@@ -23,7 +23,7 @@
 					.level-left: b-button.level-item(@click='clearPosts') Clear
 					.level-right: b-button.level-item(@click='remove' type='is-danger') Remove
 
-		.timelinePosts(ref='posts' @scroll='onScroll')
+		.timelinePosts(ref='posts' @scroll='onScroll' @wheel='onWheel')
 			ArticleGeneric(
 				v-for='article in articles'
 				:key='article.id'
@@ -218,19 +218,29 @@ export default class Timeline extends Vue {
 		});
 	}
 
-	onScroll({target: {scrollTop, clientHeight, scrollHeight}} : { target : Element }) {
-		if (scrollTop + clientHeight >= Math.max(0, scrollHeight - 5000)) {
-			if (moment().diff(this.lastBottomRefreshTime) > 10000) {
-				this.refresh({bottom: true, resetTimer: true})
-					.then(articleCount => {
-						if (articleCount)
-							this.bottomRefreshCount = 20;
-						else
-							this.incrementCountBottom();
-					});
+	onWheel({deltaY, currentTarget: {scrollTop, clientHeight, scrollHeight}} : { deltaY : number, currentTarget : Element }) {
+		//if no scrollbar or scrolled all the way down&& scrolling down
+		//if there's a scrollbar, we let onScroll handle it
+		if ((scrollTop === 0 || scrollTop + clientHeight === scrollHeight) && deltaY > 0)
+			this.tryLoadMoreBottom();
+	}
 
-				this.lastBottomRefreshTime = moment();
-			}
+	onScroll({currentTarget: {scrollTop, clientHeight, scrollHeight}} : { currentTarget : Element }) {
+		if (scrollTop + clientHeight >= Math.max(0, scrollHeight - 5000))
+			this.tryLoadMoreBottom();
+	}
+
+	tryLoadMoreBottom() {
+		if (moment().diff(this.lastBottomRefreshTime) > 10000) {
+			this.refresh({bottom: true, resetTimer: true})
+				.then(articleCount => {
+					if (articleCount)
+						this.bottomRefreshCount = 20;
+					else
+						this.incrementCountBottom();
+				});
+
+			this.lastBottomRefreshTime = moment();
 		}
 	}
 
