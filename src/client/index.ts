@@ -10,7 +10,10 @@ import {store} from './store';
 
 Vue.component('FontAwesomeIcon', FontAwesomeIcon);
 
-Vue.use(Buefy);
+Vue.use(Buefy, {
+	defaultIconComponent: 'FontAwesomeIcon',
+	defaultIconPack: 'fas',
+});
 
 Vue.use(VueClipboard);
 
