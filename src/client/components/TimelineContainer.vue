@@ -31,6 +31,9 @@ export default class TimelineContainer extends Vue {
 	async loadTimelines() {
 		this.timelines = await fetch('/timelines')
 			.then(response => response.json());
+
+		for (let i = 0; i < this.timelines.length; ++i)
+			this.timelines[i].id = i;
 	}
 
 	addTimeline() : void {

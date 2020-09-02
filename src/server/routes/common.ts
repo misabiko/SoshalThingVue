@@ -33,7 +33,6 @@ export namespace Common {
 			if (e.code === 'ENOENT') {
 				console.log(`Couldn't read "${timelinesPath}", loading default timelines.`);
 				timelines = [{
-					id: 0,
 					name: 'Home',
 					service: 'Twitter',
 					endpoint: 'home_timeline',
@@ -59,8 +58,7 @@ export namespace Common {
 			const timelines : TimelineData[] = [];
 			for (let i = 0; i < req.body.length; ++i)
 				timelines.push({
-					id: req.body[i].id,
-					name: req.body[i].name || ('Timeline #' + req.body[i].id),
+					name: req.body[i].name || '',
 					service: req.body[i].service || '',
 					endpoint: req.body[i].endpoint || '',
 					autoRefresh: typeof req.body[i].autoRefresh === 'boolean' ? req.body[i].autoRefresh : true,

@@ -1,5 +1,5 @@
 export interface TimelineData {
-	id: number;
+	id?: number;
 	name: string;
 	service: string;
 	endpoint: string;
