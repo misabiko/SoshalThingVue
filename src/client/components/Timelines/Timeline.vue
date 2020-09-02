@@ -1,5 +1,5 @@
 <template lang='pug'>
-	.timeline(:class='{simpleTimeline: columns === 1}' :style="{'flex': '0 0 ' + (columnWidth * 500) + 'px'}")
+	.timeline(:class='{simpleTimeline: columns === 1}' :style="{flex: '0 0 ' + (columnWidth * 500) + 'px', width: (columnWidth * 500) + 'px'}")
 		.timelineHeader(@click.self='scrollTop')
 			b-input(v-if='isOptionsOpen' v-model='nameEdit')
 			strong(v-else) {{ timelineData.name }}
@@ -164,7 +164,7 @@ export default class Timeline extends Vue {
 				this.articles.push(...newArticles);
 
 				this.articles.sort((a : Article, b : Article) =>
-					moment(this.service.getArticleData(a).creationTime).milliseconds() - moment(this.service.getArticleData(b).creationTime).milliseconds(),
+					moment(this.service.getArticleData(b).creationTime).diff(moment(this.service.getArticleData(a).creationTime)),
 				);
 			}else
 				this.incrementCountTop();
