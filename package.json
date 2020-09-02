@@ -7,7 +7,7 @@
 	"scripts": {
 		"build": "webpack --config webpack.prod.ts",
 		"watch": "webpack --config webpack.dev.ts --watch",
-		"start": "node dist/server.js",
+		"start": "title SoshalThing && node dist/server.js",
 		"build-start": "npm run build && npm run start",
 		"test": "mocha --require ts-node/register 'test/**/*.ts'",
 		"cypress": "npx cypress open",
