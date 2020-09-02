@@ -32,6 +32,12 @@ export default class TwitterService extends Service {
 				{parameterSets: [['listId'], ['listSlug', 'userId'], ['listSlug', 'userHandle']]},
 			),
 			new Endpoint(
+				'likes',
+				'/twitter/tweets/likes',
+				75,
+				{maxCount: 200},
+			),
+			new Endpoint(
 				'search',
 				'/twitter/tweets/search',
 				180,
