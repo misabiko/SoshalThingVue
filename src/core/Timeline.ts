@@ -17,6 +17,8 @@ export interface TimelineOptions {
 	count?: number;
 	userId?: string;
 	userHandle?: string;
+	listId?: string;
+	listSlug?: string;
 	includeReposts: boolean;
 	onlyWithMedia: boolean;
 }

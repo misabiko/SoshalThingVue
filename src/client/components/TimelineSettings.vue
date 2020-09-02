@@ -22,6 +22,10 @@
 			v-if="endpoint === 'user_timeline'"
 			:options.sync='options'
 		)
+		TimelineListOptions(
+			v-if="endpoint === 'list'"
+			:options.sync='options'
+		)
 
 		b-button(
 			v-if='anyChanges'
@@ -35,6 +39,7 @@ import TimelineSearchOptions from './TimelineSearchOptions.vue';
 import {TimelineData, TimelineOptions} from '../../core/Timeline';
 import {Service} from '../services/service';
 import TimelineUserOptions from './TimelineUserOptions.vue';
+import TimelineListOptions from './TimelineListOptions.vue';
 
 export interface SettingsData {
 	endpoint: string;
@@ -44,7 +49,8 @@ export interface SettingsData {
 	options: TimelineOptions;
 }
 
-@Component({components: {TimelineSearchOptions, TimelineUserOptions}})
+//TODO Make endpoint parameter options dynamic
+@Component({components: {TimelineSearchOptions, TimelineUserOptions, TimelineListOptions}})
 export default class TimelineSettings extends Vue {
 	@Prop({type: Object, required: true})
 	readonly timelineData!: TimelineData;

@@ -84,6 +84,8 @@ export namespace Twitter {
 			count: parseInt(query.count),
 			userId: query.userId,
 			userHandle: query.userHandle,
+			listId: query.listId,
+			listSlug: query.listSlug,
 			includeReposts: query.includeReposts !== 'false',
 			onlyWithMedia: query.onlyWithMedia !== 'false',
 		}
@@ -142,6 +144,28 @@ export namespace Twitter {
 			await respondTimelineUpdate(response as any, response, 'mentions_timeline', options, !!options.since, res);
 		}catch (e) {
 			await respondRateOver(e, 'mentions_timeline', res, next);
+		}
+	}
+
+	async function list(req : Request, res : Response, next : NextFunction) {
+		try {
+			const options = parseTimelineOptions(req.query);
+
+			const response : TwitterResponse = await client.get('lists/statuses', {
+				...(options.since ? {since_id: options.since} : {}),
+				...(options.max ? {max_id: options.max} : {}),
+				...(options.count ? {count: options.count} : {}),
+				...(options.userId ? {owner_id: options.userId} : {}),
+				...(options.userHandle ? {owner_screen_name: options.userHandle} : {}),
+				...(options.listId ? {list_id: options.listId} : {}),
+				...(options.listSlug ? {slug: options.listSlug} : {}),
+				tweet_mode: 'extended',
+			});
+			logRateLimit(response);
+
+			await respondTimelineUpdate(response as any, response, 'list', options, !!options.since, res);
+		}catch (e) {
+			await respondRateOver(e, 'list', res, next);
 		}
 	}
 
@@ -312,6 +336,7 @@ export namespace Twitter {
 	router.get('/tweets/home_timeline', preventUnauthorized, homeTimeline);
 	router.get('/tweets/user_timeline', preventUnauthorized, userTimeline);
 	router.get('/tweets/mentions_timeline', preventUnauthorized, mentionsTimeline);
+	router.get('/tweets/list', preventUnauthorized, list);
 	router.get('/tweets/search', preventUnauthorized, search);
 	router.get('/tweets/status/:id', preventUnauthorized, status);
 	router.post('/like/:id', preventUnauthorized, like);

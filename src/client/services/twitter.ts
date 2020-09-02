@@ -16,7 +16,7 @@ export default class TwitterService extends Service {
 				900,
 				{
 					maxCount: 200,
-					parameterSets: [['userId'], ['userHandle']]
+					parameterSets: [['userId'], ['userHandle']],
 				},
 			),
 			new Endpoint(
@@ -24,6 +24,12 @@ export default class TwitterService extends Service {
 				'/twitter/tweets/mentions_timeline',
 				900,
 				{maxCount: 200},
+			),
+			new Endpoint(
+				'list',
+				'/twitter/tweets/list',
+				900,
+				{parameterSets: [['listId'], ['listSlug', 'userId'], ['listSlug', 'userHandle']]},
 			),
 			new Endpoint(
 				'search',
