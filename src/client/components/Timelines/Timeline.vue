@@ -21,14 +21,17 @@
 
 				.level
 					.level-left: b-button.level-item(@click='clearPosts') Clear
-					.level-right: b-button.level-item(@click='remove' type='is-danger') Remove
+					.level-right
+						b-button.level-item(@click='autoScrolling = true; isOptionsOpen = false;') AutoScroll
+						b-button.level-item(@click='remove' type='is-danger') Remove
 
 		TimelineArticles(
-			ref='posts'
+			ref='timelineArticles'
 			:columns='columns'
 			:articles='articles'
 			:service='service'
 			:compact-media='timelineData.compactMedia'
+			:scrolling.sync='autoScrolling'
 			@scroll='onScroll'
 			@wheel='onWheel'
 			@remove-article='removeArticle($event)'
@@ -59,7 +62,7 @@ export default class Timeline extends Vue {
 	@Prop({type: Boolean, required: true})
 	readonly shouldScroll! : string[];
 
-	@Ref('posts') readonly timelinePosts! : HTMLDivElement;
+	@Ref('timelineArticles') readonly timelineArticles! : TimelineArticles;
 
 	interval = undefined as number | undefined;
 	timeout = undefined as number | undefined;
@@ -70,6 +73,7 @@ export default class Timeline extends Vue {
 	topRefreshCount = 20;
 	bottomRefreshCount = 20;
 	columns = 1;
+	autoScrolling = false;
 
 	mounted() {
 		if (this.enabled)
@@ -214,7 +218,7 @@ export default class Timeline extends Vue {
 	}
 
 	scrollTop() {
-		this.timelinePosts.scroll({
+		this.timelineArticles.$el.scroll({
 			top: 0,
 			left: 0,
 			behavior: 'smooth',
@@ -222,6 +226,9 @@ export default class Timeline extends Vue {
 	}
 
 	onWheel({deltaY, currentTarget: {scrollTop, clientHeight, scrollHeight}} : { deltaY : number, currentTarget : Element }) {
+		if (this.autoScrolling)
+			return;
+
 		//if no scrollbar or scrolled all the way down&& scrolling down
 		//if there's a scrollbar, we let onScroll handle it
 		if ((scrollTop === 0 || scrollTop + clientHeight === scrollHeight) && deltaY > 0)
@@ -229,11 +236,17 @@ export default class Timeline extends Vue {
 	}
 
 	onScroll({currentTarget: {scrollTop, clientHeight, scrollHeight}} : { currentTarget : Element }) {
+		if (this.autoScrolling)
+			return;
+
 		if (scrollTop + clientHeight >= Math.max(0, scrollHeight - 5000))
 			this.tryLoadMoreBottom();
 	}
 
 	tryLoadMoreBottom() {
+		if (this.autoScrolling)
+			return;
+
 		if (moment().diff(this.lastBottomRefreshTime) > 10000) {
 			this.refresh({bottom: true, resetTimer: true})
 				.then(articleCount => {
