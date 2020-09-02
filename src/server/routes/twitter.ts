@@ -127,6 +127,24 @@ export namespace Twitter {
 		}
 	}
 
+	async function mentionsTimeline(req : Request, res : Response, next : NextFunction) {
+		try {
+			const options = parseTimelineOptions(req.query);
+
+			const response : TwitterResponse = await client.get('statuses/mentions_timeline', {
+				...(options.since ? {since_id: options.since} : {}),
+				...(options.max ? {max_id: options.max} : {}),
+				...(options.count ? {count: options.count} : {}),
+				tweet_mode: 'extended',
+			});
+			logRateLimit(response);
+
+			await respondTimelineUpdate(response as any, response, 'mentions_timeline', options, !!options.since, res);
+		}catch (e) {
+			await respondRateOver(e, 'mentions_timeline', res, next);
+		}
+	}
+
 	async function search(req : Request, res : Response, next : NextFunction) {
 		try {
 			const options = parseTimelineOptions(req.query);
@@ -293,6 +311,7 @@ export namespace Twitter {
 	}));
 	router.get('/tweets/home_timeline', preventUnauthorized, homeTimeline);
 	router.get('/tweets/user_timeline', preventUnauthorized, userTimeline);
+	router.get('/tweets/mentions_timeline', preventUnauthorized, mentionsTimeline);
 	router.get('/tweets/search', preventUnauthorized, search);
 	router.get('/tweets/status/:id', preventUnauthorized, status);
 	router.post('/like/:id', preventUnauthorized, like);

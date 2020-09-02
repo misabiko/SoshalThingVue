@@ -135,13 +135,13 @@ export default class Timeline extends Vue {
 
 			const payload : TimelinePayload = await this.service.refreshEndpoint(
 				this.timelineData.endpoint,
-				options
+				options,
 			);
 
 			const newArticles = payload.newArticles.filter((a : Article) =>
 				this.articles.findIndex(
-					(b : Article) => b.id === a.id
-				) < 0
+					(b : Article) => b.id === a.id,
+				) < 0,
 			);
 
 			if (newArticles.length) {
@@ -150,8 +150,8 @@ export default class Timeline extends Vue {
 				this.articles.push(...newArticles);
 
 				this.articles.sort((a : Article, b : Article) =>
-					moment(this.service.getArticleData(a).creationTime).milliseconds() - moment(this.service.getArticleData(b).creationTime).milliseconds()
-				)
+					moment(this.service.getArticleData(a).creationTime).milliseconds() - moment(this.service.getArticleData(b).creationTime).milliseconds(),
+				);
 			}else
 				this.incrementCountTop();
 
@@ -160,12 +160,12 @@ export default class Timeline extends Vue {
 			if (resetTimer)
 				this.resetAutoRefresh({
 					refresh: false,
-					timeout: this.endpoint.rateLimitStatus.remaining ? 0 : untilReset + 1000
+					timeout: this.endpoint.rateLimitStatus.remaining ? 0 : untilReset + 1000,
 				});
 			else if (!this.endpoint.rateLimitStatus.remaining)
 				this.resetAutoRefresh({
 					refresh: false,
-					timeout: untilReset + 1000
+					timeout: untilReset + 1000,
 				});
 
 			return newArticles.length;
@@ -176,12 +176,12 @@ export default class Timeline extends Vue {
 	}
 
 	incrementCountTop() {
-		if (this.topRefreshCount < 200)
+		if (this.topRefreshCount < this.endpoint.maxCount)
 			this.topRefreshCount += this.topRefreshCount == 20 ? 30 : 50;
 	}
 
 	incrementCountBottom() {
-		if (this.bottomRefreshCount < 200)
+		if (this.bottomRefreshCount < this.endpoint.maxCount)
 			this.bottomRefreshCount += this.bottomRefreshCount == 20 ? 30 : 50;
 	}
 
@@ -253,14 +253,17 @@ export default class Timeline extends Vue {
 	}
 
 	get enabled() {
-		const query = this.timelineData.options.q ? this.timelineData.options.q : '';
-		const userHandle = this.timelineData.options.userHandle ? this.timelineData.options.userHandle : '';
+		//if every of the endpoint's parameter sets is missing a parameter in timelineData, return false
+		if (this.endpoint && this.endpoint.parameterSets.length)
+			if (this.endpoint.parameterSets.every((parameterSet : string[]) =>
+				parameterSet.some((parameter : string) => {
+					const p = (this.timelineData.options as any)[parameter] as string;
+					return !p || !p.length;
+				}),
+			))
+				return false;
 
-		return this.service.loggedIn &&
-			this.timelineData.enabled &&
-			!!this.timelineData.endpoint &&
-			(this.timelineData.endpoint !== 'search' || !!query.length) &&
-			(this.timelineData.endpoint !== 'user_timeline' || !!userHandle.length);
+		return this.service.loggedIn && this.timelineData.enabled && !!this.timelineData.endpoint;
 	}
 
 	get autoRefresh() {

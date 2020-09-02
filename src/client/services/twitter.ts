@@ -8,16 +8,30 @@ export default class TwitterService extends Service {
 				'home_timeline',
 				'/twitter/tweets/home_timeline',
 				15,
+				{maxCount: 200},
 			),
 			new Endpoint(
 				'user_timeline',
 				'/twitter/tweets/user_timeline',
 				900,
+				{
+					maxCount: 200,
+					parameterSets: [['userId'], ['userHandle']]
+				},
+			),
+			new Endpoint(
+				'mentions_timeline',
+				'/twitter/tweets/mentions_timeline',
+				900,
+				{maxCount: 200},
 			),
 			new Endpoint(
 				'search',
 				'/twitter/tweets/search',
 				180,
+				{
+					parameterSets: [['q']]
+				},
 			),
 		);
 	}

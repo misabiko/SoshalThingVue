@@ -12,7 +12,7 @@ export abstract class Service {
 	reposts : { [id : string] : RepostData } = {};
 	quotes : { [id : string] : QuoteData } = {};
 
-	protected constructor(public name : string, public loginHref : string) {}
+	protected constructor(readonly name : string, readonly loginHref : string) {}
 
 	addEndpoints(...endpoints : Endpoint[]) {
 		for (const endpoint of endpoints)
@@ -83,18 +83,27 @@ export abstract class Service {
 
 export class Endpoint {
 	rateLimitStatus : RateLimitStatus;
+	readonly maxCount : number;
+	readonly parameterSets : string[][];
 	//postType :
 
 	constructor(
-		public name : string,
-		public url : string,
+		readonly name : string,
+		readonly url : string,
 		rateLimit : number,
+		{
+			maxCount = 100,
+			parameterSets = [] as string[][],
+		} = {},
 	) {
 		this.rateLimitStatus = {
 			remaining: rateLimit,
 			limit: rateLimit,
 			reset: 0,
 		};
+
+		this.maxCount = maxCount;
+		this.parameterSets = parameterSets;
 	}
 
 	async refresh(service : Service, timelineOptions : TimelineOptions) : Promise<TimelinePayload> {
