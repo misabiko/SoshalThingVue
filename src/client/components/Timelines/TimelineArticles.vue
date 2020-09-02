@@ -10,6 +10,7 @@
 		)
 	.timelineArticles(
 		v-else
+		:key='columns'
 		@scroll="$emit('scroll', $event)"
 		@wheel="$emit('wheel', $event)"
 	)

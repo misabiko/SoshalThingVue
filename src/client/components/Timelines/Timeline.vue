@@ -1,5 +1,5 @@
 <template lang='pug'>
-	.timeline(:class='{simpleTimeline: columns === 1}' :style="{'flex': '0 0 ' + (columns * 500) + 'px'}")
+	.timeline(:class='{simpleTimeline: columns === 1}' :style="{'flex': '0 0 ' + (columnWidth * 500) + 'px'}")
 		.timelineHeader(@click.self='scrollTop')
 			b-input(v-if='isOptionsOpen' v-model='nameEdit')
 			strong(v-else) {{ timelineData.name }}
@@ -18,6 +18,12 @@
 					:service='service'
 					@apply-settings='applySettings($event)'
 				)
+
+				b-field(label='Columns')
+					b-numberinput(v-model='columns' min='1')
+
+				b-field(label='Width')
+					b-numberinput(v-model='columnWidth' min='1')
 
 				.level
 					.level-left: b-button.level-item(@click='clearPosts') Clear
@@ -47,13 +53,13 @@ import {TimelinePayload} from '../../../core/ServerResponses';
 import {Article} from '../../../core/PostData';
 import {TimelineData} from '../../../core/Timeline';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
+import {faEllipsisV, faSyncAlt, faPlus, faMinus} from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 import {Endpoint, Service} from '../../services/service';
 import {SoshalState} from '../../store';
 import TimelineArticles from './TimelineArticles.vue';
 
-library.add(faEllipsisV, faSyncAlt);
+library.add(faEllipsisV, faSyncAlt, faPlus, faMinus);
 
 @Component({components: {ArticleGeneric, TimelineSettings, TimelineArticles}})
 export default class Timeline extends Vue {
@@ -73,6 +79,7 @@ export default class Timeline extends Vue {
 	topRefreshCount = 20;
 	bottomRefreshCount = 20;
 	columns = 1;
+	columnWidth = 1;	//Could use a better name
 	autoScrolling = false;
 
 	mounted() {
@@ -319,6 +326,15 @@ export default class Timeline extends Vue {
 	onOptionsCollapseToggled(optionsOpened : boolean) {
 		if (!optionsOpened)
 			this.nameEdit = this.timelineData.name;
+	}
+
+	@Watch('columns')
+	onColumnChange(newColumnCount : number, oldColumnCount : number) {
+		if (newColumnCount < oldColumnCount) {
+			if (this.columnWidth)
+				this.columnWidth--;
+		}else if (newColumnCount > oldColumnCount)
+			this.columnWidth++;
 	}
 }
 </script>
