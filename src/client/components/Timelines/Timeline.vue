@@ -1,5 +1,5 @@
 <template lang='pug'>
-	.timeline
+	.timeline(:class='{simpleTimeline: columns === 1}' :style="{'flex': '0 0 ' + (columns * 500) + 'px'}")
 		.timelineHeader(@click.self='scrollTop')
 			b-input(v-if='isOptionsOpen' v-model='nameEdit')
 			strong(v-else) {{ timelineData.name }}
@@ -23,15 +23,16 @@
 					.level-left: b-button.level-item(@click='clearPosts') Clear
 					.level-right: b-button.level-item(@click='remove' type='is-danger') Remove
 
-		.timelinePosts(ref='posts' @scroll='onScroll' @wheel='onWheel')
-			ArticleGeneric(
-				v-for='article in articles'
-				:key='article.id'
-				:service='service'
-				:article='article'
-				:compact-media='timelineData.compactMedia'
-				@remove='removeArticle($event)'
-			)
+		TimelineArticles(
+			ref='posts'
+			:columns='columns'
+			:articles='articles'
+			:service='service'
+			:compact-media='timelineData.compactMedia'
+			@scroll='onScroll'
+			@wheel='onWheel'
+			@remove-article='removeArticle($event)'
+		)
 </template>
 
 <script lang='ts'>
@@ -47,10 +48,11 @@ import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 import {Endpoint, Service} from '../../services/service';
 import {SoshalState} from '../../store';
+import TimelineArticles from './TimelineArticles.vue';
 
 library.add(faEllipsisV, faSyncAlt);
 
-@Component({components: {ArticleGeneric, TimelineSettings}})
+@Component({components: {ArticleGeneric, TimelineSettings, TimelineArticles}})
 export default class Timeline extends Vue {
 	@Prop({type: Object, required: true})
 	readonly timelineData! : TimelineData;
@@ -67,6 +69,7 @@ export default class Timeline extends Vue {
 	lastBottomRefreshTime = moment();
 	topRefreshCount = 20;
 	bottomRefreshCount = 20;
+	columns = 1;
 
 	mounted() {
 		if (this.enabled)
@@ -313,12 +316,12 @@ export default class Timeline extends Vue {
 @include pretty-scrollbar
 
 .timeline
-	width: 500px
-	min-width: 500px
-	//TODO I don't know why this is needed
 	height: 100%
 	padding: 0 5px
 	box-sizing: border-box
+
+.simpleTimeline
+	//TODO I don't know why this is needed
 	display: flex
 	flex-flow: column
 
@@ -341,9 +344,4 @@ export default class Timeline extends Vue {
 .timelineOptions
 	background-color: $scheme-main-ter
 	padding: 1rem
-
-.timelinePosts
-	overflow-y: scroll
-	overflow-x: hidden
-	flex-grow: 1
 </style>
