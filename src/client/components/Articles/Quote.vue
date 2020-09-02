@@ -4,6 +4,10 @@
 		:article-id='quoteId'
 		:post-data='quoteData'
 		:show-media='false'
+		:timeline-hidden='timelineHidden'
+		:timeline-compact-override='timelineCompactOverride'
+		@set-hidden="$emit('set-hidden', $event)"
+		@set-compact-override="$emit('set-compact-override', $event)"
 	)
 		template(v-slot:extra-content)
 			.quotedPost
@@ -35,7 +39,7 @@ import {PostData, QuoteData} from '../../../core/PostData';
 import {Prop} from 'vue-property-decorator';
 import {Mutation} from 'vuex-class';
 import {ExpandedPost} from '../../store';
-import ArticleSkeleton from './ArticleSkeleton.vue';
+import ArticleSkeleton, {CompactOverride} from './ArticleSkeleton.vue';
 import ArticleParagraph from './ArticleParagraph.vue';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
@@ -52,6 +56,10 @@ export default class Quote extends Vue {
 	readonly showMedia!: boolean;
 	@Prop({type: Boolean})
 	readonly compactMedia!: boolean;
+	@Prop({type: Boolean})
+	readonly timelineHidden!: boolean;
+	@Prop({type: Number, default: CompactOverride.Inherit})
+	readonly timelineCompactOverride!: number;
 
 	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
 

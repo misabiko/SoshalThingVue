@@ -5,8 +5,12 @@
 			:key='article.id'
 			:service='service'
 			:article='article'
+			:timeline-hidden='hiddens.has(article.id)'
+			:timeline-compact-override='compactOverrides.hasOwnProperty(article.id) ? compactOverrides[article.id] : 0'
 			:compact-media='compactMedia'
 			@remove="$emit('remove-article', $event)"
+			@set-hidden='onHiddenChange'
+			@set-compact-override='onCompactOverrideChange'
 		)
 	.timelineArticles(
 		v-else
@@ -20,8 +24,12 @@
 				:key='article.id'
 				:service='service'
 				:article='article'
+				:timeline-hidden='hiddens.has(article.id)'
+				:timeline-compact-override='compactOverrides.hasOwnProperty(article.id) ? compactOverrides[article.id] : 0'
 				:compact-media='compactMedia'
 				@remove="$emit('remove-article', $event)"
+				@set-hidden='onHiddenChange'
+				@set-compact-override='onCompactOverrideChange'
 			)
 </template>
 
@@ -44,6 +52,8 @@ export default class TimelineArticles extends Vue {
 	@Prop({type: Boolean})
 	readonly scrolling!: boolean;
 
+	hiddens = new Set<string>();
+	compactOverrides = {} as {[id : string] : number};
 	scrollDirection = false;
 	scrollRequestId = 0;
 	scrollSpeed = 3;
@@ -75,6 +85,20 @@ export default class TimelineArticles extends Vue {
 		}, {
 			once: true
 		});
+	}
+
+	onHiddenChange({hidden, id} : { hidden: boolean, id: string }) {
+		if (hidden)
+			this.hiddens.add(id);
+		else
+			this.hiddens.delete(id);
+	}
+
+	onCompactOverrideChange({compactOverride, id} : { compactOverride: number, id: string }) {
+		if (compactOverride)
+			this.compactOverrides[id] = compactOverride;
+		else
+			delete this.compactOverrides[id];
 	}
 
 	@Watch('scrolling')

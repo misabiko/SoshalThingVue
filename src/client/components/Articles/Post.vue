@@ -5,13 +5,17 @@
 		:post-data='postData'
 		:show-media='showMedia'
 		:compact-media='compactMedia'
+		:timeline-hidden='timelineHidden'
+		:timeline-compact-override='timelineCompactOverride'
+		@set-hidden="$emit('set-hidden', $event)"
+		@set-compact-override="$emit('set-compact-override', $event)"
 	)
 </template>
 
 <script lang='ts'>
 import {Component, Prop, Vue} from 'vue-property-decorator';
 import {PostData} from '../../../core/PostData';
-import ArticleSkeleton from './ArticleSkeleton.vue';
+import ArticleSkeleton, {CompactOverride} from './ArticleSkeleton.vue';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
 import {Service} from '../../services/service';
@@ -28,6 +32,10 @@ export default class Post extends Vue {
 	readonly showMedia!: boolean;
 	@Prop({type: Boolean})
 	readonly compactMedia!: boolean;
+	@Prop({type: Boolean})
+	readonly timelineHidden!: boolean;
+	@Prop({type: Number, default: CompactOverride.Inherit})
+	readonly timelineCompactOverride!: number;
 
 	get postData() : PostData {
 		return this.service.posts[this.postId];

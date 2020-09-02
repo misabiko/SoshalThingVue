@@ -58,7 +58,7 @@
 </template>
 
 <script lang='ts'>
-import {Vue, Component, Prop} from 'vue-property-decorator';
+import {Vue, Component, Prop, Watch} from 'vue-property-decorator';
 import {Mutation} from 'vuex-class';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
@@ -87,12 +87,16 @@ export default class ArticleSkeleton extends Vue {
 	readonly postData!: PostData;
 	@Prop({type: Boolean})
 	readonly compactMedia!: boolean;
+	@Prop({type: Boolean})
+	readonly timelineHidden!: boolean;
+	@Prop({type: Number, default: CompactOverride.Inherit})
+	readonly timelineCompactOverride!: number;
 
 	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
 
 	hovered = false;
-	hidden = false;
-	compactOverride = CompactOverride.Inherit;
+	hidden = this.timelineHidden;
+	compactOverride = this.timelineCompactOverride;
 
 	expandPost(selectedMedia: number) {
 		this.storeExpandPost({service: this.service, id: this.postData.id, selectedMedia});
@@ -103,6 +107,16 @@ export default class ArticleSkeleton extends Vue {
 			return this.compactMedia;
 		else
 			return this.compactOverride === CompactOverride.Compact;
+	}
+
+	@Watch('hidden')
+	onHiddenChange(hidden : boolean) {
+		this.$emit('set-hidden', {hidden, id: this.articleId});
+	}
+
+	@Watch('compactOverride')
+	onCompactOverrideChange(compactOverride : boolean) {
+		this.$emit('set-compact-override', {compactOverride, id: this.articleId});
 	}
 }
 </script>

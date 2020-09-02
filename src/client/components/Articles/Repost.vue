@@ -5,6 +5,10 @@
 		:post-data='postData'
 		:show-media='showMedia'
 		:compact-media='compactMedia'
+		:timeline-hidden='timelineHidden'
+		:timeline-compact-override='timelineCompactOverride'
+		@set-hidden="$emit('set-hidden', $event)"
+		@set-compact-override="$emit('set-compact-override', $event)"
 	)
 		template(v-slot:header)
 			.repostLabel(v-if='repostData.reposterName')
@@ -17,7 +21,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import {PostData, RepostData} from '../../../core/PostData';
 import {Prop} from 'vue-property-decorator';
-import ArticleSkeleton from './ArticleSkeleton.vue';
+import ArticleSkeleton, {CompactOverride} from './ArticleSkeleton.vue';
 import PostVideo from './PostVideo.vue';
 import PostImages from './PostImages.vue';
 import {Service} from '../../services/service';
@@ -32,6 +36,10 @@ export default class Repost extends Vue {
 	readonly showMedia!: boolean;
 	@Prop({type: Boolean})
 	readonly compactMedia!: boolean;
+	@Prop({type: Boolean})
+	readonly timelineHidden!: boolean;
+	@Prop({type: Number, default: CompactOverride.Inherit})
+	readonly timelineCompactOverride!: number;
 
 	get repostData() : RepostData {
 		return this.service.reposts[this.repostId];
