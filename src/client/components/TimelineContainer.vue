@@ -1,5 +1,5 @@
 <template lang='pug'>
-	#timelineContainer
+	draggable#timelineContainer(v-model='timelines' handle='.timelineHeader')
 		Timeline(
 			v-for='timeline in timelines'
 			:key='timeline.id'
@@ -15,8 +15,9 @@ import {Vue, Component, Watch} from 'vue-property-decorator';
 import {Mutation, State} from 'vuex-class';
 import Timeline from "./Timeline.vue";
 import {TimelineData} from '../../core/Timeline';
+import draggable from 'vuedraggable';
 
-@Component({components: {Timeline}})
+@Component({components: {Timeline, draggable}})
 export default class TimelineContainer extends Vue {
 	@State userTimelineBuffer!: string[];
 	@Mutation clearUserTimelines!: () => void;
