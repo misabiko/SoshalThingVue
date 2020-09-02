@@ -36,8 +36,8 @@
 <script lang='ts'>
 import {Vue, Component, Prop} from 'vue-property-decorator';
 import TimelineSearchOptions from './TimelineSearchOptions.vue';
-import {TimelineData, TimelineOptions} from '../../core/Timeline';
-import {Service} from '../services/service';
+import {TimelineData, TimelineOptions} from '../../../core/Timeline';
+import {Service} from '../../services/service';
 import TimelineUserOptions from './TimelineUserOptions.vue';
 import TimelineListOptions from './TimelineListOptions.vue';
 

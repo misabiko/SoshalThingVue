@@ -8,7 +8,7 @@
 
 <script lang='ts'>
 import {Vue, Component, Ref, Watch} from 'vue-property-decorator'
-import TimelineContainer from './TimelineContainer';
+import TimelineContainer from './Timelines/TimelineContainer.vue';
 import Sidebar from './Sidebar';
 import Post from './Articles/Post.vue';
 import {Mutation, State} from 'vuex-class';

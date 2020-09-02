@@ -14,7 +14,7 @@
 import {Vue, Component, Watch} from 'vue-property-decorator';
 import {Mutation, State} from 'vuex-class';
 import Timeline from "./Timeline.vue";
-import {TimelineData} from '../../core/Timeline';
+import {TimelineData} from '../../../core/Timeline';
 import draggable from 'vuedraggable';
 
 @Component({components: {Timeline, draggable}})
@@ -120,7 +120,7 @@ export default class TimelineContainer extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../bulma_overrides' as *
+@use '../../bulma_overrides' as *
 
 @include pretty-scrollbar
 

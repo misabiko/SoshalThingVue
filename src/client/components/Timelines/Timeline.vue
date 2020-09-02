@@ -37,16 +37,16 @@
 <script lang='ts'>
 import {Component, Prop, Ref, Vue, Watch} from 'vue-property-decorator';
 import {SettingsData} from './TimelineSettings.vue';
-import ArticleGeneric from './Articles/ArticleGeneric.vue';
+import ArticleGeneric from '../Articles/ArticleGeneric.vue';
 import TimelineSettings from './TimelineSettings.vue';
-import {TimelinePayload} from '../../core/ServerResponses';
-import {Article} from '../../core/PostData';
-import {TimelineData} from '../../core/Timeline';
+import {TimelinePayload} from '../../../core/ServerResponses';
+import {Article} from '../../../core/PostData';
+import {TimelineData} from '../../../core/Timeline';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
-import {Endpoint, Service} from '../services/service';
-import {SoshalState} from '../store';
+import {Endpoint, Service} from '../../services/service';
+import {SoshalState} from '../../store';
 
 library.add(faEllipsisV, faSyncAlt);
 
@@ -308,7 +308,7 @@ export default class Timeline extends Vue {
 </script>
 
 <style scoped lang='sass'>
-@use '../bulma_overrides' as *
+@use '../../bulma_overrides' as *
 
 @include pretty-scrollbar
 
