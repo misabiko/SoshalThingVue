@@ -37,8 +37,8 @@ export default class RepostButton extends Vue {
 			color: $repost-color
 
 .icon > svg
-	will-change: transform, color
-	transition: all .5s ease-in-out
+	will-change: transform
+	transition: transform .5s ease-in-out
 
 .repostedPostButton .icon > svg
 	transform: rotate(360deg)
