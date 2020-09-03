@@ -1,13 +1,15 @@
 <script lang='ts'>
 import {Vue, Component, Prop, Watch} from 'vue-property-decorator';
-import ArticleGeneric from '../Articles/ArticleGeneric.vue';
-import {Article} from '../../../core/PostData';
+import {Article, ArticleType} from '../../../core/PostData';
 import {Service} from '../../services/service';
 import {State} from 'vuex-class';
-import moment from 'moment';
 import {CreateElement} from 'vue';
+import {VNode, VNodeData} from 'vue/types/vnode';
+import Post from '../Articles/Post.vue';
+import Repost from '../Articles/Repost.vue';
+import Quote from '../Articles/Quote.vue';
 
-@Component({components: {ArticleGeneric}})
+@Component
 export default class TimelineArticles extends Vue {
 	@Prop({type: Number, required: true})
 	readonly columns! : number;
@@ -29,26 +31,37 @@ export default class TimelineArticles extends Vue {
 	scrollSpeed = 3;
 	firstVisibleArticleIndex = 0;
 
+	articleFactory(createElement : CreateElement, article : Article) : VNode {
+		const data : VNodeData = {
+			key: article.id,
+			props: {
+				service: this.service,
+				articleId: article.id,
+				timelineHidden: this.hiddens.has(article.id),
+				timelineCompactOverride: this.compactOverrides.hasOwnProperty(article.id) ? this.compactOverrides[article.id] : 0,
+				compactMedia: this.compactMedia,
+			},
+			on: {
+				remove: ($event : any) => this.$emit('remove-article', $event),
+				'set-hidden': this.onHiddenChange,
+				'set-compact-override': this.onCompactOverrideChange,
+			}
+		};
+
+		switch(article.type) {
+			case ArticleType.Post:
+				return createElement(Post, data);
+			case ArticleType.Repost:
+				return createElement(Repost, data);
+			case ArticleType.Quote:
+				return createElement(Quote, data);
+		}
+	}
+
 	render(createElement : CreateElement) {
 		let children;
 
-		const articles = this.articles.map(article => createElement(
-			ArticleGeneric, {
-				key: article.id,
-				props: {
-					service: this.service,
-					article,
-					timelineHidden: this.hiddens.has(article.id),
-					timelineCompactOverride: this.compactOverrides.hasOwnProperty(article.id) ? this.compactOverrides[article.id] : 0,
-					compactMedia: this.compactMedia,
-				},
-				on: {
-					remove: ($event : any) => this.$emit('remove-article', $event),
-					'set-hidden': this.onHiddenChange,
-					'set-compact-override': this.onCompactOverrideChange,
-				},
-			},
-		));
+		const articles = this.articles.map(article => this.articleFactory(createElement, article));
 
 		if (this.columns === 1) {
 			const label = createElement('div', {

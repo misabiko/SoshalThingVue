@@ -1,7 +1,7 @@
 <template lang='pug'>
 	ArticleSkeleton.quote(
 		:service='service'
-		:article-id='quoteId'
+		:article-id='articleId'
 		:post-data='quoteData'
 		:show-media='false'
 		:timeline-hidden='timelineHidden'
@@ -51,7 +51,7 @@ export default class Quote extends Vue {
 	@Prop({type: Object, required: true})
 	readonly service!: Service;
 	@Prop({type: String, required: true})
-	readonly quoteId!: string;
+	readonly articleId!: string;
 	@Prop({type: Boolean, default: true})
 	readonly showMedia!: boolean;
 	@Prop({type: Boolean})
@@ -64,7 +64,7 @@ export default class Quote extends Vue {
 	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
 
 	get quoteData() : QuoteData {
-		return this.service.quotes[this.quoteId];
+		return this.service.quotes[this.articleId];
 	}
 
 	get postId() : string {

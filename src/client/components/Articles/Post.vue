@@ -1,7 +1,7 @@
 <template lang='pug'>
 	ArticleSkeleton.post(
 		:service='service'
-		:article-id='postId'
+		:article-id='articleId'
 		:post-data='postData'
 		:show-media='showMedia'
 		:compact-media='compactMedia'
@@ -27,7 +27,7 @@ export default class Post extends Vue {
 	@Prop({type: Object, required: true})
 	readonly service!: Service;
 	@Prop({type: String, required: true})
-	readonly postId!: string;
+	readonly articleId!: string;
 	@Prop({type: Boolean, default: true})
 	readonly showMedia!: boolean;
 	@Prop({type: Boolean})
@@ -38,7 +38,7 @@ export default class Post extends Vue {
 	readonly timelineCompactOverride!: number;
 
 	get postData() : PostData {
-		return this.service.posts[this.postId];
+		return this.service.posts[this.articleId];
 	}
 }
 </script>

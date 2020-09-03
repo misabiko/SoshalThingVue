@@ -1,7 +1,7 @@
 <template lang='pug'>
 	ArticleSkeleton.repost(
 		:service='service'
-		:article-id='repostId'
+		:article-id='articleId'
 		:post-data='postData'
 		:show-media='showMedia'
 		:compact-media='compactMedia'
@@ -31,7 +31,7 @@ export default class Repost extends Vue {
 	@Prop({type: Object, required: true})
 	readonly service!: Service;
 	@Prop({type: String, required: true})
-	readonly repostId!: string;
+	readonly articleId!: string;
 	@Prop({type: Boolean, default: true})
 	readonly showMedia!: boolean;
 	@Prop({type: Boolean})
@@ -42,7 +42,7 @@ export default class Repost extends Vue {
 	readonly timelineCompactOverride!: number;
 
 	get repostData() : RepostData {
-		return this.service.reposts[this.repostId];
+		return this.service.reposts[this.articleId];
 	}
 
 	get postId() : string {

@@ -47,7 +47,6 @@
 <script lang='ts'>
 import {Component, Prop, Ref, Vue, Watch} from 'vue-property-decorator';
 import {SettingsData} from './TimelineSettings.vue';
-import ArticleGeneric from '../Articles/ArticleGeneric.vue';
 import TimelineSettings from './TimelineSettings.vue';
 import {TimelinePayload} from '../../../core/ServerResponses';
 import {Article} from '../../../core/PostData';
@@ -61,7 +60,7 @@ import TimelineArticles from './TimelineArticles.vue';
 
 library.add(faEllipsisV, faSyncAlt, faPlus, faMinus);
 
-@Component({components: {ArticleGeneric, TimelineSettings, TimelineArticles}})
+@Component({components: {TimelineSettings, TimelineArticles}})
 export default class Timeline extends Vue {
 	@Prop({type: Object, required: true})
 	readonly timelineData! : TimelineData;
