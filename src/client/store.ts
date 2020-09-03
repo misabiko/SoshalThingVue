@@ -7,8 +7,8 @@ Vue.use(Vuex);
 
 export interface ExpandedPost {
 	service? : Service;
-	id : string
-	selectedMedia : number
+	id : string;
+	selectedMedia : number;
 }
 
 export class SoshalState {
@@ -19,6 +19,7 @@ export class SoshalState {
 	};
 	sidebarExpanded = false;
 	userTimelineBuffer : string[] = [];
+	timelineArticleRadius = 10;
 }
 
 const mutations = <MutationTree<SoshalState>>{

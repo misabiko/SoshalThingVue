@@ -38,9 +38,9 @@
 			:service='service'
 			:compact-media='timelineData.compactMedia'
 			:scrolling.sync='autoScrolling'
-			@scroll='onScroll'
 			@wheel='onWheel'
 			@remove-article='removeArticle($event)'
+			@load-bottom='tryLoadMoreBottom'
 		)
 </template>
 
@@ -76,8 +76,6 @@ export default class Timeline extends Vue {
 	isOptionsOpen = !(this.timelineData.name && this.timelineData.endpoint) as boolean;
 	nameEdit = this.timelineData.name;
 	lastBottomRefreshTime = moment();
-	topRefreshCount = 20;
-	bottomRefreshCount = 20;
 	columns = 1;
 	columnWidth = 1;	//Could use a better name
 	autoScrolling = false;
@@ -95,6 +93,10 @@ export default class Timeline extends Vue {
 
 	beforeDestroy() {
 		this.disableAutoRefresh();
+	}
+
+	log(...data : any[]) {
+		console.log(`${this.timelineData.name}: `, ...data);
 	}
 
 	resetAutoRefresh({refresh = true, timeout = 0} = {}) {
@@ -119,7 +121,7 @@ export default class Timeline extends Vue {
 
 	async refresh({scrollTop = false, bottom = false, resetTimer = false, count = 0} = {}) : Promise<number> {
 		//TODO Replace with visual update queue
-		//console.log(`refreshing... (enabled: ${this.enabled})`);
+		//this.log(`refreshing... (enabled: ${this.enabled})`);
 		if (scrollTop)
 			this.scrollTop();
 
@@ -133,18 +135,18 @@ export default class Timeline extends Vue {
 					options = {
 						...options,
 						max: this.articles[this.articles.length - 1].id,
-						count: count || this.bottomRefreshCount,
+						count: count || this.endpoint.maxCount,
 					};
 				else
 					options = {
 						...options,
 						since: this.articles[0].id,
-						count: count || (this.articles.length < 10 ? 150 : 20),
+						count: count || 25,
 					};
 			}else
 				options = {
 					...options,
-					count: count || this.topRefreshCount,
+					count: count || 25,
 				};
 
 			const payload : TimelinePayload = await this.service.refreshEndpoint(
@@ -159,15 +161,12 @@ export default class Timeline extends Vue {
 			);
 
 			if (newArticles.length) {
-				this.topRefreshCount = 20;
-
 				this.articles.push(...newArticles);
 
 				this.articles.sort((a : Article, b : Article) =>
 					moment(this.service.getArticleData(b).creationTime).diff(moment(this.service.getArticleData(a).creationTime)),
 				);
-			}else
-				this.incrementCountTop();
+			}
 
 			const untilReset = moment.duration(moment.unix(this.endpoint.rateLimitStatus.reset).diff(moment())).asMilliseconds();
 
@@ -187,16 +186,6 @@ export default class Timeline extends Vue {
 			e.message = `Timeline ${this.timelineData.name}: ${e.message}`;
 			throw e;
 		}
-	}
-
-	incrementCountTop() {
-		if (this.topRefreshCount < this.endpoint.maxCount)
-			this.topRefreshCount += this.topRefreshCount == 20 ? 30 : 50;
-	}
-
-	incrementCountBottom() {
-		if (this.bottomRefreshCount < this.endpoint.maxCount)
-			this.bottomRefreshCount += this.bottomRefreshCount == 20 ? 30 : 50;
 	}
 
 	removeArticle(id : string) {
@@ -242,26 +231,12 @@ export default class Timeline extends Vue {
 			this.tryLoadMoreBottom();
 	}
 
-	onScroll({currentTarget: {scrollTop, clientHeight, scrollHeight}} : { currentTarget : Element }) {
-		if (this.autoScrolling)
-			return;
-
-		if (scrollTop + clientHeight >= Math.max(0, scrollHeight - 5000))
-			this.tryLoadMoreBottom();
-	}
-
 	tryLoadMoreBottom() {
 		if (this.autoScrolling)
 			return;
 
 		if (moment().diff(this.lastBottomRefreshTime) > 10000) {
-			this.refresh({bottom: true, resetTimer: true})
-				.then(articleCount => {
-					if (articleCount)
-						this.bottomRefreshCount = 20;
-					else
-						this.incrementCountBottom();
-				});
+			this.refresh({bottom: true, resetTimer: true});
 
 			this.lastBottomRefreshTime = moment();
 		}

@@ -1,5 +1,7 @@
 <template lang='pug'>
-	.timelineArticles(v-if='columns === 1' @scroll="$emit('scroll', $event)" @wheel="$emit('wheel', $event)")
+	.timelineArticles(v-if='columns === 1' @scroll="onScroll" @wheel="$emit('wheel', $event)")
+		.timelineArticlesLabel(style='position: sticky; top: 0; background-color: black')
+			p(style='text-align: center') Showing {{ articles.length > timelineArticleRadius ? timelineArticleRadius : articles.length }} articles, first article: {{ firstVisibleArticleIndex }}
 		ArticleGeneric(
 			v-for='article in articles'
 			:key='article.id'
@@ -38,6 +40,8 @@ import {Vue, Component, Prop, Watch} from 'vue-property-decorator';
 import ArticleGeneric from '../Articles/ArticleGeneric.vue';
 import {Article} from '../../../core/PostData';
 import {Service} from '../../services/service';
+import {State} from 'vuex-class';
+import moment from 'moment';
 
 @Component({components: {ArticleGeneric}})
 export default class TimelineArticles extends Vue {
@@ -46,17 +50,20 @@ export default class TimelineArticles extends Vue {
 	@Prop({type: Array, required: true})
 	readonly articles! : Article[];
 	@Prop({type: Object, required: true})
-	readonly service!: Service;
+	readonly service! : Service;
 	@Prop({type: Boolean, required: true})
-	readonly compactMedia!: boolean;
+	readonly compactMedia! : boolean;
 	@Prop({type: Boolean})
-	readonly scrolling!: boolean;
+	readonly scrolling! : boolean;
+
+	@State timelineArticleRadius! : number;
 
 	hiddens = new Set<string>();
-	compactOverrides = {} as {[id : string] : number};
+	compactOverrides = {} as { [id : string] : number };
 	scrollDirection = false;
 	scrollRequestId = 0;
 	scrollSpeed = 3;
+	firstVisibleArticleIndex = 0;
 
 	autoScroll(scrollUp : boolean) {
 		this.scrollDirection = scrollUp;
@@ -68,7 +75,7 @@ export default class TimelineArticles extends Vue {
 			else
 				this.scrollDirection = !this.scrollDirection;
 			this.scrollRequestId = window.requestAnimationFrame(scrollStep);
-		}
+		};
 		this.scrollRequestId = window.requestAnimationFrame(scrollStep);
 		this.addScrollStopper();
 	}
@@ -79,26 +86,45 @@ export default class TimelineArticles extends Vue {
 	}
 
 	addScrollStopper() {
-		window.addEventListener("mousedown", () => {
+		window.addEventListener('mousedown', () => {
 			this.stopScroll();
 			this.$emit('update:scrolling', false);
 		}, {
-			once: true
+			once: true,
 		});
 	}
 
-	onHiddenChange({hidden, id} : { hidden: boolean, id: string }) {
+	onHiddenChange({hidden, id} : { hidden : boolean, id : string }) {
 		if (hidden)
 			this.hiddens.add(id);
 		else
 			this.hiddens.delete(id);
 	}
 
-	onCompactOverrideChange({compactOverride, id} : { compactOverride: number, id: string }) {
+	onCompactOverrideChange({compactOverride, id} : { compactOverride : number, id : string }) {
 		if (compactOverride)
 			this.compactOverrides[id] = compactOverride;
 		else
 			delete this.compactOverrides[id];
+	}
+
+	onScroll() {
+		this.firstVisibleArticleIndex = this.getFirstVisibleArticleIndex();
+
+		if (this.articles.length - this.firstVisibleArticleIndex <= this.timelineArticleRadius)
+			this.$emit('load-bottom');
+	}
+
+	getFirstVisibleArticleIndex() : number {
+		for (const articleEl of this.$el.querySelectorAll('.article'))
+			if (articleEl.getBoundingClientRect().bottom >= 0)
+				return this.articles.findIndex(article => article.id === articleEl.getAttribute('article-id'));
+
+		return 0;
+	}
+
+	get partialArticles() : Article[] {
+		return this.articles.slice(Math.max(0, this.firstVisibleArticleIndex - this.timelineArticleRadius), this.firstVisibleArticleIndex + this.timelineArticleRadius);
 	}
 
 	@Watch('scrolling')
@@ -117,4 +143,7 @@ export default class TimelineArticles extends Vue {
 	overflow-x: hidden
 	flex-grow: 1
 	height: 100%
+
+article.article.firstArticle
+	background-color: blue
 </style>
