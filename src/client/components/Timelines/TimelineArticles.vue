@@ -1,40 +1,3 @@
-<template lang='pug'>
-	.timelineArticles(v-if='columns === 1' @scroll="onScroll" @wheel="$emit('wheel', $event)")
-		.timelineArticlesLabel(style='position: sticky; top: 0; background-color: black')
-			p(style='text-align: center') Showing {{ articles.length > timelineArticleRadius ? timelineArticleRadius : articles.length }} articles, first article: {{ firstVisibleArticleIndex }}
-		ArticleGeneric(
-			v-for='article in articles'
-			:key='article.id'
-			:service='service'
-			:article='article'
-			:timeline-hidden='hiddens.has(article.id)'
-			:timeline-compact-override='compactOverrides.hasOwnProperty(article.id) ? compactOverrides[article.id] : 0'
-			:compact-media='compactMedia'
-			@remove="$emit('remove-article', $event)"
-			@set-hidden='onHiddenChange'
-			@set-compact-override='onCompactOverrideChange'
-		)
-	.timelineArticles(
-		v-else
-		:key='columns'
-		@scroll="$emit('scroll', $event)"
-		@wheel="$emit('wheel', $event)"
-	)
-		masonry(:cols='columns')
-			ArticleGeneric(
-				v-for='article in articles'
-				:key='article.id'
-				:service='service'
-				:article='article'
-				:timeline-hidden='hiddens.has(article.id)'
-				:timeline-compact-override='compactOverrides.hasOwnProperty(article.id) ? compactOverrides[article.id] : 0'
-				:compact-media='compactMedia'
-				@remove="$emit('remove-article', $event)"
-				@set-hidden='onHiddenChange'
-				@set-compact-override='onCompactOverrideChange'
-			)
-</template>
-
 <script lang='ts'>
 import {Vue, Component, Prop, Watch} from 'vue-property-decorator';
 import ArticleGeneric from '../Articles/ArticleGeneric.vue';
@@ -42,6 +5,7 @@ import {Article} from '../../../core/PostData';
 import {Service} from '../../services/service';
 import {State} from 'vuex-class';
 import moment from 'moment';
+import {CreateElement} from 'vue';
 
 @Component({components: {ArticleGeneric}})
 export default class TimelineArticles extends Vue {
@@ -64,6 +28,65 @@ export default class TimelineArticles extends Vue {
 	scrollRequestId = 0;
 	scrollSpeed = 3;
 	firstVisibleArticleIndex = 0;
+
+	render(createElement : CreateElement) {
+		let children;
+
+		const articles = this.articles.map(article => createElement(
+			ArticleGeneric, {
+				key: article.id,
+				props: {
+					service: this.service,
+					article,
+					timelineHidden: this.hiddens.has(article.id),
+					timelineCompactOverride: this.compactOverrides.hasOwnProperty(article.id) ? this.compactOverrides[article.id] : 0,
+					compactMedia: this.compactMedia,
+				},
+				on: {
+					remove: ($event : any) => this.$emit('remove-article', $event),
+					'set-hidden': this.onHiddenChange,
+					'set-compact-override': this.onCompactOverrideChange,
+				},
+			},
+		));
+
+		if (this.columns === 1) {
+			const label = createElement('div', {
+					staticClass: 'timelineArticlesLabel',
+					staticStyle: {
+						position: 'sticky',
+						top: 0,
+						'background-color': 'black',
+					},
+				}, [
+					createElement('p', {
+							staticStyle: {
+								'text-align': 'center',
+							},
+						}, `Showing ${this.articles.length > this.timelineArticleRadius ? this.timelineArticleRadius : this.articles.length} articles, first article: ${this.firstVisibleArticleIndex}`,
+					),
+				],
+			);
+
+			children = [label, ...articles];
+		}else
+			children = [
+				createElement('masonry', {
+					props: {
+						cols: this.columns,
+					},
+				}, articles),
+			];
+
+		return createElement('div', {
+			staticClass: 'timelineArticles',
+			key: this.columns,
+			on: {
+				scroll: this.onScroll,
+				wheel: ($event : WheelEvent) => this.$emit('wheel', $event),
+			},
+		}, children);
+	}
 
 	autoScroll(scrollUp : boolean) {
 		this.scrollDirection = scrollUp;
