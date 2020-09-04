@@ -124,14 +124,20 @@ export class Endpoint {
 		for (const postData of stuffedResponse.posts)
 			if (!service.posts.hasOwnProperty(postData.id))
 				Vue.set(service.posts, postData.id, postData);
+			else
+				service.updatePostData(postData);
 
 		for (const repostData of stuffedResponse.reposts)
 			if (!service.reposts.hasOwnProperty(repostData.id))
 				Vue.set(service.reposts, repostData.id, repostData);
+			else
+				service.updateArticleData({repost: repostData});
 
 		for (const quoteData of stuffedResponse.quotes)
 			if (!service.quotes.hasOwnProperty(quoteData.id))
 				Vue.set(service.quotes, quoteData.id, quoteData);
+			else
+				service.updateArticleData({quote: quoteData});
 
 		return stuffedResponse.timelinePosts;
 	}
