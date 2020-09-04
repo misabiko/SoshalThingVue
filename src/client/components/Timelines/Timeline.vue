@@ -6,7 +6,7 @@
 
 			.timelineButtons
 				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true})')
-					FontAwesomeIcon(icon='sync-alt' inverse size='lg')
+					FontAwesomeIcon(icon='sync-alt' inverse size='lg' :spin='refreshing' :class="{'slow-spin': !refreshing && isWaitingRefresh}")
 				button.openTimelineOptions(@click='isOptionsOpen = !isOptionsOpen')
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
 
@@ -69,8 +69,8 @@ export default class Timeline extends Vue {
 
 	@Ref('timelineArticles') readonly timelineArticles! : TimelineArticles;
 
-	interval = undefined as number | undefined;
-	timeout = undefined as number | undefined;
+	interval = 0 as number | undefined;	//Initialized as 0 to enable reactivity
+	timeout = 0 as number | undefined;
 	articles = [] as Article[];
 	isOptionsOpen = !(this.timelineData.name && this.timelineData.endpoint) as boolean;
 	nameEdit = this.timelineData.name;
@@ -79,8 +79,8 @@ export default class Timeline extends Vue {
 	columnWidth = 1;	//Could use a better name
 	autoScrolling = false;
 	oldestArticle = null as null | Article;
-
-	loadingBottomTimeout = undefined as number | undefined;
+	loadingBottomTimeout = 0 as number | undefined;
+	refreshing = false;
 
 	mounted() {
 		if (this.enabled)
@@ -122,14 +122,11 @@ export default class Timeline extends Vue {
 	}
 
 	async refresh({scrollTop = false, bottom = false, resetTimer = false, count = 0} = {}) : Promise<number> {
-		//TODO Replace with visual update queue
-		//this.log(`refreshing... (enabled: ${this.enabled})`);
 		if (scrollTop)
 			this.scrollTop();
 
 		if (!this.enabled)
 			return 0;
-
 		try {
 			let options = this.timelineData.options;
 			if (this.articles.length) {
@@ -151,6 +148,7 @@ export default class Timeline extends Vue {
 					count: count || 25,
 				};
 
+			this.refreshing = true;
 			const payload : TimelinePayload = await this.service.refreshEndpoint(
 				this.timelineData.endpoint,
 				options,
@@ -179,9 +177,11 @@ export default class Timeline extends Vue {
 					timeout: this.endpoint.rateLimitStatus.remaining ? 0 : this.rateTimeout(),
 				});
 
+			this.refreshing = false;
 			return newArticles.length;
 		}catch (e) {
 			e.message = `Timeline ${this.timelineData.name}: ${e.message}`;
+			this.refreshing = false;
 			throw e;
 		}
 	}
@@ -227,6 +227,7 @@ export default class Timeline extends Vue {
 		if (this.autoScrolling || this.loadingBottomTimeout)
 			return;
 
+		this.log('Trying to load bottom');
 		const untilLoad = 10000 - moment().diff(this.lastBottomRefreshTime);
 
 		if (untilLoad < 0)
@@ -242,6 +243,7 @@ export default class Timeline extends Vue {
 
 		this.lastBottomRefreshTime = moment();
 		this.loadingBottomTimeout = undefined;
+		this.log('Loaded bottom!');
 	}
 
 	get service() : Service {
@@ -272,6 +274,10 @@ export default class Timeline extends Vue {
 
 	get outsideChanges() {
 		return this.nameEdit !== this.timelineData.name;
+	}
+
+	get isWaitingRefresh() {
+		return !!this.loadingBottomTimeout;
 	}
 
 	@Watch('enabled')
@@ -327,7 +333,6 @@ export default class Timeline extends Vue {
 	box-sizing: border-box
 
 .simpleTimeline
-	//TODO I don't know why this is needed
 	display: flex
 	flex-flow: column
 
@@ -350,4 +355,7 @@ export default class Timeline extends Vue {
 .timelineOptions
 	background-color: $scheme-main-ter
 	padding: 1rem
+
+.slow-spin
+	animation: fa-spin 6s infinite linear
 </style>

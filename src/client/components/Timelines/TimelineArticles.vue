@@ -233,15 +233,14 @@ export default class TimelineArticles extends Vue {
 			this.topArticleId = '';
 			this.bottomArticleId = '';
 			this.partialArticles = [];
-			return;
+		}else {
+			const topIndex = this.getTopIndex();
+			const bottomIndex = this.getBottomIndex(topIndex);
+
+			this.topArticleId = this.articles[topIndex].id;
+			this.bottomArticleId = this.articles[bottomIndex].id;
+			this.partialArticles = this.articles.slice(topIndex, bottomIndex);
 		}
-
-		const topIndex = this.getTopIndex();
-		const bottomIndex = this.getBottomIndex(topIndex);
-
-		this.topArticleId = this.articles[topIndex].id;
-		this.bottomArticleId = this.articles[bottomIndex].id;
-		this.partialArticles = this.articles.slice(topIndex, bottomIndex);
 
 		if (this.loadingBottomIndex)
 			this.$emit('load-bottom');
