@@ -20,6 +20,7 @@ export class SoshalState {
 	sidebarExpanded = false;
 	userTimelineBuffer : string[] = [];
 	timelineArticleRadius = 10;
+	timelineUnloadMinimum = 35;
 }
 
 const mutations = <MutationTree<SoshalState>>{

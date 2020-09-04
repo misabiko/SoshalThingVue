@@ -226,7 +226,7 @@ export default class Timeline extends Vue {
 		if (this.autoScrolling || this.loadingBottomTimeout)
 			return;
 
-		const untilLoad = 10000 - moment().diff(this.lastBottomRefreshTime);
+		const untilLoad = 1000 - moment().diff(this.lastBottomRefreshTime);
 
 		if (untilLoad < 0)
 			this.loadBottom();

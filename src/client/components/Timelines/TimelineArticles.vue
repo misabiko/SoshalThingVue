@@ -27,6 +27,7 @@ export default class TimelineArticles extends Vue {
 	readonly scrolling! : boolean;
 
 	@State timelineArticleRadius! : number;
+	@State timelineUnloadMinimum! : number;
 
 	hiddens = new Set<string>();
 	compactOverrides = {} as { [id : string] : number };
@@ -236,8 +237,12 @@ export default class TimelineArticles extends Vue {
 			this.bottomArticleId = '';
 			this.partialArticles = [];
 		}else {
+			let incrementBottom = false;
+			if (!this.loadingBottomIndex && this.$el.scrollTop == 0 && this.partialArticles.length > this.timelineUnloadMinimum)
+				incrementBottom = true;
+
 			const topIndex = this.getTopIndex();
-			const bottomIndex = this.getBottomIndex(topIndex);
+			const bottomIndex = this.getBottomIndex(topIndex) - (incrementBottom ? this.partialArticles.length - this.timelineUnloadMinimum : 0);
 
 			this.topArticleId = this.articles[topIndex].id;
 			this.bottomArticleId = this.articles[bottomIndex].id;
@@ -262,7 +267,7 @@ export default class TimelineArticles extends Vue {
 
 	@Watch('refreshing')
 	onArticlesChange(refreshing : boolean) {
-		if (!refreshing)
+		if (!refreshing)	//If refresh just completed
 			this.updatePartialArticles();
 	}
 }
