@@ -241,7 +241,7 @@ export default class TimelineArticles extends Vue {
 			if (!this.loadingBottomIndex && this.$el.scrollTop == 0 && this.partialArticles.length > this.timelineUnloadMinimum)
 				incrementBottom = true;
 
-			const topIndex = this.getTopIndex();
+			const topIndex = this.$el.scrollTop == 0 ? 0 : this.getTopIndex();
 			const bottomIndex = this.getBottomIndex(topIndex) - (incrementBottom ? this.partialArticles.length - this.timelineUnloadMinimum : 0);
 
 			this.topArticleId = this.articles[topIndex].id;
