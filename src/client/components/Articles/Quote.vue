@@ -23,12 +23,12 @@
 					v-if='showMedia && postData.images'
 					:images='postData.images'
 					:compact='compactMedia'
-					@expanded='expandPost($event)'
+					@expanded='expandPost({service, id: postId, selectedMedia: $event})'
 				)
 				PostVideo.postMedia(
 					v-if='showMedia && postData.video'
 					:video='postData.video'
-					@expanded='expandPost(0)'
+					@expanded='expandPost({service, id: postId, selectedMedia: 0})'
 				)
 </template>
 
@@ -61,7 +61,7 @@ export default class Quote extends Vue {
 	@Prop({type: Number, default: CompactOverride.Inherit})
 	readonly timelineCompactOverride!: number;
 
-	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
+	@Mutation('expandPost') expandPost!: (post : ExpandedPost) => void;
 
 	get quoteData() : QuoteData {
 		return this.service.quotes[this.articleId];

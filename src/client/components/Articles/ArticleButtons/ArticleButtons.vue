@@ -39,8 +39,11 @@
 					b-dropdown-item(:focusable='false') Remove this post
 
 		.level-right
-			a.level-item.postButton.showButton(v-if='hidden' @click="$emit('update:hidden', false)")
-				span.icon: FontAwesomeIcon(icon='eye' fixed-width)
+			transition(name='fade' mode='out-in')
+				a.level-item.postButton.showButton(v-if='hidden' @click="$emit('update:hidden', false)")
+					span.icon: FontAwesomeIcon(icon='eye' fixed-width)
+				a.level-item.postButton.showButton(v-else-if='hovered' @click="$emit('update:hidden', true)")
+					span.icon: FontAwesomeIcon(icon='eye-slash' fixed-width)
 </template>
 
 <script lang='ts'>
@@ -56,13 +59,14 @@ import {
 	faReply,
 	faEllipsisH,
 	faEye,
+	faEyeSlash,
 } from '@fortawesome/free-solid-svg-icons';
 import {Service} from '../../../services/service';
 import gsap from 'gsap';
 
-library.add(faReply, faExpand, faCompress, faEllipsisH, faEye);
+library.add(faReply, faExpand, faCompress, faEllipsisH, faEye, faEyeSlash);
 
-@Component({components:{RepostButton, LikeButton}})
+@Component({components: {RepostButton, LikeButton}})
 export default class ArticleButtons extends Vue {
 	@Prop({type: Object, required: true})
 	readonly service! : Service;
@@ -74,6 +78,8 @@ export default class ArticleButtons extends Vue {
 	readonly compactOverride! : CompactOverride;
 	@Prop({type: Boolean, required: true})
 	readonly hidden! : boolean;
+	@Prop({type: Boolean, required: true})
+	readonly hovered! : boolean;
 
 	tweenedLikeCount = this.likeCount;
 	tweenedRepostCount = this.repostCount;
@@ -126,12 +132,12 @@ export default class ArticleButtons extends Vue {
 
 	@Watch('likeCount')
 	onLikeCountChange(newLikeCount : number) {
-		gsap.to(this.$data, {duration: 0.5, ease:'power2.out', tweenedLikeCount: newLikeCount});
+		gsap.to(this.$data, {duration: 0.5, ease: 'power2.out', tweenedLikeCount: newLikeCount});
 	}
 
 	@Watch('repostCount')
 	onRepostCountChange(newRepostCount : number) {
-		gsap.to(this.$data, {duration: 0.5, ease:'power2.out', tweenedRepostCount: newRepostCount});
+		gsap.to(this.$data, {duration: 0.5, ease: 'power2.out', tweenedRepostCount: newRepostCount});
 	}
 }
 </script>
@@ -157,4 +163,13 @@ export default class ArticleButtons extends Vue {
 
 .svg-inline--fa.fa-w-18
 	width: 1.125em
+
+.svg-inline--fa.fa-w-20
+	width: 1em
+
+.fade-enter-active, .fade-leave-active
+	transition: opacity .5s
+
+.fade-enter, .fade-leave-to
+	opacity: 0
 </style>

@@ -22,6 +22,7 @@
 					:compact-media='compactMedia'
 					:compact-override.sync='compactOverride'
 					:hidden.sync='hidden'
+					:hovered='hovered'
 				)
 			.media-content(v-else)
 				.content
@@ -41,6 +42,7 @@
 					:compact-media='compactMedia'
 					:compact-override.sync='compactOverride'
 					:hidden.sync='hidden'
+					:hovered='hovered'
 				)
 			//-.media-right
 		slot(name='footer' v-if='!hidden')
