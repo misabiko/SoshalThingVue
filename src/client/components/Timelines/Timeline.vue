@@ -5,7 +5,7 @@
 			strong(v-else) {{ timelineData.name }}
 
 			.timelineButtons
-				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true})')
+				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true}).then()')
 					FontAwesomeIcon(icon='sync-alt' inverse size='lg' :spin='refreshing' :class="{'slow-spin': !refreshing && isWaitingRefresh}")
 				button.openTimelineOptions(@click='isOptionsOpen = !isOptionsOpen')
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
@@ -85,7 +85,6 @@ export default class Timeline extends Vue {
 	mounted() {
 		if (this.enabled)
 			this.resetAutoRefresh();
-		//this.$root.visible(() => this.resetAutoRefresh());
 
 		if (this.shouldScroll)
 			this.$el.scrollIntoView({
@@ -102,7 +101,6 @@ export default class Timeline extends Vue {
 	}
 
 	resetAutoRefresh({refresh = true, timeout = 0} = {}) {
-		//TODO Disable refreshing when not in focus
 		window.clearInterval(this.interval);
 		window.clearTimeout(this.timeout);
 
@@ -227,7 +225,6 @@ export default class Timeline extends Vue {
 		if (this.autoScrolling || this.loadingBottomTimeout)
 			return;
 
-		this.log('Trying to load bottom');
 		const untilLoad = 10000 - moment().diff(this.lastBottomRefreshTime);
 
 		if (untilLoad < 0)
@@ -243,7 +240,6 @@ export default class Timeline extends Vue {
 
 		this.lastBottomRefreshTime = moment();
 		this.loadingBottomTimeout = undefined;
-		this.log('Loaded bottom!');
 	}
 
 	get service() : Service {
@@ -343,7 +339,6 @@ export default class Timeline extends Vue {
 	background-color: $dark
 	display: flex
 	justify-content: space-between
-	//cursor: pointer
 
 	strong
 		vertical-align: middle
