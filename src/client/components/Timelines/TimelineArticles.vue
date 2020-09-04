@@ -18,6 +18,8 @@ export default class TimelineArticles extends Vue {
 	@Prop({type: Object, required: true})
 	readonly service! : Service;
 	@Prop({type: Boolean, required: true})
+	readonly enabled! : boolean;
+	@Prop({type: Boolean, required: true})
 	readonly compactMedia! : boolean;
 	@Prop({type: Boolean})
 	readonly scrolling! : boolean;
@@ -79,27 +81,20 @@ export default class TimelineArticles extends Vue {
 		let children;
 
 		const articles = this.partialArticles.map(article => this.articleFactory(createElement, article));
+		const bottomLoading = createElement('div', {
+			staticClass: 'bottomLoader'
+		}, [createElement(
+			'b-loading', {
+				props: {
+					active: this.isLoadingBottom,
+					'is-full-page': false,
+				},
+			},
+		)]);
 
-		if (this.columns === 1) {
-			/*const label = createElement('div', {
-					staticClass: 'timelineArticlesLabel',
-					staticStyle: {
-						position: 'sticky',
-						top: 0,
-						'background-color': 'black',
-					},
-				}, [
-					createElement('p', {
-							staticStyle: {
-								'text-align': 'center',
-							},
-						}, `Showing ${this.partialArticles.length} articles from ${this.firstArticleVisible}, top: ${this.getTopIndex()}, bottom: ${this.getBottomIndex()}`,
-					),
-				],
-			);*/
-
-			children = [/*label, */...articles];
-		}else
+		if (this.columns === 1)
+			children = [...articles, bottomLoading];
+		else
 			children = [
 				createElement('masonry', {
 					props: {
@@ -252,6 +247,10 @@ export default class TimelineArticles extends Vue {
 			this.$emit('load-bottom');
 	}
 
+	get isLoadingBottom() {
+		return this.enabled && !!this.loadingBottomIndex;
+	}
+
 	@Watch('scrolling')
 	onScrollChange(newScrolling : boolean) {
 		if (newScrolling)
@@ -268,9 +267,18 @@ export default class TimelineArticles extends Vue {
 </script>
 
 <style scoped lang='sass'>
+@use '../../bulma_overrides' as *
+
 .timelineArticles
 	overflow-y: scroll
 	overflow-x: hidden
 	flex-grow: 1
 	height: 100%
+
+.bottomLoader
+	position: relative
+
+.bottomLoader > .loading-overlay
+	height: 100px
+	border-radius: 0 0 8px 8px
 </style>

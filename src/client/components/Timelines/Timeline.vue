@@ -36,6 +36,7 @@
 			:columns='columns'
 			:articles='articles'
 			:service='service'
+			:enabled='enabled'
 			:compact-media='timelineData.compactMedia'
 			:scrolling.sync='autoScrolling'
 			@remove-article='removeArticle($event)'
