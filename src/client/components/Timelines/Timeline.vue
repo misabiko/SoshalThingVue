@@ -38,7 +38,6 @@
 			:service='service'
 			:compact-media='timelineData.compactMedia'
 			:scrolling.sync='autoScrolling'
-			@wheel='onWheel'
 			@remove-article='removeArticle($event)'
 			@load-bottom='tryLoadMoreBottom'
 		)
@@ -78,6 +77,9 @@ export default class Timeline extends Vue {
 	columns = 1;
 	columnWidth = 1;	//Could use a better name
 	autoScrolling = false;
+	oldestArticle = null as null | Article;
+
+	loadingBottomTimeout = undefined as number | undefined;
 
 	mounted() {
 		if (this.enabled)
@@ -133,7 +135,7 @@ export default class Timeline extends Vue {
 				if (bottom)
 					options = {
 						...options,
-						max: this.articles[this.articles.length - 1].id,
+						max: this.oldestArticle ? this.oldestArticle.id : this.articles[this.articles.length - 1].id,
 						count: count || this.endpoint.maxCount,
 					};
 				else
@@ -153,6 +155,9 @@ export default class Timeline extends Vue {
 				options,
 			);
 
+			if (payload.oldestArticle)
+				this.oldestArticle = payload.oldestArticle;
+
 			const newArticles = payload.newArticles.filter((a : Article) =>
 				this.articles.findIndex(
 					(b : Article) => b.id === a.id,
@@ -167,17 +172,10 @@ export default class Timeline extends Vue {
 				);
 			}
 
-			const untilReset = moment.duration(moment.unix(this.endpoint.rateLimitStatus.reset).diff(moment())).asMilliseconds();
-
 			if (resetTimer)
 				this.resetAutoRefresh({
 					refresh: false,
-					timeout: this.endpoint.rateLimitStatus.remaining ? 0 : untilReset + 1000,
-				});
-			else if (!this.endpoint.rateLimitStatus.remaining)
-				this.resetAutoRefresh({
-					refresh: false,
-					timeout: untilReset + 1000,
+					timeout: this.endpoint.rateLimitStatus.remaining ? 0 : this.rateTimeout(),
 				});
 
 			return newArticles.length;
@@ -185,6 +183,10 @@ export default class Timeline extends Vue {
 			e.message = `Timeline ${this.timelineData.name}: ${e.message}`;
 			throw e;
 		}
+	}
+
+	rateTimeout() : number {
+		return moment.duration(moment.unix(this.endpoint.rateLimitStatus.reset).diff(moment())).asMilliseconds() + 1000;
 	}
 
 	removeArticle(id : string) {
@@ -220,25 +222,25 @@ export default class Timeline extends Vue {
 		});
 	}
 
-	onWheel({deltaY, currentTarget: {scrollTop, clientHeight, scrollHeight}} : { deltaY : number, currentTarget : Element }) {
-		if (this.autoScrolling)
+	tryLoadMoreBottom() {
+		if (this.autoScrolling || this.loadingBottomTimeout)
 			return;
 
-		//if no scrollbar or scrolled all the way down&& scrolling down
-		//if there's a scrollbar, we let onScroll handle it
-		if ((scrollTop === 0 || scrollTop + clientHeight === scrollHeight) && deltaY > 0)
-			this.tryLoadMoreBottom();
+		const untilLoad = 10000 - moment().diff(this.lastBottomRefreshTime);
+
+		if (untilLoad < 0)
+			this.loadBottom();
+		else {
+			const rateTimeout = this.endpoint.rateLimitStatus.remaining ? 0 : this.rateTimeout();
+			this.loadingBottomTimeout = window.setTimeout(this.loadBottom, rateTimeout + untilLoad);
+		}
 	}
 
-	tryLoadMoreBottom() {
-		if (this.autoScrolling)
-			return;
+	loadBottom() {
+		this.refresh({bottom: true, resetTimer: true});
 
-		if (moment().diff(this.lastBottomRefreshTime) > 10000) {
-			this.refresh({bottom: true, resetTimer: true});
-
-			this.lastBottomRefreshTime = moment();
-		}
+		this.lastBottomRefreshTime = moment();
+		this.loadingBottomTimeout = undefined;
 	}
 
 	get service() : Service {

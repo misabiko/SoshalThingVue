@@ -4,7 +4,7 @@
 			b-carousel(:arrow='images.length > 1' :indicator='false' :autoplay='false')
 				b-carousel-item(v-for='(image, index) in images' :key='index')
 					figure.image: img(:src='image.url')
-		.card-content: Post(v-if='expandedPost.id.length' :service='expandedPost.service' :postId="expandedPost.id" :show-media='false')
+		.card-content: Post(v-if='expandedPost.id.length' :service='expandedPost.service' :articleId="expandedPost.id" :show-media='false')
 </template>
 
 <script lang='ts'>

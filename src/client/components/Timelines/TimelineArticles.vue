@@ -29,7 +29,24 @@ export default class TimelineArticles extends Vue {
 	scrollDirection = false;
 	scrollRequestId = 0;
 	scrollSpeed = 3;
-	firstVisibleArticleIndex = 0;
+	partialArticles = [] as Article[];
+	topArticleId = this.articles.length ? this.articles[0].id : '';
+	bottomArticleId = this.articles.length ?
+		(
+			this.articles.length > this.timelineArticleRadius * 3 ?
+				this.articles[this.timelineArticleRadius * 3].id :
+				this.articles[this.articles.length - 1].id
+		) : '';
+	//The index we're waiting to be available
+	loadingTopIndex = null as number | null;
+	loadingBottomIndex = null as number | null;
+
+	firstArticleVisible = 0;
+
+	mounted() {
+		this.loadingBottomIndex = this.timelineArticleRadius * 2 - 1;
+		this.updatePartialArticles();
+	}
 
 	articleFactory(createElement : CreateElement, article : Article) : VNode {
 		const data : VNodeData = {
@@ -45,10 +62,10 @@ export default class TimelineArticles extends Vue {
 				remove: ($event : any) => this.$emit('remove-article', $event),
 				'set-hidden': this.onHiddenChange,
 				'set-compact-override': this.onCompactOverrideChange,
-			}
+			},
 		};
 
-		switch(article.type) {
+		switch (article.type) {
 			case ArticleType.Post:
 				return createElement(Post, data);
 			case ArticleType.Repost:
@@ -61,10 +78,10 @@ export default class TimelineArticles extends Vue {
 	render(createElement : CreateElement) {
 		let children;
 
-		const articles = this.articles.map(article => this.articleFactory(createElement, article));
+		const articles = this.partialArticles.map(article => this.articleFactory(createElement, article));
 
 		if (this.columns === 1) {
-			const label = createElement('div', {
+			/*const label = createElement('div', {
 					staticClass: 'timelineArticlesLabel',
 					staticStyle: {
 						position: 'sticky',
@@ -76,12 +93,12 @@ export default class TimelineArticles extends Vue {
 							staticStyle: {
 								'text-align': 'center',
 							},
-						}, `Showing ${this.articles.length > this.timelineArticleRadius ? this.timelineArticleRadius : this.articles.length} articles, first article: ${this.firstVisibleArticleIndex}`,
+						}, `Showing ${this.partialArticles.length} articles from ${this.firstArticleVisible}, top: ${this.getTopIndex()}, bottom: ${this.getBottomIndex()}`,
 					),
 				],
-			);
+			);*/
 
-			children = [label, ...articles];
+			children = [/*label, */...articles];
 		}else
 			children = [
 				createElement('masonry', {
@@ -96,7 +113,6 @@ export default class TimelineArticles extends Vue {
 			key: this.columns,
 			on: {
 				scroll: this.onScroll,
-				wheel: ($event : WheelEvent) => this.$emit('wheel', $event),
 			},
 		}, children);
 	}
@@ -145,22 +161,95 @@ export default class TimelineArticles extends Vue {
 	}
 
 	onScroll() {
-		this.firstVisibleArticleIndex = this.getFirstVisibleArticleIndex();
+		const firstVisibleId = this.getVisibleArticles()[0];
+		const firstVisibleIndex = this.partialArticles.findIndex(article => article.id === firstVisibleId);
 
-		if (this.articles.length - this.firstVisibleArticleIndex <= this.timelineArticleRadius)
+		//if partial articles left less than radius
+		//update partialArticles with
+		if (!this.loadingBottomIndex && this.partialArticles.length - firstVisibleIndex <= this.timelineArticleRadius)
+			this.decrementBottom();
+	}
+
+	getArticleIndex(id : string) : number {
+		return this.articles.findIndex(article => article.id === id);
+	}
+
+	getVisibleArticles() : string[] {
+		const articles : string[] = [];
+
+		const {top, bottom} = this.$el.getBoundingClientRect();
+		for (const articleEl of this.$el.querySelectorAll('.article')) {
+			const rect = articleEl.getBoundingClientRect();
+			if (rect.bottom >= top) {
+				if (rect.top <= bottom) {
+					const id = articleEl.getAttribute('article-id');
+					if (id)
+						articles.push(id);
+				}else
+					break;	//Since querySelector returns in order, no need to look at the rest
+			}
+		}
+
+		return articles;
+	}
+
+	getTopIndex() : number {
+		let topIndex = this.topArticleId ? this.getArticleIndex(this.topArticleId) : 0;
+		if (topIndex < 0)
+			topIndex = 0;
+
+		return topIndex;
+	}
+
+	getBottomIndex(topIndex? : number) : number {
+		const loadingBottomIndex = this.loadingBottomIndex;
+		if (loadingBottomIndex) {
+			if (this.articles.length > loadingBottomIndex) {
+				this.loadingBottomIndex = null;
+				return loadingBottomIndex;
+			}else
+				return this.articles.length - 1;
+		}
+
+		let bottomIndex = this.bottomArticleId ? this.getArticleIndex(this.bottomArticleId) : -1;
+		if (bottomIndex < 0)
+			bottomIndex = Math.min((topIndex === undefined ? this.getTopIndex() : topIndex) + this.timelineArticleRadius * 3, this.articles.length - 1);
+
+		return bottomIndex;
+	}
+
+	decrementBottom() {
+		const topIndex = this.getTopIndex();
+		const b = this.getBottomIndex(topIndex);
+
+		let bottomIndex = b + 20;
+		if (bottomIndex >= this.articles.length) {
+			this.loadingBottomIndex = bottomIndex;
 			this.$emit('load-bottom');
+			bottomIndex = this.articles.length - 1;
+		}
+
+		this.bottomArticleId = this.articles[bottomIndex].id;
+		this.partialArticles = this.articles.slice(topIndex, bottomIndex);
 	}
 
-	getFirstVisibleArticleIndex() : number {
-		for (const articleEl of this.$el.querySelectorAll('.article'))
-			if (articleEl.getBoundingClientRect().bottom >= 0)
-				return this.articles.findIndex(article => article.id === articleEl.getAttribute('article-id'));
+	updatePartialArticles() {
+		if (!this.articles.length) {
+			this.topArticleId = '';
+			this.bottomArticleId = '';
+			this.partialArticles = [];
+			return;
+		}
 
-		return 0;
-	}
+		const topIndex = this.getTopIndex();
+		const bottomIndex = this.getBottomIndex(topIndex);
 
-	get partialArticles() : Article[] {
-		return this.articles.slice(Math.max(0, this.firstVisibleArticleIndex - this.timelineArticleRadius), this.firstVisibleArticleIndex + this.timelineArticleRadius);
+		this.topArticleId = this.articles[topIndex].id;
+		this.bottomArticleId = this.articles[bottomIndex].id;
+		this.partialArticles = this.articles.slice(topIndex, bottomIndex);
+
+		if (this.loadingBottomIndex)
+			this.$emit('load-bottom');
 	}
 
 	@Watch('scrolling')
@@ -169,6 +258,11 @@ export default class TimelineArticles extends Vue {
 			this.autoScroll(false);
 		else
 			this.stopScroll();
+	}
+
+	@Watch('articles')
+	onArticlesChange() {
+		this.updatePartialArticles();
 	}
 }
 </script>
@@ -179,7 +273,4 @@ export default class TimelineArticles extends Vue {
 	overflow-x: hidden
 	flex-grow: 1
 	height: 100%
-
-article.article.firstArticle
-	background-color: blue
 </style>

@@ -4,6 +4,7 @@
 			v-for='(imageData, index) of images'
 			:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(index), images.length === 3 && index === 2 ? 'thirdImage' : '']"
 		)
+			.is-hidden.imgPlaceholder
 			img(
 				:src='imageData.url'
 				@click="$emit('expanded', index)"
@@ -20,6 +21,14 @@ export default class PostImages extends Vue {
 	readonly images!: PostImageData[];
 	@Prop({type: Boolean})
 	readonly compact!: boolean;
+
+	setupPlaceholder({currentTarget} : {currentTarget : HTMLImageElement}) {
+		const placeholder = currentTarget.previousElementSibling as HTMLDivElement;
+		placeholder.style.width = currentTarget.width + 'px';
+		placeholder.style.height = currentTarget.height + 'px';
+		placeholder.classList.remove('is-hidden');
+		currentTarget.classList.add('is-hidden');
+	}
 
 	imageFormatClass(index : number) : string {
 		const sizeIndex = Object.keys(this.images[index].sizes).find(sizeName => sizeName !== 'thumb');

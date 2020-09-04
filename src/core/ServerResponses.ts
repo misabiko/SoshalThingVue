@@ -14,6 +14,7 @@ export interface ServiceStatuses {
 
 export interface TimelinePayload {
 	newArticles: Article[],
+	oldestArticle?: Article,
 	//modifiedArticles: Article[],
 	//removedArticles: Article[],
 }

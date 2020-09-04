@@ -1,4 +1,5 @@
 import {
+	Article,
 	ArticleType,
 	ExternalLinkData,
 	HashtagData,
@@ -14,14 +15,22 @@ import {Media, Tweet} from './types';
 import he from 'he';
 import {TimelineOptions} from '../../core/Timeline';
 
-export function parseTweets(tweets : Tweet[], options : TimelineOptions = {includeReposts: true, onlyWithMedia: false}, reverse = true) : { posts : PostData[], reposts : RepostData[], quotes : QuoteData[], timelinePosts : TimelinePayload } {
+export function parseTweets(tweets : Tweet[], options : TimelineOptions = {
+	includeReposts: true,
+	onlyWithMedia: false,
+}, reverse = true) : { posts : PostData[], reposts : RepostData[], quotes : QuoteData[], timelinePosts : TimelinePayload } {
 	const posts : PostData[] = [];
 	const reposts : RepostData[] = [];
 	const quotes : QuoteData[] = [];
-	const timelinePosts : TimelinePayload = {newArticles: []};
+	const newArticles : Article[] = [];
 
-	(reverse ? tweets.reverse() : tweets).map(tweet => {
+	if (!tweets.length)
+		return {posts, reposts, quotes, timelinePosts: {newArticles}};
+
+	const toMap = reverse ? tweets.reverse() : tweets;
+	toMap.map((tweet, index) => {
 		const {post, repost, quote} = parseTweet(tweet);
+
 		if (!options.includeReposts && repost)
 			return;
 
@@ -33,15 +42,25 @@ export function parseTweets(tweets : Tweet[], options : TimelineOptions = {inclu
 
 		if (repost) {
 			reposts.push(repost);
-			timelinePosts.newArticles.push({type: ArticleType.Repost, id: repost.id});
+			newArticles.push({type: ArticleType.Repost, id: repost.id});
 		}else if (quote) {
 			quotes.push(quote);
-			timelinePosts.newArticles.push({type: ArticleType.Quote, id: quote.id});
+			newArticles.push({type: ArticleType.Quote, id: quote.id});
 		}else
-			timelinePosts.newArticles.push({type: ArticleType.Post, id: post.id});
+			newArticles.push({type: ArticleType.Post, id: post.id});
 	});
 
-	return {posts, reposts, quotes, timelinePosts};
+	const {post, repost, quote} = parseTweet(toMap[toMap.length - 1]);
+	let oldestArticle;
+
+	if (repost) {
+		oldestArticle = {type: ArticleType.Repost, id: repost.id};
+	}else if (quote) {
+		oldestArticle = {type: ArticleType.Quote, id: quote.id};
+	}else
+		oldestArticle = {type: ArticleType.Post, id: post.id};
+
+	return {posts, reposts, quotes, timelinePosts: {newArticles, oldestArticle}};
 }
 
 export function parseTweet(tweet : Tweet) : { post : PostData, repost? : RepostData, quote? : QuoteData } {

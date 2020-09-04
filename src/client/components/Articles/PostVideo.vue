@@ -1,13 +1,15 @@
 <template lang='pug'>
-	video(
-		controls
-		:autoplay='video.autoplay'
-		:loop='video.autoplay'
-	)
-		source(
-			:src='firstVariant.url'
-			:type='firstVariant.contentType'
+	.postVideo
+		.is-hidden.imgPlaceholder
+		video(
+			controls
+			:autoplay='video.autoplay'
+			:loop='video.autoplay'
 		)
+			source(
+				:src='firstVariant.url'
+				:type='firstVariant.contentType'
+			)
 </template>
 
 <script lang='ts'>
@@ -18,6 +20,14 @@ import {PostVideoData, PostVideoVariant} from '../../../core/PostData';
 export default class PostVideo extends Vue {
 	@Prop({type: Object, required: true})
 	readonly video!: PostVideoData;
+
+	setupPlaceholder({currentTarget} : {currentTarget : HTMLVideoElement}) {
+		const placeholder = currentTarget.previousElementSibling as HTMLDivElement;
+		placeholder.style.width = currentTarget.width + 'px';
+		placeholder.style.height = currentTarget.height + 'px';
+		placeholder.classList.remove('is-hidden');
+		currentTarget.classList.add('is-hidden');
+	}
 
 	get firstVariant() : PostVideoVariant | undefined {
 		return this.video.variants.find(variant => variant.contentType === 'video/mp4');

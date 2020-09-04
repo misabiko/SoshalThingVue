@@ -74,8 +74,8 @@ export abstract class Service {
 				store.commit('setSidebarExpanded', true);
 			}
 		})
-		console.error(message);
 		this.loggedIn = false;
+		return new Error(message);
 	}
 
 	abstract getUserURL(handle : string) : string;
@@ -85,7 +85,6 @@ export class Endpoint {
 	rateLimitStatus : RateLimitStatus;
 	readonly maxCount : number;
 	readonly parameterSets : string[][];
-	//postType :
 
 	constructor(
 		readonly name : string,
@@ -113,10 +112,9 @@ export class Endpoint {
 
 		const response = await fetch(this.url + options);
 
-		if (response.status == 401) {
-			service.lostConnection();
-			return {newArticles: []};
-		}else if (!response.ok)
+		if (response.status == 401)
+			throw service.lostConnection();
+		else if (!response.ok)
 			throw new Error(`Server error on refresh`);
 
 		const stuffedResponse : StuffedResponse = await response.json();
