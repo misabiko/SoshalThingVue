@@ -14,6 +14,10 @@ import {State} from 'vuex-class';
 import Post from './Post.vue';
 import {ExpandedPost} from '../../store';
 import {PostImageData} from '../../../core/PostData';
+import {library} from '@fortawesome/fontawesome-svg-core';
+import {faAngleLeft, faAngleRight} from '@fortawesome/free-solid-svg-icons';
+
+library.add(faAngleLeft, faAngleRight);
 
 @Component({components: {Post}})
 export default class PostCard extends Vue {
