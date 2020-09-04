@@ -362,4 +362,5 @@ export default class ArticleParagraph extends Vue {
 <style scoped lang='sass'>
 p.articleParagraph
 	white-space: pre-line
+	overflow-wrap: anywhere
 </style>
