@@ -15,6 +15,8 @@ export default class TimelineArticles extends Vue {
 	readonly columns! : number;
 	@Prop({type: Array, required: true})
 	readonly articles! : Article[];
+	@Prop({type: Boolean, required: true})
+	readonly refreshing! : boolean;
 	@Prop({type: Object, required: true})
 	readonly service! : Service;
 	@Prop({type: Boolean, required: true})
@@ -258,9 +260,10 @@ export default class TimelineArticles extends Vue {
 			this.stopScroll();
 	}
 
-	@Watch('articles')
-	onArticlesChange() {
-		this.updatePartialArticles();
+	@Watch('refreshing')
+	onArticlesChange(refreshing : boolean) {
+		if (!refreshing)
+			this.updatePartialArticles();
 	}
 }
 </script>

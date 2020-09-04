@@ -35,6 +35,7 @@
 			ref='timelineArticles'
 			:columns='columns'
 			:articles='articles'
+			:refreshing='refreshing'
 			:service='service'
 			:enabled='enabled'
 			:compact-media='timelineData.compactMedia'
