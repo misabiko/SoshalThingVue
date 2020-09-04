@@ -311,7 +311,7 @@ export default class Timeline extends Vue {
 	@Watch('columns')
 	onColumnChange(newColumnCount : number, oldColumnCount : number) {
 		if (newColumnCount < oldColumnCount) {
-			if (this.columnWidth)
+			if (this.columnWidth > 1)
 				this.columnWidth--;
 		}else if (newColumnCount > oldColumnCount)
 			this.columnWidth++;
