@@ -8,7 +8,7 @@ import passport from 'passport';
 import {Common} from './routes/common';
 import {Twitter} from './routes/twitter';
 
-export default (app : Express) => {
+export default async (app : Express) => {
 	const MemoryStore = connectMemoryStore(session);
 
 	app.use(morgan('dev'));
@@ -33,5 +33,7 @@ export default (app : Express) => {
 	})
 
 	app.use('/', Common.router);
-	app.use('/twitter', Twitter.router);
+	await Twitter.getRouter()
+		.then(router => app.use('/twitter', router))
+		.catch(e => console.error("Failed to initialize Twitter's proxy.", e));
 };

@@ -1,15 +1,37 @@
 import {NextFunction, Request, Response, Router} from 'express';
 import {Profile, Strategy as TwitterStrategy} from 'passport-twitter';
 import TwitterLite from 'twitter-lite';
-import {consumer_key, consumer_secret} from '../credentials.json';
 import passport from 'passport';
 import {RateLimitStatus, StuffedResponse} from '../../core/ServerResponses';
 import {parseTweet, parseTweets} from '../twitter';
 import {Tweet, TwitterResponse, TwitterSearchResponse} from '../twitter/types';
 import {TimelineOptions} from '../../core/Timeline';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export namespace Twitter {
-	let client = new TwitterLite({consumer_key, consumer_secret});
+	async function loadConsumerCredentials() : Promise<{consumer_key: string, consumer_secret: string}> {
+		if (process.env.SOSHAL_TWITTER_CONSUMER_KEY && process.env.SOSHAL_TWITTER_CONSUMER_SECRET) {
+			return {
+				consumer_key: process.env.SOSHAL_TWITTER_CONSUMER_KEY,
+				consumer_secret: process.env.SOSHAL_TWITTER_CONSUMER_SECRET,
+			};
+		}else if (
+			(process.env.SOSHAL_TWITTER_CONSUMER_KEY && !process.env.SOSHAL_TWITTER_CONSUMER_SECRET) ||
+			(!process.env.SOSHAL_TWITTER_CONSUMER_KEY && process.env.SOSHAL_TWITTER_CONSUMER_SECRET)
+		) {
+			throw new Error('If using environment variables, both SOSHAL_TWITTER_CONSUMER_KEY and SOSHAL_TWITTER_CONSUMER_SECRET need to be set.');
+		}else {
+			const credentialPath = path.join(__dirname, 'credentials.json');
+			try {
+				const {consumer_key, consumer_secret} = JSON.parse(await fs.promises.readFile(credentialPath, 'utf-8'));
+
+				return {consumer_key, consumer_secret};
+			}catch (e) {
+				throw new Error(`Couldn't load ${credentialPath}`);
+			}
+		}
+	}
 
 	export interface AuthUser {
 		id : string,
@@ -91,216 +113,9 @@ export namespace Twitter {
 		}
 	}
 
-	async function homeTimeline(req : Request, res : Response, next : NextFunction) {
-		try {
-			const options = parseTimelineOptions(req.query);
-
-			const response : TwitterResponse = await client.get('statuses/home_timeline', {
-				...(options.since ? {since_id: options.since} : {}),
-				...(options.max ? {max_id: options.max} : {}),
-				...(options.count ? {count: options.count} : {}),
-				tweet_mode: 'extended',
-			});
-			logRateLimit(response);
-
-			await respondTimelineUpdate(response as any, response, 'home_timeline', options, !!options.since, res);
-		}catch (e) {
-			await respondRateOver(e, 'home_timeline', res, next);
-		}
-	}
-
-	async function userTimeline(req : Request, res : Response, next : NextFunction) {
-		try {
-			const options = parseTimelineOptions(req.query);
-
-			const response : TwitterResponse = await client.get('statuses/user_timeline', {
-				...(options.since ? {since_id: options.since} : {}),
-				...(options.max ? {max_id: options.max} : {}),
-				...(options.count ? {count: options.count} : {}),
-				...(options.userId ? {user_id: options.userId} : {}),
-				...(options.userHandle ? {screen_name: options.userHandle} : {}),
-				tweet_mode: 'extended',
-			});
-			logRateLimit(response);
-
-			await respondTimelineUpdate(response as any, response, 'user_timeline', options, !!options.since, res);
-		}catch (e) {
-			await respondRateOver(e, 'user_timeline', res, next);
-		}
-	}
-
-	async function mentionsTimeline(req : Request, res : Response, next : NextFunction) {
-		try {
-			const options = parseTimelineOptions(req.query);
-
-			const response : TwitterResponse = await client.get('statuses/mentions_timeline', {
-				...(options.since ? {since_id: options.since} : {}),
-				...(options.max ? {max_id: options.max} : {}),
-				...(options.count ? {count: options.count} : {}),
-				tweet_mode: 'extended',
-			});
-			logRateLimit(response);
-
-			await respondTimelineUpdate(response as any, response, 'mentions_timeline', options, !!options.since, res);
-		}catch (e) {
-			await respondRateOver(e, 'mentions_timeline', res, next);
-		}
-	}
-
-	async function list(req : Request, res : Response, next : NextFunction) {
-		try {
-			const options = parseTimelineOptions(req.query);
-
-			const response : TwitterResponse = await client.get('lists/statuses', {
-				...(options.since ? {since_id: options.since} : {}),
-				...(options.max ? {max_id: options.max} : {}),
-				...(options.count ? {count: options.count} : {}),
-				...(options.userId ? {owner_id: options.userId} : {}),
-				...(options.userHandle ? {owner_screen_name: options.userHandle} : {}),
-				...(options.listId ? {list_id: options.listId} : {}),
-				...(options.listSlug ? {slug: options.listSlug} : {}),
-				tweet_mode: 'extended',
-			});
-			logRateLimit(response);
-
-			await respondTimelineUpdate(response as any, response, 'list', options, !!options.since, res);
-		}catch (e) {
-			await respondRateOver(e, 'list', res, next);
-		}
-	}
-
-	async function likes(req : Request, res : Response, next : NextFunction) {
-		try {
-			const options = parseTimelineOptions(req.query);
-
-			const response : TwitterResponse = await client.get('favorites/list', {
-				...(options.since ? {since_id: options.since} : {}),
-				...(options.max ? {max_id: options.max} : {}),
-				...(options.count ? {count: options.count} : {}),
-				...(options.userId ? {user_id: options.userId} : {}),
-				...(options.userHandle ? {screen_name: options.userHandle} : {}),
-				tweet_mode: 'extended',
-			});
-			logRateLimit(response);
-
-			await respondTimelineUpdate(response as any, response, 'likes', options, !!options.since, res);
-		}catch (e) {
-			await respondRateOver(e, 'likes', res, next);
-		}
-	}
-
-	async function search(req : Request, res : Response, next : NextFunction) {
-		try {
-			const options = parseTimelineOptions(req.query);
-
-			const response : TwitterSearchResponse = await client.get('search/tweets', {
-				...(options.since ? {since_id: options.since} : {}),
-				...(options.max ? {max_id: options.max} : {}),
-				...(options.count ? {count: options.count} : {}),
-				q: options.q,
-				result_type: 'recent',
-				tweet_mode: 'extended',
-			});
-			logRateLimit(response);
-
-			await respondTimelineUpdate(response.statuses, response, 'search', options, !!options.since, res);
-		}catch (e) {
-			if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 25))
-				return next(new Error('Twitter: ' + e.errors[0].message));
-			else
-				await respondRateOver(e, 'search', res, next);
-		}
-	}
-
-	async function status(req : Request, res : Response, next : NextFunction) {
-		try {
-			const response = await client.get('statuses/show', {
-				id: req.params.id,
-				tweet_mode: 'extended',
-			});
-			console.log(`1 tweet sent.`);
-			logRateLimit(response);
-
-			await res.json(parseTweet(response));
-		}catch (e) {
-			if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 25))
-				return next(new Error('Twitter: ' + e.errors[0].message));
-			else
-				await respondRateOver(e, 'status', res, next);
-		}
-	}
-
-	async function like(req : Request, res : Response, next : NextFunction) {
-		try {
-			const response = await client.post('favorites/create', {
-				id: req.params.id,
-				tweet_mode: 'extended',
-			});
-
-			await res.json(parseTweet(response));
-		}catch (e) {
-			if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 139)) {
-				try {
-					const response = await client.get('statuses/show', {
-						id: req.params.id,
-						tweet_mode: 'extended',
-					});
-
-					await res.json(parseTweet(response));
-				}catch (showError) {
-					parseQueryErrors(showError, next);
-				}
-			}else
-				parseQueryErrors(e, next);
-		}
-	}
-
-	async function unlike(req : Request, res : Response, next : NextFunction) {
-		try {
-			const response = await client.post('favorites/destroy', {
-				id: req.params.id,
-				tweet_mode: 'extended',
-			});
-
-			await res.json(parseTweet(response));
-		}catch (e) {
-			if (
-				e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 144) &&
-				parseInt(req.params.id) > 1000
-			) {
-				try {
-					const response = await client.get('statuses/show', {
-						id: req.params.id,
-						tweet_mode: 'extended',
-					});
-
-					await res.json(parseTweet(response));
-				}catch (showError) {
-					parseQueryErrors(showError, next);
-				}
-			}else
-				parseQueryErrors(e, next);
-		}
-	}
-
-	async function retweet(req : Request, res : Response, next : NextFunction) {
-		try {
-			const response = await client.post('statuses/retweet', {
-				id: req.params.id,
-				tweet_mode: 'extended',
-			});
-
-			await res.json(parseTweet(response));
-		}catch (e) {
-			parseQueryErrors(e, next);
-		}
-	}
-
 	export function checkLogin() : boolean {
 		return !!authUser;
 	}
-
-	export const router = Router();
 
 	passport.serializeUser(function(user : AuthUser, done) {
 		done(null, user.id);
@@ -315,32 +130,6 @@ export namespace Twitter {
 			done(null, authUser);
 	});
 
-	passport.use(new TwitterStrategy({
-			consumerKey: consumer_key,
-			consumerSecret: consumer_secret,
-			callbackURL: 'http://localhost:3000/twitter/callback',
-		},
-		function(access_token_key, access_token_secret, profile : Profile, done) {
-			try {
-				client = new TwitterLite({
-					consumer_key,
-					consumer_secret,
-					access_token_key,
-					access_token_secret,
-				});
-
-				authUser = {
-					id: profile.id,
-					username: profile.username,
-				};
-
-				done(null, authUser);
-			}catch (e) {
-				done(e);
-			}
-		},
-	));
-
 	function preventUnauthorized(req : Request, res : Response, next : NextFunction) {
 		if (req.user)
 			next();
@@ -348,34 +137,272 @@ export namespace Twitter {
 			res.sendStatus(401);
 	}
 
-	router.get('/login', passport.authenticate('twitter'));
-	router.get('/callback', passport.authenticate('twitter', {
-		successRedirect: '/',
-		//failureRedirect: '/' TODO Have a way to signal failure
-	}));
-	router.get('/tweets/home_timeline', preventUnauthorized, homeTimeline);
-	router.get('/tweets/user_timeline', preventUnauthorized, userTimeline);
-	router.get('/tweets/mentions_timeline', preventUnauthorized, mentionsTimeline);
-	router.get('/tweets/list', preventUnauthorized, list);
-	router.get('/tweets/likes', preventUnauthorized, likes);
-	router.get('/tweets/search', preventUnauthorized, search);
-	router.get('/tweets/status/:id', preventUnauthorized, status);
-	router.post('/like/:id', preventUnauthorized, like);
-	router.post('/unlike/:id', preventUnauthorized, unlike);
-	router.post('/retweet/:id', preventUnauthorized, retweet);
+	export async function getRouter() : Promise<Router> {
+		const {consumer_key, consumer_secret} = await loadConsumerCredentials();
+		let  client = new TwitterLite({consumer_key, consumer_secret});
 
-	if (process.env.NODE_ENV === 'development') {
-		// @ts-ignore
-		import('./testAccess')
-			.then(obj => {
-				obj.default(router, (newClient : TwitterLite, newAuthUser : Twitter.AuthUser) => {
+		async function homeTimeline(req : Request, res : Response, next : NextFunction) {
+			try {
+				const options = parseTimelineOptions(req.query);
+
+				const response : TwitterResponse = await client.get('statuses/home_timeline', {
+					...(options.since ? {since_id: options.since} : {}),
+					...(options.max ? {max_id: options.max} : {}),
+					...(options.count ? {count: options.count} : {}),
+					tweet_mode: 'extended',
+				});
+				logRateLimit(response);
+
+				await respondTimelineUpdate(response as any, response, 'home_timeline', options, !!options.since, res);
+			}catch (e) {
+				await respondRateOver(e, 'home_timeline', res, next);
+			}
+		}
+
+		async function userTimeline(req : Request, res : Response, next : NextFunction) {
+			try {
+				const options = parseTimelineOptions(req.query);
+
+				const response : TwitterResponse = await client.get('statuses/user_timeline', {
+					...(options.since ? {since_id: options.since} : {}),
+					...(options.max ? {max_id: options.max} : {}),
+					...(options.count ? {count: options.count} : {}),
+					...(options.userId ? {user_id: options.userId} : {}),
+					...(options.userHandle ? {screen_name: options.userHandle} : {}),
+					tweet_mode: 'extended',
+				});
+				logRateLimit(response);
+
+				await respondTimelineUpdate(response as any, response, 'user_timeline', options, !!options.since, res);
+			}catch (e) {
+				await respondRateOver(e, 'user_timeline', res, next);
+			}
+		}
+
+		async function mentionsTimeline(req : Request, res : Response, next : NextFunction) {
+			try {
+				const options = parseTimelineOptions(req.query);
+
+				const response : TwitterResponse = await client.get('statuses/mentions_timeline', {
+					...(options.since ? {since_id: options.since} : {}),
+					...(options.max ? {max_id: options.max} : {}),
+					...(options.count ? {count: options.count} : {}),
+					tweet_mode: 'extended',
+				});
+				logRateLimit(response);
+
+				await respondTimelineUpdate(response as any, response, 'mentions_timeline', options, !!options.since, res);
+			}catch (e) {
+				await respondRateOver(e, 'mentions_timeline', res, next);
+			}
+		}
+
+		async function list(req : Request, res : Response, next : NextFunction) {
+			try {
+				const options = parseTimelineOptions(req.query);
+
+				const response : TwitterResponse = await client.get('lists/statuses', {
+					...(options.since ? {since_id: options.since} : {}),
+					...(options.max ? {max_id: options.max} : {}),
+					...(options.count ? {count: options.count} : {}),
+					...(options.userId ? {owner_id: options.userId} : {}),
+					...(options.userHandle ? {owner_screen_name: options.userHandle} : {}),
+					...(options.listId ? {list_id: options.listId} : {}),
+					...(options.listSlug ? {slug: options.listSlug} : {}),
+					tweet_mode: 'extended',
+				});
+				logRateLimit(response);
+
+				await respondTimelineUpdate(response as any, response, 'list', options, !!options.since, res);
+			}catch (e) {
+				await respondRateOver(e, 'list', res, next);
+			}
+		}
+
+		async function likes(req : Request, res : Response, next : NextFunction) {
+			try {
+				const options = parseTimelineOptions(req.query);
+
+				const response : TwitterResponse = await client.get('favorites/list', {
+					...(options.since ? {since_id: options.since} : {}),
+					...(options.max ? {max_id: options.max} : {}),
+					...(options.count ? {count: options.count} : {}),
+					...(options.userId ? {user_id: options.userId} : {}),
+					...(options.userHandle ? {screen_name: options.userHandle} : {}),
+					tweet_mode: 'extended',
+				});
+				logRateLimit(response);
+
+				await respondTimelineUpdate(response as any, response, 'likes', options, !!options.since, res);
+			}catch (e) {
+				await respondRateOver(e, 'likes', res, next);
+			}
+		}
+
+		async function search(req : Request, res : Response, next : NextFunction) {
+			try {
+				const options = parseTimelineOptions(req.query);
+
+				const response : TwitterSearchResponse = await client.get('search/tweets', {
+					...(options.since ? {since_id: options.since} : {}),
+					...(options.max ? {max_id: options.max} : {}),
+					...(options.count ? {count: options.count} : {}),
+					q: options.q,
+					result_type: 'recent',
+					tweet_mode: 'extended',
+				});
+				logRateLimit(response);
+
+				await respondTimelineUpdate(response.statuses, response, 'search', options, !!options.since, res);
+			}catch (e) {
+				if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 25))
+					return next(new Error('Twitter: ' + e.errors[0].message));
+				else
+					await respondRateOver(e, 'search', res, next);
+			}
+		}
+
+		async function status(req : Request, res : Response, next : NextFunction) {
+			try {
+				const response = await client.get('statuses/show', {
+					id: req.params.id,
+					tweet_mode: 'extended',
+				});
+				console.log(`1 tweet sent.`);
+				logRateLimit(response);
+
+				await res.json(parseTweet(response));
+			}catch (e) {
+				if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 25))
+					return next(new Error('Twitter: ' + e.errors[0].message));
+				else
+					await respondRateOver(e, 'status', res, next);
+			}
+		}
+
+		async function like(req : Request, res : Response, next : NextFunction) {
+			try {
+				const response = await client.post('favorites/create', {
+					id: req.params.id,
+					tweet_mode: 'extended',
+				});
+
+				await res.json(parseTweet(response));
+			}catch (e) {
+				if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 139)) {
+					try {
+						const response = await client.get('statuses/show', {
+							id: req.params.id,
+							tweet_mode: 'extended',
+						});
+
+						await res.json(parseTweet(response));
+					}catch (showError) {
+						parseQueryErrors(showError, next);
+					}
+				}else
+					parseQueryErrors(e, next);
+			}
+		}
+
+		async function unlike(req : Request, res : Response, next : NextFunction) {
+			try {
+				const response = await client.post('favorites/destroy', {
+					id: req.params.id,
+					tweet_mode: 'extended',
+				});
+
+				await res.json(parseTweet(response));
+			}catch (e) {
+				if (
+					e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 144) &&
+					parseInt(req.params.id) > 1000
+				) {
+					try {
+						const response = await client.get('statuses/show', {
+							id: req.params.id,
+							tweet_mode: 'extended',
+						});
+
+						await res.json(parseTweet(response));
+					}catch (showError) {
+						parseQueryErrors(showError, next);
+					}
+				}else
+					parseQueryErrors(e, next);
+			}
+		}
+
+		async function retweet(req : Request, res : Response, next : NextFunction) {
+			try {
+				const response = await client.post('statuses/retweet', {
+					id: req.params.id,
+					tweet_mode: 'extended',
+				});
+
+				await res.json(parseTweet(response));
+			}catch (e) {
+				parseQueryErrors(e, next);
+			}
+		}
+
+		passport.use(new TwitterStrategy({
+				consumerKey: consumer_key,
+				consumerSecret: consumer_secret,
+				callbackURL: 'http://localhost:3000/twitter/callback',
+			},
+			function(access_token_key, access_token_secret, profile : Profile, done) {
+				try {
+					client = new TwitterLite({
+						consumer_key,
+						consumer_secret,
+						access_token_key,
+						access_token_secret,
+					});
+
+					authUser = {
+						id: profile.id,
+						username: profile.username,
+					};
+
+					done(null, authUser);
+				}catch (e) {
+					done(e);
+				}
+			},
+		));
+
+		const router = Router();
+
+		router.get('/login', passport.authenticate('twitter'));
+		router.get('/callback', passport.authenticate('twitter', {
+			successRedirect: '/',
+			//failureRedirect: '/' TODO Have a way to signal failure
+		}));
+		router.get('/tweets/home_timeline', preventUnauthorized, homeTimeline);
+		router.get('/tweets/user_timeline', preventUnauthorized, userTimeline);
+		router.get('/tweets/mentions_timeline', preventUnauthorized, mentionsTimeline);
+		router.get('/tweets/list', preventUnauthorized, list);
+		router.get('/tweets/likes', preventUnauthorized, likes);
+		router.get('/tweets/search', preventUnauthorized, search);
+		router.get('/tweets/status/:id', preventUnauthorized, status);
+		router.post('/like/:id', preventUnauthorized, like);
+		router.post('/unlike/:id', preventUnauthorized, unlike);
+		router.post('/retweet/:id', preventUnauthorized, retweet);
+
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				// @ts-ignore
+				(await import('./testAccess'))(router, consumer_key, consumer_secret, (newClient : TwitterLite, newAuthUser : Twitter.AuthUser) => {
 					client = newClient;
 					authUser = newAuthUser;
 				});
 				console.log('testAccess.ts loaded.');
-			})
-			.catch(() => {
+			}catch (e) {
 				console.log('testAccess.ts not found, ignoring.');
-			});
+			}
+		}
+
+		return router;
 	}
 }
