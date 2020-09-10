@@ -265,8 +265,13 @@ export default class TimelineArticles extends Vue {
 			this.stopScroll();
 	}
 
+	@Watch('articles')
+	onArticlesChange() {
+		this.onRefresh(this.refreshing);
+	}
+
 	@Watch('refreshing')
-	onArticlesChange(refreshing : boolean) {
+	onRefresh(refreshing : boolean) {
 		if (!refreshing)	//If refresh just completed
 			this.updatePartialArticles();
 	}
