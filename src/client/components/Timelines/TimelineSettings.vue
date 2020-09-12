@@ -15,6 +15,7 @@
 			b-checkbox-button(v-model='showing' native-value='all') All
 			b-checkbox-button(v-model='showing' native-value='reposts') Reposts
 			b-checkbox-button(v-model='showing' native-value='quotes') Quotes
+			b-checkbox-button(v-model='showing' native-value='text') Text Only
 			b-checkbox-button(v-model='showing' native-value='images') Images
 			b-checkbox-button(v-model='showing' native-value='videos') Videos
 
@@ -74,17 +75,21 @@ export default class TimelineSettings extends Vue {
 		this.timelineData.options = this.options;
 	}
 
-	get changes() : {[setting : string] : boolean} {
-		return {
-			name: this.nameEdit !== this.timelineData.name,
-			endpoint: this.endpoint !== this.timelineData.endpoint,
-			showing: this.showing !== this.timelineData.showing,
-			options: this.options !== this.timelineData.options,
-		};
+	get showingChanges() {
+		if (this.showing.length !== this.timelineData.showing.length)
+			return true;
+
+		return !(this.timelineData.showing.every(filter => this.showing.includes(filter)) &&
+		this.showing.every(filter => this.timelineData.showing.includes(filter)));
 	}
 
 	get anyChanges() : boolean {
-		return Object.values(this.changes).some(change => change);
+		return (
+			this.nameEdit !== this.timelineData.name ||
+			this.endpoint !== this.timelineData.endpoint ||
+			this.showingChanges ||
+			this.options !== this.timelineData.options
+		);
 	}
 
 	get columns() : number {
@@ -107,7 +112,6 @@ export default class TimelineSettings extends Vue {
 	@Watch('showing')
 	onShowingChange(newShowing : TimelineFilter[], oldShowing : TimelineFilter[]) {
 		const added = newShowing.filter(filter => !oldShowing.includes(filter));
-		console.log('showing change: ', added);
 		//const removed = new Set([...oldShowing].filter(filter => !newShowing.has(filter)));
 
 		if (added.includes(TimelineFilter.All))

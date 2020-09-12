@@ -11,7 +11,7 @@
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
 
 		b-collapse(:open='isOptionsOpen' animation='slide')
-			TimelineSettings.mb-4(
+			TimelineSettings(
 				:timeline-data='timelineData'
 				:service='service'
 				:name-edit='nameEdit'
