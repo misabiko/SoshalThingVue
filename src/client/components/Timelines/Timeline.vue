@@ -27,8 +27,10 @@
 
 				.level
 					.level-left: b-button.level-item(@click='clearPosts') Clear
-					.level-right
-						b-button.level-item(@click='autoScrolling = true; isOptionsOpen = false;') AutoScroll
+					b-field.level-right(grouped horizontal)
+						b-field.level-item
+							b-input.autoScrollInput(type='number' min='1' v-model='autoScrollSpeed')
+							b-button(@click='autoScrolling = true; isOptionsOpen = false;') AutoScroll
 						b-button.level-item(@click='remove' type='is-danger') Remove
 
 		TimelineArticles(
@@ -40,6 +42,7 @@
 			:enabled='enabled'
 			:compact-media='timelineData.compactMedia'
 			:scrolling.sync='autoScrolling'
+			:scrollSpeed='scrollSpeed'
 			@remove-article='removeArticle($event)'
 			@load-bottom='tryLoadMoreBottom'
 		)
@@ -82,6 +85,7 @@ export default class Timeline extends Vue {
 	oldestArticle = null as null | Article;
 	loadingBottomTimeout = 0 as number | undefined;
 	refreshing = false;
+	scrollSpeed = 3;
 
 	mounted() {
 		if (this.enabled)
@@ -277,6 +281,14 @@ export default class Timeline extends Vue {
 		return !!this.loadingBottomTimeout;
 	}
 
+	get autoScrollSpeed() {
+		return this.scrollSpeed;
+	}
+
+	set autoScrollSpeed(value : any) {
+		this.scrollSpeed = parseInt(value);
+	}
+
 	@Watch('enabled')
 	onEnabledChanged(enabled : boolean) {
 		if (enabled && this.autoRefresh)
@@ -354,4 +366,7 @@ export default class Timeline extends Vue {
 
 .slow-spin
 	animation: fa-spin 6s infinite linear
+
+.autoScrollInput
+	width: 80px
 </style>

@@ -25,6 +25,8 @@ export default class TimelineArticles extends Vue {
 	readonly compactMedia! : boolean;
 	@Prop({type: Boolean})
 	readonly scrolling! : boolean;
+	@Prop({type: Number, required: true})
+	readonly scrollSpeed! : number;
 
 	@State timelineArticleRadius! : number;
 	@State timelineUnloadMinimum! : number;
@@ -33,7 +35,6 @@ export default class TimelineArticles extends Vue {
 	compactOverrides = {} as { [id : string] : number };
 	scrollDirection = false;
 	scrollRequestId = 0;
-	scrollSpeed = 3;
 	partialArticles = [] as Article[];
 	topArticleId = this.articles.length ? this.articles[0].id : '';
 	bottomArticleId = this.articles.length ?
