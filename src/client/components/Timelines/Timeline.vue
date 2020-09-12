@@ -28,7 +28,7 @@
 		TimelineArticles(
 			ref='timelineArticles'
 			:columns='timelineData.columns'
-			:articles='articles'
+			:articles='filteredArticles'
 			:refreshing='refreshing'
 			:service='service'
 			:enabled='enabled'
@@ -121,7 +121,7 @@ export default class Timeline extends Vue {
 			return 0;
 		try {
 			let options = this.timelineData.options;
-			if (this.articles.length) {
+			if (this.filteredArticles.length) {
 				if (bottom)
 					options = {
 						...options,
@@ -178,9 +178,7 @@ export default class Timeline extends Vue {
 		return newArticles.filter((a : Article) =>
 			this.articles.findIndex(
 				(b : Article) => b.id === a.id,
-			) < 0 &&
-			(this.timelineData.options.includeReposts || a.type != ArticleType.Repost) &&
-			(!this.timelineData.options.onlyWithMedia || this.hasMedia(a)),
+			) < 0
 		);
 	}
 
@@ -271,6 +269,13 @@ export default class Timeline extends Vue {
 
 	set autoScrollSpeed(value : any) {
 		this.scrollSpeed = parseInt(value);
+	}
+
+	get filteredArticles() {
+		return this.articles.filter((a : Article) =>
+			(this.timelineData.options.includeReposts || a.type != ArticleType.Repost) &&
+			(!this.timelineData.options.onlyWithMedia || this.hasMedia(a))
+		);
 	}
 
 	@Watch('enabled')
