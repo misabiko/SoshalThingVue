@@ -4,6 +4,7 @@ import {Article, ArticleType, PostData, QuoteData, RepostData} from '../../core/
 import Vue from 'vue';
 import {SnackbarProgrammatic as Snackbar} from 'buefy';
 import {store} from '../store';
+import moment from 'moment';
 
 export abstract class Service {
 	endpoints : { [name : string] : Endpoint } = {};
@@ -12,7 +13,8 @@ export abstract class Service {
 	reposts : { [id : string] : RepostData } = {};
 	quotes : { [id : string] : QuoteData } = {};
 
-	protected constructor(readonly name : string, readonly loginHref : string) {}
+	protected constructor(readonly name : string, readonly loginHref : string) {
+	}
 
 	addEndpoints(...endpoints : Endpoint[]) {
 		for (const endpoint of endpoints)
@@ -83,8 +85,8 @@ export abstract class Service {
 			actionText: 'Open Menu',
 			onAction() {
 				store.commit('setSidebarExpanded', true);
-			}
-		})
+			},
+		});
 		this.loggedIn = false;
 		return new Error(message);
 	}
@@ -151,5 +153,18 @@ export class Endpoint {
 				service.updateArticleData({quote: quoteData});
 
 		return stuffedResponse.timelinePosts;
+	}
+
+	get ready() {
+		return this.rateLimitStatus.remaining > 0;
+	}
+
+	get timeout() {
+		if (this.ready)
+			return 0;
+		else
+			return moment.duration(
+				moment.unix(this.rateLimitStatus.reset).diff(moment()),
+			).asMilliseconds() + 100;
 	}
 }

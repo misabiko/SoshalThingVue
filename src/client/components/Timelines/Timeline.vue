@@ -162,7 +162,7 @@ export default class Timeline extends Vue {
 			if (resetTimer)
 				this.resetAutoRefresh({
 					refresh: false,
-					timeout: this.endpoint.rateLimitStatus.remaining ? 0 : this.rateTimeout(),
+					timeout: this.endpoint.timeout,
 				});
 
 			this.refreshing = false;
@@ -180,10 +180,6 @@ export default class Timeline extends Vue {
 				(b : Article) => b.id === a.id,
 			) < 0,
 		);
-	}
-
-	rateTimeout() : number {
-		return moment.duration(moment.unix(this.endpoint.rateLimitStatus.reset).diff(moment())).asMilliseconds() + 1000;
 	}
 
 	removeArticle(id : string) {
@@ -215,10 +211,8 @@ export default class Timeline extends Vue {
 
 		if (untilLoad < 0)
 			this.loadBottom();
-		else {
-			const rateTimeout = this.endpoint.rateLimitStatus.remaining ? 0 : this.rateTimeout();
-			this.loadingBottomTimeout = window.setTimeout(this.loadBottom, rateTimeout + untilLoad);
-		}
+		else
+			this.loadingBottomTimeout = window.setTimeout(this.loadBottom, this.endpoint.timeout + untilLoad);
 	}
 
 	loadBottom() {

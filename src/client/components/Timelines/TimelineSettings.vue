@@ -112,7 +112,6 @@ export default class TimelineSettings extends Vue {
 	@Watch('showing')
 	onShowingChange(newShowing : TimelineFilter[], oldShowing : TimelineFilter[]) {
 		const added = newShowing.filter(filter => !oldShowing.includes(filter));
-		//const removed = new Set([...oldShowing].filter(filter => !newShowing.has(filter)));
 
 		if (added.includes(TimelineFilter.All))
 			this.showing = [TimelineFilter.All];
