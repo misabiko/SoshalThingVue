@@ -42,13 +42,12 @@
 
 <script lang='ts'>
 import {Component, Prop, Ref, Vue, Watch} from 'vue-property-decorator';
-import {SettingsData} from './TimelineSettings.vue';
 import TimelineSettings from './TimelineSettings.vue';
 import {TimelinePayload} from '../../../core/ServerResponses';
-import {Article} from '../../../core/PostData';
+import {Article, ArticleType} from '../../../core/PostData';
 import {TimelineData} from '../../../core/Timeline';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faEllipsisV, faSyncAlt, faPlus, faMinus} from '@fortawesome/free-solid-svg-icons';
+import {faEllipsisV, faMinus, faPlus, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 import {Endpoint, Service} from '../../services/service';
 import {SoshalState} from '../../store';
@@ -150,11 +149,7 @@ export default class Timeline extends Vue {
 			if (payload.oldestArticle)
 				this.oldestArticle = payload.oldestArticle;
 
-			const newArticles = payload.newArticles.filter((a : Article) =>
-				this.articles.findIndex(
-					(b : Article) => b.id === a.id,
-				) < 0,
-			);
+			const newArticles = this.filterNewArticles(payload.newArticles);
 
 			if (newArticles.length) {
 				this.articles.push(...newArticles);
@@ -177,6 +172,21 @@ export default class Timeline extends Vue {
 			this.refreshing = false;
 			throw e;
 		}
+	}
+
+	filterNewArticles(newArticles : Article[]) : Article[] {
+		return newArticles.filter((a : Article) =>
+			this.articles.findIndex(
+				(b : Article) => b.id === a.id,
+			) < 0 &&
+			(this.timelineData.options.includeReposts || a.type != ArticleType.Repost) &&
+			(!this.timelineData.options.onlyWithMedia || this.hasMedia(a)),
+		);
+	}
+
+	hasMedia(article : Article) : boolean {
+		const postData = this.service.getPostData(article);
+		return !!(postData.images || postData.video);
 	}
 
 	rateTimeout() : number {

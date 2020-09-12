@@ -34,6 +34,17 @@ export abstract class Service {
 		}
 	}
 
+	getPostData(article : Article) : PostData {
+		switch (article.type) {
+			case ArticleType.Post:
+				return this.posts[article.id];
+			case ArticleType.Repost:
+				return this.posts[this.reposts[article.id].repostedId];
+			case ArticleType.Quote:
+				return this.posts[this.quotes[article.id].quotedId];
+		}
+	}
+
 	updatePostData(postData : PostData) {
 		if (!postData)
 			throw new Error(`PostData ${postData} isn't valid.`);

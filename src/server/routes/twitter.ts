@@ -65,9 +65,9 @@ export namespace Twitter {
 		next(e);
 	}
 
-	async function respondTimelineUpdate(tweets : Tweet[], response : TwitterResponse, endpoint : string, options: TimelineOptions, reverse: boolean, res : Response) {
+	async function respondTimelineUpdate(tweets : Tweet[], response : TwitterResponse, reverse: boolean, res : Response) {
 		console.log(tweets.length + ' tweets received.')
-		const {posts, reposts, quotes, timelinePosts} = parseTweets(tweets, options, reverse);
+		const {posts, reposts, quotes, timelinePosts} = parseTweets(tweets, reverse);
 		console.log(`${timelinePosts.newArticles.length} tweets sent.`);
 
 		await res.json({
@@ -79,7 +79,7 @@ export namespace Twitter {
 		} as StuffedResponse);
 	}
 
-	async function respondRateOver(e : any, endpoint : string, res : Response, next : NextFunction) {
+	async function respondRateOver(e : any, res : Response, next : NextFunction) {
 		if (e.errors) {
 			const error = e.errors.find((error : any) => error.code === 88);
 
@@ -153,9 +153,9 @@ export namespace Twitter {
 				});
 				logRateLimit(response);
 
-				await respondTimelineUpdate(response as any, response, 'home_timeline', options, !!options.since, res);
+				await respondTimelineUpdate(response as any, response, !!options.since, res);
 			}catch (e) {
-				await respondRateOver(e, 'home_timeline', res, next);
+				await respondRateOver(e, res, next);
 			}
 		}
 
@@ -173,9 +173,9 @@ export namespace Twitter {
 				});
 				logRateLimit(response);
 
-				await respondTimelineUpdate(response as any, response, 'user_timeline', options, !!options.since, res);
+				await respondTimelineUpdate(response as any, response, !!options.since, res);
 			}catch (e) {
-				await respondRateOver(e, 'user_timeline', res, next);
+				await respondRateOver(e, res, next);
 			}
 		}
 
@@ -191,9 +191,9 @@ export namespace Twitter {
 				});
 				logRateLimit(response);
 
-				await respondTimelineUpdate(response as any, response, 'mentions_timeline', options, !!options.since, res);
+				await respondTimelineUpdate(response as any, response, !!options.since, res);
 			}catch (e) {
-				await respondRateOver(e, 'mentions_timeline', res, next);
+				await respondRateOver(e, res, next);
 			}
 		}
 
@@ -213,9 +213,9 @@ export namespace Twitter {
 				});
 				logRateLimit(response);
 
-				await respondTimelineUpdate(response as any, response, 'list', options, !!options.since, res);
+				await respondTimelineUpdate(response as any, response, !!options.since, res);
 			}catch (e) {
-				await respondRateOver(e, 'list', res, next);
+				await respondRateOver(e, res, next);
 			}
 		}
 
@@ -233,9 +233,9 @@ export namespace Twitter {
 				});
 				logRateLimit(response);
 
-				await respondTimelineUpdate(response as any, response, 'likes', options, !!options.since, res);
+				await respondTimelineUpdate(response as any, response, !!options.since, res);
 			}catch (e) {
-				await respondRateOver(e, 'likes', res, next);
+				await respondRateOver(e, res, next);
 			}
 		}
 
@@ -253,12 +253,12 @@ export namespace Twitter {
 				});
 				logRateLimit(response);
 
-				await respondTimelineUpdate(response.statuses, response, 'search', options, !!options.since, res);
+				await respondTimelineUpdate(response.statuses, response, !!options.since, res);
 			}catch (e) {
 				if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 25))
 					return next(new Error('Twitter: ' + e.errors[0].message));
 				else
-					await respondRateOver(e, 'search', res, next);
+					await respondRateOver(e, res, next);
 			}
 		}
 
@@ -276,7 +276,7 @@ export namespace Twitter {
 				if (e.errors && e.errors.find((error : { code : number, message : string }) => error.code === 25))
 					return next(new Error('Twitter: ' + e.errors[0].message));
 				else
-					await respondRateOver(e, 'status', res, next);
+					await respondRateOver(e, res, next);
 			}
 		}
 
