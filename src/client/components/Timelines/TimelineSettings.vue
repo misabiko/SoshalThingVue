@@ -125,3 +125,11 @@ export default class TimelineSettings extends Vue {
 	}
 }
 </script>
+
+<style scoped lang='sass'>
+@use '../../bulma_overrides' as *
+
+.timelineOptions
+	background-color: $scheme-main-ter
+	padding: 1rem
+</style>

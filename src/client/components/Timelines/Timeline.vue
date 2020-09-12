@@ -1,11 +1,11 @@
 <template lang='pug'>
 	.timeline(:class='{simpleTimeline: timelineData.columns === 1}' :style="{flex: '0 0 ' + (timelineData.columnWidth * 500) + 'px', width: (timelineData.columnWidth * 500) + 'px'}")
-		.timelineHeader(@click.self='scrollTop')
+		.timelineHeader(@click.self='scrollTop' :class='{timelineInvalid: !endpoint.ready}')
 			b-input(v-if='isOptionsOpen' v-model='nameEdit')
 			strong(v-else) {{ timelineData.name }}
 
 			.timelineButtons
-				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true}).then()')
+				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true}).then()' :disabled='!endpoint.ready || !enabled')
 					FontAwesomeIcon(icon='sync-alt' inverse size='lg' :spin='refreshing' :class="{'slow-spin': !refreshing && isWaitingRefresh}")
 				button.openTimelineOptions(@click='isOptionsOpen = !isOptionsOpen')
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
@@ -345,13 +345,12 @@ export default class Timeline extends Vue {
 	strong
 		vertical-align: middle
 
-	button
-		@include borderless-button(0 1.6rem)
-		height: 100%
+	&.timelineInvalid
+		background-color: $dark-error
 
-.timelineOptions
-	background-color: $scheme-main-ter
-	padding: 1rem
+.timelineButtons > button
+	@include borderless-button(0 1.6rem)
+	height: 100%
 
 .slow-spin
 	animation: fa-spin 6s infinite linear
