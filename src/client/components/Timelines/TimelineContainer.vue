@@ -14,7 +14,7 @@
 import {Vue, Component, Watch} from 'vue-property-decorator';
 import {Mutation, State} from 'vuex-class';
 import Timeline from "./Timeline.vue";
-import {TimelineData} from '../../../core/Timeline';
+import {defaultTimeline, TimelineData} from '../../../core/Timeline';
 import draggable from 'vuedraggable';
 
 @Component({components: {Timeline, draggable}})
@@ -42,18 +42,10 @@ export default class TimelineContainer extends Vue {
 
 		const id = this.getUniqueId();
 		this.timelines.push({
+			...defaultTimeline,
 			id,
 			name: 'Timeline #' + id,
 			service: 'Twitter',
-			endpoint: '',
-			autoRefresh: true,
-			enabled: true,
-			compactMedia: true,
-			options: {
-				includeReposts: true,
-				onlyWithMedia: false,
-			},
-			refreshRate: 60000,
 		});
 	}
 
@@ -98,19 +90,15 @@ export default class TimelineContainer extends Vue {
 			this.shouldScroll = true;
 
 			this.timelines.push({
+				...defaultTimeline,
 				id: this.getUniqueId(),
 				name: userHandle,
 				service: 'Twitter',
 				endpoint: 'user_timeline',
-				autoRefresh: true,
-				enabled: true,
-				compactMedia: false,
 				options: {
-					includeReposts: false,
-					onlyWithMedia: false,
+					...defaultTimeline.options,
 					userHandle,
 				},
-				refreshRate: 60000,
 			});
 		}
 

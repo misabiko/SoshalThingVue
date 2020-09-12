@@ -7,6 +7,8 @@ export interface TimelineData {
 	enabled: boolean;
 	compactMedia: boolean;
 	refreshRate: number;
+	columns: number;
+	columnWidth: number;
 	options: TimelineOptions;
 }
 
@@ -22,3 +24,19 @@ export interface TimelineOptions {
 	includeReposts: boolean;
 	onlyWithMedia: boolean;
 }
+
+export const defaultTimeline : TimelineData = {
+	name: '',
+	service: '',
+	endpoint: '',
+	autoRefresh: true,
+	enabled: true,
+	compactMedia: true,
+	columns: 1,
+	columnWidth: 1,
+	options: {
+		includeReposts: true,
+		onlyWithMedia: false,
+	},
+	refreshRate: 90000,
+};

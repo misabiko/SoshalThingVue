@@ -1,5 +1,5 @@
 <template lang='pug'>
-	.timeline(:class='{simpleTimeline: columns === 1}' :style="{flex: '0 0 ' + (columnWidth * 500) + 'px', width: (columnWidth * 500) + 'px'}")
+	.timeline(:class='{simpleTimeline: columns === 1}' :style="{flex: '0 0 ' + (timelineData.columnWidth * 500) + 'px', width: (timelineData.columnWidth * 500) + 'px'}")
 		.timelineHeader(@click.self='scrollTop')
 			b-input(v-if='isOptionsOpen' v-model='nameEdit')
 			strong(v-else) {{ timelineData.name }}
@@ -23,7 +23,7 @@
 					b-numberinput(v-model='columns' min='1')
 
 				b-field(label='Width')
-					b-numberinput(v-model='columnWidth' min='1')
+					b-numberinput(v-model='timelineData.columnWidth' min='1')
 
 				.level
 					.level-left: b-button.level-item(@click='clearPosts') Clear
@@ -79,8 +79,6 @@ export default class Timeline extends Vue {
 	isOptionsOpen = !(this.timelineData.name && this.timelineData.endpoint) as boolean;
 	nameEdit = this.timelineData.name;
 	lastBottomRefreshTime = moment();
-	columns = 1;
-	columnWidth = 1;	//Could use a better name
 	autoScrolling = false;
 	oldestArticle = null as null | Article;
 	loadingBottomTimeout = 0 as number | undefined;
@@ -289,6 +287,14 @@ export default class Timeline extends Vue {
 		this.scrollSpeed = parseInt(value);
 	}
 
+	get columns() : number {
+		return this.timelineData.columns;
+	}
+
+	set columns(value : number) {
+		this.timelineData.columns = value;
+	}
+
 	@Watch('enabled')
 	onEnabledChanged(enabled : boolean) {
 		if (enabled && this.autoRefresh)
@@ -323,10 +329,12 @@ export default class Timeline extends Vue {
 	@Watch('columns')
 	onColumnChange(newColumnCount : number, oldColumnCount : number) {
 		if (newColumnCount < oldColumnCount) {
-			if (this.columnWidth > 1)
-				this.columnWidth--;
+			if (this.timelineData.columnWidth > 1)
+				this.timelineData.columnWidth--;
 		}else if (newColumnCount > oldColumnCount)
-			this.columnWidth++;
+			this.timelineData.columnWidth++;
+
+		this.$emit('update-data');
 	}
 }
 </script>
