@@ -1,5 +1,5 @@
 <template lang='pug'>
-	.timeline(:class='{simpleTimeline: columns === 1}' :style="{flex: '0 0 ' + (timelineData.columnWidth * 500) + 'px', width: (timelineData.columnWidth * 500) + 'px'}")
+	.timeline(:class='{simpleTimeline: timelineData.columns === 1}' :style="{flex: '0 0 ' + (timelineData.columnWidth * 500) + 'px', width: (timelineData.columnWidth * 500) + 'px'}")
 		.timelineHeader(@click.self='scrollTop')
 			b-input(v-if='isOptionsOpen' v-model='nameEdit')
 			strong(v-else) {{ timelineData.name }}
@@ -11,20 +11,12 @@
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
 
 		b-collapse(:open='isOptionsOpen' animation='slide')
-			.timelineOptions
-				TimelineSettings.mb-4(
-					:timeline-data='timelineData'
-					:changesOutside='outsideChanges'
-					:service='service'
-					@apply-settings='applySettings($event)'
-				)
-
-				b-field(label='Columns')
-					b-numberinput(v-model='columns' min='1')
-
-				b-field(label='Width')
-					b-numberinput(v-model='timelineData.columnWidth' min='1')
-
+			TimelineSettings.mb-4(
+				:timeline-data='timelineData'
+				:service='service'
+				:name-edit='nameEdit'
+				@update-data="$emit('update-data')"
+			)
 				.level
 					.level-left: b-button.level-item(@click='clearPosts') Clear
 					b-field.level-right(grouped horizontal)
@@ -35,7 +27,7 @@
 
 		TimelineArticles(
 			ref='timelineArticles'
-			:columns='columns'
+			:columns='timelineData.columns'
 			:articles='articles'
 			:refreshing='refreshing'
 			:service='service'
@@ -204,18 +196,6 @@ export default class Timeline extends Vue {
 		this.$emit('remove-timeline', this.timelineData.id);
 	}
 
-	applySettings(settings : SettingsData) {
-		this.timelineData.endpoint = settings.endpoint;
-		this.timelineData.enabled = settings.enabled;
-		this.timelineData.autoRefresh = settings.autoRefresh;
-		this.timelineData.compactMedia = settings.compactMedia;
-		this.timelineData.options = settings.options;
-
-		this.timelineData.name = this.nameEdit;
-
-		this.$emit('update-data');
-	}
-
 	scrollTop() {
 		this.timelineArticles.$el.scroll({
 			top: 0,
@@ -271,10 +251,6 @@ export default class Timeline extends Vue {
 		return this.timelineData.autoRefresh;
 	}
 
-	get outsideChanges() {
-		return this.nameEdit !== this.timelineData.name;
-	}
-
 	get isWaitingRefresh() {
 		return !!this.loadingBottomTimeout;
 	}
@@ -285,14 +261,6 @@ export default class Timeline extends Vue {
 
 	set autoScrollSpeed(value : any) {
 		this.scrollSpeed = parseInt(value);
-	}
-
-	get columns() : number {
-		return this.timelineData.columns;
-	}
-
-	set columns(value : number) {
-		this.timelineData.columns = value;
 	}
 
 	@Watch('enabled')
@@ -324,17 +292,6 @@ export default class Timeline extends Vue {
 	onOptionsCollapseToggled(optionsOpened : boolean) {
 		if (!optionsOpened)
 			this.nameEdit = this.timelineData.name;
-	}
-
-	@Watch('columns')
-	onColumnChange(newColumnCount : number, oldColumnCount : number) {
-		if (newColumnCount < oldColumnCount) {
-			if (this.timelineData.columnWidth > 1)
-				this.timelineData.columnWidth--;
-		}else if (newColumnCount > oldColumnCount)
-			this.timelineData.columnWidth++;
-
-		this.$emit('update-data');
 	}
 }
 </script>
