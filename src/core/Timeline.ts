@@ -9,6 +9,7 @@ export interface TimelineData {
 	refreshRate: number;
 	columns: number;
 	columnWidth: number;
+	showing: string[];
 	options: TimelineOptions;
 }
 
@@ -21,8 +22,15 @@ export interface TimelineOptions {
 	userHandle?: string;
 	listId?: string;
 	listSlug?: string;
-	includeReposts: boolean;
-	onlyWithMedia: boolean;
+}
+
+export enum TimelineFilter {
+	All = 'all',
+	Reposts = 'reposts',
+	Quotes = 'quotes',
+	TextOnly = 'text',
+	Images = 'images',
+	Videos = 'videos',
 }
 
 export const defaultTimeline : TimelineData = {
@@ -34,9 +42,7 @@ export const defaultTimeline : TimelineData = {
 	compactMedia: true,
 	columns: 1,
 	columnWidth: 1,
-	options: {
-		includeReposts: true,
-		onlyWithMedia: false,
-	},
+	showing: [TimelineFilter.All],
+	options: {},
 	refreshRate: 90000,
 };

@@ -45,7 +45,7 @@ import {Component, Prop, Ref, Vue, Watch} from 'vue-property-decorator';
 import TimelineSettings from './TimelineSettings.vue';
 import {TimelinePayload} from '../../../core/ServerResponses';
 import {Article, ArticleType} from '../../../core/PostData';
-import {TimelineData} from '../../../core/Timeline';
+import {TimelineData, TimelineFilter} from '../../../core/Timeline';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {faEllipsisV, faMinus, faPlus, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
@@ -178,13 +178,8 @@ export default class Timeline extends Vue {
 		return newArticles.filter((a : Article) =>
 			this.articles.findIndex(
 				(b : Article) => b.id === a.id,
-			) < 0
+			) < 0,
 		);
-	}
-
-	hasMedia(article : Article) : boolean {
-		const postData = this.service.getPostData(article);
-		return !!(postData.images || postData.video);
 	}
 
 	rateTimeout() : number {
@@ -272,9 +267,29 @@ export default class Timeline extends Vue {
 	}
 
 	get filteredArticles() {
-		return this.articles.filter((a : Article) =>
-			(this.timelineData.options.includeReposts || a.type != ArticleType.Repost) &&
-			(!this.timelineData.options.onlyWithMedia || this.hasMedia(a))
+		return this.articles.filter((a : Article) => {
+				const postData = this.service.getPostData(a);
+
+				if (this.timelineData.showing.includes(TimelineFilter.All))
+					return true;
+
+				if (a.type === ArticleType.Repost && !this.timelineData.showing.includes(TimelineFilter.Reposts))
+					return false;
+				if (a.type === ArticleType.Quote && !this.timelineData.showing.includes(TimelineFilter.Quotes))
+					return false;
+
+				if (!postData.images && !postData.video) {
+					if (!this.timelineData.showing.includes(TimelineFilter.TextOnly))
+						return false;
+				}else {
+					if (postData.images && !this.timelineData.showing.includes(TimelineFilter.Images))
+						return false;
+					if (postData.video && !this.timelineData.showing.includes(TimelineFilter.Videos))
+						return false;
+				}
+
+				return true;
+			},
 		);
 	}
 

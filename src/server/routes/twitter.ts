@@ -108,8 +108,6 @@ export namespace Twitter {
 			userHandle: query.userHandle,
 			listId: query.listId,
 			listSlug: query.listSlug,
-			includeReposts: query.includeReposts !== 'false',
-			onlyWithMedia: query.onlyWithMedia !== 'false',
 		}
 	}
 

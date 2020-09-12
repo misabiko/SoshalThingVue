@@ -11,8 +11,12 @@
 		b-field: b-switch(v-model='enabled' @input='applySettings') Enabled
 		b-field: b-switch(v-model='autoRefresh' @input='applySettings') Auto Refresh
 		b-field: b-switch(v-model='compactMedia' @input='applySettings') Compact Media
-		b-field: b-switch(v-model='options.includeReposts' @input='applySettings') Include Reposts
-		b-field: b-switch(v-model='options.onlyWithMedia' @input='applySettings') Only With Media
+		b-field(label='Showing')
+			b-checkbox-button(v-model='showing' native-value='all') All
+			b-checkbox-button(v-model='showing' native-value='reposts') Reposts
+			b-checkbox-button(v-model='showing' native-value='quotes') Quotes
+			b-checkbox-button(v-model='showing' native-value='images') Images
+			b-checkbox-button(v-model='showing' native-value='videos') Videos
 
 		TimelineSearchOptions(
 			v-if="endpoint === 'search'"
@@ -36,20 +40,12 @@
 </template>
 
 <script lang='ts'>
-import {Vue, Component, Prop, Watch} from 'vue-property-decorator';
+import {Component, Prop, Vue, Watch} from 'vue-property-decorator';
 import TimelineSearchOptions from './TimelineSearchOptions.vue';
-import {TimelineData, TimelineOptions} from '../../../core/Timeline';
+import {TimelineData, TimelineFilter} from '../../../core/Timeline';
 import {Service} from '../../services/service';
 import TimelineUserOptions from './TimelineUserOptions.vue';
 import TimelineListOptions from './TimelineListOptions.vue';
-
-export interface SettingsData {
-	endpoint: string;
-	enabled: boolean;
-	autoRefresh: boolean;
-	compactMedia: boolean;
-	options: TimelineOptions;
-}
 
 //TODO Make endpoint parameter options dynamic
 @Component({components: {TimelineSearchOptions, TimelineUserOptions, TimelineListOptions}})
@@ -65,6 +61,7 @@ export default class TimelineSettings extends Vue {
 	enabled = this.timelineData.enabled;
 	autoRefresh = this.timelineData.autoRefresh;
 	compactMedia = this.timelineData.compactMedia;
+	showing = this.timelineData.showing;
 	options = this.timelineData.options;
 
 	applySettings() {
@@ -73,6 +70,7 @@ export default class TimelineSettings extends Vue {
 		this.timelineData.enabled = this.enabled;
 		this.timelineData.autoRefresh = this.autoRefresh;
 		this.timelineData.compactMedia = this.compactMedia;
+		this.timelineData.showing = this.showing;
 		this.timelineData.options = this.options;
 	}
 
@@ -80,6 +78,7 @@ export default class TimelineSettings extends Vue {
 		return {
 			name: this.nameEdit !== this.timelineData.name,
 			endpoint: this.endpoint !== this.timelineData.endpoint,
+			showing: this.showing !== this.timelineData.showing,
 			options: this.options !== this.timelineData.options,
 		};
 	}
@@ -103,6 +102,18 @@ export default class TimelineSettings extends Vue {
 				this.timelineData.columnWidth--;
 		}else if (newColumnCount > oldColumnCount)
 			this.timelineData.columnWidth++;
+	}
+
+	@Watch('showing')
+	onShowingChange(newShowing : TimelineFilter[], oldShowing : TimelineFilter[]) {
+		const added = newShowing.filter(filter => !oldShowing.includes(filter));
+		console.log('showing change: ', added);
+		//const removed = new Set([...oldShowing].filter(filter => !newShowing.has(filter)));
+
+		if (added.includes(TimelineFilter.All))
+			this.showing = [TimelineFilter.All];
+		else if (added.length)
+			this.showing = newShowing.filter(filter => filter !== TimelineFilter.All);
 	}
 
 	@Watch('timelineData', {deep: true})
