@@ -20,6 +20,7 @@ jobs:
                 with:
                     build: npm run build
                     spawn: node dist/server.js
+                    wait-on: 'http://localhost:3000'
                     spec: cypress/integration/main.spec.js, cypress/integration/paragraphs.spec.js
                     record: true
                 env:
