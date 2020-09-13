@@ -1,16 +1,23 @@
 describe('UI', () => {
+	beforeEach(() => {
+		cy.route2('/timelines', {fixture: 'timelines/homeTimeline'})
+
+		cy.stubEndpoint(/\/twitter\/tweets.*/)
+	})
+
 	it('should have buttons', () => {
 		cy.visit('/')
 
-		cy.get('button.expandSidebar').should('exist')
-		cy.get('button.addTimeline').should('exist')
+		cy.get('button#expandSidebar').should('exist')
+
+		cy.get('button#newTimelineSidebar').should('exist')
 	})
 
 	describe('Login', () => {
 		it('shows the twitter login button', () => {
 			cy.visit('/')
 
-			cy.get('.expandSidebar').click()
+			cy.get('#expandSidebar').click()
 
 			cy.get('.sidebarMenu')
 				.contains('Twitter')
@@ -19,17 +26,11 @@ describe('UI', () => {
 		})
 
 		it("doesn't show the login button when logged in", () => {
-			cy.visit('/', {
-				onBeforeLoad(win) {
-					cy.stub(win, 'fetch').withArgs('/checkLogins')
-						.resolves({
-							ok: true,
-							json: () => ({Twitter: true}),
-						})
-				},
-			})
+			cy.route2('/checkLogins', {Twitter: true})
 
-			cy.get('.expandSidebar').click()
+			cy.visit('/')
+
+			cy.get('#expandSidebar').click()
 
 			cy.get('.sidebarMenu')
 				.contains('Twitter')

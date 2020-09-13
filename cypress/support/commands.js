@@ -30,3 +30,17 @@ Cypress.Commands.add('getPayload', fixture => {
 		return $payload
 	})
 })
+
+Cypress.Commands.add('stubEndpoint', endpoint => {
+	cy.route2(endpoint, {
+		rateLimitStatus: {
+			remaining: 15,
+			limit: 15,
+			reset: Date.now() + 300000
+		},
+		posts: [],
+		reposts: [],
+		quotes: [],
+		timelinePosts: {newArticles: []}
+	})
+})
