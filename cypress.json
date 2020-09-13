@@ -1,8 +1,9 @@
 {
-	"baseUrl": "http://localhost:3000",
-	"experimentalNetworkStubbing": true,
-	"experimentalComponentTesting": true,
-	"env": {
-		"coverage": false
-	}
+  "baseUrl": "http://localhost:3000",
+  "experimentalNetworkStubbing": true,
+  "experimentalComponentTesting": true,
+  "env": {
+    "coverage": false
+  },
+  "projectId": "caktam"
 }
