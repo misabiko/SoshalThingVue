@@ -22,4 +22,5 @@ jobs:
             -   name: Cypress run
                 uses: cypress-io/github-action@v2
                 with:
+                    start: npm start
                     spec: cypress/integration/main.spec.js, cypress/integration/paragraphs.spec.js
