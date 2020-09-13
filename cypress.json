@@ -6,5 +6,8 @@
     "coverage": false
   },
   "projectId": "caktam",
-  "ignoreTestFiles": "**/server.spec.js"
+  "ignoreTestFiles": [
+    "**/server.spec.js",
+    "**/paragraphs.spec.js"
+  ]
 }

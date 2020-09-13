@@ -68,7 +68,7 @@ describe('ArticleParagraph', () => {
 			mountParagraph('tweetElUndefined')
 		})
 
-		it.only('hashtags in middle', () => {
+		it.skip('hashtags in middle', () => {
 			mountParagraphRequest('1298893373206671360')
 
 			cy.get('.articleParagraph')
