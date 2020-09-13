@@ -2,7 +2,7 @@
 dist/**
 /public/style.css*
 src/server/credentials.json
-src/server/access.json
+**/access.json
 src/server/routes/timelines.json
 testAccess.*
 

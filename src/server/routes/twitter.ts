@@ -388,16 +388,35 @@ export namespace Twitter {
 		router.post('/unlike/:id', preventUnauthorized, unlike);
 		router.post('/retweet/:id', preventUnauthorized, retweet);
 
-		if (process.env.NODE_ENV === 'development') {
+		if (process.env.NODE_ENV === 'development' && process.env.CYPRESS_ACCESS) {
 			try {
-				// @ts-ignore
-				(await import('./testAccess'))(router, consumer_key, consumer_secret, (newClient : TwitterLite, newAuthUser : Twitter.AuthUser) => {
-					client = newClient;
-					authUser = newAuthUser;
+				const {access_token_key, access_token_secret, id, username} = JSON.parse(await fs.promises.readFile('cypress/fixtures/access.json', 'utf8'));
+
+				router.get('/access', async function(req : Request, res : Response, next : NextFunction) {
+					authUser = {id, username};
+
+					client = new TwitterLite({
+						consumer_key,
+						consumer_secret,
+						access_token_key,
+						access_token_secret,
+					});
+
+					req.user = authUser;
+
+					req.login(authUser, function(error) {
+						if (error)
+							next(error);
+						else
+							res.sendStatus(200);
+					});
 				});
-				console.log('testAccess.ts loaded.');
+				console.log('access.json loaded.');
 			}catch (e) {
-				console.log('testAccess.ts not found, ignoring.');
+				if (e.code === 'ENOENT')
+					console.log('access.json not found, ignoring.');
+				else
+					throw e;
 			}
 		}
 
