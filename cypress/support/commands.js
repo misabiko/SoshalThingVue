@@ -23,3 +23,10 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('getPayload', fixture => {
+	cy.fixture(fixture).then($payload => {
+		$payload.rateLimitStatus.reset = Date.now() + 300000
+		return $payload
+	})
+})
