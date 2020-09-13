@@ -1,12 +1,12 @@
 <template lang='pug'>
 	.timeline(:class='{simpleTimeline: timelineData.columns === 1}' :style="{flex: '0 0 ' + (timelineData.columnWidth * 500) + 'px', width: (timelineData.columnWidth * 500) + 'px'}")
-		.timelineHeader(@click.self='scrollTop' :class='{timelineInvalid: !endpoint.ready}')
+		.timelineHeader(@click.self='scrollTop' :class='{timelineInvalid: !endpointReady}')
 			b-input(v-if='isOptionsOpen' v-model='nameEdit')
 			strong(v-else) {{ timelineData.name }}
 
 			.timelineButtons
-				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true}).then()' :disabled='!endpoint.ready || !enabled')
-					FontAwesomeIcon(icon='sync-alt' inverse size='lg' :spin='refreshing' :class="{'slow-spin': !refreshing && endpoint.ready && isWaitingRefresh}")
+				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true}).then()' :disabled='!endpointReady || !enabled')
+					FontAwesomeIcon(icon='sync-alt' inverse size='lg' :spin='refreshing' :class="{'slow-spin': !refreshing && endpointReady && isWaitingRefresh}")
 				button.openTimelineOptions(@click='isOptionsOpen = !isOptionsOpen')
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
 
@@ -31,7 +31,7 @@
 			:articles='filteredArticles'
 			:refreshing='refreshing'
 			:service='service'
-			:can-load='enabled && endpoint.ready'
+			:can-load='enabled && endpointReady'
 			:compact-media='timelineData.compactMedia'
 			:scrolling.sync='autoScrolling'
 			:scrollSpeed='scrollSpeed'
@@ -204,7 +204,7 @@ export default class Timeline extends Vue {
 	}
 
 	tryLoadMoreBottom() {
-		if (this.autoScrolling || this.loadingBottomTimeout || !this.endpoint.ready)
+		if (this.autoScrolling || this.loadingBottomTimeout || !this.endpointReady)
 			return;
 
 		const untilLoad = 1000 - moment().diff(this.lastBottomRefreshTime);
@@ -242,6 +242,10 @@ export default class Timeline extends Vue {
 				return false;
 
 		return this.service.loggedIn && this.timelineData.enabled && !!this.timelineData.endpoint;
+	}
+
+	get endpointReady() {
+		return this.endpoint && this.endpoint.ready;
 	}
 
 	get autoRefresh() {
@@ -289,7 +293,7 @@ export default class Timeline extends Vue {
 
 	@Watch('enabled')
 	onEnabledChanged(enabled : boolean) {
-		if (enabled && this.autoRefresh && this.endpoint.ready)
+		if (enabled && this.autoRefresh && this.endpointReady)
 			this.resetAutoRefresh();
 		else
 			this.disableAutoRefresh();

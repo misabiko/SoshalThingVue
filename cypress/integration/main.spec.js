@@ -72,6 +72,35 @@ describe('SoshalThing', () => {
 
 			cy.visit('/')
 		})
+
+		it("adding new timelines works well", () => {
+			const response = {
+				rateLimitStatus: {
+					remaining: 15,
+					limit: 15,
+					reset: Date.now() + 300000
+				},
+				posts: [],
+				reposts: [],
+				quotes: [],
+				timelinePosts: {
+					newArticles: []
+				}
+			};
+			cy.route2('/timelines', {fixture: 'timelines/homeTimeline'})
+
+			cy.route2('/checkLogins', {Twitter: true})
+
+			cy.route2(/\/twitter\/tweets\/home_timeline.*/, response)
+
+			cy.visit('/')
+
+			cy.get('.timeline').should('have.length', 1)
+
+			cy.get('#newTimelineSidebar').click()
+
+			cy.get('.timeline').should('have.length', 2)
+		})
 	})
 
 	describe('Articles', () => {

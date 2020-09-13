@@ -3,13 +3,13 @@
 		b-collapse(:open='expanded' animation='slide-right')
 			ServiceMenu(v-if="current = 'ServiceMenu'")
 		#sidebarButtons
-			button(@click='expanded = !expanded')
+			button#expandSidebar(@click='expanded = !expanded')
 				span: FontAwesomeIcon(
 						:icon="expanded ? 'angle-double-left' : 'angle-double-right'"
 						fixed-width inverse size='2x')
-			button(@click='searchId()')
+			button#searchIdSidebar(@click='searchId()')
 				span: FontAwesomeIcon(icon='search' fixed-width inverse size='2x')
-			button(@click="$emit('new-timeline')")
+			button#newTimelineSidebar(@click="$emit('new-timeline')")
 				span: FontAwesomeIcon(icon='plus' fixed-width inverse size='2x')
 </template>
 
