@@ -1,6 +1,6 @@
 <template lang='pug'>
 	.card
-		.card-image
+		.card-image(v-if='images.length')
 			b-carousel(:arrow='images.length > 1' :indicator='false' :autoplay='false')
 				b-carousel-item(v-for='(image, index) in images' :key='index')
 					figure.image: img(:src='image.url')

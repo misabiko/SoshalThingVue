@@ -25,6 +25,33 @@ export abstract class Service {
 		return this.endpoints[endpoint].refresh(this, timelineOptions);
 	}
 
+	addOrUpdatePosts(...posts : PostData[]) {
+		for (const postData of posts) {
+			if (!this.posts.hasOwnProperty(postData.id))
+				Vue.set(this.posts, postData.id, postData);
+			else
+				this.updatePostData(postData);
+		}
+	}
+
+	addOrUpdateReposts(...reposts : RepostData[]) {
+		for (const repostData of reposts) {
+			if (!this.reposts.hasOwnProperty(repostData.id))
+				Vue.set(this.reposts, repostData.id, repostData);
+			else
+				this.updateArticleData({repost: repostData});
+		}
+	}
+
+	addOrUpdateQuotes(...quotes : QuoteData[]) {
+		for (const quoteData of quotes) {
+			if (!this.quotes.hasOwnProperty(quoteData.id))
+				Vue.set(this.quotes, quoteData.id, quoteData);
+			else
+				this.updateArticleData({quote: quoteData});
+		}
+	}
+
 	getArticleData(article : Article) {
 		switch (article.type) {
 			case ArticleType.Post:
@@ -134,23 +161,9 @@ export class Endpoint {
 
 		this.rateLimitStatus = stuffedResponse.rateLimitStatus;
 
-		for (const postData of stuffedResponse.posts)
-			if (!service.posts.hasOwnProperty(postData.id))
-				Vue.set(service.posts, postData.id, postData);
-			else
-				service.updatePostData(postData);
-
-		for (const repostData of stuffedResponse.reposts)
-			if (!service.reposts.hasOwnProperty(repostData.id))
-				Vue.set(service.reposts, repostData.id, repostData);
-			else
-				service.updateArticleData({repost: repostData});
-
-		for (const quoteData of stuffedResponse.quotes)
-			if (!service.quotes.hasOwnProperty(quoteData.id))
-				Vue.set(service.quotes, quoteData.id, quoteData);
-			else
-				service.updateArticleData({quote: quoteData});
+		service.addOrUpdatePosts(...stuffedResponse.posts);
+		service.addOrUpdateReposts(...stuffedResponse.reposts);
+		service.addOrUpdateQuotes(...stuffedResponse.quotes);
 
 		return stuffedResponse.timelinePosts;
 	}
