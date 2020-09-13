@@ -4,16 +4,12 @@ name: CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
-on:
-    push:
-        branches: [ master, develop ]
-    pull_request:
-        branches: [ master ]
+on: [push]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:    
     cypress-run:
-        runs-on: windows-latest
+        runs-on: ubuntu-latest
         steps:
             -   name: Checkout
                 uses: actions/checkout@v1
@@ -22,5 +18,11 @@ jobs:
             -   name: Cypress run
                 uses: cypress-io/github-action@v2
                 with:
-                    start: npm start
+                    start: node dist/server.js
                     spec: cypress/integration/main.spec.js, cypress/integration/paragraphs.spec.js
+                    record: true
+                env:
+                  # pass the Dashboard record key as an environment variable
+                  CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+                  # pass GitHub token to allow accurately detecting a build vs a re-run build
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
