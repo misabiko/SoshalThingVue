@@ -17,6 +17,7 @@ export class SoshalState {
 		id: '',
 		selectedMedia: 0,
 	};
+	currentModal = '';
 	sidebarExpanded = false;
 	userTimelineBuffer : string[] = [];
 	timelineArticleRadius = 10;
@@ -26,14 +27,15 @@ export class SoshalState {
 const mutations = <MutationTree<SoshalState>>{
 	expandPost(state, post : ExpandedPost) {
 		state.expandedPost = post;
-	},
-
-	clearExpandedPost(state) {
-		state.expandedPost.id = '';
+		state.currentModal = 'PostCard';
 	},
 
 	setSidebarExpanded(state, expanded : boolean) {
 		state.sidebarExpanded = expanded;
+	},
+
+	searchId(state) {
+		state.currentModal = 'SearchId'
 	},
 
 	addUserTimeline(state, handle : string) {
@@ -42,6 +44,12 @@ const mutations = <MutationTree<SoshalState>>{
 
 	clearUserTimelines(state) {
 		state.userTimelineBuffer = [];
+	},
+
+	clearModal(state) {
+		state.currentModal = '';
+
+		state.expandedPost.id = '';
 	}
 };
 

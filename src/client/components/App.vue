@@ -2,29 +2,24 @@
 	#soshalThing
 		Sidebar(@new-timeline='newTimeline')
 		TimelineContainer(ref='timelineContainer')
-		b-modal(:active.sync='isPostModalActive')
-			PostCard
+		MainModal
 </template>
 
 <script lang='ts'>
-import {Vue, Component, Ref, Watch} from 'vue-property-decorator'
+import {Vue, Component, Ref} from 'vue-property-decorator';
+import {State} from 'vuex-class';
 import TimelineContainer from './Timelines/TimelineContainer.vue';
 import Sidebar from './Sidebar';
-import Post from './Articles/Post.vue';
-import {Mutation, State} from 'vuex-class';
-import {ExpandedPost, SoshalState} from '../store';
-import PostCard from './Articles/PostCard.vue';
+import MainModal from './MainModal.vue';
+import {Service} from '../services/service';
 
 @Component({
-	components: {Post, Sidebar, TimelineContainer, PostCard}
+	components: {Sidebar, TimelineContainer, MainModal},
 })
 export default class App extends Vue {
-	@Ref() readonly timelineContainer!: TimelineContainer
+	@Ref() readonly timelineContainer! : TimelineContainer;
 
-	@State expandedPost!: ExpandedPost;
-	@Mutation clearExpandedPost!: () => void;
-
-	isPostModalActive = false;
+	@State services!: { [name : string] : Service }
 
 	mounted() {
 		this.checkLogins();
@@ -35,22 +30,11 @@ export default class App extends Vue {
 			.then(response => response.json());
 
 		for (const service in json) if (json.hasOwnProperty(service))
-			(this.$store.state as SoshalState).services[service].loggedIn = json[service];
+			this.services[service].loggedIn = json[service];
 	}
 
 	newTimeline() : void {
 		this.timelineContainer.addTimeline();
-	}
-
-	@Watch('isPostModalActive')
-	onPostModalChanged(isActive: boolean) {
-		if (!isActive)
-			this.clearExpandedPost();
-	}
-
-	@Watch('expandedPost')
-	onExpandedPostChanged(post: ExpandedPost) {
-		this.isPostModalActive = !!post.id.length;
 	}
 }
 </script>

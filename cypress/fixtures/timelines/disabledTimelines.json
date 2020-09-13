@@ -1,0 +1,41 @@
+[
+	{
+		"name": "Home",
+		"service": "Twitter",
+		"endpoint": "home_timeline",
+		"autoRefresh": true,
+		"enabled": false,
+		"compactMedia": false,
+		"columns": 1,
+		"columnWidth": 1,
+		"showing": [
+			"all"
+		],
+		"options": {
+			"includeReposts": true,
+			"onlyWithMedia": false
+		},
+		"refreshRate": 90000
+	},
+	{
+		"name": "Art",
+		"service": "Twitter",
+		"endpoint": "list",
+		"autoRefresh": true,
+		"enabled": false,
+		"compactMedia": false,
+		"columns": 2,
+		"columnWidth": 2,
+		"showing": [
+			"images",
+			"videos"
+		],
+		"options": {
+			"includeReposts": false,
+			"onlyWithMedia": true,
+			"listSlug": "art",
+			"userHandle": "misabiko"
+		},
+		"refreshRate": 60000
+	}
+]

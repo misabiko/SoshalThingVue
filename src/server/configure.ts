@@ -3,15 +3,22 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import session from 'express-session';
+import connectMemoryStore from 'memorystore';
 import passport from 'passport';
 import {Common} from './routes/common';
 import {Twitter} from './routes/twitter';
 
-export default (app : Express) => {
+export default async (app : Express) => {
+	const MemoryStore = connectMemoryStore(session);
+
 	app.use(morgan('dev'));
 	app.use(cookieParser());
 	app.use(bodyParser.json());
 	app.use(session({
+		cookie: {maxAge: 86400000},
+		store: new MemoryStore({
+			checkPeriod: 86400000,
+		}),
 		secret: 'ehyAv3bH2AwKMMWiOgOeNlOYg',
 		resave: false,
 		saveUninitialized: true,
@@ -26,5 +33,7 @@ export default (app : Express) => {
 	})
 
 	app.use('/', Common.router);
-	app.use('/twitter', Twitter.router);
+	await Twitter.getRouter()
+		.then(router => app.use('/twitter', router))
+		.catch(e => console.error("Failed to initialize Twitter's proxy.", e));
 };

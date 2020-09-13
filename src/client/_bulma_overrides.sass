@@ -9,8 +9,10 @@ $scheme-main: #14151f	//Main background
 $scheme-main-bis: #1f202e	//Article background
 $scheme-main-ter: #282a3e	//Options background
 
+
 $background: $scheme-main
 $dark: #1e2039
+$dark-error: #391e33
 $primary: $blue
 $light: $grey-light
 
@@ -41,8 +43,11 @@ $loading-background: $scheme-main-bis
 	outline: none
 	cursor: pointer
 
-	&:hover svg
+	&:hover:not(:disabled) svg
 		color: $link
+
+	&:disabled svg
+		color: $grey
 
 	&:active
 		margin-top: 1px

@@ -1,45 +1,40 @@
 <template lang='pug'>
-	.timeline(:class='{simpleTimeline: columns === 1}' :style="{flex: '0 0 ' + (columnWidth * 500) + 'px', width: (columnWidth * 500) + 'px'}")
-		.timelineHeader(@click.self='scrollTop')
+	.timeline(:class='{simpleTimeline: timelineData.columns === 1}' :style="{flex: '0 0 ' + (timelineData.columnWidth * 500) + 'px', width: (timelineData.columnWidth * 500) + 'px'}")
+		.timelineHeader(@click.self='scrollTop' :class='{timelineInvalid: !endpointReady}')
 			b-input(v-if='isOptionsOpen' v-model='nameEdit')
 			strong(v-else) {{ timelineData.name }}
 
 			.timelineButtons
-				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true}).then()')
-					FontAwesomeIcon(icon='sync-alt' inverse size='lg' :spin='refreshing' :class="{'slow-spin': !refreshing && isWaitingRefresh}")
+				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true}).then()' :disabled='!endpointReady || !enabled')
+					FontAwesomeIcon(icon='sync-alt' inverse size='lg' :spin='refreshing' :class="{'slow-spin': !refreshing && endpointReady && isWaitingRefresh}")
 				button.openTimelineOptions(@click='isOptionsOpen = !isOptionsOpen')
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
 
 		b-collapse(:open='isOptionsOpen' animation='slide')
-			.timelineOptions
-				TimelineSettings.mb-4(
-					:timeline-data='timelineData'
-					:changesOutside='outsideChanges'
-					:service='service'
-					@apply-settings='applySettings($event)'
-				)
-
-				b-field(label='Columns')
-					b-numberinput(v-model='columns' min='1')
-
-				b-field(label='Width')
-					b-numberinput(v-model='columnWidth' min='1')
-
+			TimelineSettings(
+				:timeline-data='timelineData'
+				:service='service'
+				:name-edit='nameEdit'
+				@update-data="$emit('update-data')"
+			)
 				.level
 					.level-left: b-button.level-item(@click='clearPosts') Clear
-					.level-right
-						b-button.level-item(@click='autoScrolling = true; isOptionsOpen = false;') AutoScroll
+					b-field.level-right(grouped horizontal)
+						b-field.level-item
+							b-input.autoScrollInput(type='number' min='1' v-model='autoScrollSpeed')
+							b-button(@click='autoScrolling = true; isOptionsOpen = false;') AutoScroll
 						b-button.level-item(@click='remove' type='is-danger') Remove
 
 		TimelineArticles(
 			ref='timelineArticles'
-			:columns='columns'
-			:articles='articles'
+			:columns='timelineData.columns'
+			:articles='filteredArticles'
 			:refreshing='refreshing'
 			:service='service'
-			:enabled='enabled'
+			:can-load='enabled && endpointReady'
 			:compact-media='timelineData.compactMedia'
 			:scrolling.sync='autoScrolling'
+			:scrollSpeed='scrollSpeed'
 			@remove-article='removeArticle($event)'
 			@load-bottom='tryLoadMoreBottom'
 		)
@@ -47,13 +42,12 @@
 
 <script lang='ts'>
 import {Component, Prop, Ref, Vue, Watch} from 'vue-property-decorator';
-import {SettingsData} from './TimelineSettings.vue';
 import TimelineSettings from './TimelineSettings.vue';
 import {TimelinePayload} from '../../../core/ServerResponses';
-import {Article} from '../../../core/PostData';
-import {TimelineData} from '../../../core/Timeline';
+import {Article, ArticleType} from '../../../core/PostData';
+import {TimelineData, TimelineFilter} from '../../../core/Timeline';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faEllipsisV, faSyncAlt, faPlus, faMinus} from '@fortawesome/free-solid-svg-icons';
+import {faEllipsisV, faMinus, faPlus, faSyncAlt} from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 import {Endpoint, Service} from '../../services/service';
 import {SoshalState} from '../../store';
@@ -76,16 +70,15 @@ export default class Timeline extends Vue {
 	isOptionsOpen = !(this.timelineData.name && this.timelineData.endpoint) as boolean;
 	nameEdit = this.timelineData.name;
 	lastBottomRefreshTime = moment();
-	columns = 1;
-	columnWidth = 1;	//Could use a better name
 	autoScrolling = false;
 	oldestArticle = null as null | Article;
 	loadingBottomTimeout = 0 as number | undefined;
 	refreshing = false;
+	scrollSpeed = 3;
 
 	mounted() {
 		if (this.enabled)
-			this.resetAutoRefresh();
+			this.resetAutoRefresh({timeout: this.endpoint.timeout});
 
 		if (this.shouldScroll)
 			this.$el.scrollIntoView({
@@ -108,7 +101,7 @@ export default class Timeline extends Vue {
 		if (timeout)
 			this.timeout = window.setTimeout(() => this.resetAutoRefresh(), timeout);
 		else {
-			this.interval = window.setInterval(() => this.refresh(), this.timelineData.refreshRate);
+			this.interval = window.setInterval(async () => await this.refresh(), this.timelineData.refreshRate);
 
 			if (refresh)
 				this.refresh().then();
@@ -128,7 +121,7 @@ export default class Timeline extends Vue {
 			return 0;
 		try {
 			let options = this.timelineData.options;
-			if (this.articles.length) {
+			if (this.filteredArticles.length) {
 				if (bottom)
 					options = {
 						...options,
@@ -156,11 +149,7 @@ export default class Timeline extends Vue {
 			if (payload.oldestArticle)
 				this.oldestArticle = payload.oldestArticle;
 
-			const newArticles = payload.newArticles.filter((a : Article) =>
-				this.articles.findIndex(
-					(b : Article) => b.id === a.id,
-				) < 0,
-			);
+			const newArticles = this.filterNewArticles(payload.newArticles);
 
 			if (newArticles.length) {
 				this.articles.push(...newArticles);
@@ -173,7 +162,7 @@ export default class Timeline extends Vue {
 			if (resetTimer)
 				this.resetAutoRefresh({
 					refresh: false,
-					timeout: this.endpoint.rateLimitStatus.remaining ? 0 : this.rateTimeout(),
+					timeout: this.endpoint.timeout,
 				});
 
 			this.refreshing = false;
@@ -185,8 +174,12 @@ export default class Timeline extends Vue {
 		}
 	}
 
-	rateTimeout() : number {
-		return moment.duration(moment.unix(this.endpoint.rateLimitStatus.reset).diff(moment())).asMilliseconds() + 1000;
+	filterNewArticles(newArticles : Article[]) : Article[] {
+		return newArticles.filter((a : Article) =>
+			this.articles.findIndex(
+				(b : Article) => b.id === a.id,
+			) < 0,
+		);
 	}
 
 	removeArticle(id : string) {
@@ -202,18 +195,6 @@ export default class Timeline extends Vue {
 		this.$emit('remove-timeline', this.timelineData.id);
 	}
 
-	applySettings(settings : SettingsData) {
-		this.timelineData.endpoint = settings.endpoint;
-		this.timelineData.enabled = settings.enabled;
-		this.timelineData.autoRefresh = settings.autoRefresh;
-		this.timelineData.compactMedia = settings.compactMedia;
-		this.timelineData.options = settings.options;
-
-		this.timelineData.name = this.nameEdit;
-
-		this.$emit('update-data');
-	}
-
 	scrollTop() {
 		this.timelineArticles.$el.scroll({
 			top: 0,
@@ -223,17 +204,15 @@ export default class Timeline extends Vue {
 	}
 
 	tryLoadMoreBottom() {
-		if (this.autoScrolling || this.loadingBottomTimeout)
+		if (this.autoScrolling || this.loadingBottomTimeout || !this.endpointReady)
 			return;
 
 		const untilLoad = 1000 - moment().diff(this.lastBottomRefreshTime);
 
 		if (untilLoad < 0)
 			this.loadBottom();
-		else {
-			const rateTimeout = this.endpoint.rateLimitStatus.remaining ? 0 : this.rateTimeout();
-			this.loadingBottomTimeout = window.setTimeout(this.loadBottom, rateTimeout + untilLoad);
-		}
+		else
+			this.loadingBottomTimeout = window.setTimeout(this.loadBottom, this.endpoint.timeout + untilLoad);
 	}
 
 	loadBottom() {
@@ -265,21 +244,56 @@ export default class Timeline extends Vue {
 		return this.service.loggedIn && this.timelineData.enabled && !!this.timelineData.endpoint;
 	}
 
-	get autoRefresh() {
-		return this.timelineData.autoRefresh;
+	get endpointReady() {
+		return this.endpoint && this.endpoint.ready;
 	}
 
-	get outsideChanges() {
-		return this.nameEdit !== this.timelineData.name;
+	get autoRefresh() {
+		return this.timelineData.autoRefresh;
 	}
 
 	get isWaitingRefresh() {
 		return !!this.loadingBottomTimeout;
 	}
 
+	get autoScrollSpeed() {
+		return this.scrollSpeed;
+	}
+
+	set autoScrollSpeed(value : any) {
+		this.scrollSpeed = parseInt(value);
+	}
+
+	get filteredArticles() {
+		return this.articles.filter((a : Article) => {
+				const postData = this.service.getPostData(a);
+
+				if (this.timelineData.showing.includes(TimelineFilter.All))
+					return true;
+
+				if (a.type === ArticleType.Repost && !this.timelineData.showing.includes(TimelineFilter.Reposts))
+					return false;
+				if (a.type === ArticleType.Quote && !this.timelineData.showing.includes(TimelineFilter.Quotes))
+					return false;
+
+				if (!postData.images && !postData.video) {
+					if (!this.timelineData.showing.includes(TimelineFilter.TextOnly))
+						return false;
+				}else {
+					if (postData.images && !this.timelineData.showing.includes(TimelineFilter.Images))
+						return false;
+					if (postData.video && !this.timelineData.showing.includes(TimelineFilter.Videos))
+						return false;
+				}
+
+				return true;
+			},
+		);
+	}
+
 	@Watch('enabled')
 	onEnabledChanged(enabled : boolean) {
-		if (enabled && this.autoRefresh)
+		if (enabled && this.autoRefresh && this.endpointReady)
 			this.resetAutoRefresh();
 		else
 			this.disableAutoRefresh();
@@ -306,15 +320,6 @@ export default class Timeline extends Vue {
 	onOptionsCollapseToggled(optionsOpened : boolean) {
 		if (!optionsOpened)
 			this.nameEdit = this.timelineData.name;
-	}
-
-	@Watch('columns')
-	onColumnChange(newColumnCount : number, oldColumnCount : number) {
-		if (newColumnCount < oldColumnCount) {
-			if (this.columnWidth > 1)
-				this.columnWidth--;
-		}else if (newColumnCount > oldColumnCount)
-			this.columnWidth++;
 	}
 }
 </script>
@@ -344,14 +349,16 @@ export default class Timeline extends Vue {
 	strong
 		vertical-align: middle
 
-	button
-		@include borderless-button(0 1.6rem)
-		height: 100%
+	&.timelineInvalid
+		background-color: $dark-error
 
-.timelineOptions
-	background-color: $scheme-main-ter
-	padding: 1rem
+.timelineButtons > button
+	@include borderless-button(0 1.6rem)
+	height: 100%
 
 .slow-spin
 	animation: fa-spin 6s infinite linear
+
+.autoScrollInput
+	width: 80px
 </style>

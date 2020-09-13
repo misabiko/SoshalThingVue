@@ -20,11 +20,13 @@ export default class TimelineArticles extends Vue {
 	@Prop({type: Object, required: true})
 	readonly service! : Service;
 	@Prop({type: Boolean, required: true})
-	readonly enabled! : boolean;
+	readonly canLoad! : boolean;
 	@Prop({type: Boolean, required: true})
 	readonly compactMedia! : boolean;
 	@Prop({type: Boolean})
 	readonly scrolling! : boolean;
+	@Prop({type: Number, required: true})
+	readonly scrollSpeed! : number;
 
 	@State timelineArticleRadius! : number;
 	@State timelineUnloadMinimum! : number;
@@ -33,7 +35,6 @@ export default class TimelineArticles extends Vue {
 	compactOverrides = {} as { [id : string] : number };
 	scrollDirection = false;
 	scrollRequestId = 0;
-	scrollSpeed = 3;
 	partialArticles = [] as Article[];
 	topArticleId = this.articles.length ? this.articles[0].id : '';
 	bottomArticleId = this.articles.length ?
@@ -89,7 +90,7 @@ export default class TimelineArticles extends Vue {
 		}, [createElement(
 			'b-loading', {
 				props: {
-					active: this.isLoadingBottom,
+					active:  this.isLoadingBottom,
 					'is-full-page': false,
 				},
 			},
@@ -241,20 +242,20 @@ export default class TimelineArticles extends Vue {
 			if (!this.loadingBottomIndex && this.$el.scrollTop == 0 && this.partialArticles.length > this.timelineUnloadMinimum)
 				incrementBottom = true;
 
-			const topIndex = this.getTopIndex();
+			const topIndex = this.$el.scrollTop == 0 ? 0 : this.getTopIndex();
 			const bottomIndex = this.getBottomIndex(topIndex) - (incrementBottom ? this.partialArticles.length - this.timelineUnloadMinimum : 0);
 
 			this.topArticleId = this.articles[topIndex].id;
 			this.bottomArticleId = this.articles[bottomIndex].id;
 			this.partialArticles = this.articles.slice(topIndex, bottomIndex);
-		}
 
-		if (this.loadingBottomIndex)
-			this.$emit('load-bottom');
+			if (this.loadingBottomIndex)
+				this.$emit('load-bottom');
+		}
 	}
 
 	get isLoadingBottom() {
-		return this.enabled && !!this.loadingBottomIndex;
+		return this.canLoad && !!this.loadingBottomIndex;
 	}
 
 	@Watch('scrolling')
@@ -265,8 +266,13 @@ export default class TimelineArticles extends Vue {
 			this.stopScroll();
 	}
 
+	@Watch('articles')
+	onArticlesChange() {
+		this.onRefresh(this.refreshing);
+	}
+
 	@Watch('refreshing')
-	onArticlesChange(refreshing : boolean) {
+	onRefresh(refreshing : boolean) {
 		if (!refreshing)	//If refresh just completed
 			this.updatePartialArticles();
 	}

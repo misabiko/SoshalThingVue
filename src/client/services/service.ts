@@ -4,6 +4,7 @@ import {Article, ArticleType, PostData, QuoteData, RepostData} from '../../core/
 import Vue from 'vue';
 import {SnackbarProgrammatic as Snackbar} from 'buefy';
 import {store} from '../store';
+import moment from 'moment';
 
 export abstract class Service {
 	endpoints : { [name : string] : Endpoint } = {};
@@ -12,7 +13,8 @@ export abstract class Service {
 	reposts : { [id : string] : RepostData } = {};
 	quotes : { [id : string] : QuoteData } = {};
 
-	protected constructor(readonly name : string, readonly loginHref : string) {}
+	protected constructor(readonly name : string, readonly loginHref : string) {
+	}
 
 	addEndpoints(...endpoints : Endpoint[]) {
 		for (const endpoint of endpoints)
@@ -23,6 +25,33 @@ export abstract class Service {
 		return this.endpoints[endpoint].refresh(this, timelineOptions);
 	}
 
+	addOrUpdatePosts(...posts : PostData[]) {
+		for (const postData of posts) {
+			if (!this.posts.hasOwnProperty(postData.id))
+				Vue.set(this.posts, postData.id, postData);
+			else
+				this.updatePostData(postData);
+		}
+	}
+
+	addOrUpdateReposts(...reposts : RepostData[]) {
+		for (const repostData of reposts) {
+			if (!this.reposts.hasOwnProperty(repostData.id))
+				Vue.set(this.reposts, repostData.id, repostData);
+			else
+				this.updateArticleData({repost: repostData});
+		}
+	}
+
+	addOrUpdateQuotes(...quotes : QuoteData[]) {
+		for (const quoteData of quotes) {
+			if (!this.quotes.hasOwnProperty(quoteData.id))
+				Vue.set(this.quotes, quoteData.id, quoteData);
+			else
+				this.updateArticleData({quote: quoteData});
+		}
+	}
+
 	getArticleData(article : Article) {
 		switch (article.type) {
 			case ArticleType.Post:
@@ -31,6 +60,17 @@ export abstract class Service {
 				return this.reposts[article.id];
 			case ArticleType.Quote:
 				return this.quotes[article.id];
+		}
+	}
+
+	getPostData(article : Article) : PostData {
+		switch (article.type) {
+			case ArticleType.Post:
+				return this.posts[article.id];
+			case ArticleType.Repost:
+				return this.posts[this.reposts[article.id].repostedId];
+			case ArticleType.Quote:
+				return this.posts[this.quotes[article.id].quotedId];
 		}
 	}
 
@@ -72,8 +112,8 @@ export abstract class Service {
 			actionText: 'Open Menu',
 			onAction() {
 				store.commit('setSidebarExpanded', true);
-			}
-		})
+			},
+		});
 		this.loggedIn = false;
 		return new Error(message);
 	}
@@ -121,24 +161,23 @@ export class Endpoint {
 
 		this.rateLimitStatus = stuffedResponse.rateLimitStatus;
 
-		for (const postData of stuffedResponse.posts)
-			if (!service.posts.hasOwnProperty(postData.id))
-				Vue.set(service.posts, postData.id, postData);
-			else
-				service.updatePostData(postData);
-
-		for (const repostData of stuffedResponse.reposts)
-			if (!service.reposts.hasOwnProperty(repostData.id))
-				Vue.set(service.reposts, repostData.id, repostData);
-			else
-				service.updateArticleData({repost: repostData});
-
-		for (const quoteData of stuffedResponse.quotes)
-			if (!service.quotes.hasOwnProperty(quoteData.id))
-				Vue.set(service.quotes, quoteData.id, quoteData);
-			else
-				service.updateArticleData({quote: quoteData});
+		service.addOrUpdatePosts(...stuffedResponse.posts);
+		service.addOrUpdateReposts(...stuffedResponse.reposts);
+		service.addOrUpdateQuotes(...stuffedResponse.quotes);
 
 		return stuffedResponse.timelinePosts;
+	}
+
+	get ready() {
+		return this.rateLimitStatus.remaining > 0;
+	}
+
+	get timeout() {
+		if (this.ready)
+			return 0;
+		else
+			return moment.duration(
+				moment.unix(this.rateLimitStatus.reset).diff(moment()),
+			).asMilliseconds() + 100;
 	}
 }

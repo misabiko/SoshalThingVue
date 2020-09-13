@@ -1,44 +1,47 @@
 <template lang='pug'>
 	nav.sidebar
 		b-collapse(:open='expanded' animation='slide-right')
-			ServiceMenu
+			ServiceMenu(v-if="current = 'ServiceMenu'")
 		#sidebarButtons
-			button.expandSidebar(@click='expanded = !expanded')
+			button#expandSidebar(@click='expanded = !expanded')
 				span: FontAwesomeIcon(
 						:icon="expanded ? 'angle-double-left' : 'angle-double-right'"
-						fixed-width
-						inverse
-						size='2x'
-				)
-			button.addTimeline(@click="$emit('new-timeline')")
-				span: FontAwesomeIcon(
-						icon='plus'
-						fixed-width
-						inverse
-						size='2x'
-				)
+						fixed-width inverse size='2x')
+			button#searchIdSidebar(@click='searchId()')
+				span: FontAwesomeIcon(icon='search' fixed-width inverse size='2x')
+			button#newTimelineSidebar(@click="$emit('new-timeline')")
+				span: FontAwesomeIcon(icon='plus' fixed-width inverse size='2x')
 </template>
 
 <script lang='ts'>
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import {Mutation, State} from 'vuex-class';
 import ServiceMenu from './ServiceMenu';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faPlus, faAngleDoubleLeft, faAngleDoubleRight} from '@fortawesome/free-solid-svg-icons';
-import {SoshalState} from '../store';
+import {faPlus, faAngleDoubleLeft, faAngleDoubleRight, faSearch} from '@fortawesome/free-solid-svg-icons';
 
-library.add(faPlus, faAngleDoubleLeft, faAngleDoubleRight);
+library.add(faPlus, faAngleDoubleLeft, faAngleDoubleRight, faSearch);
 
 @Component({components: {ServiceMenu}})
 export default class Sidebar extends Vue {
+	@State sidebarExpanded!: boolean;
+	@Mutation searchId!: () => void;
+
+	current = 'ServiceMenu';
+
+	expand(sidebar : string) {
+		this.current = sidebar;
+		this.expanded = true;
+	}
+
 	get expanded() : boolean {
-		return (this.$store.state as SoshalState).sidebarExpanded;
+		return this.sidebarExpanded;
 	}
 
 	set expanded(value : boolean) {
 		this.$store.commit('setSidebarExpanded', value);
 	}
-
 };
 </script>
 

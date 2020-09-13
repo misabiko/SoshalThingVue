@@ -2,9 +2,24 @@ import fs from 'fs';
 import path from 'path';
 import {Request, Response, Router} from 'express';
 import {Twitter} from './twitter';
-import {TimelineData} from '../../core/Timeline';
+import {defaultTimeline, TimelineData} from '../../core/Timeline';
 
 export namespace Common {
+	function combineDefault(timelines : TimelineData[]) : TimelineData[] {
+		return timelines.map(timeline => {
+			const combinedTimeline = {
+				...defaultTimeline,
+				...timeline,
+				options: {
+					...defaultTimeline.options,
+					...timeline.options,
+				},
+			};
+			delete combinedTimeline.id;
+			return combinedTimeline;
+		});
+	}
+
 	async function saveTimelines(newTimelines : TimelineData[], force = false) {
 		const stringified = JSON.stringify(newTimelines);
 
@@ -17,33 +32,26 @@ export namespace Common {
 
 	async function checkLogins(_req : Request, res : Response) {
 		await res.json({
-			Twitter: Twitter.checkLogin()
-		})
+			Twitter: Twitter.checkLogin(),
+		});
 	}
 
 	async function getTimelines(_req : Request, res : Response) {
 		try {
 			const timelines = JSON.parse(await fs.promises.readFile(timelinesPath, 'utf8'));
 
-			if (timelines instanceof Array)
-				await res.json(timelines);
-			else
+			if (timelines instanceof Array) {
+				await res.json(combineDefault(timelines));
+			}else
 				await res.json([]);
 		}catch (e) {
 			if (e.code === 'ENOENT') {
 				console.log(`Couldn't read "${timelinesPath}", loading default timelines.`);
 				timelines = [{
+					...defaultTimeline,
 					name: 'Home',
 					service: 'Twitter',
 					endpoint: 'home_timeline',
-					autoRefresh: true,
-					enabled: true,
-					compactMedia: true,
-					options: {
-						includeReposts: true,
-						onlyWithMedia: false,
-					},
-					refreshRate: 90000,
 				}];
 
 				await saveTimelines(timelines, true);
@@ -55,24 +63,7 @@ export namespace Common {
 
 	async function updateTimelines(req : Request, res : Response) {
 		if (req.body instanceof Array) {
-			const timelines : TimelineData[] = [];
-			for (let i = 0; i < req.body.length; ++i)
-				timelines.push({
-					name: req.body[i].name || '',
-					service: req.body[i].service || '',
-					endpoint: req.body[i].endpoint || '',
-					autoRefresh: typeof req.body[i].autoRefresh === 'boolean' ? req.body[i].autoRefresh : true,
-					enabled: typeof req.body[i].enabled === 'boolean' ? req.body[i].enabled : true,
-					compactMedia: typeof req.body[i].compactMedia === 'boolean' ? req.body[i].compactMedia : true,
-					refreshRate: req.body[i].refreshRate || 90000,
-					options: {
-						includeReposts: true,
-						onlyWithMedia: false,
-						...req.body[i].options,
-					},
-				});
-
-			await saveTimelines(timelines);
+			await saveTimelines(combineDefault(req.body));
 
 			await res.sendStatus(200);
 		}else
@@ -80,7 +71,7 @@ export namespace Common {
 	}
 
 	const timelinesPath = process.env.SOSHAL_TIMELINE_PATH || path.join(__dirname, 'timelines.json');
-	let timelines: TimelineData[];
+	let timelines : TimelineData[];
 
 	export const router = Router();
 

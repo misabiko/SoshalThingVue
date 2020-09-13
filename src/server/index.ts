@@ -12,6 +12,4 @@ app.use(favicon(icoPath));
 app.use('/index.js', express.static(path.join(__dirname, 'index.js')));
 app.use('/style.css', express.static(path.join(__dirname, 'style.css')));
 
-configure(app);
-
-app.listen(port, () => console.log(`Listening at http://localhost:${port}`));
+configure(app).then(() => app.listen(port, () => console.log(`Listening at http://localhost:${port}`)));
