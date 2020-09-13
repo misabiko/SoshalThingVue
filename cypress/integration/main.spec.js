@@ -28,7 +28,7 @@ describe('SoshalThing', () => {
 	it('get indicator that session is active')
 
 	describe('Timelines', () => {
-		it.only("post don't get added twice", () => {
+		it("post don't get added twice", () => {
 			cy.request('twitter/access')
 
 			cy.request('twitter/tweets/home_timeline').its('body').then($timelinePayload => {
@@ -52,6 +52,35 @@ describe('SoshalThing', () => {
 					cy.get('.timelineArticles').first()
 						.children().should('have.length', $children.length)
 				})
+			})
+		})
+
+		it("doesn't refresh when over rate limit", () => {
+			const response = {
+				rateLimitStatus: {
+					remaining: 0,
+					limit: 15,
+					reset: Date.now() + 300000
+				},
+				posts: [],
+				reposts: [],
+				quotes: [],
+				timelinePosts: {
+					newArticles: []
+				}
+			};
+			cy.route2('/timelines', {fixture: 'timelines/homeTimeline'})
+
+			cy.route2('/checkLogins', {Twitter: true})
+
+			let count = 0;
+
+			cy.route2(/\/twitter\/tweets\/home_timeline.*/, response)
+
+			cy.visit('/')
+
+			cy.wait(3000).then(() => {
+				expect(count).to.equal(1)
 			})
 		})
 	})

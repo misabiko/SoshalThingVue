@@ -77,8 +77,8 @@ export default class Timeline extends Vue {
 	scrollSpeed = 3;
 
 	mounted() {
-		//if (this.enabled)
-		//	this.resetAutoRefresh({timeout: this.endpoint.timeout});
+		if (this.enabled)
+			this.resetAutoRefresh({timeout: this.endpoint.timeout});
 
 		if (this.shouldScroll)
 			this.$el.scrollIntoView({
@@ -95,14 +95,13 @@ export default class Timeline extends Vue {
 	}
 
 	resetAutoRefresh({refresh = true, timeout = 0} = {}) {
-		this.log('ResetAutoRefrehs!');
 		window.clearInterval(this.interval);
 		window.clearTimeout(this.timeout);
 
 		if (timeout)
 			this.timeout = window.setTimeout(() => this.resetAutoRefresh(), timeout);
 		else {
-			this.interval = window.setInterval(() => this.refresh(), this.timelineData.refreshRate);
+			this.interval = window.setInterval(async () => await this.refresh(), this.timelineData.refreshRate);
 
 			if (refresh)
 				this.refresh().then();
@@ -115,7 +114,6 @@ export default class Timeline extends Vue {
 	}
 
 	async refresh({scrollTop = false, bottom = false, resetTimer = false, count = 0} = {}) : Promise<number> {
-		this.log('Refreshing!');
 		if (scrollTop)
 			this.scrollTop();
 
@@ -206,7 +204,7 @@ export default class Timeline extends Vue {
 	}
 
 	tryLoadMoreBottom() {
-		if (this.autoScrolling || this.loadingBottomTimeout)
+		if (this.autoScrolling || this.loadingBottomTimeout || !this.endpoint.ready)
 			return;
 
 		const untilLoad = 1000 - moment().diff(this.lastBottomRefreshTime);
@@ -291,7 +289,7 @@ export default class Timeline extends Vue {
 
 	@Watch('enabled')
 	onEnabledChanged(enabled : boolean) {
-		if (enabled && this.autoRefresh)
+		if (enabled && this.autoRefresh && this.endpoint.ready)
 			this.resetAutoRefresh();
 		else
 			this.disableAutoRefresh();
