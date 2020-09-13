@@ -5,9 +5,5 @@
   "env": {
     "coverage": false
   },
-  "projectId": "caktam",
-  "ignoreTestFiles": [
-    "**/server.spec.js",
-    "**/paragraphs.spec.js"
-  ]
+  "projectId": "caktam"
 }
