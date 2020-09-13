@@ -18,7 +18,8 @@ jobs:
             -   name: Cypress run
                 uses: cypress-io/github-action@v2
                 with:
-                    start: npm run build && node dist/server.js
+                    build: npm run build
+                    spawn: node dist/server.js
                     spec: cypress/integration/main.spec.js, cypress/integration/paragraphs.spec.js
                     record: true
                 env:
