@@ -72,7 +72,7 @@
 		"@types/serve-favicon": "^2.5.0",
 		"babel-loader": "^8.1.0",
 		"css-loader": "^4.2.1",
-		"cypress": "^5.0.0",
+		"cypress": "^5.1.0",
 		"cypress-intellij-reporter": "0.0.4",
 		"cypress-vue-unit-test": "^3.5.1",
 		"mini-css-extract-plugin": "^0.10.0",

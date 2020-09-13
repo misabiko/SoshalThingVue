@@ -1,128 +1,96 @@
 describe('SoshalThing', () => {
 	it("enabled as false shouldn't auto refresh", () => {
-		cy.fixture('manyTimelines').then($timelines => {
-			cy.getTimelines(
-				{
-					timelines: $timelines.map(timeline => {
-						timeline.enabled = false
-						return timeline
-					}),
-					fetchStubs: stub => {
-						stub.withArgs('/twitter/tweets/home_timeline').callsFake(fetch)
+		cy.route2('/timelines', {fixture: 'timelines/disabledTimelines'})
 
-						for (const timeline of $timelines)
-							if (timeline.endpoint === 'search')
-								stub.withArgs('/twitter/tweets/search?' + new URLSearchParams(timeline.options).toString()).callsFake(fetch)
-					},
-				}
-			)
-		})
+		cy.route2('/checkLogins', {Twitter: true})
 
-		//TODO Remove once fetch polyfill is used
-		cy.wait(4000)
+		cy.visit('/')
 
-		cy.get('.timeline').should('have.length', 8)
+		cy.get('.timeline').should('have.length', 2)
 			.each($timeline => {
 				expect($timeline.find('.article').length).be.equal(0)
 			})
 	})
 
 	it("enabled as true should auto refresh", () => {
-		cy.fixture('manyTimelines').then(timelines => {
-			cy.getTimelines(
-				{
-					timelines,
-					fetchStubs: stub => {
-						stub.withArgs('/twitter/tweets/home_timeline').callsFake(fetch)
+		cy.route2('/checkLogins', {Twitter: true})
 
-						for (const timeline of timelines)
-							if (timeline.endpoint === 'search')
-								stub.withArgs('/twitter/tweets/search?' + new URLSearchParams(timeline.options).toString()).callsFake(fetch)
-					},
-				}
-			)
-		})
+		cy.route2('/timelines', {fixture: 'timelines/manyTimelines'})
 
-		//TODO Remove once fetch polyfill is used
-		cy.wait(4000)
+		cy.visit('/')
 
-		cy.get('.timeline').should('have.length', 8)
-			.each($timeline => {
-				expect($timeline.find('.article').length).be.above(0)
-			})
+		//TODO Replace requests with tweet fixtures
+		cy.route2(/\/twitter\/tweets\/home_timeline.*/)
+
+		cy.get('.timeline').should('have.length', 10)
 	})
 
 	it('get indicator that session is active')
 
 	describe('Timelines', () => {
-		it("post don't get added twice", () => {
+		it.only("post don't get added twice", () => {
 			cy.request('twitter/access')
 
 			cy.request('twitter/tweets/home_timeline').its('body').then($timelinePayload => {
-				cy.fixture('manyTimelines').then($timelines => {
-					cy.visit('/', {
-						onBeforeLoad(win) {
-							const stub = cy.stub(win, 'fetch')
-							stub.withArgs('/checkLogins')
-								.resolves({
-									ok: true,
-									json: () => ({Twitter: true}),
-								})
-							stub.withArgs('/timelines')
-								.resolves({
-									ok: true,
-									json: () => [$timelines[0]]
-								})
-							stub.withArgs('/twitter/tweets/home_timeline')
-								.resolves({
-									ok: true,
-									json: () => $timelinePayload
-								})
-						},
-					})
+				cy.route2('/timelines', {fixture: 'timelines/homeTimeline'})
+
+				cy.route2('/checkLogins', {Twitter: true})
+
+				cy.route2('/twitter/tweets/home_timeline', $timelinePayload).as('home_timeline')
+
+				cy.visit('/')
+
+				cy.wait('@home_timeline')
+				cy.wait(1000)
+
+				cy.get('.timelineArticles').first()
+					.children().then($children => {
+					cy.get('.timeline').first()
+						.get('.refreshTimeline')
+						.click()
+
+					cy.get('.timelineArticles').first()
+						.children().should('have.length', $children.length)
 				})
-			})
-
-			cy.get('.timeline').first()
-				.get('.timelinePosts')
-				.children().then($children => {
-				cy.get('.timeline').first()
-					.get('.refreshTimeline')
-					.click()
-
-				cy.get('.timeline').first()
-					.get('.timelinePosts')
-					.children().should('have.length', $children.length)
 			})
 		})
 	})
 
 	describe('Articles', () => {
-		it('skip lines should render correctly'/*, () => {
-			cy.getQuoteTimeline()
-
-			cy.get('.article').contains('\n')
-		}*/)
+		it('skip lines should render correctly')
 
 		describe('Quotes', () => {
-			it("quotes show up well", () => {
-				cy.getQuoteTimeline()
+			it("quotes show up well"/*, () => {
+				cy.request('twitter/access')
 
-				cy.get('.timeline').should('have.length', 1)
-					.first()
-					.get('.refreshTimeline')
-					.click()
+				cy.request({
+					url: 'twitter/tweets/search',
+					qs: {q: 'from:misabiko #soshalTest'} TODO Make fixture response
+				}).its('body').then($timelinePayload => {
+					cy.route2('/timelines', {fixture: 'timelines/quoteTimeline'})
 
-				cy.get('.timelinePosts').children('.quote')
-					.each($quoteElement => {
-						const quotedText = $quoteElement.find('.quotedPost > p').first().text()
+					cy.route2('/checkLogins', {Twitter: true})
 
-						cy.wrap($quoteElement).find('.content > p')
-							.should('not.have.text', quotedText)
-					})
+					cy.route2('/twitter/tweets/search?q=from%3Amisabiko+%23soshalTest&count=25', $timelinePayload)
 
-				//cy.get('.repost').contains('quoted test tweet')
-			})
+					cy.visit('/')
+
+					cy.get('.timeline').should('have.length', 1)
+						.first()
+						.get('.refreshTimeline')
+						.click()
+
+					cy.get('.timelineArticles').children('.quote')
+						.each($quoteElement => {
+							const quotedText = $quoteElement.find('.quotedPost > p').first().text()
+
+							cy.wrap($quoteElement).find('.content > p')
+								.should('not.have.text', quotedText)
+						})
+
+					//cy.get('.repost').contains('quoted test tweet')
+				})
+			}*/)
 		})
 	})
 })

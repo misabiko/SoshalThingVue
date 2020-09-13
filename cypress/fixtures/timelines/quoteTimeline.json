@@ -1,0 +1,1 @@
+[{"name":"Quotes","service":"Twitter","endpoint":"search","autoRefresh":false,"enabled":true,"compactMedia":true,"columns":1,"columnWidth":1,"showing":["all"],"options":{"q":"from:misabiko #soshalTest"},"refreshRate":90000}]

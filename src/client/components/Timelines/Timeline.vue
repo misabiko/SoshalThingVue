@@ -6,7 +6,7 @@
 
 			.timelineButtons
 				button.refreshTimeline(@click='refresh({scrollTop: true, resetTimer: true}).then()' :disabled='!endpoint.ready || !enabled')
-					FontAwesomeIcon(icon='sync-alt' inverse size='lg' :spin='refreshing' :class="{'slow-spin': !refreshing && isWaitingRefresh}")
+					FontAwesomeIcon(icon='sync-alt' inverse size='lg' :spin='refreshing' :class="{'slow-spin': !refreshing && endpoint.ready && isWaitingRefresh}")
 				button.openTimelineOptions(@click='isOptionsOpen = !isOptionsOpen')
 					FontAwesomeIcon(icon='ellipsis-v' inverse size='lg')
 
@@ -31,7 +31,7 @@
 			:articles='filteredArticles'
 			:refreshing='refreshing'
 			:service='service'
-			:enabled='enabled'
+			:can-load='enabled && endpoint.ready'
 			:compact-media='timelineData.compactMedia'
 			:scrolling.sync='autoScrolling'
 			:scrollSpeed='scrollSpeed'
@@ -77,8 +77,8 @@ export default class Timeline extends Vue {
 	scrollSpeed = 3;
 
 	mounted() {
-		if (this.enabled)
-			this.resetAutoRefresh();
+		//if (this.enabled)
+		//	this.resetAutoRefresh({timeout: this.endpoint.timeout});
 
 		if (this.shouldScroll)
 			this.$el.scrollIntoView({
@@ -95,6 +95,7 @@ export default class Timeline extends Vue {
 	}
 
 	resetAutoRefresh({refresh = true, timeout = 0} = {}) {
+		this.log('ResetAutoRefrehs!');
 		window.clearInterval(this.interval);
 		window.clearTimeout(this.timeout);
 
@@ -114,6 +115,7 @@ export default class Timeline extends Vue {
 	}
 
 	async refresh({scrollTop = false, bottom = false, resetTimer = false, count = 0} = {}) : Promise<number> {
+		this.log('Refreshing!');
 		if (scrollTop)
 			this.scrollTop();
 

@@ -20,7 +20,7 @@ export default class TimelineArticles extends Vue {
 	@Prop({type: Object, required: true})
 	readonly service! : Service;
 	@Prop({type: Boolean, required: true})
-	readonly enabled! : boolean;
+	readonly canLoad! : boolean;
 	@Prop({type: Boolean, required: true})
 	readonly compactMedia! : boolean;
 	@Prop({type: Boolean})
@@ -90,7 +90,7 @@ export default class TimelineArticles extends Vue {
 		}, [createElement(
 			'b-loading', {
 				props: {
-					active: this.isLoadingBottom,
+					active:  this.isLoadingBottom,
 					'is-full-page': false,
 				},
 			},
@@ -255,7 +255,7 @@ export default class TimelineArticles extends Vue {
 	}
 
 	get isLoadingBottom() {
-		return this.enabled && !!this.loadingBottomIndex;
+		return this.canLoad && !!this.loadingBottomIndex;
 	}
 
 	@Watch('scrolling')

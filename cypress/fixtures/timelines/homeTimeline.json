@@ -1,0 +1,20 @@
+[
+	{
+		"name": "Home",
+		"service": "Twitter",
+		"endpoint": "home_timeline",
+		"autoRefresh": true,
+		"enabled": true,
+		"compactMedia": false,
+		"columns": 1,
+		"columnWidth": 1,
+		"showing": [
+			"all"
+		],
+		"options": {
+			"includeReposts": true,
+			"onlyWithMedia": false
+		},
+		"refreshRate": 90000
+	}
+]
