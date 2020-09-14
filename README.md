@@ -1,4 +1,4 @@
-![it's hard to find a good screenshot moment](/docs/images/2020-09-13 19_15_03-SoshalThing.png?raw=true)
+![it's hard to find a good screenshot moment](/docs/images/timelines.png?raw=true)
 
 # SoshalThing [![SoshalThing](https://img.shields.io/endpoint?url=https://dashboard.cypress.io/badge/simple/caktam/master&style=flat&logo=cypress)](https://dashboard.cypress.io/projects/caktam/runs)
 
@@ -33,6 +33,6 @@ Basically a Tweetdeck-style timeline app to host feeds from various service/netw
 
 ## More screenshots
 
-![Image Display (with carousel)](/docs/images/2020-09-13 19_22_03-SoshalThing.png?raw=true)
+![Image Display (with carousel)](/docs/images/expandedview.png?raw=true)
 
-![Timeline settings](/docs/images/2020-09-13 19_23_22-SoshalThing.png?raw=true)
+![Timeline settings](/docs/images/timelinesettings.png?raw=true)
