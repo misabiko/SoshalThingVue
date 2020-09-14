@@ -132,12 +132,12 @@ export default class Timeline extends Vue {
 					options = {
 						...options,
 						since: this.articles[0].id,
-						count: count || 25,
+						count: count || this.endpoint.maxCount,
 					};
 			}else
 				options = {
 					...options,
-					count: count || 25,
+					count: count || this.endpoint.maxCount,
 				};
 
 			this.refreshing = true;
