@@ -22,6 +22,7 @@ export class SoshalState {
 	userTimelineBuffer : string[] = [];
 	timelineArticleRadius = 10;
 	timelineUnloadMinimum = 35;
+	hideHiddenArticles = false;
 }
 
 const mutations = <MutationTree<SoshalState>>{
@@ -50,6 +51,14 @@ const mutations = <MutationTree<SoshalState>>{
 		state.currentModal = '';
 
 		state.expandedPost.id = '';
+	},
+
+	toggleHideHiddenArticles(state) {
+		state.hideHiddenArticles = !state.hideHiddenArticles;
+	},
+
+	setHideHiddenArticles(state, hidden : boolean) {
+		state.hideHiddenArticles = hidden;
 	}
 };
 
