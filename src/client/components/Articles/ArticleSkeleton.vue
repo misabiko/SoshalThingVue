@@ -1,5 +1,5 @@
 <template lang='pug'>
-	article.article(:article-id='articleId' @mouseover='hovered = true' @mouseleave='hovered = false')
+	article.article(:article-id='articleId' @mouseover='hovered = true' @mouseleave='hovered = false' @click='onArticleClick')
 		slot(name='header')
 
 		.media
@@ -60,8 +60,8 @@
 </template>
 
 <script lang='ts'>
-import {Vue, Component, Prop, Watch} from 'vue-property-decorator';
-import {Mutation} from 'vuex-class';
+import {Component, Prop, Vue, Watch} from 'vue-property-decorator';
+import {Mutation, State} from 'vuex-class';
 import PostImages from './PostImages.vue';
 import PostVideo from './PostVideo.vue';
 import ArticleParagraph from './ArticleParagraph.vue';
@@ -69,7 +69,7 @@ import ArticleButtons from './ArticleButtons/ArticleButtons.vue';
 import ArticleHeader from './ArticleHeader.vue';
 import {Service} from '../../services/service';
 import {PostData} from '../../../core/PostData';
-import {ExpandedPost} from '../../store';
+import {ExpandedPost, OnArticleClick} from '../../store';
 
 export enum CompactOverride {
 	Inherit = 0,
@@ -80,28 +80,47 @@ export enum CompactOverride {
 @Component({components: {ArticleHeader: ArticleHeader, ArticleButtons, ArticleParagraph, PostImages, PostVideo}})
 export default class ArticleSkeleton extends Vue {
 	@Prop({type: Object, required: true})
-	readonly service!: Service;
+	readonly service! : Service;
 	@Prop({type: String, required: true})
-	readonly articleId!: string;
+	readonly articleId! : string;
 	@Prop({type: Boolean, default: true})
-	readonly showMedia!: boolean;
+	readonly showMedia! : boolean;
 	@Prop({type: Object, required: true})
-	readonly postData!: PostData;
+	readonly postData! : PostData;
 	@Prop({type: Boolean})
-	readonly compactMedia!: boolean;
+	readonly compactMedia! : boolean;
 	@Prop({type: Boolean})
-	readonly timelineHidden!: boolean;
+	readonly timelineHidden! : boolean;
 	@Prop({type: Number, default: CompactOverride.Inherit})
-	readonly timelineCompactOverride!: number;
+	readonly timelineCompactOverride! : number;
 
-	@Mutation('expandPost') storeExpandPost!: (post : ExpandedPost) => void;
+	@State('onArticleClick') storeOnArticleClick! : OnArticleClick;
+	@Mutation('expandPost') storeExpandPost! : (post : ExpandedPost) => void;
 
 	hovered = false;
 	hidden = this.timelineHidden;
 	compactOverride = this.timelineCompactOverride;
 
-	expandPost(selectedMedia: number) {
+	expandPost(selectedMedia : number) {
 		this.storeExpandPost({service: this.service, id: this.postData.id, selectedMedia});
+	}
+
+	onArticleClick(event : any) {
+		if (this.storeOnArticleClick === OnArticleClick.Disabled || event.target.matches('.postButton *'))
+			return;
+
+		event.stopPropagation();
+		event.preventDefault();
+		switch (this.storeOnArticleClick) {
+			case OnArticleClick.Hide:
+				this.hidden = !this.hidden;
+				break;
+			case OnArticleClick.Like:
+				this.service.toggleLike(this.postData.id);
+				break;
+			case OnArticleClick.Repost:
+				this.service.repost(this.postData.id);
+		}
 	}
 
 	get compact() {

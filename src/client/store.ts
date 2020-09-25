@@ -11,6 +11,13 @@ export interface ExpandedPost {
 	selectedMedia : number;
 }
 
+export enum OnArticleClick {
+	Disabled,
+	Hide,
+	Like,
+	Repost,
+}
+
 export class SoshalState {
 	services : { [name : string] : Service } = {Twitter: new TwitterService()};
 	expandedPost : ExpandedPost = {
@@ -23,6 +30,7 @@ export class SoshalState {
 	timelineArticleRadius = 10;
 	timelineUnloadMinimum = 35;
 	hideHiddenArticles = false;
+	onArticleClick = OnArticleClick.Disabled;
 }
 
 const mutations = <MutationTree<SoshalState>>{
@@ -59,6 +67,14 @@ const mutations = <MutationTree<SoshalState>>{
 
 	setHideHiddenArticles(state, hidden : boolean) {
 		state.hideHiddenArticles = hidden;
+	},
+
+	setOnArticleClick(state, onClick : OnArticleClick) {
+		state.onArticleClick = onClick;
+	},
+
+	toggleOnArticleClick(state, onClick : OnArticleClick) {
+		state.onArticleClick = state.onArticleClick === onClick ? OnArticleClick.Disabled : onClick;
 	}
 };
 

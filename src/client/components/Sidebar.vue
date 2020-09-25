@@ -13,6 +13,8 @@
 				button#newTimelineSidebar(@click="$emit('new-timeline')")
 					span: FontAwesomeIcon(icon='plus' fixed-width inverse size='2x')
 			#sidebarButtonsBottom
+				button(@click="toggleOnClickHide")
+					span: FontAwesomeIcon(icon='mouse-pointer' fixed-width inverse size='2x')
 				button(@click="toggleHideHiddenArticles")
 					span: FontAwesomeIcon(icon='eye-slash' fixed-width inverse size='2x')
 </template>
@@ -23,9 +25,10 @@ import Component from 'vue-class-component';
 import {Mutation, State} from 'vuex-class';
 import ServiceMenu from './ServiceMenu';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faPlus, faAngleDoubleLeft, faAngleDoubleRight, faSearch, faEyeSlash} from '@fortawesome/free-solid-svg-icons';
+import {faAngleDoubleLeft, faAngleDoubleRight, faEyeSlash, faPlus, faSearch, faMousePointer} from '@fortawesome/free-solid-svg-icons';
+import {OnArticleClick} from '../store';
 
-library.add(faPlus, faAngleDoubleLeft, faAngleDoubleRight, faSearch, faEyeSlash);
+library.add(faPlus, faAngleDoubleLeft, faAngleDoubleRight, faSearch, faEyeSlash, faMousePointer);
 
 @Component({components: {ServiceMenu}})
 export default class Sidebar extends Vue {
@@ -33,12 +36,17 @@ export default class Sidebar extends Vue {
 	@State sidebarExpanded!: boolean;
 	@Mutation searchId!: () => void;
 	@Mutation toggleHideHiddenArticles!: () => void;
+	@Mutation toggleOnArticleClick!: (onClick : OnArticleClick) => void;
 
 	current = 'ServiceMenu';
 
 	expand(sidebar : string) {
 		this.current = sidebar;
 		this.expanded = true;
+	}
+
+	toggleOnClickHide() {
+		this.toggleOnArticleClick(OnArticleClick.Hide);
 	}
 
 	get expanded() : boolean {
