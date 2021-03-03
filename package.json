@@ -76,7 +76,7 @@
 		"cypress-intellij-reporter": "0.0.4",
 		"cypress-vue-unit-test": "^3.5.1",
 		"mini-css-extract-plugin": "^0.10.0",
-		"pug": "^3.0.0",
+		"pug": "^3.0.1",
 		"pug-plain-loader": "^1.0.0",
 		"sass": "^1.26.10",
 		"sass-loader": "^9.0.3",
