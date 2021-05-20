@@ -347,7 +347,7 @@ export namespace Twitter {
 		passport.use(new TwitterStrategy({
 				consumerKey: consumer_key,
 				consumerSecret: consumer_secret,
-				callbackURL: 'http://localhost:3000/twitter/callback',
+				callbackURL: 'http://localhost:5000/twitter/callback',
 			},
 			function(access_token_key, access_token_secret, profile : Profile, done) {
 				try {

@@ -31,7 +31,7 @@
 			:articles='filteredArticles'
 			:refreshing='refreshing'
 			:service='service'
-			:can-load='enabled && endpointReady'
+			:can-load-bottom='!reachedBottom && enabled && endpointReady'
 			:compact-media='timelineData.compactMedia'
 			:scrolling.sync='autoScrolling'
 			:scrollSpeed='scrollSpeed'
@@ -75,6 +75,7 @@ export default class Timeline extends Vue {
 	loadingBottomTimeout = 0 as number | undefined;
 	refreshing = false;
 	scrollSpeed = 3;
+	reachedBottom = false;
 
 	mounted() {
 		if (this.enabled)
@@ -132,12 +133,12 @@ export default class Timeline extends Vue {
 					options = {
 						...options,
 						since: this.articles[0].id,
-						count: count || 25,
+						count: count || this.endpoint.maxCount,
 					};
 			}else
 				options = {
 					...options,
-					count: count || 25,
+					count: count || this.endpoint.maxCount,
 				};
 
 			this.refreshing = true;
@@ -145,6 +146,9 @@ export default class Timeline extends Vue {
 				this.timelineData.endpoint,
 				options,
 			);
+
+			if (!count && this.oldestArticle && payload.newArticles.length === 1 && payload.newArticles[0].id === this.oldestArticle.id)
+				this.reachedBottom = true;
 
 			if (payload.oldestArticle)
 				this.oldestArticle = payload.oldestArticle;
@@ -204,7 +208,7 @@ export default class Timeline extends Vue {
 	}
 
 	tryLoadMoreBottom() {
-		if (this.autoScrolling || this.loadingBottomTimeout || !this.endpointReady)
+		if (this.reachedBottom || this.autoScrolling || this.loadingBottomTimeout || !this.endpointReady)
 			return;
 
 		const untilLoad = 1000 - moment().diff(this.lastBottomRefreshTime);

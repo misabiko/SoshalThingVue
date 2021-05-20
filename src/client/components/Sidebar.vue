@@ -3,14 +3,20 @@
 		b-collapse(:open='expanded' animation='slide-right')
 			ServiceMenu(v-if="current = 'ServiceMenu'")
 		#sidebarButtons
-			button#expandSidebar(@click='expanded = !expanded')
-				span: FontAwesomeIcon(
-						:icon="expanded ? 'angle-double-left' : 'angle-double-right'"
-						fixed-width inverse size='2x')
-			button#searchIdSidebar(@click='searchId()')
-				span: FontAwesomeIcon(icon='search' fixed-width inverse size='2x')
-			button#newTimelineSidebar(@click="$emit('new-timeline')")
-				span: FontAwesomeIcon(icon='plus' fixed-width inverse size='2x')
+			#sidebarButtonsTop
+				button#expandSidebar(@click='expanded = !expanded')
+					span: FontAwesomeIcon(
+							:icon="expanded ? 'angle-double-left' : 'angle-double-right'"
+							fixed-width inverse size='2x')
+				button#searchIdSidebar(@click='searchId()')
+					span: FontAwesomeIcon(icon='search' fixed-width inverse size='2x')
+				button#newTimelineSidebar(@click="$emit('new-timeline')")
+					span: FontAwesomeIcon(icon='plus' fixed-width inverse size='2x')
+			#sidebarButtonsBottom
+				button(@click="toggleOnClickHide")
+					span: FontAwesomeIcon(icon='mouse-pointer' fixed-width inverse size='2x')
+				button(@click="toggleHideHiddenArticles")
+					span: FontAwesomeIcon(icon='eye-slash' fixed-width inverse size='2x')
 </template>
 
 <script lang='ts'>
@@ -19,20 +25,28 @@ import Component from 'vue-class-component';
 import {Mutation, State} from 'vuex-class';
 import ServiceMenu from './ServiceMenu';
 import {library} from '@fortawesome/fontawesome-svg-core';
-import {faPlus, faAngleDoubleLeft, faAngleDoubleRight, faSearch} from '@fortawesome/free-solid-svg-icons';
+import {faAngleDoubleLeft, faAngleDoubleRight, faEyeSlash, faPlus, faSearch, faMousePointer} from '@fortawesome/free-solid-svg-icons';
+import {OnArticleClick} from '../store';
 
-library.add(faPlus, faAngleDoubleLeft, faAngleDoubleRight, faSearch);
+library.add(faPlus, faAngleDoubleLeft, faAngleDoubleRight, faSearch, faEyeSlash, faMousePointer);
 
 @Component({components: {ServiceMenu}})
 export default class Sidebar extends Vue {
+	@State storeHideHidden!: boolean;
 	@State sidebarExpanded!: boolean;
 	@Mutation searchId!: () => void;
+	@Mutation toggleHideHiddenArticles!: () => void;
+	@Mutation toggleOnArticleClick!: (onClick : OnArticleClick) => void;
 
 	current = 'ServiceMenu';
 
 	expand(sidebar : string) {
 		this.current = sidebar;
 		this.expanded = true;
+	}
+
+	toggleOnClickHide() {
+		this.toggleOnArticleClick(OnArticleClick.Hide);
 	}
 
 	get expanded() : boolean {
@@ -55,12 +69,16 @@ export default class Sidebar extends Vue {
 	z-index: 1
 	display: flex
 
+	.collapse-content
+		height: 100%
+
 #sidebarButtons
 	width: 60px
 	padding: 1rem 0
 	text-align: center
 	display: flex
 	flex-direction: column
+	justify-content: space-between
 
 	button
 		@include borderless-button
@@ -90,9 +108,4 @@ export default class Sidebar extends Vue {
 .slide-right-enter, .slide-right-leave-to
 	max-width: 0
 	overflow: hidden
-</style>
-
-<style lang='sass'>
-.sidebar .collapse-content
-	height: 100%
 </style>

@@ -20,7 +20,7 @@ export default class TimelineArticles extends Vue {
 	@Prop({type: Object, required: true})
 	readonly service! : Service;
 	@Prop({type: Boolean, required: true})
-	readonly canLoad! : boolean;
+	readonly canLoadBottom! : boolean;
 	@Prop({type: Boolean, required: true})
 	readonly compactMedia! : boolean;
 	@Prop({type: Boolean})
@@ -30,8 +30,9 @@ export default class TimelineArticles extends Vue {
 
 	@State timelineArticleRadius! : number;
 	@State timelineUnloadMinimum! : number;
+	@State hideHiddenArticles! : boolean;
 
-	hiddens = new Set<string>();
+	hiddens = [] as string[];
 	compactOverrides = {} as { [id : string] : number };
 	scrollDirection = false;
 	scrollRequestId = 0;
@@ -60,7 +61,7 @@ export default class TimelineArticles extends Vue {
 			props: {
 				service: this.service,
 				articleId: article.id,
-				timelineHidden: this.hiddens.has(article.id),
+				timelineHidden: this.hideHiddenArticles ? false : this.hiddens.includes(article.id),
 				timelineCompactOverride: this.compactOverrides.hasOwnProperty(article.id) ? this.compactOverrides[article.id] : 0,
 				compactMedia: this.compactMedia,
 			},
@@ -84,7 +85,8 @@ export default class TimelineArticles extends Vue {
 	render(createElement : CreateElement) {
 		let children;
 
-		const articles = this.partialArticles.map(article => this.articleFactory(createElement, article));
+		const articles = this.renderedArticles.map(article => this.articleFactory(createElement, article));
+
 		const bottomLoading = createElement('div', {
 			staticClass: 'bottomLoader'
 		}, [createElement(
@@ -147,9 +149,12 @@ export default class TimelineArticles extends Vue {
 
 	onHiddenChange({hidden, id} : { hidden : boolean, id : string }) {
 		if (hidden)
-			this.hiddens.add(id);
-		else
-			this.hiddens.delete(id);
+			this.hiddens.push(id);
+		else {
+			const index = this.hiddens.indexOf(id);
+			if (index > -1)
+				this.hiddens.splice(index, 1);
+		}
 	}
 
 	onCompactOverrideChange({compactOverride, id} : { compactOverride : number, id : string }) {
@@ -255,7 +260,14 @@ export default class TimelineArticles extends Vue {
 	}
 
 	get isLoadingBottom() {
-		return this.canLoad && !!this.loadingBottomIndex;
+		return this.canLoadBottom && !!this.loadingBottomIndex;
+	}
+
+	get renderedArticles() {
+		if (this.hideHiddenArticles)
+			return this.partialArticles.filter(article => !this.hiddens.includes(article.id));
+		else
+			return this.partialArticles;
 	}
 
 	@Watch('scrolling')

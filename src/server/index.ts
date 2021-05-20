@@ -4,7 +4,7 @@ import path from "path";
 import favicon from 'serve-favicon';
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 const icoPath = path.join(__dirname, '..', 'public', 'favicon.ico');
 
 app.use(express.static('public'));
