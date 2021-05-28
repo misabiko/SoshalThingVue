@@ -5,9 +5,12 @@
   "author": {
     "name": "misabiko"
   },
+  "main": "dist/soshalthing.umd.js",
+  "typings": "./dist/src/index.d.ts",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build-lib": "vue-cli-service build --target lib src/index.ts && tsc --emitDeclarationOnly",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e"
   },

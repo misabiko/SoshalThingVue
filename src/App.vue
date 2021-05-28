@@ -1,18 +1,16 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+	<Sidebar></Sidebar>
+	<TimelineContainer timelines='[]'></TimelineContainer>
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import HelloWorld from './components/HelloWorld.vue';
+import {defineComponent} from 'vue'
+import Sidebar from '@/components/Sidebar.vue'
+import TimelineContainer from '@/components/TimelineContainer.vue'
 
-@Options({
-  components: {
-    HelloWorld,
-  },
+export default defineComponent({
+	components: {TimelineContainer, Sidebar},
 })
-export default class App extends Vue {}
 </script>
 
 <style lang="scss">
