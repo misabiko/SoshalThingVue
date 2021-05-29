@@ -1,6 +1,6 @@
 <template>
 	<div id='timelineContainer'>
-		<Timeline :title='timelines[0].title'></Timeline>
+		<Timeline :timeline='timelines[0]'></Timeline>
 	</div>
 </template>
 
@@ -19,6 +19,5 @@ export default defineComponent({
 })
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
+<style scoped lang="sass">
 </style>

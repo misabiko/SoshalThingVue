@@ -15,6 +15,7 @@
     "test:e2e": "vue-cli-service test:e2e"
   },
   "dependencies": {
+    "bulma": "^0.9.2",
     "vue": "^3.0.0",
     "vue-class-component": "^8.0.0-0"
   },
