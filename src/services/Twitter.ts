@@ -1,5 +1,6 @@
 import {Service} from '@/services/index'
-import {Article} from '@/articles'
+import {Article} from '@/data/articles'
+import TweetArticle from '@/components/TweetArticle.vue'
 
 export interface TwitterArticle extends Article {
 	content: string
@@ -14,6 +15,14 @@ export interface TwitterArticle extends Article {
 
 export class TwitterService extends Service {
 	constructor() {
-		super('Twitter');
+		super('Twitter', TweetArticle);
+	}
+
+	getAPIArticleData(id : string) : Promise<any> {
+		return Promise.resolve(undefined);
+	}
+
+	getExternalLink(id : string) : string {
+		return '';
 	}
 }
