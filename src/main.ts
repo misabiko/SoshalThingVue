@@ -5,4 +5,7 @@ import {TwitterService} from '@/services/Twitter'
 
 Service.instances.push(new TwitterService())
 
-createApp(App).mount('#app')
+
+Service.initLocalStorage().then(() =>
+	createApp(App).mount('#app')
+)
