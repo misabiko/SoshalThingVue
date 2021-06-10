@@ -25,7 +25,7 @@ import {PageInfo} from '@/hostpages/pageinfo'
 import {TimelineData} from '@/data/timelines'
 
 export default defineComponent({
-	name: 'App',
+	name: 'FavViewer',
 	components: {
 		Timeline,
 	},

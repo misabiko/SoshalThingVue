@@ -1,10 +1,10 @@
 import { createApp } from 'vue'
-import App from './App.vue'
 import {Service} from '@/services'
 import pages from '@/hostpages'
 import {PixivFollowPage, PixivUserPage} from '@/hostpages/pixiv'
 import {PixivService} from '@/services/pixiv'
 import {PageInfo} from '@/hostpages/pageinfo'
+import FavViewer from '@/FavViewer.vue'
 
 (async () => {
 	let page : PageInfo | undefined
@@ -31,5 +31,5 @@ import {PageInfo} from '@/hostpages/pageinfo'
 
 	await Service.initLocalStorage()
 
-	createApp(App, {pageInfo: page}).mount('#favviewer')
+	createApp(FavViewer, {pageInfo: page}).mount('#favviewer')
 })()

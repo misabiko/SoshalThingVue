@@ -69,6 +69,8 @@ import usePages from '@/composables/usePages'
 import {useAutoScroll} from '@/composables/useAutoScroll'
 import {useSortMethods} from '@/composables/useSortMethods'
 import {useFilters} from '@/composables/useFilters'
+import RowContainer from '@/components/RowContainer.vue'
+import MasonryContainer from '@/components/MasonryContainer.vue'
 
 function headerFaIcon(props : any) {
 	return h('span', {class: 'icon'}, [h('i', {class: `${props.icon} fas fa-lg`})])
@@ -363,8 +365,8 @@ export default defineComponent({
 
 		const containers : { [containerName : string] : any } = {
 			ColumnContainer,
-			//RowContainer,
-			//MasonryContainer,
+			RowContainer,
+			MasonryContainer,
 		}
 
 		options.push(() => [h('div', {class: 'control'},

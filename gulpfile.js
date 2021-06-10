@@ -2,7 +2,7 @@ const {src, dest, series, parallel} = require('gulp')
 const header = require('gulp-header')
 const rename = require('gulp-rename')
 const fs = require('fs')
-const path = require('path')
+//const path = require('path')
 const {spawn} = require('child_process')
 const ts = require('gulp-typescript')
 
@@ -10,13 +10,11 @@ const hostPages = []
 
 function buildHosts() {
 	const hostSources = ['src/hostpages/**.*ts']
-	console.dir(process.argv)
-	const extensionIndex = process.argv.indexOf('--extension')
+
+	/*const extensionIndex = process.argv.indexOf('--extension')
 	if (extensionIndex > -1) {
-		const hostPath = path.join(process.cwd(), process.argv[extensionIndex + 1],'hostpages/**.*ts')
-		console.log(hostPath)
-		hostSources.push(hostPath)
-	}
+		hostSources.push(path.join(process.cwd(), process.argv[extensionIndex + 1], 'hostpages/!**.*ts'))
+	}*/
 
 	return src(hostSources)
 		.pipe(ts({
