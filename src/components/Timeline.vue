@@ -430,7 +430,7 @@ export default defineComponent({
 })
 </script>
 
-<style scoped lang='sass'>
+<style lang='sass'>
 @use '../sass/core' as *
 
 .timeline
