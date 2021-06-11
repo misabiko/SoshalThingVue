@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import {Service} from '@/services'
 import pages from '@/hostpages'
-import {PixivFollowPage, PixivUserPage} from '@/hostpages/pixiv'
+import {PixivPage} from '@/hostpages/pixiv'
 import {PixivService} from '@/services/pixiv'
 import {PageInfo} from '@/hostpages/pageinfo'
 import FavViewer from '@/FavViewer.vue'
@@ -26,7 +26,7 @@ import FavViewer from '@/FavViewer.vue'
 
 	(globalThis as any).services = Service.instances
 
-	if (page instanceof PixivFollowPage || page instanceof PixivUserPage)
+	if (page instanceof PixivPage)
 		Service.instances.push(new PixivService(page))
 
 	await Service.initLocalStorage()

@@ -1,7 +1,9 @@
 import {PageInfo} from './pageinfo'
 import {h} from 'vue'
 
-export class PixivFollowPage extends PageInfo {
+export abstract class PixivPage extends PageInfo {}
+
+export class PixivFollowPage extends PixivPage {
 	pageNum : number
 	lastPage : number
 	csrfToken : string
@@ -37,7 +39,7 @@ export class PixivFollowPage extends PageInfo {
 	}
 }
 
-export class PixivUserPage extends PageInfo {
+export class PixivUserPage extends PixivPage {
 	pageNum! : number
 	lastPage! : number
 
@@ -115,6 +117,40 @@ export class PixivUserPage extends PageInfo {
 	}
 }
 
+export class PixivBookmarkPage extends PixivPage {
+	pageNum! : number
+	lastPage! : number
+	priv: boolean
+
+	constructor(css : string) {
+		super(css, {
+			default: `form._bookmark-settings {display: none;} #favviewer {width: 100%}`
+		})
+
+		const currPage = document.querySelector('.column-order-menu li.current')
+		if (!currPage || !currPage.textContent)
+			throw "Couldn't find pageNum element"
+
+		this.pageNum = parseInt(currPage.textContent) - 1
+
+		const lastPage = currPage.parentElement?.lastElementChild?.firstElementChild?.textContent
+		if (!lastPage)
+			throw "Couldn't find lastPage element"
+
+		this.lastPage = parseInt(lastPage) - 1
+
+		this.priv = new URLSearchParams(window.location.search).get('rest') === 'hide'
+	}
+
+	inject() : void {
+		const paginator = document.querySelector('.column-menu + .column-order-menu')
+		if (!paginator)
+			throw "Couldn't find paginator to inject after"
+
+		paginator.after(this.rootDiv)
+	}
+}
+
 export default [
 	{
 		pageInfo: PixivFollowPage,
@@ -125,5 +161,10 @@ export default [
 		pageInfo: PixivUserPage,
 		urlRegex: /https:\/\/.*pixiv\.net\/.+\/users\/.+\/artworks/,
 		urlMatch: "https://*pixiv.net/*/users/*/artworks*",
+	},
+	{
+		pageInfo: PixivBookmarkPage,
+		urlRegex: /https:\/\/.*pixiv\.net\/bookmark\.php/,
+		urlMatch: "https://*pixiv.net/bookmark.php*",
 	},
 ]

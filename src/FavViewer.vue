@@ -18,7 +18,7 @@
 </template>
 
 <script lang='ts'>
-import {defineComponent, getCurrentInstance, PropType, ref} from 'vue'
+import {defineComponent, PropType, ref} from 'vue'
 import Timeline from '@/components/Timeline.vue'
 import {Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'

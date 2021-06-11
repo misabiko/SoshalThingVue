@@ -1,6 +1,6 @@
 import {HostPageService, PagedEndpoint, Payload, Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
-import {PixivFollowPage, PixivUserPage} from '@/hostpages/pixiv'
+import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
 import PixivArticle from '@/components/PixivArticle.vue'
 import {Article, getImageFormat, ImageData, MediaLoadStatus} from '@/data/articles'
 import {reactive} from 'vue'
@@ -14,17 +14,18 @@ export interface PixivArticle extends Article {
 
 export class PixivService extends Service implements HostPageService {
 	articles! : { [id : string] : PixivArticle }
-	pageInfo? : PixivFollowPage | PixivUserPage
+	pageInfo? : PixivPage
 
 	constructor(pageInfoObj? : PageInfo) {
 		super('Pixiv', PixivArticle)
 
-		if (pageInfoObj instanceof PixivFollowPage || pageInfoObj instanceof PixivUserPage)
+		if (pageInfoObj instanceof PixivPage)
 			this.pageInfo = pageInfoObj
 
 		this.endpoints.push(
 			new FollowPageEndpoint(this.pageInfo instanceof PixivFollowPage ? this.pageInfo : undefined),
 			new UserPageEndpoint(this.pageInfo instanceof PixivUserPage ? this.pageInfo : undefined),
+			new BookmarkPageEndpoint(this.pageInfo instanceof PixivBookmarkPage ? this.pageInfo : undefined),
 		)
 	}
 
@@ -48,6 +49,18 @@ export class PixivService extends Service implements HostPageService {
 						title: 'User',
 						serviceIndex,
 						endpointIndex: 1,
+						container: 'MasonryContainer',
+						defaults: {
+							rtl: false,
+						},
+					},
+				]
+			case PixivBookmarkPage:
+				return [
+					{
+						title: 'Bookmarks',
+						serviceIndex,
+						endpointIndex: 2,
 						container: 'MasonryContainer',
 						defaults: {
 							rtl: false,
@@ -321,8 +334,6 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPage
 	}
 }
 
-
-
 interface UserPageInstanceOpt {
 
 }
@@ -442,6 +453,147 @@ class UserPageEndpoint extends PagedEndpoint<UserPageInstanceOpt, UserPageCallOp
 				format: getImageFormat(img.src),
 			},
 			bookmarked: getComputedStyle(svg).color === "rgb(255, 64, 96)"
+		}
+	}
+
+	initInstance() {
+		if (this.pageInfo)
+			return {
+				articles: reactive([]),
+				loadedPages: [],
+				basePageNum: this.pageInfo.pageNum,
+				lastPage: this.pageInfo.lastPage,
+			}
+		else
+			return super.initInstance()
+	}
+}
+
+interface BookmarkPageInstanceOpt {
+	priv: boolean
+}
+
+interface BookmarkPageCallOpt extends BookmarkPageInstanceOpt {
+	pageNum : number
+}
+
+class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageInstanceOpt, BookmarkPageCallOpt> {
+	constructor(readonly pageInfo? : PixivBookmarkPage) {
+		super('Bookmark')
+
+		if (pageInfo) {
+			const key = this.optionsToInstance({priv: pageInfo?.priv || false})
+			this.instances[key] = {
+				articles: [],
+				basePageNum: pageInfo.pageNum,
+				loadedPages: [],
+				lastPage: pageInfo.lastPage,
+			}
+		}
+	}
+
+	async call(options : BookmarkPageCallOpt) {
+		console.log('Loading page ' + options.pageNum)
+
+		const wrappedPayload = {
+			payload: options.pageNum === this.pageInfo?.pageNum ?
+				BookmarkPageEndpoint.loadCurrentPageArticles(this.pageInfo.pageNum) :
+				await BookmarkPageEndpoint.loadPageArticles(options.pageNum, options.priv),
+			basePageNum: this.pageInfo?.pageNum || 0,
+			lastPage: this.pageInfo?.lastPage || this.pageInfo?.pageNum || 0,
+		}
+
+		this.updateInstance(options, wrappedPayload)
+
+		return wrappedPayload.payload
+	}
+
+	initOptions() : BookmarkPageInstanceOpt {
+		return {
+			priv: this.pageInfo?.priv || false,
+		}
+	}
+
+	private static loadCurrentPageArticles(pageNum : number) {
+		return BookmarkPageEndpoint.parsePageArticles(document, pageNum)
+	}
+
+	private static async loadPageArticles(pageNum : number, priv: boolean) {
+		let url = new URL('https://www.pixiv.net/bookmark.php?rest=hide&order=desc')
+
+		if (pageNum)
+			url.searchParams.set('p', (pageNum + 1).toString())
+
+		if (priv)
+			url.searchParams.set('rest', 'hide')
+
+		const htmlEl = document.createElement('html')
+		htmlEl.innerHTML = await fetch(url.toString()).then(response => response.text())
+
+		return BookmarkPageEndpoint.parsePageArticles(htmlEl, pageNum)
+	}
+
+	private static parsePageArticles(page : Document | HTMLHtmlElement, pageNum : number) : Payload {
+		const articles : PixivArticle[] = []
+		const newArticles = []
+
+		const thumbs : ThumbData[] = [...page.querySelectorAll('.display_editable_works .image-item')].map(t => BookmarkPageEndpoint.parseThumb(t as HTMLLIElement))
+
+		for (const [i, thumb] of thumbs.entries()) {
+			let fullImageUrlSplit = thumb.thumbnail.url.split('/')
+			fullImageUrlSplit.splice(3, 2)
+
+			articles.push({
+				id: thumb.id,
+				title: thumb.title,
+				index: pageNum * 20 + i,
+				media: {
+					status: MediaLoadStatus.ReadyToLoad,
+					thumbnail: thumb.thumbnail,
+					content: {
+						url: fullImageUrlSplit.join('/'),
+						size: thumb.thumbnail.size,
+						format: getImageFormat(thumb.thumbnail.url),
+					},
+				},
+				hidden: false,
+				queried: false,
+				liked: false,
+				bookmarked: true,
+			})
+			newArticles.push(thumb.id)
+		}
+
+		console.log(`Loading ${articles.length} new articles with ${newArticles.length} in timeline.`)
+		return {articles, newArticles}
+	}
+
+	private static parseThumb(thumb : HTMLLIElement) : ThumbData {
+		const img = thumb.querySelector('img') as HTMLImageElement
+		if (!img)
+			throw "Couldn't find img"
+
+		const id = img.getAttribute('data-id')
+		if (!id)
+			throw "Couldn't find id"
+
+		const title = thumb.children[2].firstElementChild?.getAttribute('title')
+		if (!title)
+			throw "Couldn't find title for " + id
+
+		const src = img.getAttribute('data-src')
+		if (!src)
+			throw "Couldn't find src"
+
+		return {
+			id,
+			title,
+			thumbnail: {
+				url: src,
+				size: {width: img.naturalWidth || img.clientWidth || 1, height: img.naturalWidth || img.clientWidth || 1},
+				format: getImageFormat(src),
+			},
+			bookmarked: true
 		}
 	}
 
