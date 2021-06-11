@@ -1,6 +1,7 @@
 import {Component, reactive} from 'vue'
 import {Article} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
+import {PageInfo} from '@/hostpages/pageinfo'
 
 export interface Payload<ArticleType = Article> {
 	articles : ArticleType[],
@@ -98,7 +99,7 @@ export abstract class Service {
 }
 
 export interface HostPageService {
-	pageInfo : {} | { hostPageNum : number }
+	pageInfo? : PageInfo
 }
 
 export abstract class Endpoint<InstanceOpt, CallOpt, InstanceInfo = { articles : string[] }> {

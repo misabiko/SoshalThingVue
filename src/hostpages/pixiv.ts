@@ -10,7 +10,7 @@ export class PixivFollowPage extends PageInfo {
 
 	constructor(css : string) {
 		super(css, {
-			default: `#js-mount-point-latest-following, nav.column-order-menu, nav.column-menu.folder-menu, footer._classic-footer {display: none;} #wrapper, .layout-body, #wrapper #favviewer {width: 100%; height: 84.8vh}`,
+			default: `#js-mount-point-latest-following, nav.column-order-menu, nav.column-menu.folder-menu, footer._classic-footer, .ad-footer {display: none;} #wrapper, .layout-body, #wrapper #favviewer {width: 100%; height: 100%}`,
 			fullscreen: `nav.column-menu, h1.column-title, div.extaraNavi {display: none;} #wrapper #favviewer {height: 93vh}`,
 		})
 

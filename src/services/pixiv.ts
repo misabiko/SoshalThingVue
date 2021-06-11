@@ -12,58 +12,25 @@ export interface PixivArticle extends Article {
 	bookmarked : boolean
 }
 
-enum PageInfoType {
-	Unknown,
-	Follow,
-	User,
-}
-
-type FollowPageInfo = {
-	type : PageInfoType.Follow
-	hostPageNum : number
-	lastPage : number
-	csrfToken : string
-}
-
-type UserPageInfo = {
-	type : PageInfoType.User
-	hostPageNum : number
-	lastPage : number
-}
-
 export class PixivService extends Service implements HostPageService {
 	articles! : { [id : string] : PixivArticle }
-	pageInfo : FollowPageInfo | UserPageInfo | { type : PageInfoType.Unknown }
+	pageInfo? : PixivFollowPage | PixivUserPage
 
 	constructor(pageInfoObj? : PageInfo) {
 		super('Pixiv', PixivArticle)
-		if (pageInfoObj instanceof PixivFollowPage)
-			this.pageInfo = {
-				type: PageInfoType.Follow,
-				hostPageNum: pageInfoObj.pageNum,
-				lastPage: pageInfoObj.lastPage,
-				csrfToken: pageInfoObj.csrfToken,
-			}
-		else if (pageInfoObj instanceof PixivUserPage)
-			this.pageInfo = {
-				type: PageInfoType.User,
-				hostPageNum: pageInfoObj.pageNum,
-				lastPage: pageInfoObj.lastPage,
-			}
-		else
-			this.pageInfo = {type: PageInfoType.Unknown}
+
+		if (pageInfoObj instanceof PixivFollowPage || pageInfoObj instanceof PixivUserPage)
+			this.pageInfo = pageInfoObj
 
 		this.endpoints.push(
-			new FollowPageEndpoint(this.pageInfo.type == PageInfoType.Follow ? this.pageInfo : undefined),
-			new UserPageEndpoint(this.pageInfo.type == PageInfoType.User ? this.pageInfo : undefined),
+			new FollowPageEndpoint(this.pageInfo instanceof PixivFollowPage ? this.pageInfo : undefined),
+			new UserPageEndpoint(this.pageInfo instanceof PixivUserPage ? this.pageInfo : undefined),
 		)
 	}
 
 	initialTimelines(serviceIndex : number) {
-		switch (this.pageInfo.type) {
-			case PageInfoType.Unknown:
-				return []
-			case PageInfoType.Follow:
+		switch (this.pageInfo?.constructor) {
+			case PixivFollowPage:
 				return [
 					{
 						title: 'Following',
@@ -75,7 +42,7 @@ export class PixivService extends Service implements HostPageService {
 						},
 					},
 				]
-			case PageInfoType.User:
+			case PixivUserPage:
 				return [
 					{
 						title: 'User',
@@ -87,6 +54,7 @@ export class PixivService extends Service implements HostPageService {
 						},
 					},
 				]
+			default: return []
 		}
 	}
 
@@ -99,7 +67,7 @@ export class PixivService extends Service implements HostPageService {
 	}
 
 	async like(id : string) {
-		if (this.pageInfo.type != PageInfoType.Follow)
+		if (!(this.pageInfo instanceof PixivFollowPage))
 			return
 
 		const response : LikeResponse = await fetch('https://www.pixiv.net/ajax/illusts/like', {
@@ -130,7 +98,7 @@ export class PixivService extends Service implements HostPageService {
 	}
 
 	async bookmark(id : string) {
-		if (this.pageInfo.type != PageInfoType.Follow)
+		if (!(this.pageInfo instanceof PixivFollowPage))
 			return
 
 		const response : BookmarkResponse = await fetch('https://www.pixiv.net/ajax/illusts/bookmarks/add', {
@@ -215,14 +183,14 @@ interface FollowPageCallOpt extends FollowPageInstanceOpt {
 class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPageCallOpt> {
 	static defaultLastPage = 100
 
-	constructor(readonly pageInfo? : FollowPageInfo) {
+	constructor(readonly pageInfo? : PixivFollowPage) {
 		super('Following')
 
 		if (pageInfo) {
 			const key = this.optionsToInstance({})
 			this.instances[key] = {
 				articles: [],
-				basePageNum: pageInfo.hostPageNum,
+				basePageNum: pageInfo.pageNum,
 				loadedPages: [],
 				lastPage: FollowPageEndpoint.defaultLastPage,
 			}
@@ -233,10 +201,10 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPage
 		console.log('Loading page ' + options.pageNum)
 
 		const wrappedPayload = {
-			payload: options.pageNum === this.pageInfo?.hostPageNum ?
+			payload: options.pageNum === this.pageInfo?.pageNum ?
 				FollowPageEndpoint.loadCurrentPageArticles() :
 				await FollowPageEndpoint.loadPageArticles(options.pageNum),
-			basePageNum: this.pageInfo?.hostPageNum || 0,
+			basePageNum: this.pageInfo?.pageNum || 0,
 			lastPage: FollowPageEndpoint.defaultLastPage,
 		}
 
@@ -345,7 +313,7 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPage
 			return {
 				articles: reactive([]),
 				loadedPages: [],
-				basePageNum: this.pageInfo.hostPageNum,
+				basePageNum: this.pageInfo.pageNum,
 				lastPage: this.pageInfo.lastPage,
 			}
 		else
@@ -366,14 +334,14 @@ interface UserPageCallOpt extends UserPageInstanceOpt {
 class UserPageEndpoint extends PagedEndpoint<UserPageInstanceOpt, UserPageCallOpt> {
 	static defaultLastPage = 100
 
-	constructor(readonly pageInfo? : UserPageInfo) {
+	constructor(readonly pageInfo? : PixivUserPage) {
 		super('User')
 
 		if (pageInfo) {
 			const key = this.optionsToInstance({})
 			this.instances[key] = {
 				articles: [],
-				basePageNum: pageInfo.hostPageNum,
+				basePageNum: pageInfo.pageNum,
 				loadedPages: [],
 				lastPage: UserPageEndpoint.defaultLastPage,
 			}
@@ -384,10 +352,10 @@ class UserPageEndpoint extends PagedEndpoint<UserPageInstanceOpt, UserPageCallOp
 		console.log('Loading page ' + options.pageNum)
 
 		const wrappedPayload = {
-			payload: options.pageNum === this.pageInfo?.hostPageNum ?
+			payload: options.pageNum === this.pageInfo?.pageNum ?
 				UserPageEndpoint.loadCurrentPageArticles() :
 				{articles: [], newArticles: []},
-			basePageNum: this.pageInfo?.hostPageNum || 0,
+			basePageNum: this.pageInfo?.pageNum || 0,
 			lastPage: UserPageEndpoint.defaultLastPage,
 		}
 
@@ -482,7 +450,7 @@ class UserPageEndpoint extends PagedEndpoint<UserPageInstanceOpt, UserPageCallOp
 			return {
 				articles: reactive([]),
 				loadedPages: [],
-				basePageNum: this.pageInfo.hostPageNum,
+				basePageNum: this.pageInfo.pageNum,
 				lastPage: this.pageInfo.lastPage,
 			}
 		else
