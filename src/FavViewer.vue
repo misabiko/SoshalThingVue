@@ -41,6 +41,9 @@ export default defineComponent({
 		for (let i = 0; i < Service.instances.length; i++)
 			timelines.value.push(...Service.instances[i].initialTimelines(i))
 
+		if (!timelines.value.length)
+			console.warn('No timelines were initialized')
+
 		function setViewMode(mode: string) {
 			viewMode.value = mode
 			props?.pageInfo?.setViewMode(mode)

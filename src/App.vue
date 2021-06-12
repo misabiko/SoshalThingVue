@@ -27,6 +27,9 @@ export default defineComponent({
 		for (let i = 0; i < Service.instances.length; i++)
 			timelines.value.push(...Service.instances[i].initialTimelines(i))
 
+		if (!timelines.value.length)
+			console.warn('No timelines were initialized')
+
 		return {timelines}
 	}
 })
