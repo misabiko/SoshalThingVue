@@ -14,7 +14,7 @@
 <script lang='ts'>
 import {defineComponent, PropType} from 'vue'
 import {Article} from '@/data/articles'
-import ArticleComponent from '@/components/TweetArticle.vue'
+import ArticleComponent from '@/components/Articles/TweetArticle.vue'
 
 export default defineComponent({
 	components: {ArticleComponent},

@@ -1,7 +1,7 @@
 import {HostPageService, PagedEndpoint, Payload, Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
-import PixivArticle from '@/components/PixivArticle.vue'
+import PixivArticle from '@/components/Articles/PixivArticle.vue'
 import {Article, getImageFormat, ImageData, MediaLoadStatus} from '@/data/articles'
 import {reactive} from 'vue'
 

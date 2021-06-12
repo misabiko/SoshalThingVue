@@ -1,6 +1,6 @@
 import {Endpoint, Payload, Service} from '@/services/index'
 import {Article} from '@/data/articles'
-import TweetArticle from '@/components/TweetArticle.vue'
+import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {TimelineData} from '@/data/timelines'
 
 export interface TwitterArticle extends Article {

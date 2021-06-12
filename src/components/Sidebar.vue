@@ -5,14 +5,10 @@
 				Twitter
 			</div>
 		</div>
-		<div v-else id='sidebarButtons'>
-			<button class='refreshTimeline'>
+		<div id='sidebarButtons'>
+			<button class='refreshTimeline' @click='expanded = !expanded'>
 				<span class='icon'>
-					<i
-						class='fas fa-2x'
-						:class='expanded ? "fa-angle-double-left" : "fa-angle-double-right"'
-						@click='expanded = !expanded'
-					></i>
+					<FAIcon :icon='expanded ? "angle-double-left" : "angle-double-right"' size='2x'/>
 				</span>
 			</button>
 		</div>
@@ -21,6 +17,10 @@
 
 <script lang="ts">
 import {defineComponent, ref} from 'vue'
+import {library} from '@fortawesome/fontawesome-svg-core'
+import {faAngleDoubleLeft, faAngleDoubleRight} from '@fortawesome/free-solid-svg-icons'
+
+library.add(faAngleDoubleLeft, faAngleDoubleRight)
 
 export default defineComponent({
 	setup() {

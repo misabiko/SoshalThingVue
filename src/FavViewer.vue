@@ -55,7 +55,14 @@ export default defineComponent({
 </script>
 
 <style lang='sass'>
-@import "sass"
+@use 'sass/core' as *
+@import "~bulma/sass/utilities/_all.sass"
+@import "~bulma/sass/form/_all.sass"
+@import "~bulma/sass/components/modal.sass"
+@import "~bulma/sass/components/dropdown.sass"
+@import "~bulma/sass/elements/button.sass"
+@import "~bulma/sass/elements/icon.sass"
+@import "~bulma/sass/elements/box.sass"
 
 #favviewer
 	width: 100vw

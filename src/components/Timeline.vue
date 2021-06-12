@@ -463,9 +463,6 @@ export default defineComponent({
 	&.timelineInvalid
 		background-color: $dark-error
 
-	& .icon i
-		color: $white-ter
-
 .timelineLeftHeader
 	display: flex
 

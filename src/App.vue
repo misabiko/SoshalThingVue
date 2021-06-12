@@ -37,9 +37,12 @@ export default defineComponent({
 
 <style lang="sass">
 @use 'sass/core' as *
-@import "sass"
+@import "~bulma/bulma.sass"
 
 @include pretty-scrollbar
+
+.icon
+	color: $white-ter
 
 html
 	overflow-y: hidden
