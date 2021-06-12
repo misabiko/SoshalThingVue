@@ -8,7 +8,7 @@
 		<div id='sidebarButtons'>
 			<button class='refreshTimeline' @click='expanded = !expanded'>
 				<span class='icon'>
-					<FAIcon :icon='expanded ? "angle-double-left" : "angle-double-right"' size='2x'/>
+					<FontAwesomeIcon :icon='expanded ? "angle-double-left" : "angle-double-right"' size='2x'/>
 				</span>
 			</button>
 		</div>

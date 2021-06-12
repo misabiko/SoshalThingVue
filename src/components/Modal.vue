@@ -15,12 +15,12 @@
 			<div class='modalButtons'>
 				<button class='button' @click='zoom = Math.max(zoom - 10, 10)'>
 					<span class='icon'>
-						<i class='fas fa-search-minus'></i>
+						<FontAwesomeIcon icon='search-minus'/>
 					</span>
 				</button>
 				<button class='button' @click='zoom += 10'>
 					<span class='icon'>
-						<i class='fas fa-search-plus'></i>
+						<FontAwesomeIcon icon='search-plus'/>
 					</span>
 				</button>
 			</div>
@@ -32,6 +32,10 @@
 <script lang='ts'>
 import {defineComponent, PropType, ref} from 'vue'
 import {Service} from '@/services'
+import {library} from '@fortawesome/fontawesome-svg-core'
+import {faSearchMinus, faSearchPlus} from '@fortawesome/free-solid-svg-icons'
+
+library.add(faSearchMinus, faSearchPlus)
 
 export default defineComponent({
 	props: {

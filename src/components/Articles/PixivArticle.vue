@@ -10,6 +10,12 @@ import {defineComponent, h, PropType, toRefs} from 'vue'
 import {PixivArticle, PixivService} from '@/services/pixiv'
 import {useFavViewerButtons} from '@/composables/useFavViewerButtons'
 import {useLazyMedia} from '@/composables/useLazyMedia'
+import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
+import {library} from '@fortawesome/fontawesome-svg-core'
+import {faSmile} from '@fortawesome/free-regular-svg-icons'
+import {faHeart} from '@fortawesome/free-solid-svg-icons'
+
+library.add(faSmile, faHeart)
 
 export default defineComponent({
 	name: 'PixivArticle',
@@ -38,7 +44,11 @@ export default defineComponent({
 					return h('button', {
 							class: 'button',
 							onClick: () => service.value.like(article.value.id),
-						}, [h('span', {class: 'icon is-small'}, [h('i', {class: 'far fa-smile'})])],
+						}, [
+							h('span', {class: 'icon is-small'},
+								h(FontAwesomeIcon, {icon: 'smile'})
+							)
+						],
 					)
 			},
 			() => {
@@ -46,9 +56,13 @@ export default defineComponent({
 					return h('button', {
 							class: 'button',
 							onClick: () => service.value.bookmark(article.value.id),
-						}, [h('span', {class: 'icon is-small'}, [h('i', {class: 'fas fa-heart'})])],
+						}, [
+							h('span', {class: 'icon is-small'},
+								h(FontAwesomeIcon, {class: 'heart'})
+							)
+						],
 					)
-			}
+			},
 		)
 
 		const {medias} = useLazyMedia(service, article, onArticleClick)

@@ -9,6 +9,6 @@ Service.instances.push(new TwitterService())
 
 Service.initLocalStorage().then(() =>
 	createApp(App)
-		.component('FAIcon', FontAwesomeIcon)
+		.component('FontAwesomeIcon', FontAwesomeIcon)
 		.mount('#app')
 )

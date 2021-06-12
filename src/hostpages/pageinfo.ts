@@ -31,10 +31,6 @@ export abstract class PageInfo {
 		this.rootDiv = document.createElement('div')
 		this.rootDiv.id = 'favviewer'
 
-		const fa = document.createElement('script')
-		fa.setAttribute('src', 'https://kit.fontawesome.com/67998b1eca.js')
-		document.head.appendChild(fa)
-
 		this.styleElement = document.createElement('style')
 		this.styleElement.textContent = css + viewModes['default']
 		this.styleElement.id = 'FavViewerCSS'

@@ -21,7 +21,7 @@
 						:class='{repostedPostButton: article.reposted}'
 					>
 						<span class='icon'>
-							<i class='retweet fas'></i>
+							<FontAwesomeIcon icon='retweet'/>
 						</span>
 						<span v-if='article.repostCount'>{{article.repostCount}}</span>
 					</a>
@@ -30,13 +30,13 @@
 						:class='{likedPostButton: article.liked}'
 					>
 						<span class='icon'>
-							<i class='fa-heart' :class='article.liked ? "fas" : "far"'></i>
+							<FontAwesomeIcon :icon='[article.liked ? "fas" : "far", "heart"]'/>
 						</span>
 						<span v-if='article.likeCount'>{{article.likeCount}}</span>
 					</a>
 					<a class='level-item articleButton articleMenuButton'>
 						<span class='icon'>
-							<i class='fa-ellipsis-h fas'></i>
+							<FontAwesomeIcon icon='ellipsis-h'/>
 						</span>
 					</a>
 				</div>
@@ -50,6 +50,11 @@
 import {defineComponent, inject, PropType} from 'vue'
 import {Service} from '@/services'
 import {TwitterArticle} from '@/services/Twitter'
+import {library} from '@fortawesome/fontawesome-svg-core'
+import {faEllipsisH, faHeart as fasHeart, faRetweet} from '@fortawesome/free-solid-svg-icons'
+import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons'
+
+library.add(faRetweet, fasHeart, farHeart, faEllipsisH)
 
 export default defineComponent({
 	props: {

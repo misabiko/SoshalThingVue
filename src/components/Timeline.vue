@@ -5,16 +5,22 @@
 				<strong>{{ timeline.title }}</strong>
 				<div class='timelineButtons' v-if='mainTimeline'>
 					<button @click='$emit("hideSoshal")'>
-						<HeaderFa icon='fa-eye-slash'></HeaderFa>
+						<span class='icon'>
+							<FontAwesomeIcon icon='eye-slash' size='lg'/>
+						</span>
 					</button>
 				</div>
 			</div>
 			<div class='timelineButtons'>
 				<button @click='getNewArticles()'>
-					<HeaderFa icon='fa-arrow-down'></HeaderFa>
+					<span class='icon'>
+						<FontAwesomeIcon icon='arrow-down' size='lg'/>
+					</span>
 				</button>
 				<button @click='showOptions = !showOptions'>
-					<HeaderFa icon='fa-ellipsis-v'></HeaderFa>
+					<span class='icon'>
+						<FontAwesomeIcon icon='ellipsis-v' size='lg'/>
+					</span>
 				</button>
 			</div>
 		</div>
@@ -71,10 +77,10 @@ import {useSortMethods} from '@/composables/useSortMethods'
 import {useFilters} from '@/composables/useFilters'
 import RowContainer from '@/components/RowContainer.vue'
 import MasonryContainer from '@/components/MasonryContainer.vue'
+import {library} from '@fortawesome/fontawesome-svg-core'
+import {faArrowDown, faEllipsisV, faEyeSlash} from '@fortawesome/free-solid-svg-icons'
 
-function headerFaIcon(props : any) {
-	return h('span', {class: 'icon'}, [h('i', {class: `${props.icon} fas fa-lg`})])
-}
+library.add(faEllipsisV, faArrowDown, faEyeSlash)
 
 export default defineComponent({
 	props: {
@@ -84,10 +90,7 @@ export default defineComponent({
 		},
 		mainTimeline: Boolean,
 	},
-	components: {
-		HeaderFa: headerFaIcon,
-		Modal,
-	},
+	components: {Modal},
 	setup(props, {emit}) {
 		const options : (() => VNode | VNode[])[] = []
 
