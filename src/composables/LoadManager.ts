@@ -9,13 +9,17 @@ class LoadManager {
 	maxLoadCount = 4
 	mountedArticles : {[title: string]: string[]} = {}
 
+	get loadInProgress() {
+		return this.timeout != undefined
+	}
+
 	getQueue(service: Service, mountedArticles = Object.values(this.mountedArticles).flat()) {
 		return Object.values(service.articles).filter(a => mountedArticles.includes(a.id) && a.media.status == MediaLoadStatus.Loading).map(a => a.id)
 	}
 
 	loadRemainingData(service: Service, timedout = false) {
 		console.debug('Loading?')
-		if (!timedout)
+		if (!timedout && this.loadInProgress)
 			return
 
 		console.debug('Loading!')

@@ -24,10 +24,6 @@ class QueryManager {
 		return this.timeout != undefined
 	}
 
-	get readyToQuery() {
-		return !this.queryInProgress
-	}
-
 	confirmQueue(queryable : Queryable) {
 		for (const queryingId of this.queue)
 			if (queryable.articles[queryingId].queried) {
@@ -38,7 +34,7 @@ class QueryManager {
 
 	queryRemainingData(queryable : Queryable, timedout = false) {
 		console.debug('Querying?')
-		if (!timedout && !this.readyToQuery)
+		if (!timedout && this.queryInProgress)
 			return
 
 		console.debug('Querying!')

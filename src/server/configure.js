@@ -1,14 +1,6 @@
 const Twitter = require('twitter-lite')
 const morgan = require('morgan')
 
-let credentials
-try {
-	credentials = require('../../credentials.json')
-}catch (e) {
-	console.error("Please include a 'credentials.json' file with {consumer_key, consumer_secret, access_key, access_secret}\n", e)
-	process.exit(1)
-}
-
 function parseQueryErrors(e, next) {
 	if ('errors' in e) {
 		for (const error of e.errors)
@@ -44,20 +36,28 @@ function logRateLimit(response) {
 module.exports = app => {
 	app.use(morgan('dev'))
 
-	const clientV1 = new Twitter({
-		consumer_key: credentials.consumer_key,
-		consumer_secret: credentials.consumer_secret,
-		//access_token_key: credentials.access_key,
-		//access_token_secret: credentials.access_secret,
-	})
+	let credentials, clientV1, clientV2
+	try {
+		credentials = require('../../credentials.json')
 
-	const clientV2 = new Twitter({
-		version: "2",
-		extension: false,
-		//consumer_key: credentials.consumer_key,
-		//consumer_secret: credentials.consumer_secret,
-		bearer_token: credentials.bearer_token,
-	})
+		clientV1 = new Twitter({
+			consumer_key: credentials.consumer_key,
+			consumer_secret: credentials.consumer_secret,
+			//access_token_key: credentials.access_key,
+			//access_token_secret: credentials.access_secret,
+		})
+
+		clientV2 = new Twitter({
+			version: "2",
+			extension: false,
+			//consumer_key: credentials.consumer_key,
+			//consumer_secret: credentials.consumer_secret,
+			bearer_token: credentials.bearer_token,
+		})
+	}catch (e) {
+		console.error("Please include a 'credentials.json' file with {consumer_key, consumer_secret, access_key, access_secret}\n", e)
+		process.exit(1)
+	}
 
 	app.route('/twitter/v1/:endpoint1/:endpoint2')
 		.get(async (req, res, next) => {
