@@ -59,11 +59,15 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineInstanceOpt, UserTimelin
 		const payload : Payload<TwitterArticle> = {articles: [], newArticles: []}
 		const params = new URLSearchParams()
 		params.set('tweet.fields', 'created_at,public_metrics,entities')
+		params.set('expansions', 'author_id')
+		params.set('user.fields', 'name,username,profile_image_url')
 
 		const response = await fetch(`/twitter/users/${options.userId}?${params.toString()}`).then(r => r.json())
 		console.dir(response)
 
 		for (const tweet of response.data) {
+			const user = response.includes.users.find((u : any) => u.id === tweet.author_id)
+
 			payload.articles.push({
 				id: tweet.id,
 				content: tweet.text,
@@ -75,9 +79,9 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineInstanceOpt, UserTimelin
 				likeCount: tweet.public_metrics.like_count,
 				reposted: false,
 				repostCount: tweet.public_metrics.retweet_count,
-				authorAvatar: '',
-				authorHandle: '',
-				authorName: '',
+				authorAvatar: user.profile_image_url,
+				authorHandle: user.username,
+				authorName: user.name,
 				hidden: false,
 				queried: false,
 			})
