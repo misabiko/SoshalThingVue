@@ -1,7 +1,7 @@
 export interface Article {
 	id : string
 	media : Media | QueriedMedia | LazyMedia
-	index : number
+	index : number	//TODO Remove index from base Article
 	hidden : boolean
 	queried : boolean
 }

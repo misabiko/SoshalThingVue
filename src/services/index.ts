@@ -1,4 +1,4 @@
-import {Component, reactive} from 'vue'
+import {Component, markRaw, reactive} from 'vue'
 import {Article} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
@@ -19,13 +19,16 @@ export abstract class Service {
 	articles = reactive<ArticleCollection>({})
 	endpoints : Endpoint<any, any>[] = []
 
+	readonly articleComponent : Component
+
 	defaultSortMethod = 'Unsorted'
 	sortMethods = {}
 
 	protected constructor(
 		public name : string,
-		readonly articleComponent : Component,
+		articleComponent : Component,
 	) {
+		this.articleComponent = markRaw(articleComponent)
 	}
 
 	initialTimelines(serviceIndex : number) : TimelineData[] {
