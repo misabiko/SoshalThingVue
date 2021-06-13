@@ -15,6 +15,8 @@ export interface TwitterArticle extends Article {
 }
 
 export class TwitterService extends Service {
+	articles! : { [id : string] : TwitterArticle }
+
 	constructor() {
 		super('Twitter', TweetArticle)
 
@@ -39,6 +41,10 @@ export class TwitterService extends Service {
 
 	getExternalLink(id : string) : string {
 		return ''
+	}
+
+	getUserURL(handle : string) {
+		return 'https://twitter.com/' + handle
 	}
 }
 
@@ -73,7 +79,7 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineInstanceOpt, UserTimelin
 				content: tweet.text,
 				index: 0,
 				media: {
-					status: MediaLoadStatus.NothingLoaded
+					status: MediaLoadStatus.NothingLoaded,
 				},
 				liked: false,
 				likeCount: tweet.public_metrics.like_count,
