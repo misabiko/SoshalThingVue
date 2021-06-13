@@ -12,6 +12,7 @@
     "build": "vue-cli-service build",
     "build-lib": "vue-cli-service build --target lib src/index.ts && tsc --emitDeclarationOnly",
     "install-userscript": "%BROWSER% %cd%/dist/favviewer.user.js",
+    "server": "node src/server/index.js",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e"
   },
@@ -21,6 +22,10 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/vue-fontawesome": "^3.0.0-4",
     "bulma": "^0.9.2",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0",
+    "serve-favicon": "^2.5.0",
+    "twitter-lite": "^1.1.0",
     "vue": "^3.0.0",
     "vue-class-component": "^8.0.0-0"
   },
