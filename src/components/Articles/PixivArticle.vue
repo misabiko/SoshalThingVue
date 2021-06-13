@@ -1,5 +1,5 @@
 <template>
-	<article class='article' :class='{hiddenArticle: article.hidden}'>
+	<article class='article' :class='{hiddenArticle: article.hidden}' :articleId='article.id'>
 		<component :is='medias'></component>
 		<component :is='holderBoxes'></component>
 	</article>
@@ -57,7 +57,7 @@ export default defineComponent({
 							class: 'button',
 							onClick: () => service.value.bookmark(article.value.id),
 						}, [
-							h('span', {class: 'icon is-small'},
+							h('span', {class: 'icon darkIcon is-small'},
 								h(FontAwesomeIcon, {class: 'heart'})
 							)
 						],

@@ -4,6 +4,8 @@
 			v-for='t in timelines'
 			key='t.title'
 			:timeline='t'
+			:view-mode='viewMode'
+			:view-modes='Object.keys(pageInfo.viewModes)'
 			main-timeline='true'
 			@change-container='t.container = $event'
 			@change-endpoint='t.endpointIndex = $event'
@@ -13,30 +15,30 @@
 		></Timeline>
 	</div>
 	<teleport v-if='pageInfo && viewMode === "hidden"' :to='pageInfo.activatorSelector'>
-		<component :is='pageInfo.activator()' @click='pageInfo.setViewMode("default")'></component>
+		<component :is='pageInfo.activator' @click='setViewMode(lastViewMode)'></component>
 	</teleport>
 </template>
 
 <script lang='ts'>
-import {defineComponent, PropType, ref} from 'vue'
+import {computed, defineComponent, PropType, ref} from 'vue'
 import Timeline from '@/components/Timeline.vue'
+import {TimelineData} from '@/data/timelines'
 import {Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
-import {TimelineData} from '@/data/timelines'
 
 export default defineComponent({
 	name: 'FavViewer',
-	components: {
-		Timeline,
-	},
+	components: {Timeline},
 	props: {
 		pageInfo: {
 			type: Object as PropType<PageInfo>,
+			required: true,
 		}
 	},
 	setup(props) {
 		const timelines = ref<TimelineData[]>([])
-		const viewMode = ref(props?.pageInfo?.defaultViewMode || 'default')
+		const lastViewMode = computed(() => props.pageInfo.currentViewMode)
+		const viewMode = ref(lastViewMode.value)
 
 		for (let i = 0; i < Service.instances.length; i++)
 			timelines.value.push(...Service.instances[i].initialTimelines(i))
@@ -44,12 +46,12 @@ export default defineComponent({
 		if (!timelines.value.length)
 			console.warn('No timelines were initialized')
 
-		function setViewMode(mode: string) {
+		function setViewMode(mode : string) {
 			viewMode.value = mode
-			props?.pageInfo?.setViewMode(mode)
+			props.pageInfo.setViewMode(mode)
 		}
 
-		return {timelines, setViewMode, viewMode}
+		return {timelines, lastViewMode, viewMode, setViewMode}
 	}
 })
 </script>
@@ -63,6 +65,12 @@ export default defineComponent({
 @import "~bulma/sass/elements/button.sass"
 @import "~bulma/sass/elements/icon.sass"
 @import "~bulma/sass/elements/box.sass"
+
+.icon
+	color: $white-ter
+
+.icon.darkIcon
+	color: $black-ter
 
 #favviewer
 	width: 100vw

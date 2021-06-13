@@ -37,7 +37,7 @@ export function useFavViewerButtons(service : Ref<Service>, article : Ref<Articl
 						onClick: () => {
 							queryArticle(article.value.id)
 						},
-					}, [h('span', {class: 'icon is-small'}, [h(FontAwesomeIcon, {icon: 'download'})])]),
+					}, [h('span', {class: 'icon darkIcon is-small'}, h(FontAwesomeIcon, {icon: 'download'}))]),
 				)
 				break
 			case MediaLoadStatus.ReadyToLoad:
@@ -45,7 +45,7 @@ export function useFavViewerButtons(service : Ref<Service>, article : Ref<Articl
 						class: 'button',
 						title: 'Load',
 						onClick: () => service.value.articles[article.value.id].media.status = MediaLoadStatus.Loading,
-					}, [h('span', {class: 'icon is-small'}, [h(FontAwesomeIcon, {icon: 'truck-loading'})])]),
+					}, [h('span', {class: 'icon darkIcon is-small'}, h(FontAwesomeIcon, {icon: 'truck-loading'}))]),
 				)
 				break
 			case MediaLoadStatus.Loading:
@@ -53,7 +53,7 @@ export function useFavViewerButtons(service : Ref<Service>, article : Ref<Articl
 						class: 'button',
 						title: 'Loading...',
 						onClick: () => console.log(`this.checkIfLoaded`),
-					}, [h('span', {class: 'icon is-small'}, [h(FontAwesomeIcon, {icon: 'spinner'})])]),
+					}, [h('span', {class: 'icon darkIcon is-small'}, h(FontAwesomeIcon, {icon: 'spinner'}))]),
 				)
 				break
 			default:
@@ -63,13 +63,13 @@ export function useFavViewerButtons(service : Ref<Service>, article : Ref<Articl
 				class: 'button',
 				title: 'External Link',
 				href: service.value.getExternalLink(article.value.id),
-			}, [h('span', {class: 'icon is-small'}, [h(FontAwesomeIcon, {icon: 'external-link-alt'})])],
+			}, [h('span', {class: 'icon darkIcon is-small'}, h(FontAwesomeIcon, {icon: 'external-link-alt'}))],
 		))
 
 		topButtons.push(h('button', {
 				class: 'button',
 				onClick: () => emit('expand', article.value.id),
-			}, [h('span', {class: 'icon is-small'}, [h(FontAwesomeIcon, {icon: 'expand-arrows-alt'})])],
+			}, [h('span', {class: 'icon darkIcon is-small'}, h(FontAwesomeIcon, {icon: 'expand-arrows-alt'}))],
 		))
 
 		topButtons.push(h('div', {class: 'dropdown is-right' + (showDropdown.value ? ' is-active' : '')}, [
@@ -80,7 +80,7 @@ export function useFavViewerButtons(service : Ref<Service>, article : Ref<Articl
 						'aria-haspopup': true,
 						'aria-controls': 'dropdown-menu',
 						onClick: () => showDropdown.value = !showDropdown.value,
-					}, [h('span', {class: 'icon is-small'}, [h(FontAwesomeIcon, {icon: 'ellipsis-v'})])],
+					}, [h('span', {class: 'icon darkIcon is-small'}, h(FontAwesomeIcon, {icon: 'ellipsis-v'}))],
 				),
 			]),
 			h('div', {class: 'dropdown-menu'}, [

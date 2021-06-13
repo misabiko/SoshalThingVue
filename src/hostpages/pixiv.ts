@@ -43,7 +43,7 @@ export class PixivUserPage extends PixivPage {
 	pageNum! : number
 	lastPage! : number
 
-	defaultViewMode = 'fullscreen'
+	currentViewMode = 'fullscreen'
 	activatorClassNames? : string
 	activatorSelector = 'nav'
 

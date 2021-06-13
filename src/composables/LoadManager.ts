@@ -60,7 +60,7 @@ class LoadManager {
 		if (queue.length)
 			console.log(`Loading [${queue.toString()}]`)
 		else
-			console.log('Done loading.')
+			console.debug('Done loading.')
 		//this.confirmQueue(service.articles)
 
 		this.timeout = undefined

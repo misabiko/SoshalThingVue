@@ -61,7 +61,7 @@ import {
 	provide,
 	reactive,
 	Ref,
-	ref,
+	ref, toRefs,
 	VNode,
 	watch,
 } from 'vue'
@@ -78,9 +78,10 @@ import {useFilters} from '@/composables/useFilters'
 import RowContainer from '@/components/RowContainer.vue'
 import MasonryContainer from '@/components/MasonryContainer.vue'
 import {library} from '@fortawesome/fontawesome-svg-core'
-import {faArrowDown, faEllipsisV, faEyeSlash} from '@fortawesome/free-solid-svg-icons'
+import {faArrowDown, faEllipsisV, faEyeSlash, faMagic, faRandom, faScroll} from '@fortawesome/free-solid-svg-icons'
+import {PageInfo} from '@/hostpages/pageinfo'
 
-library.add(faEllipsisV, faArrowDown, faEyeSlash)
+library.add(faEllipsisV, faArrowDown, faEyeSlash, faRandom, faScroll, faMagic)
 
 export default defineComponent({
 	props: {
@@ -89,9 +90,12 @@ export default defineComponent({
 			required: true,
 		},
 		mainTimeline: Boolean,
+		viewMode: String,
+		viewModes: Array as PropType<string[]>,
 	},
 	components: {Modal},
 	setup(props, {emit}) {
+		const {viewMode} = toRefs(props)
 		const options : (() => VNode | VNode[])[] = []
 
 		const service : Ref<Service> = ref(Service.instances[props.timeline.serviceIndex] as Service)
@@ -361,6 +365,24 @@ export default defineComponent({
 
 			return option
 		})
+
+		if (viewMode?.value)
+			options.push(() => {
+				if (viewMode?.value && props.viewModes)
+					return [
+						h('label', {class: 'field-label'}, 'View Mode'),
+						h('div', {class: 'select'}, [
+							h('select', {
+								value: viewMode.value,
+								onInput: (e : InputEvent) => emit('set-viewmode', (e.target as HTMLSelectElement).value),
+							}, props.viewModes.map(mode =>
+								h('option', {value: mode, selected: viewMode.value === mode}, mode),
+							)),
+						]),
+					]
+				else
+					return []
+			})
 
 		const containerEl = ref()
 		const {autoScroll, scrollOptions} = useAutoScroll(containerEl)

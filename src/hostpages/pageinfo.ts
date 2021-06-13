@@ -11,9 +11,9 @@ export abstract class PageInfo {
 	static viewModes = {
 		hidden: '#favviewer {display: none;}'
 	}
-	defaultViewMode = 'default'
+	currentViewMode = 'default'
 
-	protected viewModes : CSSViewModes
+	viewModes : CSSViewModes
 	protected rootDiv : HTMLDivElement
 	protected styleElement : HTMLStyleElement
 	searchParams : URLSearchParams
@@ -47,8 +47,10 @@ export abstract class PageInfo {
 	setViewMode(mode : string) {
 		if (mode === 'hidden')
 			this.styleElement.textContent = this.viewModes[mode]
-		else
+		else {
+			this.currentViewMode = mode	//Might cause a bug that mode can't be hidden
 			this.styleElement.textContent = this.css + this.viewModes[mode]
+		}
 	}
 
 	activator() {

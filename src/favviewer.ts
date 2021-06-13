@@ -5,6 +5,7 @@ import {PixivPage} from '@/hostpages/pixiv'
 import {PixivService} from '@/services/pixiv'
 import {PageInfo} from '@/hostpages/pageinfo'
 import FavViewer from '@/FavViewer.vue'
+import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 
 (async () => {
 	let page : PageInfo | undefined
@@ -31,5 +32,7 @@ import FavViewer from '@/FavViewer.vue'
 
 	await Service.initLocalStorage()
 
-	createApp(FavViewer, {pageInfo: page}).mount('#favviewer')
+	createApp(FavViewer, {pageInfo: page})
+		.component('FontAwesomeIcon', FontAwesomeIcon)
+		.mount('#favviewer')
 })()

@@ -60,7 +60,7 @@ class QueryManager {
 		if (this.queue.size)
 			console.log(`Querying [${this.queue ? Array.from(this.queue).toString() : 'undefined'}]`)
 		else
-			console.log('Done querying.')
+			console.debug('Done querying.')
 		this.confirmQueue(queryable)
 
 		this.timeout = undefined
@@ -77,7 +77,7 @@ class QueryManager {
 		this.queue.delete(id)
 
 		if (this.timeout === undefined && !this.queue.size) {
-			console.log('Done querying.')
+			console.debug('Done querying.')
 			await queryable.onDoneQuerying()
 		}
 

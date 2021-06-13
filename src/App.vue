@@ -35,7 +35,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="sass">
+<style lang='sass'>
 @use 'sass/core' as *
 @import "~bulma/bulma.sass"
 
