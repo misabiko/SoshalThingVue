@@ -17,15 +17,15 @@
 
 <script lang='ts'>
 import {computed, defineComponent, onBeforeUpdate, PropType} from 'vue'
-import {Article, LazyMedia, Media, MediaLoadStatus} from '@/data/articles'
-import {Service} from '@/services'
+import {LazyMedia, Media, MediaArticle, MediaLoadStatus} from '@/data/articles'
+import {MediaService} from '@/services'
 
-type RatioedArticle = [Article, number]
+type RatioedArticle = [MediaArticle, number]
 
 export default defineComponent({
 	props: {
 		service: {
-			type: Object as PropType<Service>,
+			type: Object as PropType<MediaService>,
 			required: true,
 		},
 		columnCount: {
@@ -35,7 +35,7 @@ export default defineComponent({
 		rightToLeft: Boolean,
 		onArticleClick: Function,
 		articles: {
-			type: Array as PropType<Article[]>,
+			type: Array as PropType<MediaArticle[]>,
 			required: true,
 		},
 		updateQueries: {
@@ -65,8 +65,8 @@ function getColumnHeight(column : [number, RatioedArticle[]]) {
 		return 0
 }
 
-function arrangeColumns(columnCount : number, articles : Article[], rightToLeft: boolean) {
-	const ratioedArticles : RatioedArticle[] = articles.map((a : Article) => [a, getAspectRatio(a.media)])
+function arrangeColumns(columnCount : number, articles : MediaArticle[], rightToLeft: boolean) {
+	const ratioedArticles : RatioedArticle[] = articles.map((a : MediaArticle) => [a, getAspectRatio(a.media)])
 
 	const cols : [number, RatioedArticle[]][] = []
 	for (let i = 0; i < columnCount; i++)

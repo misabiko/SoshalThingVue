@@ -1,9 +1,16 @@
 export interface Article {
 	id : string
-	media : Media | QueriedMedia | LazyMedia
 	index : number	//TODO Remove index from base Article
 	hidden : boolean
 	queried : boolean
+}
+
+export interface MediaArticle extends Article {
+	media : Media | QueriedMedia | LazyMedia | Media[] | QueriedMedia[] | LazyMedia[]
+}
+
+export interface SingleMediaArticle extends Article {
+	media : Media | QueriedMedia | LazyMedia
 }
 
 export enum MediaLoadStatus {
@@ -17,7 +24,7 @@ export enum MediaLoadStatus {
 
 export type Media = {
 	status : MediaLoadStatus.Plain
-	content : MediaContent
+	content : ImageData
 }
 
 export type LazyMedia
@@ -29,23 +36,23 @@ export type LazyMedia
 	| {
 	status : MediaLoadStatus.ReadyToLoad
 	thumbnail : ImageData
-	content : MediaContent
+	content : ImageData
 }
 	| {
 	status : MediaLoadStatus.Loading
 	thumbnail : ImageData
-	content : MediaContent
+	content : ImageData
 }
 	| {
 	status : MediaLoadStatus.FullyLoaded
-	content : MediaContent
+	content : ImageData
 }
 
 export type QueriedMedia
 	= { status : MediaLoadStatus.NothingLoaded }
 	| {
 	status : MediaLoadStatus.FullyLoaded
-	content : MediaContent
+	content : ImageData
 }
 
 type MediaSize = { width : number, height : number }
@@ -63,8 +70,6 @@ export interface ImageData {
 	size? : MediaSize
 	format : ImageFormat
 }
-
-export type MediaContent = ImageData
 
 export function isVideo(image : ImageData) {
 	return image.format == ImageFormat.MP4 || image.format == ImageFormat.WEBM

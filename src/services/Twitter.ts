@@ -1,5 +1,5 @@
 import {Endpoint, Payload, Service} from '@/services/index'
-import {Article, MediaLoadStatus} from '@/data/articles'
+import {Article, Media, MediaArticle, MediaLoadStatus} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import {TimelineData} from '@/data/timelines'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
@@ -23,9 +23,10 @@ export interface TwitterArticle extends Article {
 	author : TwitterUser
 }
 
-export interface TweetArticle extends TwitterArticle {
+export interface TweetArticle extends TwitterArticle, MediaArticle {
 	type : TwitterArticleType.Tweet | TwitterArticleType.Quote
 	text : string
+	media : Media[]
 	liked : boolean
 	reposted : boolean
 	likeCount : number
@@ -42,9 +43,7 @@ export interface QuoteArticle extends TweetArticle {
 	quotedId : string
 }
 
-export class TwitterService extends Service {
-	articles! : { [id : string] : TwitterArticle }
-
+export class TwitterService extends Service<TwitterArticle> {
 	constructor() {
 		super('Twitter', TweetComponent)
 
@@ -154,9 +153,7 @@ function parseRetweet(retweet : APITweetData, author : APIUserData, retweetedTwe
 			avatarURL: retweetedAuthor.profile_image_url,
 		},
 		index: 0,
-		media: {
-			status: MediaLoadStatus.NothingLoaded,
-		},
+		media: [],
 		liked: false,
 		likeCount: retweetedTweet.public_metrics.like_count,
 		reposted: false,
@@ -177,9 +174,7 @@ function parseRetweet(retweet : APITweetData, author : APIUserData, retweetedTwe
 			avatarURL: author.profile_image_url,
 		},
 		index: 0,
-		media: {
-			status: MediaLoadStatus.NothingLoaded,
-		},
+		media: [],
 		liked: false,
 		likeCount: retweet.public_metrics.like_count,
 		reposted: false,

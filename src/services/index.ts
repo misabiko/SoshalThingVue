@@ -1,5 +1,5 @@
 import {Component, markRaw, reactive} from 'vue'
-import {Article} from '@/data/articles'
+import {Article, MediaArticle, SingleMediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
 
@@ -8,15 +8,17 @@ export interface Payload<ArticleType = Article> {
 	newArticles : string[]
 }
 
-export type ArticleCollection = { [id : string] : Article }
-
 export interface LocalStorage {
-	articles : ArticleCollection
+	articles : { [id : string] : Article }
 }
 
-export abstract class Service {
+export type MediaService = Service<MediaArticle>
+
+export type SingleMediaService = Service<SingleMediaArticle>
+
+export abstract class Service<ArticleType extends Article = Article> {
 	static readonly instances : Service[] = []
-	articles = reactive<ArticleCollection>({})
+	articles = reactive<{ [id : string] : ArticleType }>({})
 	endpoints : Endpoint<any, any>[] = []
 
 	readonly articleComponent : Component
@@ -40,12 +42,14 @@ export abstract class Service {
 		const {articles, newArticles} = await actualEndpoint.call(options)
 
 		for (const a of articles)
-			this.updateArticle(a)
+			this.updateArticle(a as ArticleType)
 
 		await this.saveLocalStorage()
 	}
 
-	updateArticle(article : Article) {
+	updateArticle(article : ArticleType) {
+		//TODO Remove ts=ignore
+		// @ts-ignore
 		this.articles[article.id] = article
 	}
 
@@ -55,6 +59,8 @@ export abstract class Service {
 	}
 
 	loadLocalStorage(storage : LocalStorage) : void {
+		//TODO Remove ts=ignore
+		// @ts-ignore
 		this.articles = storage.articles
 	}
 

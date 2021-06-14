@@ -1,6 +1,6 @@
 import {Ref} from 'vue'
-import {Service} from '@/services'
-import {MediaLoadStatus} from '@/data/articles'
+import {Service, MediaService} from '@/services'
+import {LazyMedia, Media, MediaLoadStatus, QueriedMedia} from '@/data/articles'
 
 class LoadManager {
 	autoLoad = true
@@ -13,11 +13,11 @@ class LoadManager {
 		return this.timeout != undefined
 	}
 
-	getQueue(service: Service, mountedArticles = Object.values(this.mountedArticles).flat()) {
-		return Object.values(service.articles).filter(a => mountedArticles.includes(a.id) && a.media.status == MediaLoadStatus.Loading).map(a => a.id)
+	getQueue(service: MediaService, mountedArticles = Object.values(this.mountedArticles).flat()) {
+		return Object.values(service.articles).filter(a => mountedArticles.includes(a.id) && a.media.some((m : Media | LazyMedia | QueriedMedia) => m.status == MediaLoadStatus.Loading)).map(a => a.id)
 	}
 
-	loadRemainingData(service: Service, timedout = false) {
+	loadRemainingData(service: MediaService, timedout = false) {
 		console.debug('Loading?')
 		if (!timedout && this.loadInProgress)
 			return
@@ -66,14 +66,14 @@ class LoadManager {
 		this.timeout = undefined
 	}
 
-	startLoadingArticle(id : string, service: Service, queue = this.getQueue(service)) {
+	startLoadingArticle(id : string, service: MediaService, queue = this.getQueue(service)) {
 		if (queue.length > this.maxLoadCount)
 			return
 
 		service.articles[id].media.status = MediaLoadStatus.Loading
 	}
 
-	doneLoadingArticle(id : string, service: Service) {
+	doneLoadingArticle(id : string, service: MediaService) {
 		service.articles[id].media.status = MediaLoadStatus.FullyLoaded
 
 		const flatMountedArticles = Object.values(this.mountedArticles).flat()
@@ -101,11 +101,11 @@ export function useLoadManagerTimeline(service : Ref<Service>, title: string, mo
 }
 
 export function useLoadManagerArticle() {
-	const startLoading = function(id: string, service : Service) {
+	const startLoading = function(id: string, service : MediaService) {
 		loadManager.startLoadingArticle(id, service)
 	}
 
-	const doneLoading = function(id: string, service : Service) {
+	const doneLoading = function(id: string, service : MediaService) {
 		loadManager.doneLoadingArticle(id, service)
 	}
 

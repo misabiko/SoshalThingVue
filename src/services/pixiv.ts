@@ -1,23 +1,22 @@
 import {HostPageService, PagedEndpoint, Payload, Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
-import PixivArticle from '@/components/Articles/PixivArticle.vue'
-import {Article, getImageFormat, ImageData, MediaLoadStatus} from '@/data/articles'
+import PixivComponent from '@/components/Articles/PixivArticle.vue'
+import {Article, getImageFormat, ImageData, LazyMedia, MediaArticle, MediaLoadStatus} from '@/data/articles'
 import {reactive} from 'vue'
 
-export interface PixivArticle extends Article {
+export interface PixivArticle extends Article, MediaArticle {
 	title : string
-
+	media : LazyMedia
 	liked : boolean
 	bookmarked : boolean
 }
 
-export class PixivService extends Service implements HostPageService {
-	articles! : { [id : string] : PixivArticle }
+export class PixivService extends Service<PixivArticle> implements HostPageService {
 	pageInfo? : PixivPage
 
 	constructor(pageInfoObj? : PageInfo) {
-		super('Pixiv', PixivArticle)
+		super('Pixiv', PixivComponent)
 
 		if (pageInfoObj instanceof PixivPage)
 			this.pageInfo = pageInfoObj

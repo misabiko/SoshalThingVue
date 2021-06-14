@@ -1,8 +1,9 @@
 import {reactive, Ref} from 'vue'
-import {ArticleCollection, Service} from '@/services'
+import {Service} from '@/services'
+import {SingleMediaArticle} from '@/data/articles'
 
 export interface Queryable {
-	articles : ArticleCollection
+	articles : {[id : string] : SingleMediaArticle}
 	getData : (id : string) => void
 	onDoneQuerying : () => void
 }
