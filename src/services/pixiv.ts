@@ -7,7 +7,7 @@ import {reactive} from 'vue'
 
 export interface PixivArticle extends Article, MediaArticle {
 	title : string
-	media : LazyMedia
+	media : [LazyMedia]
 	liked : boolean
 	bookmarked : boolean
 }
@@ -16,7 +16,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 	pageInfo? : PixivPage
 
 	constructor(pageInfoObj? : PageInfo) {
-		super('Pixiv', PixivComponent)
+		super('Pixiv', PixivComponent, true)
 
 		if (pageInfoObj instanceof PixivPage)
 			this.pageInfo = pageInfoObj
@@ -267,7 +267,7 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPage
 				id: thumb.illustId,
 				title: thumb.illustTitle,
 				index: pageNum * 20 + i,
-				media: {
+				media: [{
 					status: MediaLoadStatus.ReadyToLoad,
 					thumbnail: {
 						url: thumb.url,
@@ -279,7 +279,7 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPage
 						size: {width: thumb.width, height: thumb.height},
 						format: getImageFormat(thumb.url),
 					},
-				},
+				}],
 				hidden: false,
 				queried: false,
 				liked: false,
@@ -406,10 +406,10 @@ class UserPageEndpoint extends PagedEndpoint<UserPageInstanceOpt, UserPageCallOp
 				id: thumb.id,
 				title: thumb.title,
 				index: pageNum * 48 + i,
-				media: {
+				media: [{
 					status: MediaLoadStatus.ThumbnailOnly,
 					thumbnail: thumb.thumbnail,
-				},
+				}],
 				hidden: false,
 				queried: false,
 				liked: false,
@@ -546,7 +546,7 @@ class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageInstanceOpt, Bookma
 				id: thumb.id,
 				title: thumb.title,
 				index: pageNum * 20 + i,
-				media: {
+				media: [{
 					status: MediaLoadStatus.ReadyToLoad,
 					thumbnail: thumb.thumbnail,
 					content: {
@@ -554,7 +554,7 @@ class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageInstanceOpt, Bookma
 						size: thumb.thumbnail.size,
 						format: getImageFormat(thumb.thumbnail.url),
 					},
-				},
+				}],
 				hidden: false,
 				queried: false,
 				liked: false,

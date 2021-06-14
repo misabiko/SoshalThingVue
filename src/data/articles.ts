@@ -6,11 +6,7 @@ export interface Article {
 }
 
 export interface MediaArticle extends Article {
-	media : Media | QueriedMedia | LazyMedia | Media[] | QueriedMedia[] | LazyMedia[]
-}
-
-export interface SingleMediaArticle extends Article {
-	media : Media | QueriedMedia | LazyMedia
+	media : PlainMedia[] | QueriedMedia[] | LazyMedia[]
 }
 
 export enum MediaLoadStatus {
@@ -22,7 +18,9 @@ export enum MediaLoadStatus {
 	FullyLoaded,
 }
 
-export type Media = {
+export type Media = PlainMedia | LazyMedia | QueriedMedia
+
+export type PlainMedia = {
 	status : MediaLoadStatus.Plain
 	content : ImageData
 }

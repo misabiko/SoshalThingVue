@@ -1,5 +1,5 @@
 import {Endpoint, Payload, Service} from '@/services/index'
-import {Article, Media, MediaArticle, MediaLoadStatus} from '@/data/articles'
+import {Article, PlainMedia, MediaArticle, MediaLoadStatus} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import {TimelineData} from '@/data/timelines'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
@@ -26,7 +26,7 @@ export interface TwitterArticle extends Article {
 export interface TweetArticle extends TwitterArticle, MediaArticle {
 	type : TwitterArticleType.Tweet | TwitterArticleType.Quote
 	text : string
-	media : Media[]
+	media : PlainMedia[]
 	liked : boolean
 	reposted : boolean
 	likeCount : number
@@ -45,7 +45,7 @@ export interface QuoteArticle extends TweetArticle {
 
 export class TwitterService extends Service<TwitterArticle> {
 	constructor() {
-		super('Twitter', TweetComponent)
+		super('Twitter', TweetComponent, true)
 
 		this.endpoints.push(new UserTimelineEndpoint())
 	}

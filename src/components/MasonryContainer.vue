@@ -17,7 +17,7 @@
 
 <script lang='ts'>
 import {computed, defineComponent, onBeforeUpdate, PropType} from 'vue'
-import {LazyMedia, Media, MediaArticle, MediaLoadStatus} from '@/data/articles'
+import {LazyMedia, PlainMedia, MediaArticle, MediaLoadStatus, QueriedMedia} from '@/data/articles'
 import {MediaService} from '@/services'
 
 type RatioedArticle = [MediaArticle, number]
@@ -66,7 +66,7 @@ function getColumnHeight(column : [number, RatioedArticle[]]) {
 }
 
 function arrangeColumns(columnCount : number, articles : MediaArticle[], rightToLeft: boolean) {
-	const ratioedArticles : RatioedArticle[] = articles.map((a : MediaArticle) => [a, getAspectRatio(a.media)])
+	const ratioedArticles : RatioedArticle[] = articles.map((a : MediaArticle) => [a, getRelativeHeight(a.media)])
 
 	const cols : [number, RatioedArticle[]][] = []
 	for (let i = 0; i < columnCount; i++)
@@ -82,18 +82,25 @@ function arrangeColumns(columnCount : number, articles : MediaArticle[], rightTo
 	return cols.map(column => column[1].map((ratioed : RatioedArticle) => ratioed[0]))
 }
 
-function getAspectRatio(media : Media | LazyMedia) : number {
-	switch (media.status) {
-		case MediaLoadStatus.NothingLoaded:
-			return 1
-		case MediaLoadStatus.ThumbnailOnly:
-			return media.thumbnail.size ? media.thumbnail.size.height / media.thumbnail.size.width : 1
-		case MediaLoadStatus.Plain:
-		case MediaLoadStatus.ReadyToLoad:
-		case MediaLoadStatus.Loading:
-		case MediaLoadStatus.FullyLoaded:
-			return media.content.size ? media.content.size.height / media.content.size.width : 1
-	}
+function getRelativeHeight(medias : PlainMedia[] | LazyMedia[] | QueriedMedia[]) : number {
+	let sum = 1
+	for (const media of medias)
+		switch (media.status) {
+			case MediaLoadStatus.NothingLoaded:
+				sum += 0
+				break
+			case MediaLoadStatus.ThumbnailOnly:
+				sum += media.thumbnail.size ? media.thumbnail.size.height / media.thumbnail.size.width : 1
+				break
+			case MediaLoadStatus.Plain:
+			case MediaLoadStatus.ReadyToLoad:
+			case MediaLoadStatus.Loading:
+			case MediaLoadStatus.FullyLoaded:
+				sum += media.content.size ? media.content.size.height / media.content.size.width : 1
+				break
+		}
+
+	return sum
 }
 </script>
 

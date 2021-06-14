@@ -65,7 +65,7 @@ import {
 	VNode,
 	watch,
 } from 'vue'
-import {Service} from '@/services'
+import {MediaService, Service} from '@/services'
 import {TimelineData} from '@/data/timelines'
 import {useQueryManagerContainer} from '@/composables/QueryManager'
 import {useLoadManagerTimeline} from '@/composables/LoadManager'
@@ -427,8 +427,16 @@ export default defineComponent({
 			),
 		])
 
-		const {updateQueries} = useQueryManagerContainer(service, props.timeline.title, filteredArticleIds)
-		const {updateLoadings} = useLoadManagerTimeline(service, props.timeline.title, filteredArticleIds)
+		let mediaServiceReturns = {}
+		if (service.value.hasMedia) {
+			const {updateQueries} = useQueryManagerContainer(service, props.timeline.title, filteredArticleIds)
+			const {updateLoadings} = useLoadManagerTimeline(service as Ref<MediaService>, props.timeline.title, filteredArticleIds)
+
+			mediaServiceReturns = {
+				updateQueries,
+				updateLoadings,
+			}
+		}
 
 		return {
 			shuffle,
@@ -444,12 +452,11 @@ export default defineComponent({
 			rightToLeft,
 			onArticleClicks,
 			onArticleClick,
-			updateQueries,
-			updateLoadings,
 			containerEl,
 			modalArticle,
 			showOptions,
 			options,
+			...mediaServiceReturns,
 		}
 	},
 })

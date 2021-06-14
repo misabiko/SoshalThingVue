@@ -1,5 +1,5 @@
 import {Component, markRaw, reactive} from 'vue'
-import {Article, MediaArticle, SingleMediaArticle} from '@/data/articles'
+import {Article, MediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
 
@@ -14,14 +14,12 @@ export interface LocalStorage {
 
 export type MediaService = Service<MediaArticle>
 
-export type SingleMediaService = Service<SingleMediaArticle>
-
 export abstract class Service<ArticleType extends Article = Article> {
 	static readonly instances : Service[] = []
 	articles = reactive<{ [id : string] : ArticleType }>({})
-	endpoints : Endpoint<any, any>[] = []
-
 	readonly articleComponent : Component
+
+	endpoints : Endpoint<any, any>[] = []
 
 	defaultSortMethod = 'Unsorted'
 	sortMethods = {}
@@ -29,6 +27,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 	protected constructor(
 		public name : string,
 		articleComponent : Component,
+		readonly hasMedia : boolean,	//TODO Check programatically
 	) {
 		this.articleComponent = markRaw(articleComponent)
 	}
@@ -39,7 +38,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	async getNewArticles(endpoint : number | Endpoint<any, any>, options : object) {
 		const actualEndpoint = endpoint instanceof Endpoint ? endpoint : this.endpoints[endpoint]
-		const {articles, newArticles} = await actualEndpoint.call(options)
+		const {articles, newArticles} = await actualEndpoint.call(options)	//TODO Stop listing newArticles?
 
 		for (const a of articles)
 			this.updateArticle(a as ArticleType)

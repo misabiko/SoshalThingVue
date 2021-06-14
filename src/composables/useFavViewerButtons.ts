@@ -1,7 +1,7 @@
 import {getCurrentInstance, h, ref, Ref, toRaw, VNode} from 'vue'
-import {Article, MediaLoadStatus} from '@/data/articles'
+import {Article, MediaArticle, MediaLoadStatus} from '@/data/articles'
 import {useQueryManagerArticle} from '@/composables/QueryManager'
-import {Service} from '@/services'
+import {MediaService, Service} from '@/services'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {
@@ -15,7 +15,7 @@ import {
 
 library.add(faDownload, faTruckLoading, faSpinner, faExternalLinkAlt, faExpandArrowsAlt, faEllipsisV)
 
-export function useFavViewerButtons(service : Ref<Service>, article : Ref<Article>, addedTopButtons : (() => any)[] = [], addedBottomButtons : (() => any)[] = []) {
+export function useFavViewerButtons(service : Ref<MediaService>, article : Ref<MediaArticle>, addedTopButtons : (() => any)[] = [], addedBottomButtons : (() => any)[] = []) {
 	const instance = getCurrentInstance()
 	if (!instance)
 		throw "No current instance"
@@ -30,7 +30,7 @@ export function useFavViewerButtons(service : Ref<Service>, article : Ref<Articl
 		const topButtons : VNode[] = addedTopButtons.map(b => b())
 		const bottomButtons : VNode[] = addedBottomButtons.map(b => b())
 
-		switch (article.value.media.status) {
+		switch (article.value.media[0].status) {
 			case MediaLoadStatus.ThumbnailOnly:
 				topButtons.unshift(h('button', {
 						class: 'button',
@@ -44,7 +44,7 @@ export function useFavViewerButtons(service : Ref<Service>, article : Ref<Articl
 				topButtons.unshift(h('button', {
 						class: 'button',
 						title: 'Load',
-						onClick: () => service.value.articles[article.value.id].media.status = MediaLoadStatus.Loading,
+						onClick: () => service.value.articles[article.value.id].media[0].status = MediaLoadStatus.Loading,
 					}, [h('span', {class: 'icon darkIcon is-small'}, h(FontAwesomeIcon, {icon: 'truck-loading'}))]),
 				)
 				break

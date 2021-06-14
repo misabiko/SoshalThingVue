@@ -1,16 +1,14 @@
-import {Article, ImageFormat, isVideo, MediaLoadStatus} from '@/data/articles'
+import {ImageFormat, isVideo, MediaArticle, MediaLoadStatus} from '@/data/articles'
 import {computed, getCurrentInstance, h, onUpdated, Ref, VNode} from 'vue'
-import {Service} from '@/services'
-import {useLoadManagerArticle} from '@/composables/LoadManager'
+import {MediaService} from '@/services'
+import {loadManager} from '@/composables/LoadManager'
 
-export function useLazyMedia(service: Ref<Service>, article: Ref<Article>, onArticleClick: Ref<(id: string) => void>) {
+export function useLazyMedia(service: Ref<MediaService>, article: Ref<MediaArticle>, onArticleClick: Ref<(id: string) => void>) {
 	const instance = getCurrentInstance()
 	if (!instance)
 		throw "No current instance"
 
 	const {emit} = instance
-
-	const {startLoading, doneLoading} = useLoadManagerArticle()
 
 	const checkIfLoaded = () => {
 		const video = document.querySelector(`.article${article.value.id} > video.articleMediaLoading`)
@@ -21,37 +19,36 @@ export function useLazyMedia(service: Ref<Service>, article: Ref<Article>, onArt
 	onUpdated(() => checkIfLoaded())
 
 	const thumbnailUrl = computed(() => {
-		switch (article.value.media.status) {
+		switch (article.value.media[0].status) {
 			case MediaLoadStatus.ThumbnailOnly:
 			case MediaLoadStatus.ReadyToLoad:
 			case MediaLoadStatus.Loading:
-				return article.value.media.thumbnail.url
+				return article.value.media[0].thumbnail.url
 			default:
 				return ''
 		}
 	})
 	const imageUrl = computed(() => {
-		switch (article.value.media.status) {
+		switch (article.value.media[0].status) {
 			case MediaLoadStatus.ReadyToLoad:
 			case MediaLoadStatus.Loading:
 			case MediaLoadStatus.FullyLoaded:
-				return article.value.media.content.url
+				return article.value.media[0].content.url
 			default:
 				return ''
 		}
 	})
 
 	const medias = () => {
-		switch (article.value.media.status) {
+		switch (article.value.media[0].status) {
 			case MediaLoadStatus.ThumbnailOnly:
 			case MediaLoadStatus.ReadyToLoad:
 				return [h('img', {
 					src: thumbnailUrl.value,
 					onClick: () => onArticleClick.value(article.value.id),
 				})]
-				break
 			case MediaLoadStatus.Loading:
-				if (isVideo(article.value.media.content)) {
+				if (isVideo(article.value.media[0].content)) {
 					const withoutExt = imageUrl.value.substring(0, imageUrl.value.lastIndexOf('.') + 1)
 					return [
 						h('video', {
@@ -60,8 +57,9 @@ export function useLazyMedia(service: Ref<Service>, article: Ref<Article>, onArt
 							autoplay: '',
 							muted: 'true',
 							class: 'articleMediaLoading',
-							onLoadedData: () => doneLoading(article.value.id, service.value),
-							onLoad: () => doneLoading(article.value.id, service.value),
+							mediaIndex: 0,
+							onLoadedData: () => loadManager.doneLoadingArticle(article.value.id, 0, service.value),
+							onLoad: () => loadManager.doneLoadingArticle(article.value.id, 0, service.value),
 							onClick: () => onArticleClick.value(article.value.id),
 						}, [h('source', {
 							src: withoutExt + 'webm',
@@ -74,8 +72,9 @@ export function useLazyMedia(service: Ref<Service>, article: Ref<Article>, onArt
 				}else
 					return [h('img', {
 						class: 'articleMediaLoading',
+						mediaIndex: 0,
 						src: imageUrl.value,
-						onLoad: () => doneLoading(article.value.id, service.value),
+						onLoad: () => loadManager.doneLoadingArticle(article.value.id, 0, service.value),
 						onClick: () => onArticleClick.value(article.value.id),
 					}), h('img', {
 						class: 'articleThumb',
@@ -83,9 +82,8 @@ export function useLazyMedia(service: Ref<Service>, article: Ref<Article>, onArt
 						onClick: () => onArticleClick.value(article.value.id),
 					}),
 					]
-				break
 			case MediaLoadStatus.FullyLoaded:
-				if (isVideo(article.value.media.content))
+				if (isVideo(article.value.media[0].content))
 					return [
 						h('video', {
 							controls: '',
@@ -95,7 +93,7 @@ export function useLazyMedia(service: Ref<Service>, article: Ref<Article>, onArt
 						}, [h('source', {
 							src: imageUrl.value,
 							onClick: () => onArticleClick.value(article.value.id),
-							type: article.value.media.content.format == ImageFormat.MP4 ? 'video/mp4' : 'video/webm',
+							type: article.value.media[0].content.format == ImageFormat.MP4 ? 'video/mp4' : 'video/webm',
 						})]),
 					]
 				else

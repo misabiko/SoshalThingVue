@@ -1,6 +1,8 @@
 import {Ref} from 'vue'
 import {Service, MediaService} from '@/services'
-import {LazyMedia, Media, MediaLoadStatus, QueriedMedia} from '@/data/articles'
+import {MediaLoadStatus} from '@/data/articles'
+
+type GenericMedia = { status : MediaLoadStatus }
 
 class LoadManager {
 	autoLoad = true
@@ -13,8 +15,14 @@ class LoadManager {
 		return this.timeout != undefined
 	}
 
-	getQueue(service: MediaService, mountedArticles = Object.values(this.mountedArticles).flat()) {
-		return Object.values(service.articles).filter(a => mountedArticles.includes(a.id) && a.media.some((m : Media | LazyMedia | QueriedMedia) => m.status == MediaLoadStatus.Loading)).map(a => a.id)
+	getQueue(service: MediaService, mountedArticles = Object.values(this.mountedArticles).flat()) : {id: string, media: number}[] {
+		return Object.values(service.articles)
+			.filter(a => mountedArticles.includes(a.id))
+			.flatMap(
+				a => (a.media as GenericMedia[])
+					.filter((m : GenericMedia) => m.status == MediaLoadStatus.Loading)
+					.map((m : GenericMedia, i : number) => ({id: a.id, media: i}))
+			)
 	}
 
 	loadRemainingData(service: MediaService, timedout = false) {
@@ -24,15 +32,18 @@ class LoadManager {
 
 		console.debug('Loading!')
 
-		for (const el of document.getElementsByClassName("articleMediaLoading"))
+		for (const el of document.getElementsByClassName('articleMediaLoading'))
 			switch (el.tagName) {
 				case 'VIDEO':
 					if ((el as HTMLMediaElement).readyState >= 3) {
-						const id = el?.parentElement?.getAttribute("articleid")
+						const id = el?.parentElement?.getAttribute('articleid')
+						const mediaIndex = el.getAttribute('mediaIndex')
 						if (!id)
 							console.error("Couldn't get id for video element.", el)
+						else if (!mediaIndex)
+							console.error("Couldn't get media index for video element.", el)
 						else
-							this.doneLoadingArticle(id, service)
+							this.doneLoadingArticle(id, parseInt(mediaIndex), service)
 					}
 			}
 
@@ -40,20 +51,24 @@ class LoadManager {
 		const queue = this.getQueue(service, flatMountedArticles)
 
 		for (const id of flatMountedArticles) {
-			if (!service.articles.hasOwnProperty(id) || service.articles[id].media.status != MediaLoadStatus.ReadyToLoad)
+			if (!service.articles.hasOwnProperty(id))
 				continue
 
-			if (queue.length >= this.maxLoadCount) {
-				this.timeout = setTimeout(() => this.loadRemainingData(service, true), this.delay)
+			for (const [i, media] of service.articles[id].media.entries()) {
+				if (media.status != MediaLoadStatus.ReadyToLoad)
+					continue
 
-				console.log(`Loading full [${queue.toString()}]`)
-				//this.confirmQueue(service.articles)
-				return
-			}
+				if (queue.length >= this.maxLoadCount) {
+					this.timeout = setTimeout(() => this.loadRemainingData(service, true), this.delay)
 
-			if (!queue.includes(id)) {
-				queue.push(id)
-				this.startLoadingArticle(id, service, queue)
+					console.log(`Loading full [${queue.toString()}]`)
+					return
+				}
+
+				if (!queue.find(m => m.id === id && m.media === i)) {
+					queue.push({id, media: i})
+					this.startLoadingArticle(id, i, service, queue)
+				}
 			}
 		}
 
@@ -61,32 +76,36 @@ class LoadManager {
 			console.log(`Loading [${queue.toString()}]`)
 		else
 			console.debug('Done loading.')
-		//this.confirmQueue(service.articles)
 
 		this.timeout = undefined
 	}
 
-	startLoadingArticle(id : string, service: MediaService, queue = this.getQueue(service)) {
+	startLoadingArticle(id : string, mediaIndex: number, service: MediaService, queue = this.getQueue(service)) {
 		if (queue.length > this.maxLoadCount)
 			return
 
-		service.articles[id].media.status = MediaLoadStatus.Loading
+		service.articles[id].media[mediaIndex].status = MediaLoadStatus.Loading
 	}
 
-	doneLoadingArticle(id : string, service: MediaService) {
-		service.articles[id].media.status = MediaLoadStatus.FullyLoaded
+	doneLoadingArticle(id : string, mediaIndex: number, service: MediaService) {
+		service.articles[id].media[mediaIndex].status = MediaLoadStatus.FullyLoaded
 
 		const flatMountedArticles = Object.values(this.mountedArticles).flat()
 		const queue = this.getQueue(service, flatMountedArticles)
+
 		for (const id of flatMountedArticles)
-			if (service.articles.hasOwnProperty(id) && service.articles[id].media.status == MediaLoadStatus.ReadyToLoad && !queue.includes(id))
-				this.startLoadingArticle(id, service, queue)
+			if (service.articles.hasOwnProperty(id))
+				for (const [i, media] of service.articles[id].media.entries())
+					if (media.status == MediaLoadStatus.ReadyToLoad && !queue.find(m => m.id === id && m.media === i)) {
+						queue.push({id, media: i})
+						this.startLoadingArticle(id, i, service, queue)
+					}
 	}
 }
 
 export const loadManager = new LoadManager()
 
-export function useLoadManagerTimeline(service : Ref<Service>, title: string, mountedArticles: Ref<string[]>) {
+export function useLoadManagerTimeline(service : Ref<MediaService>, title: string, mountedArticles: Ref<string[]>) {
 	const updateLoadings = function() {
 		if (!service)
 			return
@@ -98,16 +117,4 @@ export function useLoadManagerTimeline(service : Ref<Service>, title: string, mo
 	}
 
 	return {updateLoadings}
-}
-
-export function useLoadManagerArticle() {
-	const startLoading = function(id: string, service : MediaService) {
-		loadManager.startLoadingArticle(id, service)
-	}
-
-	const doneLoading = function(id: string, service : MediaService) {
-		loadManager.doneLoadingArticle(id, service)
-	}
-
-	return {startLoading, doneLoading}
 }
