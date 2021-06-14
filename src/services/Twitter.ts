@@ -78,44 +78,118 @@ export class TwitterService extends Service {
 }
 
 interface TwitterAPIPayload {
-	data : APIPayloadTweetData[]
+	data : APITweetData[]
 	includes : {
-		users: APIUserData[]
-		tweets: APITweetData[]
+		users : APIUserData[]
+		tweets : APITweetData[]
 	}
 	meta : {
-		oldest_id: string
-		newest_id: string
-		result_count: number
-		next_token: string
+		oldest_id : string
+		newest_id : string
+		result_count : number
+		next_token : string
 	}
 }
 
 interface APIUserData {
-	username: string
-	id: string
-	profile_image_url: string
-	name: string
+	username : string
+	id : string
+	profile_image_url : string
+	name : string
 }
 
 interface APITweetData {
 	id : string
-	created_at: string
+	created_at : string
 	text : string
 	author_id : string
-	public_metrics: {
-		retweet_count: number
-		reply_count: number
-		like_count: number
-		quote_count: number
+	entities? : APIEntities
+	public_metrics : {
+		retweet_count : number
+		reply_count : number
+		like_count : number
+		quote_count : number
 	}
-}
-
-interface APIPayloadTweetData extends APITweetData {
-	referenced_tweets: {
-		type: "retweeted"
+	referenced_tweets? : {
+		type : 'retweeted' | 'quoted' | 'replied_to'
 		id : string
 	}[]
+}
+
+interface APIEntities {
+	urls : {
+		start: number
+		end: number
+		url: string
+		expanded_url: string
+		display_url: string
+	}[]
+}
+
+function parseTweetText(rawText : string, entities? : APIEntities) {
+	if (!entities)
+		return rawText
+
+	let copyText = rawText
+
+	if (entities.urls)
+		for (const url of entities.urls)
+			copyText = copyText.replaceAll(url.url, '')
+
+	return copyText.trim()
+}
+
+function parseRetweet(retweet : APITweetData, author : APIUserData, retweetedTweet : APITweetData, retweetedAuthor : APIUserData) {
+	const result : Payload<TwitterArticle> = {articles: [], newArticles: []}
+
+	result.articles.push(<TweetArticle>{
+		type: TwitterArticleType.Tweet,
+		id: retweetedTweet.id,
+		creationDate: new Date(retweetedTweet.created_at),
+		text: parseTweetText(retweetedTweet.text, retweetedTweet.entities),
+		author: {
+			id: retweetedAuthor.id,
+			handle: retweetedAuthor.username,
+			name: retweetedAuthor.name,
+			avatarURL: retweetedAuthor.profile_image_url,
+		},
+		index: 0,
+		media: {
+			status: MediaLoadStatus.NothingLoaded,
+		},
+		liked: false,
+		likeCount: retweetedTweet.public_metrics.like_count,
+		reposted: false,
+		repostCount: retweetedTweet.public_metrics.retweet_count,
+		hidden: false,
+		queried: false,
+	})
+
+	result.articles.push(<RetweetArticle>{
+		type: TwitterArticleType.Retweet,
+		id: retweet.id,
+		creationDate: new Date(retweet.created_at),
+		retweetedId: retweetedTweet.id,
+		author: {
+			id: author.id,
+			handle: author.username,
+			name: author.name,
+			avatarURL: author.profile_image_url,
+		},
+		index: 0,
+		media: {
+			status: MediaLoadStatus.NothingLoaded,
+		},
+		liked: false,
+		likeCount: retweet.public_metrics.like_count,
+		reposted: false,
+		repostCount: retweet.public_metrics.retweet_count,
+		hidden: false,
+		queried: false,
+	})
+	result.newArticles.push(retweet.id)
+
+	return result
 }
 
 interface UserTimelineInstanceOpt {
@@ -148,86 +222,37 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineInstanceOpt, UserTimelin
 				continue
 			}
 
-			for (const referencedTweet of tweet.referenced_tweets)
-				switch (referencedTweet.type) {
-					case 'retweeted':
-						const retweetedTweet = response.includes.tweets.find((t : APITweetData) => t.id === referencedTweet.id)
-						if (!retweetedTweet) {
-							console.error(`Couldn't find retweeted article ${referencedTweet.id} for retweet ${tweet.id}`)
-							continue dataTweetLoop
-						}
+			if (tweet.referenced_tweets)
+				for (const referencedTweet of tweet.referenced_tweets)
+					switch (referencedTweet.type) {
+						case 'retweeted':
+							const retweetedTweet = response.includes.tweets.find((t : APITweetData) => t.id === referencedTweet.id)
+							if (!retweetedTweet) {
+								console.error(`Couldn't find retweeted article ${referencedTweet.id} for retweet ${tweet.id}`)
+								continue dataTweetLoop
+							}
 
-						const retweetedTweetAuthor = response.includes.users.find((u : APIUserData) => u.id === retweetedTweet.author_id)
-						if (!retweetedTweetAuthor) {
-							console.error(`Couldn't find retweeted article author ${retweetedTweet.author_id} for retweet ${tweet.id}`)
-							continue dataTweetLoop
-						}
+							const retweetedTweetAuthor = response.includes.users.find((u : APIUserData) => u.id === retweetedTweet.author_id)
+							if (!retweetedTweetAuthor) {
+								console.error(`Couldn't find retweeted article author ${retweetedTweet.author_id} for retweet ${tweet.id}`)
+								continue dataTweetLoop
+							}
 
-						const {articles, newArticles} = this.parseRetweet(tweet, user, retweetedTweet, retweetedTweetAuthor)
-						payload.articles.push(...articles)
-						payload.newArticles.push(...newArticles)
-						break;
-					default:
-						console.warn(`Reference tweet type "${referencedTweet.type}"`)
-				}
+							const {
+								articles,
+								newArticles,
+							} = parseRetweet(tweet, user, retweetedTweet, retweetedTweetAuthor)
+							payload.articles.push(...articles)
+							payload.newArticles.push(...newArticles)
+							break
+						default:
+							console.warn(`Reference tweet type "${referencedTweet.type}"`)
+					}
 		}
 
 		this.updateInstance(options, payload)
 
 		return payload
-	}
-
-	parseRetweet(retweet : APIPayloadTweetData, author : APIUserData, retweetedTweet : APITweetData, retweetedAuthor : APIUserData) {
-		const result : Payload<TwitterArticle> = {articles: [], newArticles: []}
-
-		result.articles.push(<TweetArticle>{
-			type: TwitterArticleType.Tweet,
-			id: retweetedTweet.id,
-			creationDate: new Date(retweetedTweet.created_at),
-			text: retweetedTweet.text,
-			author: {
-				id: retweetedAuthor.id,
-				handle: retweetedAuthor.username,
-				name: retweetedAuthor.name,
-				avatarURL: retweetedAuthor.profile_image_url,
-			},
-			index: 0,
-			media: {
-				status: MediaLoadStatus.NothingLoaded,
-			},
-			liked: false,
-			likeCount: retweetedTweet.public_metrics.like_count,
-			reposted: false,
-			repostCount: retweetedTweet.public_metrics.retweet_count,
-			hidden: false,
-			queried: false,
-		})
-
-		result.articles.push(<RetweetArticle>{
-			type: TwitterArticleType.Retweet,
-			id: retweet.id,
-			creationDate: new Date(retweet.created_at),
-			retweetedId: retweetedTweet.id,
-			author: {
-				id: author.id,
-				handle: author.username,
-				name: author.name,
-				avatarURL: author.profile_image_url,
-			},
-			index: 0,
-			media: {
-				status: MediaLoadStatus.NothingLoaded,
-			},
-			liked: false,
-			likeCount: retweet.public_metrics.like_count,
-			reposted: false,
-			repostCount: retweet.public_metrics.retweet_count,
-			hidden: false,
-			queried: false,
-		})
-		result.newArticles.push(retweet.id)
-
-		return result
 	}
 
 	updateInstance(options : UserTimelineCallOpt, payload : Payload) {

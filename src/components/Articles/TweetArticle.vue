@@ -61,8 +61,7 @@
 </template>
 
 <script lang='ts'>
-import {computed, defineComponent, inject, PropType, toRefs} from 'vue'
-import {Service} from '@/services'
+import {computed, defineComponent, PropType, toRefs} from 'vue'
 import {TwitterArticle, TwitterService, TwitterArticleType, RetweetArticle, QuoteArticle} from '@/services/Twitter'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faEllipsisH, faHeart as fasHeart, faRetweet} from '@fortawesome/free-solid-svg-icons'
