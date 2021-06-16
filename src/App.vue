@@ -1,5 +1,5 @@
 <template>
-	<Sidebar></Sidebar>
+	<Sidebar @add-timeline='showAddTimeline = true'></Sidebar>
 	<div id='timelineContainer'>
 		<Timeline
 			v-for='t in timelines'
@@ -10,6 +10,7 @@
 			@change-service='t.serviceIndex = $event'
 		></Timeline>
 	</div>
+	<AddTimelineModal v-if='showAddTimeline' @add='addTimeline($event)' @close='showAddTimeline = false'/>
 </template>
 
 <script lang="ts">
@@ -18,9 +19,10 @@ import Sidebar from '@/components/Sidebar.vue'
 import Timeline from '@/components/Timeline.vue'
 import {TimelineData} from '@/data/timelines'
 import {Service} from '@/services'
+import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
 
 export default defineComponent({
-	components: {Timeline, Sidebar},
+	components: {AddTimelineModal, Timeline, Sidebar},
 	setup() {
 		const timelines = ref<TimelineData[]>([])
 
@@ -30,7 +32,13 @@ export default defineComponent({
 		if (!timelines.value.length)
 			console.warn('No timelines were initialized')
 
-		return {timelines}
+		const showAddTimeline = ref(false)
+
+		function addTimeline(data : TimelineData) {
+
+		}
+
+		return {timelines, showAddTimeline, addTimeline}
 	}
 })
 </script>

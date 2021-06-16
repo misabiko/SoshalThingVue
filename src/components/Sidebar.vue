@@ -6,11 +6,19 @@
 			</div>
 		</div>
 		<div id='sidebarButtons'>
-			<button class='refreshTimeline' @click='expanded = !expanded'>
-				<span class='icon'>
-					<FontAwesomeIcon :icon='expanded ? "angle-double-left" : "angle-double-right"' size='2x'/>
-				</span>
-			</button>
+			<div>
+				<button @click='expanded = !expanded'>
+					<span class='icon'>
+						<FontAwesomeIcon :icon='expanded ? "angle-double-left" : "angle-double-right"' size='2x'/>
+					</span>
+				</button>
+				<button @click='$emit("addTimeline")'>
+					<span class='icon'>
+						<FontAwesomeIcon icon='plus' size='2x'/>
+					</span>
+				</button>
+			</div>
+			<div/>
 		</div>
 	</nav>
 </template>
@@ -18,9 +26,9 @@
 <script lang="ts">
 import {defineComponent, ref} from 'vue'
 import {library} from '@fortawesome/fontawesome-svg-core'
-import {faAngleDoubleLeft, faAngleDoubleRight} from '@fortawesome/free-solid-svg-icons'
+import {faAngleDoubleLeft, faAngleDoubleRight, faPlus} from '@fortawesome/free-solid-svg-icons'
 
-library.add(faAngleDoubleLeft, faAngleDoubleRight)
+library.add(faAngleDoubleLeft, faAngleDoubleRight, faPlus)
 
 export default defineComponent({
 	setup() {
@@ -51,6 +59,10 @@ export default defineComponent({
 	display: flex
 	flex-direction: column
 	justify-content: space-between
+
+	& > div
+		display: flex
+		flex-direction: column
 
 	button
 		@include borderless-button

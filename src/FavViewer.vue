@@ -15,10 +15,10 @@
 			@add-timeline='showAddTimeline = true'
 		></Timeline>
 	</div>
+	<AddTimelineModal v-if='showAddTimeline' @add='addTimeline($event)' @close='showAddTimeline = false'/>
 	<teleport v-if='pageInfo && viewMode === "hidden"' :to='pageInfo.activatorSelector'>
 		<component :is='pageInfo.activator' @click='setViewMode(lastViewMode)'></component>
 	</teleport>
-	<AddTimelineModal v-if='showAddTimeline' @add='addTimeline($event)'/>
 </template>
 
 <script lang='ts'>
@@ -27,7 +27,7 @@ import Timeline from '@/components/Timeline.vue'
 import {TimelineData} from '@/data/timelines'
 import {Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
-import AddTimelineModal from '@/components/AddTimelineModal.vue'
+import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
 
 export default defineComponent({
 	name: 'FavViewer',
@@ -49,12 +49,12 @@ export default defineComponent({
 		if (!timelines.value.length)
 			console.warn('No timelines were initialized')
 
-		const showAddTimeline = ref(false)
-
 		function setViewMode(mode : string) {
 			viewMode.value = mode
 			props.pageInfo.setViewMode(mode)
 		}
+
+		const showAddTimeline = ref(false)
 
 		function addTimeline(data : TimelineData) {
 
