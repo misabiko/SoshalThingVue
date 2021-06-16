@@ -10,7 +10,12 @@
 			@change-service='t.serviceIndex = $event'
 		></Timeline>
 	</div>
-	<AddTimelineModal v-if='showAddTimeline' @add='addTimeline($event)' @close='showAddTimeline = false'/>
+	<AddTimelineModal
+		v-if='showAddTimeline'
+		:timelines='timelines'
+		@add='addTimeline($event)'
+		@close='showAddTimeline = false'
+	/>
 </template>
 
 <script lang="ts">

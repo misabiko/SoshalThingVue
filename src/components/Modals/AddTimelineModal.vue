@@ -18,8 +18,11 @@
 						<div class='field'>
 							<label class='label'>Title</label>
 							<div class='control'>
-								<input class='input' type='text' v-model='timelineData.title'>
+								<input class='input' :class='{"is-danger": !validations.title}' type='text' v-model='timelineData.title'>
 							</div>
+							<p v-if='!validations.title' class='help is-danger'>
+								Timeline "{{ timelineData.title }}" already exists.
+							</p>
 						</div>
 						<div class='field'>
 							<label class='label'>Service</label>
@@ -67,7 +70,11 @@
 					</div>
 				</div>
 				<footer class='card-footer'>
-					<button class='button card-footer-item' @click='$emit("add", timelineData), $emit("close")'>Add</button>
+					<button
+						class='button card-footer-item'
+						@click='$emit("add", timelineData), $emit("close")'
+						:disabled='!valid'
+					>Add</button>
 					<button class='button card-footer-item' @click='$emit("close")'>Cancel</button>
 				</footer>
 			</div>
@@ -76,7 +83,7 @@
 </template>
 
 <script lang='ts'>
-import {computed, defineComponent, ref} from 'vue'
+import {computed, defineComponent, PropType, ref, toRefs} from 'vue'
 import {Service} from '@/services'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faTimes} from '@fortawesome/free-solid-svg-icons'
@@ -85,19 +92,41 @@ import {TimelineData} from '@/data/timelines'
 library.add(faTimes)
 
 export default defineComponent({
-	setup() {
+	props: {
+		timelines: {
+			type: Array as PropType<TimelineData[]>,
+			required: true,
+		}
+	},
+
+	setup(props) {
+		const {timelines} = toRefs(props)
+
 		const firstService = Service.instances[0]
 		const timelineData = ref<TimelineData>(firstService.initialTimelines(0)[0])
+
+		const baseTitle = timelineData.value.title
+		let title = baseTitle
+		const titles = timelines.value.map(t => t.title)
+		for (let i = 2; titles.includes(title); i++)
+			title = `${baseTitle} ${i}`
+		timelineData.value.title = title
+
 		const service = computed(() => Service.instances[timelineData.value.serviceIndex])
 
-		//TODO Centralize this
+		//TODO Centralize containers
 		const containers = [
 			'ColumnContainer',
 			'RowContainer',
 			'MasonryContainer',
 		]
 
-		return {timelineData, services: Service.instances, service, containers}
+		const validations = computed<{[name:string]:boolean}>(() => ({
+			title: !timelines.value.some(t => t.title === timelineData.value.title)
+		}))
+		const valid = computed(() => Object.values(validations.value).every(isValid => isValid))
+
+		return {timelineData, services: Service.instances, service, containers, validations, valid}
 	},
 })
 </script>
