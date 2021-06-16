@@ -24,7 +24,7 @@
 							<small title='long time!'>short time!</small>
 						</span>
 					</div>
-					<div v-if='actualArticle.type !== TwitterArticleType.Retweet' class='tweet-paragraph'>{{ actualArticle.text }}</div>
+					<div class='tweet-paragraph'>{{ actualArticle.text }}</div>
 				</div>
 <!--			extra-->
 				<nav class='level is-mobile'>
@@ -56,13 +56,29 @@
 				</nav>
 			</div>
 		</div>
-<!--		footer-->
+		<div v-if='actualArticle.media.length' class='postImages' :class='{postImagesCompact: compact}'>
+			<div
+				class='mediaHolder'
+				v-for='(imageData, i) in actualArticle.media'
+				:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(i), actualArticle.media.length === 3 && i === 2 ? 'thirdImage' : '']"
+			>
+				<div class='is-hidden imgPlaceholder'/>
+				<img :alt='actualArticle.id' :src='imageData.content.url' @click='$emit("expanded", i)'/>
+			</div>
+		</div>
 	</article>
 </template>
 
 <script lang='ts'>
-import {computed, defineComponent, PropType, toRefs} from 'vue'
-import {TwitterArticle, TwitterService, TwitterArticleType, RetweetArticle, QuoteArticle} from '@/services/twitter'
+import {computed, defineComponent, PropType, ref, toRefs} from 'vue'
+import {
+	TwitterArticle,
+	TwitterService,
+	TwitterArticleType,
+	RetweetArticle,
+	QuoteArticle,
+	TweetArticle,
+} from '@/services/twitter'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faEllipsisH, faHeart as fasHeart, faRetweet} from '@fortawesome/free-solid-svg-icons'
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons'
@@ -88,14 +104,14 @@ export default defineComponent({
 	setup(props) {
 		const {article, service} = toRefs(props)
 
-		const actualArticle = computed<TwitterArticle>(() => {
+		const actualArticle = computed<TweetArticle>(() => {
 			switch (article.value.type) {
 				case TwitterArticleType.Tweet:
-					return article.value
+					return article.value as TweetArticle
 				case TwitterArticleType.Retweet:
-					return service.value.articles[(article.value as RetweetArticle).retweetedId]
+					return service.value.articles[(article.value as RetweetArticle).retweetedId] as TweetArticle
 				case TwitterArticleType.Quote:
-					return service.value.articles[(article.value as QuoteArticle).quotedId]
+					return service.value.articles[(article.value as QuoteArticle).quotedId] as TweetArticle
 			}
 		})
 
@@ -103,7 +119,17 @@ export default defineComponent({
 			console.log('boop ' + handle)
 		}
 
-		return {service, addUserTimeline, TwitterArticleType, actualArticle}
+		const compact = ref(false)
+
+		function imageFormatClass(index : number) : string {
+			const size = actualArticle.value.media[index].content.size
+			if (!size)
+				return 'portrait'
+
+			return size.width > size.height ? 'landscape' : 'portrait'
+		}
+
+		return {service, addUserTimeline, TwitterArticleType, actualArticle, compact, imageFormatClass}
 	}
 })
 </script>
@@ -144,4 +170,51 @@ article.article
 
 .timestamp
 	float: right
+
+.postImagesCompact
+	display: flex
+	flex-wrap: wrap
+
+.mediaHolder
+	overflow: hidden
+	display: flex
+	justify-content: center
+	border-radius: 8px
+
+	&:not(:last-child)
+		margin-bottom: 2px
+
+	img
+		align-self: center
+		width: 100%
+
+	&.mediaHolderCompact
+		max-height: 16vh
+		width: 100%
+
+		&:not(:only-child)
+			margin: 2px
+			max-width: 49%
+
+			&.landscape img
+				width: unset
+				height: 110%
+
+			&.portrait img
+				width: 110%
+				height: unset
+
+		img
+			object-fit: cover
+
+		&.thirdImage
+			max-width: unset
+
+			&.landscape img
+				width: unset
+				height: 175%
+
+			&.portrait img
+				width: 175%
+				height: unset
 </style>

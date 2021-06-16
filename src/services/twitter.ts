@@ -1,8 +1,8 @@
 import {Endpoint, Payload, Service} from '@/services/index'
-import {Article, PlainMedia, MediaArticle, MediaLoadStatus} from '@/data/articles'
+import {Article, getImageFormat, MediaArticle, MediaLoadStatus, PlainMedia} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
-import {TimelineData} from '@/data/timelines'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
+import {TimelineData} from '@/data/timelines'
 
 export enum TwitterArticleType {
 	Tweet,
@@ -81,6 +81,7 @@ interface TwitterAPIPayload {
 	includes : {
 		users : APIUserData[]
 		tweets : APITweetData[]
+		media: APIMediaData[]
 	}
 	meta : {
 		oldest_id : string
@@ -103,6 +104,9 @@ interface APITweetData {
 	text : string
 	author_id : string
 	entities? : APIEntities
+	attachments? : {
+		media_keys: string[]
+	}
 	public_metrics : {
 		retweet_count : number
 		reply_count : number
@@ -125,6 +129,20 @@ interface APIEntities {
 	}[]
 }
 
+type APIMediaData = {
+	media_key: string
+	type: 'photo'
+	url: string
+	width: number
+	height: number
+} | {
+	media_key: string
+	type: 'video'
+	preview_image_url: string
+	width: number
+	height: number
+}
+
 function parseTweetText(rawText : string, entities? : APIEntities) {
 	if (!entities)
 		return rawText
@@ -138,29 +156,59 @@ function parseTweetText(rawText : string, entities? : APIEntities) {
 	return copyText.trim()
 }
 
-function parseRetweet(retweet : APITweetData, author : APIUserData, retweetedTweet : APITweetData, retweetedAuthor : APIUserData) {
-	const result : Payload<TwitterArticle> = {articles: [], newArticles: []}
+function parseTweet(tweet : APITweetData, author : APIUserData, mediaData : APIMediaData[]): TweetArticle {
+	const media: PlainMedia[] = []
+	for (const data of mediaData)
+		switch (data.type) {
+			case 'photo':
+				media.push({
+					status: MediaLoadStatus.Plain,
+					content: {
+						url: data.url,
+						size: {width: data.width, height: data.height},
+						format: getImageFormat(data.url),
+					},
+				})
+				break
+			case 'video':
+				media.push({
+					status: MediaLoadStatus.Plain,
+					content: {
+						url: data.preview_image_url,
+						size: {width: data.width, height: data.height},
+						format: getImageFormat(data.preview_image_url),
+					},
+				})
+				break
+		}
 
-	result.articles.push(<TweetArticle>{
+	return {
 		type: TwitterArticleType.Tweet,
-		id: retweetedTweet.id,
-		creationDate: new Date(retweetedTweet.created_at),
-		text: parseTweetText(retweetedTweet.text, retweetedTweet.entities),
+		id: tweet.id,
+		creationDate: new Date(tweet.created_at),
+		text: parseTweetText(tweet.text, tweet.entities),
 		author: {
-			id: retweetedAuthor.id,
-			handle: retweetedAuthor.username,
-			name: retweetedAuthor.name,
-			avatarURL: retweetedAuthor.profile_image_url,
+			id: author.id,
+			handle: author.username,
+			name: author.name,
+			avatarURL: author.profile_image_url,
 		},
 		index: 0,
-		media: [],
+		media,
 		liked: false,
-		likeCount: retweetedTweet.public_metrics.like_count,
+		likeCount: tweet.public_metrics.like_count,
 		reposted: false,
-		repostCount: retweetedTweet.public_metrics.retweet_count,
+		repostCount: tweet.public_metrics.retweet_count,
 		hidden: false,
 		queried: false,
-	})
+	}
+}
+
+function parseRetweet(retweet : APITweetData, author : APIUserData, retweetedTweet : APITweetData, retweetedAuthor : APIUserData, retweetedMedia : APIMediaData[]) {
+	const result : Payload<TwitterArticle> = {articles: [], newArticles: []}
+
+	const retweetedArticle = parseTweet(retweetedTweet, retweetedAuthor, retweetedMedia)
+	result.articles.push(retweetedArticle)
 
 	result.articles.push(<RetweetArticle>{
 		type: TwitterArticleType.Retweet,
@@ -203,9 +251,10 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineInstanceOpt, UserTimelin
 	async call(options : UserTimelineCallOpt) : Promise<Payload> {
 		const payload : Payload<TwitterArticle> = {articles: [], newArticles: []}
 		const params = new URLSearchParams()
-		params.set('tweet.fields', 'created_at,public_metrics,entities,referenced_tweets')
-		params.set('expansions', 'author_id,referenced_tweets.id,referenced_tweets.id.author_id')
+		params.set('tweet.fields', 'created_at,public_metrics,referenced_tweets,entities,attachments')
 		params.set('user.fields', 'name,username,profile_image_url')
+		params.set('media.fields', 'width,height,preview_image_url,url')
+		params.set('expansions', 'author_id,referenced_tweets.id,referenced_tweets.id.author_id,attachments.media_keys')
 
 		const response : TwitterAPIPayload = await fetch(`/twitter/users/${options.userId}?${params.toString()}`).then(r => r.json())
 		console.dir(response)
@@ -233,10 +282,18 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineInstanceOpt, UserTimelin
 								continue dataTweetLoop
 							}
 
+							const retweetedMedia = []
+							if (retweetedTweet.attachments?.media_keys)
+								for (const mediaKey of retweetedTweet.attachments.media_keys) {
+									const media = response.includes.media.find(m => m.media_key === mediaKey)
+									if (media)
+										retweetedMedia.push(media)
+								}
+
 							const {
 								articles,
 								newArticles,
-							} = parseRetweet(tweet, user, retweetedTweet, retweetedTweetAuthor)
+							} = parseRetweet(tweet, user, retweetedTweet, retweetedTweetAuthor, retweetedMedia)
 							payload.articles.push(...articles)
 							payload.newArticles.push(...newArticles)
 							break
