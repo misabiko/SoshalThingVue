@@ -56,7 +56,7 @@
 				</nav>
 			</div>
 		</div>
-		<div v-if='actualArticle.media.length' class='postImages' :class='{postImagesCompact: compact}'>
+		<div v-if='actualArticle.media.length' class='postMedia postImages' :class='{postImagesCompact: compact}'>
 			<div
 				class='mediaHolder'
 				v-for='(imageData, i) in actualArticle.media'
@@ -217,4 +217,96 @@ article.article
 			&.portrait img
 				width: 175%
 				height: unset
+
+p.articleParagraph
+	white-space: pre-line
+	overflow-wrap: anywhere
+
+
+.postButton
+	color: $light
+
+	&:hover span
+		color: $primary
+
+	&:hover.commentButton span
+		color: $comment-color
+
+.postMenu .dropdown-item:hover
+	color: $white
+	background-color: $primary
+
+.svg-inline--fa.fa-w-14
+	width: 0.875em
+
+.svg-inline--fa.fa-w-18
+	width: 1.125em
+
+.svg-inline--fa.fa-w-20
+	width: 1em
+
+.fade-enter-active, .fade-leave-active
+	transition: opacity .5s
+
+.fade-enter, .fade-leave-to
+	opacity: 0
+
+
+.svg-inline--fa.fa-w-16
+	width: 1em
+
+.likeButton
+	color: $light
+
+	&:hover, &.likedPostButton
+		span
+			color: $like-color
+
+@keyframes heart
+	0%, 17.5%
+		width: 0
+
+.heart-enter-active
+	will-change: width
+	animation: heart .5s cubic-bezier(.17, .89, .32, 1.49)
+
+.heart-enter
+	width: 0
+
+$bubble-d: 2em
+$bubble-r: .5 * $bubble-d
+
+.icon > svg
+	position: relative
+
+	&:before, &:after
+		position: absolute
+		z-index: -1
+		top: 50%
+		left: 50%
+		border-radius: 50%
+		content: ''
+
+	&::before
+		margin: -$bubble-r
+		width: $bubble-d
+		height: $bubble-d
+		background: gold
+
+.svg-inline--fa.fa-w-20
+	width: 1.25em
+
+.repostButton
+	color: $light
+
+	&:hover, &.repostedPostButton
+		span
+			color: $repost-color
+
+.icon > svg
+	will-change: transform
+	transition: transform .5s ease-in-out
+
+.repostedPostButton .icon > svg
+	transform: rotate(360deg)
 </style>
