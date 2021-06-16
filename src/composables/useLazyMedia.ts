@@ -1,4 +1,4 @@
-import {ImageFormat, isVideo, MediaArticle, MediaLoadStatus} from '@/data/articles'
+import {MediaFormat, MediaArticle, MediaLoadStatus, MediaType} from '@/data/articles'
 import {computed, getCurrentInstance, h, onUpdated, Ref, VNode} from 'vue'
 import {MediaService} from '@/services'
 import {loadManager} from '@/composables/LoadManager'
@@ -48,7 +48,7 @@ export function useLazyMedia(service: Ref<MediaService>, article: Ref<MediaArtic
 					onClick: () => onArticleClick.value(article.value.id),
 				})]
 			case MediaLoadStatus.Loading:
-				if (isVideo(article.value.media[0].content)) {
+				if (article.value.media[0].type == MediaType.Video) {
 					const withoutExt = imageUrl.value.substring(0, imageUrl.value.lastIndexOf('.') + 1)
 					return [
 						h('video', {
@@ -83,7 +83,7 @@ export function useLazyMedia(service: Ref<MediaService>, article: Ref<MediaArtic
 					}),
 					]
 			case MediaLoadStatus.FullyLoaded:
-				if (isVideo(article.value.media[0].content))
+				if (article.value.media[0].type == MediaType.Video)
 					return [
 						h('video', {
 							controls: '',
@@ -93,7 +93,7 @@ export function useLazyMedia(service: Ref<MediaService>, article: Ref<MediaArtic
 						}, [h('source', {
 							src: imageUrl.value,
 							onClick: () => onArticleClick.value(article.value.id),
-							type: article.value.media[0].content.format == ImageFormat.MP4 ? 'video/mp4' : 'video/webm',
+							type: article.value.media[0].content.format == MediaFormat.MP4 ? 'video/mp4' : 'video/webm',
 						})]),
 					]
 				else

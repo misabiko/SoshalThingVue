@@ -2,7 +2,7 @@ import {HostPageService, PagedEndpoint, Payload, Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
 import PixivComponent from '@/components/Articles/PixivArticle.vue'
-import {Article, getImageFormat, ImageData, LazyMedia, MediaArticle, MediaLoadStatus} from '@/data/articles'
+import {Article, getImageFormat, ImageData, LazyMedia, MediaArticle, MediaLoadStatus, MediaType} from '@/data/articles'
 import {reactive} from 'vue'
 
 export interface PixivArticle extends Article, MediaArticle {
@@ -268,6 +268,7 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPage
 				title: thumb.illustTitle,
 				index: pageNum * 20 + i,
 				media: [{
+					type: MediaType.Image,
 					status: MediaLoadStatus.ReadyToLoad,
 					thumbnail: {
 						url: thumb.url,
@@ -407,6 +408,7 @@ class UserPageEndpoint extends PagedEndpoint<UserPageInstanceOpt, UserPageCallOp
 				title: thumb.title,
 				index: pageNum * 48 + i,
 				media: [{
+					type: MediaType.Image,
 					status: MediaLoadStatus.ThumbnailOnly,
 					thumbnail: thumb.thumbnail,
 				}],
@@ -547,6 +549,7 @@ class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageInstanceOpt, Bookma
 				title: thumb.title,
 				index: pageNum * 20 + i,
 				media: [{
+					type: MediaType.Image,
 					status: MediaLoadStatus.ReadyToLoad,
 					thumbnail: thumb.thumbnail,
 					content: {

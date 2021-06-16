@@ -62,15 +62,21 @@
 				</nav>
 			</div>
 		</div>
-		<div v-if='actualArticle.media.length' class='postMedia postImages' :class='{postImagesCompact: compact}'>
+		<div v-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Image' class='postMedia postImages' :class='{postImagesCompact: compact}'>
 			<div
 				class='mediaHolder'
-				v-for='(imageData, i) in actualArticle.media'
+				v-for='(mediaData, i) in actualArticle.media'
 				:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(i), actualArticle.media.length === 3 && i === 2 ? 'thirdImage' : '']"
 			>
 				<div class='is-hidden imgPlaceholder'/>
-				<img :alt='actualArticle.id' :src='imageData.content.url' @click='$emit("expanded", i)'/>
+				<img :alt='actualArticle.id' :src='mediaData.status === MediaLoadStatus.ThumbnailOnly ? mediaData.thumbnail.url : mediaData.content.url' @click='$emit("expanded", i)'/>
 			</div>
+		</div>
+		<div v-else-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Video' class='postMedia postVideo'>
+			<div class='is-hidden imgPlaceholder'/>
+			<video controls :autoplay='false' :loop='false'>
+				<source :src='actualArticle.media[0].content.url'/>
+			</video>
 		</div>
 	</article>
 </template>
@@ -88,6 +94,7 @@ import {
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faEllipsisH, faHeart as fasHeart, faRetweet} from '@fortawesome/free-solid-svg-icons'
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons'
+import {MediaLoadStatus, MediaType} from '@/data/articles'
 
 library.add(faRetweet, fasHeart, farHeart, faEllipsisH)
 
@@ -128,14 +135,17 @@ export default defineComponent({
 		const compact = ref(false)
 
 		function imageFormatClass(index : number) : string {
-			const size = actualArticle.value.media[index].content.size
+			const media = actualArticle.value.media[index]
+			const size = media.status == MediaLoadStatus.ThumbnailOnly ?
+				media.thumbnail.size :
+				media.content.size
 			if (!size)
 				return 'portrait'
 
 			return size.width > size.height ? 'landscape' : 'portrait'
 		}
 
-		return {service, addUserTimeline, TwitterArticleType, actualArticle, compact, imageFormatClass}
+		return {service, addUserTimeline, TwitterArticleType, MediaLoadStatus, MediaType, actualArticle, compact, imageFormatClass}
 	}
 })
 </script>

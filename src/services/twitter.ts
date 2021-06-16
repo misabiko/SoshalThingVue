@@ -1,5 +1,5 @@
 import {Endpoint, Payload, Service} from '@/services/index'
-import {Article, getImageFormat, MediaArticle, MediaLoadStatus, PlainMedia} from '@/data/articles'
+import {Article, getImageFormat, LazyMedia, MediaArticle, MediaLoadStatus, MediaType, PlainMedia} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {TimelineData} from '@/data/timelines'
@@ -26,7 +26,7 @@ export interface TwitterArticle extends Article {
 export interface TweetArticle extends TwitterArticle, MediaArticle {
 	type : TwitterArticleType.Tweet | TwitterArticleType.Quote
 	text : string
-	media : PlainMedia[]
+	media : PlainMedia[] | [LazyMedia]
 	liked : boolean
 	reposted : boolean
 	likeCount : number
@@ -157,11 +157,12 @@ function parseTweetText(rawText : string, entities? : APIEntities) {
 }
 
 function parseTweet(tweet : APITweetData, author : APIUserData, mediaData : APIMediaData[]): TweetArticle {
-	const media: PlainMedia[] = []
+	const media: (PlainMedia | LazyMedia)[] = []
 	for (const data of mediaData)
 		switch (data.type) {
 			case 'photo':
 				media.push({
+					type: MediaType.Image,
 					status: MediaLoadStatus.Plain,
 					content: {
 						url: data.url,
@@ -172,8 +173,9 @@ function parseTweet(tweet : APITweetData, author : APIUserData, mediaData : APIM
 				break
 			case 'video':
 				media.push({
-					status: MediaLoadStatus.Plain,
-					content: {
+					type: MediaType.Image,
+					status: MediaLoadStatus.ThumbnailOnly,
+					thumbnail: {
 						url: data.preview_image_url,
 						size: {width: data.width, height: data.height},
 						format: getImageFormat(data.preview_image_url),
@@ -194,7 +196,7 @@ function parseTweet(tweet : APITweetData, author : APIUserData, mediaData : APIM
 			avatarURL: author.profile_image_url,
 		},
 		index: 0,
-		media,
+		media: media as PlainMedia[] | [LazyMedia],
 		liked: false,
 		likeCount: tweet.public_metrics.like_count,
 		reposted: false,

@@ -9,6 +9,11 @@ export interface MediaArticle extends Article {
 	media : PlainMedia[] | QueriedMedia[] | LazyMedia[]
 }
 
+export enum MediaType {
+	Image,
+	Video,
+}
+
 export enum MediaLoadStatus {
 	Plain,
 	ThumbnailOnly,
@@ -18,44 +23,49 @@ export enum MediaLoadStatus {
 	FullyLoaded,
 }
 
-export type Media = PlainMedia | LazyMedia | QueriedMedia
-
 export type PlainMedia = {
+	type : MediaType
 	status : MediaLoadStatus.Plain
 	content : ImageData
 }
 
 export type LazyMedia
-	= { status : MediaLoadStatus.NothingLoaded }
-	| {
+	= {
+	type : MediaType.Image
 	status : MediaLoadStatus.ThumbnailOnly
 	thumbnail : ImageData
 }
 	| {
+	type : MediaType
 	status : MediaLoadStatus.ReadyToLoad
 	thumbnail : ImageData
 	content : ImageData
 }
 	| {
+	type : MediaType
 	status : MediaLoadStatus.Loading
 	thumbnail : ImageData
 	content : ImageData
 }
 	| {
+	type : MediaType
 	status : MediaLoadStatus.FullyLoaded
 	content : ImageData
 }
 
 export type QueriedMedia
-	= { status : MediaLoadStatus.NothingLoaded }
+	= {
+		type : MediaType
+	status : MediaLoadStatus.NothingLoaded }
 	| {
+	type : MediaType
 	status : MediaLoadStatus.FullyLoaded
 	content : ImageData
 }
 
 type MediaSize = { width : number, height : number }
 
-export enum ImageFormat {
+export enum MediaFormat {
 	JPG,
 	PNG,
 	GIF,
@@ -66,30 +76,30 @@ export enum ImageFormat {
 export interface ImageData {
 	url : string
 	size? : MediaSize
-	format : ImageFormat
+	format : MediaFormat
 }
 
 export function isVideo(image : ImageData) {
-	return image.format == ImageFormat.MP4 || image.format == ImageFormat.WEBM
+	return image.format == MediaFormat.MP4 || image.format == MediaFormat.WEBM
 }
 
-export function getImageFormat(url : string) : ImageFormat {
+export function getImageFormat(url : string) : MediaFormat {
 	const extension = url.split('.').pop()?.toLowerCase()
 
 	switch (extension) {
 		case 'jpeg':
 		case 'jpg':
-			return ImageFormat.JPG
+			return MediaFormat.JPG
 		case 'png':
-			return ImageFormat.PNG
+			return MediaFormat.PNG
 		case 'gif':
-			return ImageFormat.GIF
+			return MediaFormat.GIF
 		case 'mp4':
-			return ImageFormat.MP4
+			return MediaFormat.MP4
 		case 'webm':
-			return ImageFormat.WEBM
+			return MediaFormat.WEBM
 		default:
 			console.error(`Couldn't find the format for extension "${extension}" in url "${url}"`)
-			return ImageFormat.JPG
+			return MediaFormat.JPG
 	}
 }
