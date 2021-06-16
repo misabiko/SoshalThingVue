@@ -46,7 +46,7 @@ export default defineComponent({
 							onClick: () => service.value.like(article.value.id),
 						}, [
 							h('span', {class: 'icon darkIcon is-small'},
-								h(FontAwesomeIcon, {icon: 'smile'})
+								h(FontAwesomeIcon, {icon: ['far', 'smile']})
 							)
 						],
 					)

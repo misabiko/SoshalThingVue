@@ -12,11 +12,13 @@
 			@change-service='t.serviceIndex = $event'
 			@hide-soshal='setViewMode("hidden")'
 			@set-viewmode='setViewMode($event)'
+			@add-timeline='showAddTimeline = true'
 		></Timeline>
 	</div>
 	<teleport v-if='pageInfo && viewMode === "hidden"' :to='pageInfo.activatorSelector'>
 		<component :is='pageInfo.activator' @click='setViewMode(lastViewMode)'></component>
 	</teleport>
+	<AddTimelineModal v-if='showAddTimeline' @add='addTimeline($event)'/>
 </template>
 
 <script lang='ts'>
@@ -25,10 +27,11 @@ import Timeline from '@/components/Timeline.vue'
 import {TimelineData} from '@/data/timelines'
 import {Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
+import AddTimelineModal from '@/components/AddTimelineModal.vue'
 
 export default defineComponent({
 	name: 'FavViewer',
-	components: {Timeline},
+	components: {AddTimelineModal, Timeline},
 	props: {
 		pageInfo: {
 			type: Object as PropType<PageInfo>,
@@ -46,12 +49,18 @@ export default defineComponent({
 		if (!timelines.value.length)
 			console.warn('No timelines were initialized')
 
+		const showAddTimeline = ref(false)
+
 		function setViewMode(mode : string) {
 			viewMode.value = mode
 			props.pageInfo.setViewMode(mode)
 		}
 
-		return {timelines, lastViewMode, viewMode, setViewMode}
+		function addTimeline(data : TimelineData) {
+
+		}
+
+		return {timelines, lastViewMode, viewMode, setViewMode, showAddTimeline, addTimeline}
 	}
 })
 </script>
@@ -60,8 +69,10 @@ export default defineComponent({
 @use 'sass/core' as *
 @import "~bulma/sass/utilities/_all.sass"
 @import "~bulma/sass/form/_all.sass"
+@import "~bulma/sass/components/level.sass"
 @import "~bulma/sass/components/modal.sass"
 @import "~bulma/sass/components/dropdown.sass"
+@import "~bulma/sass/components/card.sass"
 @import "~bulma/sass/elements/button.sass"
 @import "~bulma/sass/elements/icon.sass"
 @import "~bulma/sass/elements/box.sass"

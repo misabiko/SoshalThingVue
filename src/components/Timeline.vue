@@ -9,6 +9,11 @@
 							<FontAwesomeIcon icon='eye-slash' size='lg'/>
 						</span>
 					</button>
+					<button @click='$emit("addTimeline")'>
+						<span class='icon'>
+							<FontAwesomeIcon icon='plus' size='lg'/>
+						</span>
+					</button>
 				</div>
 			</div>
 			<div class='timelineButtons'>
@@ -70,7 +75,7 @@ import {TimelineData} from '@/data/timelines'
 import {useQueryManagerContainer} from '@/composables/QueryManager'
 import {useLoadManagerTimeline} from '@/composables/LoadManager'
 import ColumnContainer from '@/components/ColumnContainer.vue'
-import Modal from '@/components/Modal.vue'
+import Modal from '@/components/ArticleModal.vue'
 import usePages from '@/composables/usePages'
 import {useAutoScroll} from '@/composables/useAutoScroll'
 import {useSortMethods} from '@/composables/useSortMethods'
@@ -78,10 +83,18 @@ import {useFilters} from '@/composables/useFilters'
 import RowContainer from '@/components/RowContainer.vue'
 import MasonryContainer from '@/components/MasonryContainer.vue'
 import {library} from '@fortawesome/fontawesome-svg-core'
-import {faArrowDown, faEllipsisV, faEyeSlash, faMagic, faRandom, faScroll} from '@fortawesome/free-solid-svg-icons'
+import {
+	faArrowDown,
+	faEllipsisV,
+	faEyeSlash,
+	faMagic,
+	faPlus,
+	faRandom,
+	faScroll,
+} from '@fortawesome/free-solid-svg-icons'
 import {PageInfo} from '@/hostpages/pageinfo'
 
-library.add(faEllipsisV, faArrowDown, faEyeSlash, faRandom, faScroll, faMagic)
+library.add(faEllipsisV, faArrowDown, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
 
 export default defineComponent({
 	props: {
