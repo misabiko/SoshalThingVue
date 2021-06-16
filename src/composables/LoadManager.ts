@@ -61,7 +61,7 @@ class LoadManager {
 				if (queue.length >= this.maxLoadCount) {
 					this.timeout = setTimeout(() => this.loadRemainingData(service, true), this.delay)
 
-					console.log(`Loading full [${queue.toString()}]`)
+					console.log(`Loading full [${queue.map((q: any) => `${q.id}/${q.media}`).join(', ')}]`)
 					return
 				}
 
@@ -73,7 +73,7 @@ class LoadManager {
 		}
 
 		if (queue.length)
-			console.log(`Loading [${queue.toString()}]`)
+			console.log(`Loading [${queue.map((q: any) => `${q.id}/${q.media}`).join(', ')}]`)
 		else
 			console.debug('Done loading.')
 

@@ -142,7 +142,7 @@ export default defineComponent({
 		} = useSortMethods(service.value.defaultSortMethod, service.value.sortMethods)
 		options.push(sortOption)
 
-		const {filterMethods, filters, filterOptions} = useFilters()
+		const {filterMethods, filters, filterOptions} = useFilters(service.value.defaultFilters, service.value.filters)
 		options.push(filterOptions)
 
 		const articles = computed(() => {
@@ -152,7 +152,7 @@ export default defineComponent({
 
 				for (const [method, opts] of Object.entries(filters.value))
 					if (opts.enabled)
-						unsorted = unsorted.filter(filterMethods[method](opts.config))
+						unsorted = unsorted.filter(filterMethods[method].filter(opts.config))
 
 				let sorted = sortMethods[sortMethod.value](unsorted)
 				if (sortReversed.value)

@@ -109,7 +109,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 		this.articles[id].liked = true
 	}
 
-	async bookmark(id : string) {
+	async bookmark(id : string, priv: boolean) {
 		if (!(this.pageInfo instanceof PixivFollowPage))
 			return
 
@@ -125,7 +125,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 			},
 			body: JSON.stringify({
 				illust_id: id,
-				restrict: 0,
+				restrict: priv ? 1 : 0,
 				comment: "",
 				tags: [],
 			}),

@@ -2,6 +2,7 @@ import {Component, markRaw, reactive} from 'vue'
 import {Article, MediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
+import {defaultDefaultFilters, FilterConfigs, Filters} from '@/composables/useFilters'
 
 export interface Payload<ArticleType = Article> {
 	articles : ArticleType[],
@@ -23,6 +24,9 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	defaultSortMethod = 'Unsorted'
 	sortMethods = {}
+
+	defaultFilters : FilterConfigs = defaultDefaultFilters
+	filters : Filters<any> = {}
 
 	protected constructor(
 		public name : string,

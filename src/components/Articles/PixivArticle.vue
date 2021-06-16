@@ -45,7 +45,7 @@ export default defineComponent({
 							class: 'button',
 							onClick: () => service.value.like(article.value.id),
 						}, [
-							h('span', {class: 'icon is-small'},
+							h('span', {class: 'icon darkIcon is-small'},
 								h(FontAwesomeIcon, {icon: 'smile'})
 							)
 						],
@@ -55,10 +55,10 @@ export default defineComponent({
 				if (!article.value.bookmarked)
 					return h('button', {
 							class: 'button',
-							onClick: () => service.value.bookmark(article.value.id),
+							onClick: () => service.value.bookmark(article.value.id, false),
 						}, [
 							h('span', {class: 'icon darkIcon is-small'},
-								h(FontAwesomeIcon, {class: 'heart'})
+								h(FontAwesomeIcon, {icon: ['fas', 'heart']})
 							)
 						],
 					)

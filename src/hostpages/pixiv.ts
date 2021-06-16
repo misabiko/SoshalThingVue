@@ -122,9 +122,15 @@ export class PixivBookmarkPage extends PixivPage {
 	lastPage! : number
 	priv: boolean
 
+	activatorSelector = '.column-order-menu > .menu-items'
+	activator() {
+		return h('li', super.activator())
+	}
+
 	constructor(css : string) {
 		super(css, {
-			default: `form._bookmark-settings {display: none;} #favviewer {width: 100%}`
+			default: `form._bookmark-settings {display: none;} #favviewer {width: 100%; height: 60vh}`,
+			fullscreen: `#js-mount-point-header, nav.column-order-menu, footer.footer, .layout-column-1, .column-label, .column-menu, .display_editable_works, #illust-recommend, form._bookmark-settings {display: none;} #wrapper, .layout-a, #wrapper .layout-a .layout-column-2, #favviewer {width: 100%}`,
 		})
 
 		const currPage = document.querySelector('.column-order-menu li.current')
