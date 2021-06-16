@@ -26,17 +26,23 @@ export default defineComponent({
 	setup() {
 		const timelines = ref<TimelineData[]>([])
 
-		for (let i = 0; i < Service.instances.length; i++)
-			timelines.value.push(...Service.instances[i].initialTimelines(i))
+		function addTimeline(data : TimelineData) {
+			if (timelines.value.find(t => t.title === data.title)) {
+				console.error(`Timeline "${data.title}" already exists.`)
+				return
+			}
 
-		if (!timelines.value.length)
-			console.warn('No timelines were initialized')
+			timelines.value.push(data)
+		}
 
 		const showAddTimeline = ref(false)
 
-		function addTimeline(data : TimelineData) {
+		for (let i = 0; i < Service.instances.length; i++)
+			for (const t of Service.instances[i].initialTimelines(i))
+				addTimeline(t)
 
-		}
+		if (!timelines.value.length)
+			console.warn('No timelines were initialized')
 
 		return {timelines, showAddTimeline, addTimeline}
 	}

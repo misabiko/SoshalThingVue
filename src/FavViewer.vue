@@ -40,27 +40,34 @@ export default defineComponent({
 	},
 	setup(props) {
 		const timelines = ref<TimelineData[]>([])
-		const lastViewMode = computed(() => props.pageInfo.currentViewMode)
-		const viewMode = ref(lastViewMode.value)
+
+		function addTimeline(data : TimelineData) {
+			if (timelines.value.find(t => t.title === data.title)) {
+				console.error(`Timeline "${data.title}" already exists.`)
+				return
+			}
+
+			timelines.value.push(data)
+		}
+
+		const showAddTimeline = ref(false)
 
 		for (let i = 0; i < Service.instances.length; i++)
-			timelines.value.push(...Service.instances[i].initialTimelines(i))
+			for (const t of Service.instances[i].initialTimelines(i))
+				addTimeline(t)
 
 		if (!timelines.value.length)
 			console.warn('No timelines were initialized')
+
+		const lastViewMode = computed(() => props.pageInfo.currentViewMode)
+		const viewMode = ref(lastViewMode.value)
 
 		function setViewMode(mode : string) {
 			viewMode.value = mode
 			props.pageInfo.setViewMode(mode)
 		}
 
-		const showAddTimeline = ref(false)
-
-		function addTimeline(data : TimelineData) {
-
-		}
-
-		return {timelines, lastViewMode, viewMode, setViewMode, showAddTimeline, addTimeline}
+		return {timelines, showAddTimeline, addTimeline, lastViewMode, viewMode, setViewMode}
 	}
 })
 </script>

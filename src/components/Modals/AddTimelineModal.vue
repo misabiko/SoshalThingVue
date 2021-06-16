@@ -67,7 +67,7 @@
 					</div>
 				</div>
 				<footer class='card-footer'>
-					<button class='button card-footer-item' @click='$emit("addTimeline", timelineData), $emit("close")'>Add</button>
+					<button class='button card-footer-item' @click='$emit("add", timelineData), $emit("close")'>Add</button>
 					<button class='button card-footer-item' @click='$emit("close")'>Cancel</button>
 				</footer>
 			</div>
