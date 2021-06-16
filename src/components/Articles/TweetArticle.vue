@@ -1,6 +1,12 @@
 <template>
 	<article class='article' :articleId='actualArticle.id'>
-<!--		superheader-->
+		<div v-if='article.type === TwitterArticleType.Retweet' class='repostLabel'>
+			<a
+				:href='service.getUserURL(article.author.handle)'
+				target='_blank'
+				rel='noopener noreferrer'
+			>{{ article.author.name}} retweeted</a>
+		</div>
 		<div class='media'>
 			<figure class='media-left'>
 				<p class='image is-64x64'>
@@ -309,4 +315,16 @@ $bubble-r: .5 * $bubble-d
 
 .repostedPostButton .icon > svg
 	transform: rotate(360deg)
+
+.repostLabel
+	margin-left: 64px
+	color: $light
+	font-size: smaller
+
+	a
+		margin-left: 1rem
+		color: $light
+
+		&:hover
+			text-decoration: underline
 </style>
