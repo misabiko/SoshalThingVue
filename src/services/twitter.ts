@@ -257,7 +257,9 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineInstanceOpt, UserTimelin
 		if (!instance)
 			throw `Instance "${key}" isn't initiated`
 
-		instance.articles.push(...payload.newArticles)
+		for (const id of payload.newArticles)
+			if (!instance.articles.includes(id))
+				instance.articles.push(id)
 	}
 
 	optionsToInstance(options : UserTimelineInstanceOpt | UserTimelineCallOpt) : string {

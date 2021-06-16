@@ -62,7 +62,7 @@
 
 <script lang='ts'>
 import {computed, defineComponent, PropType, toRefs} from 'vue'
-import {TwitterArticle, TwitterService, TwitterArticleType, RetweetArticle, QuoteArticle} from '@/services/Twitter'
+import {TwitterArticle, TwitterService, TwitterArticleType, RetweetArticle, QuoteArticle} from '@/services/twitter'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faEllipsisH, faHeart as fasHeart, faRetweet} from '@fortawesome/free-solid-svg-icons'
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons'

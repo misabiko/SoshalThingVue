@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {Service} from '@/services'
-import {TwitterService} from '@/services/Twitter'
+import {TwitterService} from '@/services/twitter'
 
 Service.instances.push(new TwitterService())
 

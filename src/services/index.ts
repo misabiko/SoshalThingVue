@@ -160,7 +160,9 @@ export abstract class PagedEndpoint<InstanceOpt = {},
 		if (!instance)
 			throw `Instance "${key}" isn't initiated`
 
-		instance.articles.push(...wrappedPayload.payload.newArticles)
+		for (const id of wrappedPayload.payload.newArticles)
+			if (!instance.articles.includes(id))
+				instance.articles.push(id)
 		instance.loadedPages.push(options.pageNum)
 		instance.basePageNum = wrappedPayload.basePageNum
 		instance.lastPage = wrappedPayload.lastPage
