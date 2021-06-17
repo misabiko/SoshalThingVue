@@ -1,8 +1,8 @@
 <template>
 	<nav id='sidebar'>
 		<div v-if='expanded' class='sidebarMenu'>
-			<div class='box'>
-				Twitter
+			<div v-for='s in services' class='box'>
+				{{s.name}}
 			</div>
 		</div>
 		<div id='sidebarButtons'>
@@ -27,6 +27,7 @@
 import {defineComponent, ref} from 'vue'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faAngleDoubleLeft, faAngleDoubleRight, faPlus} from '@fortawesome/free-solid-svg-icons'
+import {Service} from '@/services'
 
 library.add(faAngleDoubleLeft, faAngleDoubleRight, faPlus)
 
@@ -34,7 +35,7 @@ export default defineComponent({
 	setup() {
 		const expanded = ref(false)
 
-		return {expanded}
+		return {expanded, services: Service.instances}
 	}
 })
 </script>

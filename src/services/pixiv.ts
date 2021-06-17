@@ -215,7 +215,7 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPage
 		const wrappedPayload = {
 			payload: options.pageNum === this.pageInfo?.pageNum ?
 				FollowPageEndpoint.loadCurrentPageArticles() :
-				await FollowPageEndpoint.loadPageArticles(options.pageNum),
+				await this.loadPageArticles(options.pageNum),
 			basePageNum: this.pageInfo?.pageNum || 0,
 			lastPage: FollowPageEndpoint.defaultLastPage,
 		}
@@ -233,13 +233,16 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPage
 		return FollowPageEndpoint.parsePageArticles(document)
 	}
 
-	private static async loadPageArticles(pageNum : number) {
+	private async loadPageArticles(pageNum : number) {
 		let url = 'https://www.pixiv.net/bookmark_new_illust.php'
 		if (pageNum)
 			url += '?p=' + (pageNum + 1)
 
 		const htmlEl = document.createElement('html')
-		htmlEl.innerHTML = await fetch(url).then(response => response.text())
+		if (this.pageInfo)
+			htmlEl.innerHTML = await fetch(url).then(response => response.text())
+		else	//TODO if proxy server
+			htmlEl.innerHTML = await fetch('/generic/page/' + url).then(response => response.text())
 
 		return FollowPageEndpoint.parsePageArticles(htmlEl)
 	}

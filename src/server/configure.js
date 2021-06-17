@@ -1,5 +1,6 @@
 const Twitter = require('twitter-lite')
 const morgan = require('morgan')
+const got = require('got')
 
 function parseQueryErrors(e, next) {
 	if ('errors' in e) {
@@ -120,6 +121,19 @@ module.exports = app => {
 				res.json(response)
 			}catch (e) {
 				parseQueryErrors(e, next)
+			}
+		})
+
+	app.route('/generic/page/*')
+		.get(async (req, res, next) => {
+			try {
+				console.log("Redirect: " + req.params[0])
+
+				const response = await got(req.params[0])
+				res.send(response.body)
+			}catch (err) {
+				console.error(err)
+				next(err)
 			}
 		})
 }
