@@ -1,21 +1,36 @@
 <template>
 	<div id='timelineContainer'>
-		<Timeline
-			v-for='t in timelines'
-			key='t.title'
-			:timeline='t'
-			:view-mode='viewMode'
-			:view-modes='Object.keys(pageInfo.viewModes)'
-			main-timeline='true'
-			@change-container='t.container = $event'
-			@change-endpoint='t.endpointIndex = $event'
-			@change-service='t.serviceIndex = $event'
-			@hide-soshal='setViewMode("hidden")'
-			@set-viewmode='setViewMode($event)'
-			@add-timeline='showAddTimeline = true'
-		></Timeline>
+		<template v-for='(t, i) in timelines'>
+			<Timeline
+				v-if='!i'
+				:key='t.title'
+				:timeline='t'
+				:view-mode='viewMode'
+				:view-modes='Object.keys(pageInfo.viewModes)'
+				main-timeline
+				@change-container='t.container = $event'
+				@change-endpoint='t.endpointIndex = $event'
+				@change-service='t.serviceIndex = $event'
+				@hide-soshal='setViewMode("hidden")'
+				@set-viewmode='setViewMode($event)'
+				@add-timeline='showAddTimeline = true'
+			></Timeline>
+			<Timeline
+				v-else
+				:key='t.title'
+				:timeline='t'
+				@change-container='t.container = $event'
+				@change-endpoint='t.endpointIndex = $event'
+				@change-service='t.serviceIndex = $event'
+			></Timeline>
+		</template>
 	</div>
-	<AddTimelineModal v-if='showAddTimeline' @add='addTimeline($event)' @close='showAddTimeline = false'/>
+	<AddTimelineModal
+		v-if='showAddTimeline'
+		:timelines='timelines'
+		@add='addTimeline($event)'
+		@close='showAddTimeline = false'
+	/>
 	<teleport v-if='pageInfo && viewMode === "hidden"' :to='pageInfo.activatorSelector'>
 		<component :is='pageInfo.activator' @click='setViewMode(lastViewMode)'></component>
 	</teleport>
@@ -45,6 +60,13 @@ export default defineComponent({
 			if (timelines.value.find(t => t.title === data.title)) {
 				console.error(`Timeline "${data.title}" already exists.`)
 				return
+			}
+
+			//I will regret this, setting endpointIndex to length + typeIndex so it can be created here
+			const service = Service.instances[data.serviceIndex]
+			if (data.endpointIndex !== undefined && data.endpointIndex >= service.endpoints.length) {
+				service.endpoints.push(new (service.endpointTypes[data.endpointIndex - service.endpoints.length] as any)())
+				data.endpointIndex -= service.endpoints.length
 			}
 
 			timelines.value.push(data)

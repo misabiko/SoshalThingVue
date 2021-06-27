@@ -1,5 +1,5 @@
 <template>
-	<div class='timelineArticles timelineMasonry masonrySqueezed' ref='root'>
+	<div class='masonryContainer' ref='root'>
 		<div class='masonryColumn' v-for='(column, colI) in columns' :key='colI'>
 			<component
 				:is='service.articleComponent'
@@ -105,31 +105,19 @@ function getRelativeHeight(medias : PlainMedia[] | LazyMedia[] | QueriedMedia[])
 </script>
 
 <style scoped lang='sass'>
-.timelineArticles
-	overflow-y: scroll
-	overflow-x: hidden
-	flex-grow: 1
-	height: 100%
-	width: 500px
-
-.timelineArticles.timelineMasonry
+.masonryContainer
 	display: flex
 	flex-wrap: nowrap
 	align-items: flex-start
 	align-content: flex-start
 	position: relative
-	width: fit-content
-
-	&.masonrySqueezed
-		width: 100%
 
 .masonryColumn
 	flex: 1 1 0
-	width: 500px
-
-.masonrySqueezed .masonryColumn
-	width: unset
 
 .masonryColumn img
 	width: 100%
+
+.mainTimeline .masonryColumn
+	width: unset
 </style>

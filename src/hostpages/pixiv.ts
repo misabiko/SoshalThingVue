@@ -165,8 +165,8 @@ export default [
 	},
 	{
 		pageInfo: PixivUserPage,
-		urlRegex: /https:\/\/.*pixiv\.net\/.+\/users\/.+\/artworks/,
-		urlMatch: "https://*pixiv.net/*/users/*/artworks*",
+		urlRegex: /https:\/\/.*pixiv\.net\/.+\/users\/.+/,
+		urlMatch: "https://*pixiv.net/*/users/*",
 	},
 	{
 		pageInfo: PixivBookmarkPage,

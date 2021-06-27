@@ -1,5 +1,5 @@
 <template>
-	<div class='timelineArticles timelineRowContainer' ref='root' :style='{direction: rightToLeft ? "rtl" : "ltr"}'>
+	<div class='rowContainer' ref='root' :style='{direction: rightToLeft ? "rtl" : "ltr"}'>
 		<component
 			:is='service.articleComponent'
 			v-for='a in articles' :key='a.id'
@@ -53,16 +53,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang='sass'>
-.timelineArticles
-	overflow-y: scroll
-	overflow-x: hidden
-	flex-grow: 1
-	height: 100%
-	width: 500px
-
-.timelineArticles.timelineRowContainer
+.articlesContainer.rowContainer
 	display: flex
 	flex-wrap: wrap
-	align-items: center
-	width: 100%
+	align-items: flex-start
 </style>

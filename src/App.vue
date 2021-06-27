@@ -3,7 +3,7 @@
 	<div id='timelineContainer'>
 		<Timeline
 			v-for='t in timelines'
-			key='t.title'
+			:key='t.title'
 			:timeline='t'
 			@change-container='t.container = $event'
 			@change-endpoint='t.endpointIndex = $event'
@@ -35,6 +35,13 @@ export default defineComponent({
 			if (timelines.value.find(t => t.title === data.title)) {
 				console.error(`Timeline "${data.title}" already exists.`)
 				return
+			}
+
+			//I will regret this, setting endpointIndex to length + typeIndex so it can be created here
+			const service = Service.instances[data.serviceIndex]
+			if (data.endpointIndex !== undefined && data.endpointIndex >= service.endpoints.length) {
+				service.endpoints.push(new (service.endpointTypes[data.endpointIndex - service.endpoints.length] as any)())
+				data.endpointIndex -= service.endpoints.length
 			}
 
 			timelines.value.push(data)

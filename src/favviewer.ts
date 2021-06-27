@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import {Service} from '@/services'
 import pages from '@/hostpages'
-import {PixivPage} from '@/hostpages/pixiv'
 import {PixivService} from '@/services/pixiv'
 import {PageInfo} from '@/hostpages/pageinfo'
 import FavViewer from '@/FavViewer.vue'
@@ -27,8 +26,7 @@ import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 
 	(globalThis as any).services = Service.instances
 
-	if (page instanceof PixivPage)
-		Service.instances.push(new PixivService(page))
+	Service.instances.push(new PixivService(page))
 
 	await Service.initLocalStorage()
 

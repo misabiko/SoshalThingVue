@@ -20,7 +20,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 	articles = reactive<{ [id : string] : ArticleType }>({})
 	readonly articleComponent : Component
 
-	endpoints : Endpoint<any, any>[] = []
+	endpoints : Endpoint<any>[] = []
 
 	defaultSortMethod = 'Unsorted'
 	sortMethods = {}
@@ -30,24 +30,27 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	protected constructor(
 		public name : string,
-		articleComponent : Component,
+		readonly endpointTypes : Function[],
+		articleComponentRaw : Component,
 		readonly hasMedia : boolean,	//TODO Check programatically
 	) {
-		this.articleComponent = markRaw(articleComponent)
+		this.articleComponent = markRaw(articleComponentRaw)
 	}
 
 	initialTimelines(serviceIndex : number) : TimelineData[] {
 		return []
 	}
 
-	async getNewArticles(endpoint : number | Endpoint<any, any>, options : object) {
+	async getNewArticles(endpoint : number | Endpoint<any>, options : object): Promise<string[]> {
 		const actualEndpoint = endpoint instanceof Endpoint ? endpoint : this.endpoints[endpoint]
-		const {articles, newArticles} = await actualEndpoint.call(options)	//TODO Stop listing newArticles?
+		const {articles, newArticles} = await actualEndpoint.call(options)
 
 		for (const a of articles)
 			this.updateArticle(a as ArticleType)
 
 		await this.saveLocalStorage()
+
+		return newArticles
 	}
 
 	updateArticle(article : ArticleType) {
@@ -105,21 +108,19 @@ export abstract class Service<ArticleType extends Article = Article> {
 		localStorage.setItem('FavViewer', JSON.stringify(storage))
 	}
 
-	abstract getAPIArticleData(id: string): Promise<any>;
+	abstract getAPIArticleData(id : string) : Promise<any>;
 
-	abstract getExternalLink(id: string) : string
+	abstract getExternalLink(id : string) : string
 }
 
 export interface HostPageService {
 	pageInfo? : PageInfo
 }
 
-export abstract class Endpoint<InstanceOpt, CallOpt, InstanceInfo = { articles : string[] }> {
-	instances : { [options : string] : InstanceInfo } = {}
+export abstract class Endpoint<CallOpt> {
+	articles : string[] = reactive([])
 
-	constructor(
-		readonly name : string,
-	) {}
+	protected constructor(readonly name : string) {}
 
 	abstract call(options : CallOpt) : Promise<Payload>
 
@@ -127,53 +128,30 @@ export abstract class Endpoint<InstanceOpt, CallOpt, InstanceInfo = { articles :
 		return true
 	}
 
-	abstract optionsToInstance(options : InstanceOpt | CallOpt) : string
+	abstract getKeyOptions() : object
 
-	abstract initOptions() : InstanceOpt
+	getOptions() : any {
+		return {}
+	}
 
-	abstract initInstance() : InstanceInfo
-}
-
-export interface PagedInstanceInfo {
-	articles : string[],
-	basePageNum : number,
-	loadedPages : number[],
-	lastPage : number
+	setOptions(value : any) {}
 }
 
 export type WrappedPayload = { payload : Payload, basePageNum : number, lastPage : number }
 
-export abstract class PagedEndpoint<InstanceOpt = {},
-	CallOpt extends { pageNum : number } = { pageNum : number },
-	InstanceInfo extends PagedInstanceInfo = PagedInstanceInfo> extends Endpoint<InstanceOpt, CallOpt, InstanceInfo> {
-	optionsToInstance(options : InstanceOpt | CallOpt) {
-		const instanceOptions : { pageNum? : number } = {...options}
-		delete instanceOptions.pageNum
+export abstract class PagedEndpoint<CallOpt extends { pageNum : number } = { pageNum : number }> extends Endpoint<CallOpt> {
+	loadedPages : number[] = []
 
-		return JSON.stringify(instanceOptions)
+	protected constructor(name : string, public basePageNum : number, public lastPage? : number) {
+		super(name)
 	}
 
 	updateInstance(options : CallOpt, wrappedPayload : WrappedPayload) {
-		const key = this.optionsToInstance(options)
-		const instance = this.instances[key]
-
-		if (!instance)
-			throw `Instance "${key}" isn't initiated`
-
 		for (const id of wrappedPayload.payload.newArticles)
-			if (!instance.articles.includes(id))
-				instance.articles.push(id)
-		instance.loadedPages.push(options.pageNum)
-		instance.basePageNum = wrappedPayload.basePageNum
-		instance.lastPage = wrappedPayload.lastPage
-	}
-
-	initInstance() : InstanceInfo {
-		return {
-			articles: reactive([]),
-			loadedPages: [],
-			basePageNum: 0,
-			lastPage: 0,
-		} as unknown as InstanceInfo
+			if (!this.articles.includes(id))
+				this.articles.push(id)
+		this.loadedPages.push(options.pageNum)
+		this.basePageNum = wrappedPayload.basePageNum
+		this.lastPage = wrappedPayload.lastPage
 	}
 }

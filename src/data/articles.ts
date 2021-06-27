@@ -79,8 +79,16 @@ export interface ImageData {
 	format : MediaFormat
 }
 
-export function isVideo(image : ImageData) {
-	return image.format == MediaFormat.MP4 || image.format == MediaFormat.WEBM
+export function getMediaType(format : MediaFormat) {
+	switch (format) {
+		case MediaFormat.JPG:
+		case MediaFormat.PNG:
+		case MediaFormat.GIF:
+			return MediaType.Image
+		case MediaFormat.MP4:
+		case MediaFormat.WEBM:
+			return MediaType.Video
+	}
 }
 
 export function getImageFormat(url : string) : MediaFormat {

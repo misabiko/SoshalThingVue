@@ -90,9 +90,9 @@ export function useLazyMedia(service: Ref<MediaService>, article: Ref<MediaArtic
 							loop: '',
 							autoplay: '',
 							muted: 'true',
+							onClick: () => onArticleClick.value(article.value.id),
 						}, [h('source', {
 							src: imageUrl.value,
-							onClick: () => onArticleClick.value(article.value.id),
 							type: article.value.media[0].content.format == MediaFormat.MP4 ? 'video/mp4' : 'video/webm',
 						})]),
 					]

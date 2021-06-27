@@ -1,21 +1,16 @@
-import {Endpoint, PagedInstanceInfo, Service} from '@/services'
+import {PagedEndpoint, Service} from '@/services'
 import {computed, ref, Ref, ComputedRef, h} from 'vue'
 
 export default function usePages(
 	service : Ref<Service>,
-	endpoint : ComputedRef<Endpoint<any, any>>,
-	endpointOptions : Ref<object & { pageNum : number }>,
+	endpoint : ComputedRef<PagedEndpoint<any>>,
 	articleIds : Ref<string[]>,
 ) {
 	const loadingPage = ref(false)
 
-	const endpointInstance = computed(() => endpoint.value.instances[endpoint.value.optionsToInstance(endpointOptions.value)] as PagedInstanceInfo)
-	if (!endpointInstance.value)
-		endpoint.value.instances[endpoint.value.optionsToInstance(endpoint.value.initOptions())] = endpoint.value.initInstance()
-
 	const remainingPages = computed<number[]>(() => {
-		const lastPage = endpointInstance.value.lastPage
-		const loadedPages = endpointInstance.value.loadedPages
+		const lastPage = endpoint.value.lastPage ?? 10
+		const loadedPages = endpoint.value.loadedPages
 
 		const remaining = []
 		for (let i = 0; i <= lastPage; i++)
@@ -25,19 +20,18 @@ export default function usePages(
 		return remaining
 	})
 
-	const newPage = ref(endpointInstance.value.basePageNum)
+	const newPage = ref(endpoint.value.basePageNum)
 
 	const getNewArticles = async function(callOpts : object = {pageNum: newPage.value}) {
 		if (loadingPage.value)
 			return
 		loadingPage.value = true
 
-		const options = {
-			...endpointOptions.value,
-			...callOpts,
-		}
+		const newArticles = await service.value.getNewArticles(endpoint.value, callOpts)
 
-		await service.value.getNewArticles(endpoint.value, options)
+		for (const a of newArticles)
+			if (!articleIds.value.includes(a))
+				articleIds.value.push(a)
 
 		const oldNewPage = newPage.value
 		if (remainingPages.value.length)

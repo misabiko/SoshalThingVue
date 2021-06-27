@@ -17,7 +17,22 @@
 				</div>
 			</div>
 			<div class='timelineButtons'>
-				<button @click='getNewArticles()'>
+				<button @click='shuffle(articleIds), sortMethod = "Unsorted"'>
+					<span class='icon'>
+						<FontAwesomeIcon icon='random' size='lg'/>
+					</span>
+				</button>
+				<button @click='autoScroll()'>
+					<span class='icon'>
+						<FontAwesomeIcon icon='scroll' size='lg'/>
+					</span>
+				</button>
+				<button v-if='getRandomNewArticles' @click='getRandomNewArticles()'>
+					<span class='icon'>
+						<FontAwesomeIcon icon='magic' size='lg'/>
+					</span>
+				</button>
+				<button v-if='getNewArticles' @click='getNewArticles()'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='arrow-down' size='lg'/>
 					</span>
@@ -35,10 +50,11 @@
 			</div>
 		</div>
 		<component
+			class='articlesContainer'
 			:is='containers[timeline.container]'
 			:service='service'
 			:articles='articles'
-			:column-count='columnCount'
+			:column-count='Math.min(articles.length, columnCount)'
 			:right-to-left='rightToLeft'
 			:on-article-click='onArticleClicks[onArticleClick]'
 			@expand='modalArticle = $event'
@@ -58,7 +74,7 @@
 
 <script lang='ts'>
 import {
-	computed,
+	computed, ComputedRef,
 	defineComponent,
 	h,
 	onBeforeMount,
@@ -70,7 +86,7 @@ import {
 	VNode,
 	watch,
 } from 'vue'
-import {MediaService, Service} from '@/services'
+import {MediaService, PagedEndpoint, Service} from '@/services'
 import {TimelineData} from '@/data/timelines'
 import {useQueryManagerContainer} from '@/composables/QueryManager'
 import {useLoadManagerTimeline} from '@/composables/LoadManager'
@@ -92,7 +108,6 @@ import {
 	faRandom,
 	faScroll,
 } from '@fortawesome/free-solid-svg-icons'
-import {PageInfo} from '@/hostpages/pageinfo'
 
 library.add(faEllipsisV, faArrowDown, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
 
@@ -112,9 +127,9 @@ export default defineComponent({
 		const options : (() => VNode | VNode[])[] = []
 
 		const service : Ref<Service> = ref(Service.instances[props.timeline.serviceIndex] as Service)
-		const endpoint = computed(() => service.value.endpoints[props.timeline.endpointIndex])
+		const endpoint = computed(() => props.timeline.endpointIndex === undefined ? undefined : service.value.endpoints[props.timeline.endpointIndex])
 
-		let endpointOptions = ref(endpoint.value.initOptions())
+		const endpointOptions = computed(() => endpoint.value?.getOptions() ?? {})
 		const modifiedEndpointOptions = reactive<any>({})
 
 		function resetModifiedEndpoints() {
@@ -123,25 +138,37 @@ export default defineComponent({
 					delete modifiedEndpointOptions[key]
 		}
 
-		const articleIds = computed<string[]>(() => {
-			const instance = endpoint.value.instances[endpoint.value.optionsToInstance(endpointOptions.value)]
-			if (!instance)
-				throw "Instance not initiated"
-			return instance.articles
-		})
+		function initEndpoint() {
+			if (endpoint.value) {
+				if (endpoint.value instanceof PagedEndpoint) {
+					const {
+						getNewArticles: getNewArticlesFunc,
+						getRandomNewArticles: getRandomNewArticlesFunc,
+						pagesOption,
+					} = usePages(service, endpoint as ComputedRef<PagedEndpoint>, articleIds)
+					options.push(pagesOption)
+
+					getNewArticles.value = getNewArticlesFunc
+					getRandomNewArticles.value = getRandomNewArticlesFunc
+				}
+			}
+		}
 
 		watch(
 			endpoint,
 			(newEndpoint) => {
 				console.debug('Changing endpoint options!')
 
-				endpointOptions.value = newEndpoint.initOptions()
+				//endpointOptions.value = newEndpoint.initOptions()
+				initEndpoint()
 				resetModifiedEndpoints()
 
-				if (!articleIds.value.length)
-					getNewArticles()
+				if (!articleIds.value.length && getNewArticles.value)
+					getNewArticles.value()
 			},
 		)
+
+		const articleIds = ref([...(endpoint.value?.articles || [])])
 
 		const sectionArticles = ref(false)
 		const firstArticle = ref(0)
@@ -180,14 +207,15 @@ export default defineComponent({
 
 		const filteredArticleIds = computed(() => articles.value.map(a => a.id))
 
-		const {
-			getNewArticles,
-			getRandomNewArticles,
-			pagesOption,
-		} = usePages(service, endpoint, endpointOptions, articleIds)
-		options.push(pagesOption)
+		const getNewArticles = ref<undefined | Function>(undefined)
+		const getRandomNewArticles = ref<undefined | Function>(undefined)
 
-		onBeforeMount(() => getNewArticles())
+		initEndpoint()
+
+		onBeforeMount(() => {
+			if (getNewArticles.value)
+				getNewArticles.value()
+		})
 
 		const showOptions = ref(false)
 
@@ -318,7 +346,7 @@ export default defineComponent({
 								class: 'button',
 								onClick: () => {
 									console.log('Apply!')
-									endpointOptions.value = {...endpointOptions, ...modifiedEndpointOptions}
+									endpoint.value?.setOptions(modifiedEndpointOptions)
 									resetModifiedEndpoints()
 								},
 							}, 'Apply'),
@@ -512,7 +540,7 @@ export default defineComponent({
 	display: flex
 
 .timelineButtons > button
-	@include borderless-button(0 1.6rem)
+	@include borderless-button(0 1rem)
 	height: 100%
 
 .timelineOptions
@@ -524,4 +552,14 @@ export default defineComponent({
 
 	& input[type="number"]
 		width: 200px
+
+.articlesContainer
+	overflow-y: scroll
+	overflow-x: hidden
+	flex-grow: 1
+	height: 100%
+	width: 500px
+
+.mainTimeline .articlesContainer
+	width: 100%
 </style>

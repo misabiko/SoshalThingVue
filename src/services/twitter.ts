@@ -45,9 +45,9 @@ export interface QuoteArticle extends TweetArticle {
 
 export class TwitterService extends Service<TwitterArticle> {
 	constructor() {
-		super('Twitter', TweetComponent, true)
+		super('Twitter', [], TweetComponent, true)
 
-		this.endpoints.push(new UserTimelineEndpoint())
+		this.endpoints.push(new UserTimelineEndpoint('112543028'))
 	}
 
 	initialTimelines(serviceIndex : number) : TimelineData[] {
@@ -237,16 +237,12 @@ function parseRetweet(retweet : APITweetData, author : APIUserData, retweetedTwe
 	return result
 }
 
-interface UserTimelineInstanceOpt {
-	userId : string
-}
-
-interface UserTimelineCallOpt extends UserTimelineInstanceOpt {
+interface UserTimelineCallOpt {
 
 }
 
-class UserTimelineEndpoint extends Endpoint<UserTimelineInstanceOpt, UserTimelineInstanceOpt> {
-	constructor() {
+class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
+	constructor(readonly userId : string) {
 		super('User Timeline')
 	}
 
@@ -258,7 +254,7 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineInstanceOpt, UserTimelin
 		params.set('media.fields', 'width,height,preview_image_url,url')
 		params.set('expansions', 'author_id,referenced_tweets.id,referenced_tweets.id.author_id,attachments.media_keys')
 
-		const response : TwitterAPIPayload = await fetch(`/twitter/users/${options.userId}?${params.toString()}`).then(r => r.json())
+		const response : TwitterAPIPayload = await fetch(`/twitter/users/${this.userId}?${params.toString()}`).then(r => r.json())
 		console.dir(response)
 
 		dataTweetLoop: for (const tweet of response.data) {
@@ -310,45 +306,19 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineInstanceOpt, UserTimelin
 	}
 
 	updateInstance(options : UserTimelineCallOpt, payload : Payload) {
-		const key = this.optionsToInstance(options)
-		const instance = this.instances[key]
-
-		if (!instance)
-			throw `Instance "${key}" isn't initiated`
-
 		for (const id of payload.newArticles)
-			if (!instance.articles.includes(id))
-				instance.articles.push(id)
+			if (!this.articles.includes(id))
+				this.articles.push(id)
 	}
 
-	optionsToInstance(options : UserTimelineInstanceOpt | UserTimelineCallOpt) : string {
-		return JSON.stringify(options)
+	getKeyOptions() {
+		return {userId: this.userId}
 	}
-
-	//TODO Enable to start without invalid options
-	initOptions() : UserTimelineInstanceOpt {
-		return {
-			userId: '112543028',
-		}
-	}
-
-	initInstance() : { articles : string[] } {
-		return {
-			articles: [],
-		}
-	}
-
 }
 
-interface HomeTimelineInstanceOpt {
+interface HomeTimelineCallOpt {}
 
-}
-
-interface HomeTimelineCallOpt extends HomeTimelineInstanceOpt {
-
-}
-
-class HomeTimelineEndpoint extends Endpoint<HomeTimelineInstanceOpt, HomeTimelineInstanceOpt> {
+class HomeTimelineEndpoint extends Endpoint<HomeTimelineCallOpt> {
 	constructor() {
 		super('Home Timeline')
 	}
@@ -357,17 +327,7 @@ class HomeTimelineEndpoint extends Endpoint<HomeTimelineInstanceOpt, HomeTimelin
 		return {articles: [], newArticles: []}
 	}
 
-	optionsToInstance(options : HomeTimelineInstanceOpt | HomeTimelineCallOpt) : string {
-		return JSON.stringify(options)
-	}
-
-	initOptions() : HomeTimelineInstanceOpt {
+	getKeyOptions() {
 		return {}
-	}
-
-	initInstance() : { articles : string[] } {
-		return {
-			articles: [],
-		}
 	}
 }

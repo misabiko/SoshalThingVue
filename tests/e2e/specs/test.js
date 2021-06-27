@@ -6,3 +6,5 @@ describe('My First Test', () => {
     cy.contains('h1', 'Welcome to Your Vue.js + TypeScript App')
   })
 })
+
+//TEST masonryContainer width with regular, maintTimeline and squeezeMainTimeline

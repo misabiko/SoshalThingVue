@@ -1,5 +1,5 @@
 <template>
-	<div class='timelineArticles' ref='root'>
+	<div class='columnContainer' ref='root'>
 		<component
 			:is='service.articleComponent'
 			v-for='a in articles' :key='a.id'
@@ -45,12 +45,3 @@ export default defineComponent({
 	},
 })
 </script>
-
-<style scoped lang='sass'>
-.timelineArticles
-	overflow-y: scroll
-	overflow-x: hidden
-	flex-grow: 1
-	height: 100%
-	width: 500px
-</style>

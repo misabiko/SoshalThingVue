@@ -14,58 +14,74 @@
 					</button>
 				</header>
 				<div class='card-content'>
-					<div class='content'>
-						<div class='field'>
-							<label class='label'>Title</label>
-							<div class='control'>
-								<input class='input' :class='{"is-danger": !validations.title}' type='text' v-model='timelineData.title'>
-							</div>
-							<p v-if='!validations.title' class='help is-danger'>
-								Timeline "{{ timelineData.title }}" already exists.
-							</p>
+					<div class='field'>
+						<label class='label'>Title</label>
+						<div class='control'>
+							<input class='input' :class='{"is-danger": !validations.title}' type='text' v-model='timelineData.title'>
 						</div>
-						<div class='field'>
-							<label class='label'>Service</label>
-							<div class='control'>
-								<div class='select'>
-									<select v-model='timelineData.serviceIndex'>
-										<option v-for='(s, i) in services' :value='i'>
-											{{ s.name }}
-										</option>
-									</select>
-								</div>
+						<p v-if='!validations.title' class='help is-danger'>
+							Timeline "{{ timelineData.title }}" already exists.
+						</p>
+					</div>
+					<div class='field'>
+						<label class='label'>Service</label>
+						<div class='control'>
+							<div class='select'>
+								<select v-model='timelineData.serviceIndex'>
+									<option v-for='(s, i) in services' :value='i'>
+										{{ s.name }}
+									</option>
+								</select>
 							</div>
 						</div>
-						<div class='field'>
-							<label class='label'>Endpoint</label>
-							<div class='control'>
-								<div class='select'>
-									<select v-model='timelineData.endpointIndex'>
-										<option v-for='(e, i) in service.endpoints' :value='i'>
-											{{ e.name }}
-										</option>
-									</select>
-								</div>
+					</div>
+					<div class='field' v-if='service.endpointTypes.length'>
+						<div class='control'>
+							<input type='checkbox' v-model='newEndpoint'/>
+							New Endpoint?
+						</div>
+					</div>
+					<div class='field' v-if='newEndpoint'>
+						<label class='label'>Endpoint Type</label>
+						<div class='control'>
+							<div class='select'>
+								<select v-model='endpointTypeIndex'>
+									<option v-for='(e, i) in service.endpointTypes' :value='i'>
+										{{ e.name }}
+									</option>
+								</select>
 							</div>
 						</div>
-						<div class='field'>
-							<label class='label'>Container</label>
-							<div class='control'>
-								<div class='select'>
-									<select v-model='timelineData.container'>
-										<option v-for='c in containers' :value='c'>
-											{{ c.replace('Container', '') }}
-										</option>
-									</select>
-								</div>
+					</div>
+					<div class='field' v-else>
+						<label class='label'>Endpoint</label>
+						<div class='control'>
+							<div class='select'>
+								<select v-model='timelineData.endpointIndex'>
+									<option v-for='(e, i) in service.endpoints' :value='i'>
+										{{ e.name }}
+									</option>
+								</select>
 							</div>
 						</div>
-						<div class='field'>
-							<label class='label'>Defaults</label>
-							<div class='control'>
-								<input type='checkbox' v-model='timelineData.defaults.rtl'/>
-								Right to Left
+					</div>
+					<div class='field'>
+						<label class='label'>Container</label>
+						<div class='control'>
+							<div class='select'>
+								<select v-model='timelineData.container'>
+									<option v-for='c in containers' :value='c'>
+										{{ c.replace('Container', '') }}
+									</option>
+								</select>
 							</div>
+						</div>
+					</div>
+					<div class='field'>
+						<label class='label'>Defaults</label>
+						<div class='control'>
+							<input type='checkbox' v-model='timelineData.defaults.rtl'/>
+							Right to Left
 						</div>
 					</div>
 				</div>
@@ -83,8 +99,8 @@
 </template>
 
 <script lang='ts'>
-import {computed, defineComponent, PropType, ref, toRefs} from 'vue'
-import {Service} from '@/services'
+import {computed, defineComponent, PropType, ref, toRefs, watch} from 'vue'
+import {HostPageService, Service} from '@/services'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faTimes} from '@fortawesome/free-solid-svg-icons'
 import {TimelineData} from '@/data/timelines'
@@ -102,8 +118,19 @@ export default defineComponent({
 	setup(props) {
 		const {timelines} = toRefs(props)
 
-		const firstService = Service.instances[0]
-		const timelineData = ref<TimelineData>(firstService.initialTimelines(0)[0])
+		let firstServiceIndex = Service.instances.findIndex(s => (s as HostPageService).pageInfo)
+		if (firstServiceIndex < 0)
+			firstServiceIndex = 0
+
+		const timelineData = ref<TimelineData>(Service.instances[firstServiceIndex].initialTimelines(0)[0] || {
+			title: 'New Timeline',
+			serviceIndex: firstServiceIndex,
+			endpointIndex: 0,
+			container: 'ColumnContainer',
+			defaults: {
+				rtl: false,
+			}
+		})
 
 		const baseTitle = timelineData.value.title
 		let title = baseTitle
@@ -126,7 +153,19 @@ export default defineComponent({
 		}))
 		const valid = computed(() => Object.values(validations.value).every(isValid => isValid))
 
-		return {timelineData, services: Service.instances, service, containers, validations, valid}
+		const newEndpoint = ref(false)
+		const endpointTypeIndex = ref(0)
+
+		watch(
+			newEndpoint,
+			(value, oldValue) => {
+				//I will regret this, setting endpointIndex to length + typeIndex so it can be created later
+				if (value != oldValue)
+					timelineData.value.endpointIndex = value ? service.value.endpoints.length + endpointTypeIndex.value : 0
+			}
+		)
+
+		return {timelineData, services: Service.instances, service, containers, validations, valid, newEndpoint, endpointTypeIndex}
 	},
 })
 </script>

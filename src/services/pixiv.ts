@@ -3,7 +3,6 @@ import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
 import PixivComponent from '@/components/Articles/PixivArticle.vue'
 import {Article, getImageFormat, ImageData, LazyMedia, MediaArticle, MediaLoadStatus, MediaType} from '@/data/articles'
-import {reactive} from 'vue'
 
 export interface PixivArticle extends Article, MediaArticle {
 	title : string
@@ -16,16 +15,17 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 	pageInfo? : PixivPage
 
 	constructor(pageInfoObj? : PageInfo) {
-		super('Pixiv', PixivComponent, true)
+		super('Pixiv', [], PixivComponent, true)
 
 		if (pageInfoObj instanceof PixivPage)
 			this.pageInfo = pageInfoObj
 
-		this.endpoints.push(
-			new FollowPageEndpoint(this.pageInfo instanceof PixivFollowPage ? this.pageInfo : undefined),
-			new UserPageEndpoint(this.pageInfo instanceof PixivUserPage ? this.pageInfo : undefined),
-			new BookmarkPageEndpoint(this.pageInfo instanceof PixivBookmarkPage ? this.pageInfo : undefined),
-		)
+		if (this.pageInfo instanceof PixivFollowPage)
+			this.endpoints.push(new FollowPageEndpoint(this.pageInfo))
+		if (this.pageInfo instanceof PixivUserPage)
+			this.endpoints.push(new UserPageEndpoint(this.pageInfo))
+		if (this.pageInfo instanceof PixivBookmarkPage)
+			this.endpoints.push(new BookmarkPageEndpoint(this.pageInfo))
 	}
 
 	initialTimelines(serviceIndex : number) {
@@ -184,29 +184,19 @@ interface MountPointData {
 	responseCount : number
 }
 
-interface FollowPageInstanceOpt {
-
-}
-
-interface FollowPageCallOpt extends FollowPageInstanceOpt {
+interface FollowPageCallOpt {
 	pageNum : number
 }
 
-class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPageCallOpt> {
+class FollowPageEndpoint extends PagedEndpoint<FollowPageCallOpt> {
 	static defaultLastPage = 100
 
-	constructor(readonly pageInfo? : PixivFollowPage) {
-		super('Following')
+	constructor(readonly pageInfo : PixivFollowPage) {
+		super('Following', pageInfo.pageNum, pageInfo.lastPage)
+	}
 
-		if (pageInfo) {
-			const key = this.optionsToInstance({})
-			this.instances[key] = {
-				articles: [],
-				basePageNum: pageInfo.pageNum,
-				loadedPages: [],
-				lastPage: FollowPageEndpoint.defaultLastPage,
-			}
-		}
+	getKeyOptions() {
+		return {}
 	}
 
 	async call(options : FollowPageCallOpt) {
@@ -223,10 +213,6 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPage
 		this.updateInstance(options, wrappedPayload)
 
 		return wrappedPayload.payload
-	}
-
-	initOptions() : FollowPageInstanceOpt {
-		return {}
 	}
 
 	private static loadCurrentPageArticles() {
@@ -323,43 +309,21 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageInstanceOpt, FollowPage
 			bookmarked: getComputedStyle(svg).color === "rgb(255, 64, 96)"
 		}
 	}
-
-	initInstance() {
-		if (this.pageInfo)
-			return {
-				articles: reactive([]),
-				loadedPages: [],
-				basePageNum: this.pageInfo.pageNum,
-				lastPage: this.pageInfo.lastPage,
-			}
-		else
-			return super.initInstance()
-	}
 }
 
-interface UserPageInstanceOpt {
-
-}
-
-interface UserPageCallOpt extends UserPageInstanceOpt {
+interface UserPageCallOpt {
 	pageNum : number
 }
 
-class UserPageEndpoint extends PagedEndpoint<UserPageInstanceOpt, UserPageCallOpt> {
+class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
 	static defaultLastPage = 100
 
-	constructor(readonly pageInfo? : PixivUserPage) {
-		super('User')
+	constructor(readonly pageInfo : PixivUserPage) {
+		super('User', pageInfo.pageNum, pageInfo.lastPage)
+	}
 
-		if (pageInfo) {
-			const key = this.optionsToInstance({})
-			this.instances[key] = {
-				articles: [],
-				basePageNum: pageInfo.pageNum,
-				loadedPages: [],
-				lastPage: UserPageEndpoint.defaultLastPage,
-			}
-		}
+	getKeyOptions() {
+		return {}
 	}
 
 	async call(options : UserPageCallOpt) {
@@ -376,10 +340,6 @@ class UserPageEndpoint extends PagedEndpoint<UserPageInstanceOpt, UserPageCallOp
 		this.updateInstance(options, wrappedPayload)
 
 		return wrappedPayload.payload
-	}
-
-	initOptions() : UserPageInstanceOpt {
-		return {}
 	}
 
 	private static loadCurrentPageArticles() {
@@ -459,41 +419,23 @@ class UserPageEndpoint extends PagedEndpoint<UserPageInstanceOpt, UserPageCallOp
 			bookmarked: getComputedStyle(svg).color === "rgb(255, 64, 96)"
 		}
 	}
-
-	initInstance() {
-		if (this.pageInfo)
-			return {
-				articles: reactive([]),
-				loadedPages: [],
-				basePageNum: this.pageInfo.pageNum,
-				lastPage: this.pageInfo.lastPage,
-			}
-		else
-			return super.initInstance()
-	}
 }
 
-interface BookmarkPageInstanceOpt {
-	priv: boolean
-}
-
-interface BookmarkPageCallOpt extends BookmarkPageInstanceOpt {
+interface BookmarkPageCallOpt {
 	pageNum : number
 }
 
-class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageInstanceOpt, BookmarkPageCallOpt> {
-	constructor(readonly pageInfo? : PixivBookmarkPage) {
-		super('Bookmark')
+class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageCallOpt> {
+	priv: boolean
 
-		if (pageInfo) {
-			const key = this.optionsToInstance({priv: pageInfo?.priv || false})
-			this.instances[key] = {
-				articles: [],
-				basePageNum: pageInfo.pageNum,
-				loadedPages: [],
-				lastPage: pageInfo.lastPage,
-			}
-		}
+	constructor(readonly pageInfo : PixivBookmarkPage) {
+		super('Bookmark', pageInfo.pageNum, pageInfo.lastPage)
+
+		this.priv = pageInfo.priv
+	}
+
+	getKeyOptions() {
+		return {priv: this.priv}
 	}
 
 	async call(options : BookmarkPageCallOpt) {
@@ -502,7 +444,7 @@ class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageInstanceOpt, Bookma
 		const wrappedPayload = {
 			payload: options.pageNum === this.pageInfo?.pageNum ?
 				BookmarkPageEndpoint.loadCurrentPageArticles(this.pageInfo.pageNum) :
-				await BookmarkPageEndpoint.loadPageArticles(options.pageNum, options.priv),
+				await BookmarkPageEndpoint.loadPageArticles(options.pageNum, this.priv),
 			basePageNum: this.pageInfo?.pageNum || 0,
 			lastPage: this.pageInfo?.lastPage || this.pageInfo?.pageNum || 0,
 		}
@@ -510,12 +452,6 @@ class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageInstanceOpt, Bookma
 		this.updateInstance(options, wrappedPayload)
 
 		return wrappedPayload.payload
-	}
-
-	initOptions() : BookmarkPageInstanceOpt {
-		return {
-			priv: this.pageInfo?.priv || false,
-		}
 	}
 
 	private static loadCurrentPageArticles(pageNum : number) {
@@ -600,17 +536,5 @@ class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageInstanceOpt, Bookma
 			},
 			bookmarked: true
 		}
-	}
-
-	initInstance() {
-		if (this.pageInfo)
-			return {
-				articles: reactive([]),
-				loadedPages: [],
-				basePageNum: this.pageInfo.pageNum,
-				lastPage: this.pageInfo.lastPage,
-			}
-		else
-			return super.initInstance()
 	}
 }
