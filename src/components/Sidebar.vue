@@ -18,7 +18,15 @@
 					</span>
 				</button>
 			</div>
-			<div/>
+			<div>
+				<a href='https://github.com/misabiko/SoshalThing/tree/master'>
+					<button>
+						<span class='icon'>
+							<FontAwesomeIcon :icon='["fab", "github"]' size='2x'/>
+						</span>
+					</button>
+				</a>
+			</div>
 		</div>
 	</nav>
 </template>
@@ -28,8 +36,9 @@ import {defineComponent, ref} from 'vue'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faAngleDoubleLeft, faAngleDoubleRight, faPlus} from '@fortawesome/free-solid-svg-icons'
 import {Service} from '@/services'
+import {faGithub} from '@fortawesome/free-brands-svg-icons'
 
-library.add(faAngleDoubleLeft, faAngleDoubleRight, faPlus)
+library.add(faAngleDoubleLeft, faAngleDoubleRight, faPlus, faGithub)
 
 export default defineComponent({
 	setup() {
