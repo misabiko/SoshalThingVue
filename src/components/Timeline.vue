@@ -27,14 +27,14 @@
 						<FontAwesomeIcon icon='scroll' size='lg'/>
 					</span>
 				</button>
-				<button v-if='getRandomNewArticles' @click='getRandomNewArticles()'>
+				<button v-if='endpointPackage.type === EndpointPackageType.PagedEndpoint' @click='getRandomNewArticles()'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='magic' size='lg'/>
 					</span>
 				</button>
-				<button v-if='getNewArticles' @click='getNewArticles()'>
+				<button v-if='endpointPackage.type !== EndpointPackageType.NoEndpoint' @click='getNewArticles()'>
 					<span class='icon'>
-						<FontAwesomeIcon icon='arrow-down' size='lg'/>
+						<FontAwesomeIcon :icon='endpointPackage.type === EndpointPackageType.PagedEndpoint ? "arrow-down" : "sync-alt"' size='lg'/>
 					</span>
 				</button>
 				<button @click='showOptions = !showOptions'>
@@ -86,13 +86,12 @@ import {
 	VNode,
 	watch,
 } from 'vue'
-import {MediaService, PagedEndpoint, Service} from '@/services'
+import {Endpoint, MediaService, PagedEndpoint, Service} from '@/services'
 import {TimelineData} from '@/data/timelines'
 import {useQueryManagerContainer} from '@/composables/QueryManager'
 import {useLoadManagerTimeline} from '@/composables/LoadManager'
 import ColumnContainer from '@/components/Containers/ColumnContainer.vue'
 import Modal from '@/components/Modals/ArticleModal.vue'
-import usePages from '@/composables/usePages'
 import {useAutoScroll} from '@/composables/useAutoScroll'
 import {useSortMethods} from '@/composables/useSortMethods'
 import {useFilters} from '@/composables/useFilters'
@@ -107,9 +106,27 @@ import {
 	faPlus,
 	faRandom,
 	faScroll,
+	faSyncAlt,
 } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faEllipsisV, faArrowDown, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
+library.add(faEllipsisV, faArrowDown, faSyncAlt, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
+
+enum EndpointPackageType {
+	NoEndpoint,
+	RefreshEndpoint,
+	PagedEndpoint,
+}
+
+type EndpointPackage = {
+	type: EndpointPackageType.NoEndpoint,
+} | {
+	type: EndpointPackageType.RefreshEndpoint,
+} | {
+	type: EndpointPackageType.PagedEndpoint,
+	endpoint: ComputedRef<PagedEndpoint>,
+	remainingPages: ComputedRef<number[]>,
+	newPage: Ref<undefined | number>,
+}
 
 export default defineComponent({
 	props: {
@@ -124,13 +141,94 @@ export default defineComponent({
 	components: {Modal},
 	setup(props, {emit}) {
 		const {viewMode} = toRefs(props)
-		const options : (() => VNode | VNode[])[] = []
+		const options : (() => VNode | VNode[] | undefined)[] = []
 
-		const service : Ref<Service> = ref(Service.instances[props.timeline.serviceIndex] as Service)
+		const service = ref(Service.instances[props.timeline.serviceIndex] as Service)
 		const endpoint = computed(() => props.timeline.endpointIndex === undefined ? undefined : service.value.endpoints[props.timeline.endpointIndex])
 
 		const endpointOptions = computed(() => endpoint.value?.getOptions() ?? {})
 		const modifiedEndpointOptions = reactive<any>({})
+
+		const endpointPackage = computed<EndpointPackage>(() => {
+			if (!endpoint.value)
+				return {
+					type: EndpointPackageType.NoEndpoint,
+				}
+			else if (endpoint.value instanceof PagedEndpoint)
+				return {
+					type: EndpointPackageType.PagedEndpoint,
+					endpoint: endpoint as ComputedRef<PagedEndpoint>,
+					remainingPages,
+					newPage,
+				}
+			else
+				return {
+					type: EndpointPackageType.RefreshEndpoint,
+				}
+		})
+
+		const getNewArticles = async function(callOpts : object = {pageNum: newPage.value}) {
+			if (!endpoint.value?.ready)
+				return
+			endpoint.value.calling = true
+
+			const newArticles = await service.value.getNewArticles(endpoint.value, callOpts)
+
+			for (const a of newArticles)
+				if (!articleIds.value.includes(a))
+					articleIds.value.push(a)
+
+			const oldNewPage = newPage.value ?? -1
+			const pages = remainingPages.value
+			if (pages?.length)
+				newPage.value = pages.filter(p => p > oldNewPage)[0] || pages[pages.length - 1]
+
+			endpoint.value.calling = false
+		}
+
+		const getRandomNewArticles = () => {
+			const ePackage = endpointPackage.value
+			const pages = remainingPages.value
+			if (ePackage.type === EndpointPackageType.PagedEndpoint && pages?.length)
+				return getNewArticles({pageNum: pages[Math.floor(Math.random() * pages.length)]})
+		}
+
+		const newPage = ref(endpoint.value instanceof PagedEndpoint ? endpoint.value.basePageNum : undefined)
+
+		const remainingPages = computed<number[]>(() => {
+			if (!endpoint.value || !(endpoint.value instanceof PagedEndpoint))
+				return []
+
+			const lastPage = endpoint.value.lastPage ?? 10
+			const loadedPages = endpoint.value.loadedPages
+
+			const remaining = []
+			for (let i = 0; i <= lastPage; i++)
+				if (!loadedPages.includes(i))
+					remaining.push(i)
+
+			return remaining
+		})
+
+		options.push(() => {
+			if (endpoint.value && endpoint.value instanceof PagedEndpoint)
+				return h('div', {class: 'field'}, [
+					h('label', {class: 'label'}, "Pages"),
+					h('div', {class: 'field is-grouped'}, [
+						h('div', {class: 'select'},
+							h('select', {
+								value: newPage.value,
+								onInput: (e : InputEvent) => newPage.value = parseInt((e.target as HTMLSelectElement).value),
+							}, remainingPages.value?.map(page => h('option', {value: page}, page))),
+						),
+						h('button', {
+							class: 'button',
+							disabled: !endpoint.value?.ready,
+							onClick: () => getNewArticles({pageNum: newPage.value}),
+						}, 'Load Page'),
+					]),
+				])
+		})
 
 		function resetModifiedEndpoints() {
 			for (const key in modifiedEndpointOptions)
@@ -139,19 +237,8 @@ export default defineComponent({
 		}
 
 		function initEndpoint() {
-			if (endpoint.value) {
-				if (endpoint.value instanceof PagedEndpoint) {
-					const {
-						getNewArticles: getNewArticlesFunc,
-						getRandomNewArticles: getRandomNewArticlesFunc,
-						pagesOption,
-					} = usePages(service, endpoint as ComputedRef<PagedEndpoint>, articleIds)
-					options.push(pagesOption)
-
-					getNewArticles.value = getNewArticlesFunc
-					getRandomNewArticles.value = getRandomNewArticlesFunc
-				}
-			}
+			if (endpoint.value && endpoint.value instanceof PagedEndpoint)
+				newPage.value ??= endpoint.value.basePageNum
 		}
 
 		watch(
@@ -163,8 +250,8 @@ export default defineComponent({
 				initEndpoint()
 				resetModifiedEndpoints()
 
-				if (!articleIds.value.length && getNewArticles.value)
-					getNewArticles.value()
+				if (!articleIds.value.length && getNewArticles)
+					getNewArticles()
 			},
 		)
 
@@ -207,15 +294,9 @@ export default defineComponent({
 
 		const filteredArticleIds = computed(() => articles.value.map(a => a.id))
 
-		const getNewArticles = ref<undefined | Function>(undefined)
-		const getRandomNewArticles = ref<undefined | Function>(undefined)
-
 		initEndpoint()
 
-		onBeforeMount(() => {
-			if (getNewArticles.value)
-				getNewArticles.value()
-		})
+		onBeforeMount(() => getNewArticles())
 
 		const showOptions = ref(false)
 
@@ -470,8 +551,8 @@ export default defineComponent({
 
 		let mediaServiceReturns = {}
 		if (service.value.hasMedia) {
-			const {updateQueries} = useQueryManagerContainer(service, props.timeline.title, filteredArticleIds)
-			const {updateLoadings} = useLoadManagerTimeline(service as Ref<MediaService>, props.timeline.title, filteredArticleIds)
+			const {updateQueries} = useQueryManagerContainer(service as Ref<Service>, props.timeline.title, filteredArticleIds)
+			const {updateLoadings} = useLoadManagerTimeline(service as unknown as Ref<MediaService>, props.timeline.title, filteredArticleIds)
 
 			mediaServiceReturns = {
 				updateQueries,
@@ -486,6 +567,8 @@ export default defineComponent({
 			autoScroll,
 			getRandomNewArticles,
 			getNewArticles,
+			EndpointPackageType,
+			endpointPackage,
 			containers,
 			service,
 			articles,

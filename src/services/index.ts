@@ -1,4 +1,4 @@
-import {Component, markRaw, reactive} from 'vue'
+import {Component, markRaw, reactive, ref} from 'vue'
 import {Article, MediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
@@ -119,13 +119,14 @@ export interface HostPageService {
 
 export abstract class Endpoint<CallOpt> {
 	articles : string[] = reactive([])
+	calling = false
 
 	protected constructor(readonly name : string) {}
 
 	abstract call(options : CallOpt) : Promise<Payload>
 
 	get ready() {
-		return true
+		return !this.calling
 	}
 
 	abstract getKeyOptions() : object
