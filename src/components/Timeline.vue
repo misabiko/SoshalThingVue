@@ -45,9 +45,11 @@
 			</div>
 		</div>
 		<div class='timelineOptions' v-if='showOptions'>
-			<div v-for='option in options' class='box'>
-				<component :is='option'></component>
-			</div>
+			<template v-for='option in options'>
+				<div v-if='option' class='box'>
+					<component :is='option'></component>
+				</div>
+			</template>
 		</div>
 		<component
 			class='articlesContainer'
@@ -379,7 +381,7 @@ export default defineComponent({
 					]),
 				),
 			]),
-			h('div', {class: 'endpointOptions'},
+			/*h('div', {class: 'endpointOptions'},
 				[
 					...Object.keys(endpointOptions.value).filter(key => !key.startsWith('_')).map((optionKey : string) => {
 						let input : string | VNode
@@ -440,7 +442,7 @@ export default defineComponent({
 						),
 					]),
 				],
-			),
+			),*/
 		])
 
 		options.push(() => [
@@ -598,12 +600,14 @@ export default defineComponent({
 	box-sizing: border-box
 	display: flex
 	flex-flow: column
+	width: 500px
 
 	&:first-child
 		padding: 0
 
 .timeline.mainTimeline
 	flex-grow: 2
+	width: unset
 
 .timelineHeader
 	height: 50px
@@ -641,8 +645,4 @@ export default defineComponent({
 	overflow-x: hidden
 	flex-grow: 1
 	height: 100%
-	width: 500px
-
-.mainTimeline .articlesContainer
-	width: 100%
 </style>
