@@ -148,7 +148,7 @@ export default defineComponent({
 		const service = ref(Service.instances[props.timeline.serviceIndex] as Service)
 		const endpoint = computed(() => props.timeline.endpointIndex === undefined ? undefined : service.value.endpoints[props.timeline.endpointIndex])
 
-		const endpointOptions = computed(() => endpoint.value?.getOptions() ?? {})
+		const endpointOptions = computed(() => endpoint.value?.getKeyOptions() ?? {})
 		const modifiedEndpointOptions = reactive<any>({})
 
 		const endpointPackage = computed<EndpointPackage>(() => {
@@ -245,8 +245,10 @@ export default defineComponent({
 
 		watch(
 			endpoint,
-			(newEndpoint) => {
+			(newEndpoint, oldEndpoint) => {
 				console.debug('Changing endpoint options!')
+
+				articleIds.value = []
 
 				//endpointOptions.value = newEndpoint.initOptions()
 				initEndpoint()
@@ -364,25 +366,23 @@ export default defineComponent({
 					]),
 				),
 			]),
-			h('div', {class: 'field is-horizontal'}, [
-				h('label', {class: 'field-label'}, 'Endpoint'),
-				h('div', {class: 'control'},
-					h('div', {class: 'select'}, [
-						h('select', {
-							value: props.timeline.endpointIndex,
-							onInput: (e : InputEvent) => {
-								const value = parseInt((e.target as HTMLInputElement).value)
-								if (value !== props.timeline.endpointIndex)
-									emit('changeEndpoint', value)
-							},
-						}, service.value.endpoints.map((e, i) =>
-							h('option', {value: i, selected: props.timeline.endpointIndex == i}, e.name),
-						)),
-					]),
-				),
-			]),
-			/*h('div', {class: 'endpointOptions'},
+			h('div', {class: 'endpointOptions'},
 				[
+					h('div', {class: 'field is-horizontal'}, [
+						h('label', {class: 'field-label'}, 'Endpoint'),
+						h('div', {class: 'control'},
+							h('div', {class: 'select'}, [
+								h('select', {
+									value: props.timeline.endpointIndex,
+									onInput: (e : InputEvent) => {
+										modifiedEndpointOptions['endpointIndex'] = parseInt((e.target as HTMLInputElement).value)
+									},
+								}, service.value.endpoints.map((e, i) =>
+									h('option', {value: i, selected: props.timeline.endpointIndex == i}, e.name),
+								)),
+							]),
+						),
+					]),
 					...Object.keys(endpointOptions.value).filter(key => !key.startsWith('_')).map((optionKey : string) => {
 						let input : string | VNode
 						try {
@@ -428,8 +428,8 @@ export default defineComponent({
 							h('button', {
 								class: 'button',
 								onClick: () => {
-									console.log('Apply!')
-									endpoint.value?.setOptions(modifiedEndpointOptions)
+									console.log('Apply!', modifiedEndpointOptions)
+									emit('changeEndpoint', modifiedEndpointOptions)
 									resetModifiedEndpoints()
 								},
 							}, 'Apply'),
@@ -442,7 +442,7 @@ export default defineComponent({
 						),
 					]),
 				],
-			),*/
+			),
 		])
 
 		options.push(() => [

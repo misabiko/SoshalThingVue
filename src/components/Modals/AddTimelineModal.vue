@@ -35,7 +35,7 @@
 							</div>
 						</div>
 					</div>
-					<div class='field' v-if='service.endpointTypes.length'>
+					<div class='field' v-if='Object.values(service.endpointTypes).length'>
 						<div class='control'>
 							<input type='checkbox' v-model='newEndpoint'/>
 							New Endpoint?
@@ -45,9 +45,9 @@
 						<label class='label'>Endpoint Type</label>
 						<div class='control'>
 							<div class='select'>
-								<select v-model='endpointTypeIndex'>
+								<select v-model='endpointType'>
 									<option v-for='(e, i) in service.endpointTypes' :value='i'>
-										{{ e.name }}
+										{{ i }}
 									</option>
 								</select>
 							</div>
@@ -122,7 +122,7 @@ export default defineComponent({
 		if (firstServiceIndex < 0)
 			firstServiceIndex = 0
 
-		const timelineData = ref<TimelineData>(Service.instances[firstServiceIndex].initialTimelines(0)[0] || {
+		const timelineData = ref<{endpointType? : string, endpointOptions? : any} & TimelineData>(Service.instances[firstServiceIndex].initialTimelines(0)[0] || {
 			title: 'New Timeline',
 			serviceIndex: firstServiceIndex,
 			endpointIndex: 0,
@@ -154,18 +154,18 @@ export default defineComponent({
 		const valid = computed(() => Object.values(validations.value).every(isValid => isValid))
 
 		const newEndpoint = ref(false)
-		const endpointTypeIndex = ref(0)
+		const endpointType = ref('')
 
 		watch(
 			newEndpoint,
 			(value, oldValue) => {
 				//I will regret this, setting endpointIndex to length + typeIndex so it can be created later
-				if (value != oldValue)
-					timelineData.value.endpointIndex = value ? service.value.endpoints.length + endpointTypeIndex.value : 0
+				if (value && value != oldValue)
+					timelineData.value.endpointType = endpointType.value
 			}
 		)
 
-		return {timelineData, services: Service.instances, service, containers, validations, valid, newEndpoint, endpointTypeIndex}
+		return {timelineData, services: Service.instances, service, containers, validations, valid, newEndpoint, endpointType}
 	},
 })
 </script>

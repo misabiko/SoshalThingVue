@@ -30,7 +30,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	protected constructor(
 		public name : string,
-		readonly endpointTypes : Function[],
+		readonly endpointTypes : { [className : string] : Function },
 		articleComponentRaw : Component,
 		readonly hasMedia : boolean,	//TODO Check programatically
 	) {
@@ -41,7 +41,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 		return []
 	}
 
-	async getNewArticles(endpoint : number | Endpoint<any>, options : object): Promise<string[]> {
+	async getNewArticles(endpoint : number | Endpoint<any>, options : object) : Promise<string[]> {
 		const actualEndpoint = endpoint instanceof Endpoint ? endpoint : this.endpoints[endpoint]
 		const {articles, newArticles} = await actualEndpoint.call(options)
 
@@ -121,7 +121,8 @@ export abstract class Endpoint<CallOpt> {
 	articles : string[] = reactive([])
 	calling = false
 
-	protected constructor(readonly name : string) {}
+	protected constructor(readonly name : string) {
+	}
 
 	abstract call(options : CallOpt) : Promise<Payload>
 
@@ -129,13 +130,10 @@ export abstract class Endpoint<CallOpt> {
 		return !this.calling
 	}
 
-	abstract getKeyOptions() : object
+	abstract getKeyOptions() : any
 
-	getOptions() : any {
-		return {}
+	setOptions(value : any) {
 	}
-
-	setOptions(value : any) {}
 }
 
 export type WrappedPayload = { payload : Payload, basePageNum : number, lastPage : number }

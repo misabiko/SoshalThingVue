@@ -15,7 +15,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 	pageInfo? : PixivPage
 
 	constructor(pageInfoObj? : PageInfo) {
-		super('Pixiv', [], PixivComponent, true)
+		super('Pixiv', {}, PixivComponent, true)
 
 		if (pageInfoObj instanceof PixivPage)
 			this.pageInfo = pageInfoObj

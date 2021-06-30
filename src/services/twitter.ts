@@ -45,7 +45,9 @@ export interface QuoteArticle extends TweetArticle {
 
 export class TwitterService extends Service<TwitterArticle> {
 	constructor() {
-		super('Twitter', [], TweetComponent, true)
+		super('Twitter', {
+			[UserTimelineEndpoint.name]: ({userId}: {userId: string}) => new UserTimelineEndpoint(userId)
+		}, TweetComponent, true)
 
 		this.endpoints.push(new UserTimelineEndpoint('112543028'))
 	}
