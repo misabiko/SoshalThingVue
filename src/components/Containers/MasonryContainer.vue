@@ -114,6 +114,7 @@ function getRelativeHeight(medias : PlainMedia[] | LazyMedia[] | QueriedMedia[])
 
 .masonryColumn
 	flex: 1 1 0
+	min-width: 200px
 
 .masonryColumn img
 	width: 100%

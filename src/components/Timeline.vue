@@ -1,5 +1,5 @@
 <template>
-	<div class='timeline' :class='{ mainTimeline }'>
+	<div class='timeline' :class='{ mainTimeline }' :style='size > 1 ? {width: (size * 500) + "px"} : {}'>
 		<div class='timelineHeader'>
 			<div class='timelineLeftHeader'>
 				<strong>{{ timeline.title }}</strong>
@@ -313,6 +313,7 @@ export default defineComponent({
 
 		const columnCount = ref(5)
 		const rightToLeft = ref(props.timeline.defaults.rtl)
+		const size = ref(props.timeline.defaults.size)
 
 		const showArticle = (id : string) => {
 			const el = document.querySelector('.article' + id)
@@ -543,7 +544,6 @@ export default defineComponent({
 						onInput: (e : InputEvent) => columnCount.value = parseInt((e.target as HTMLInputElement).value),
 					},
 				)),
-
 			h('div', {class: 'control'},
 				h('label', {class: 'checkbox'}, [
 					h('input', {
@@ -554,6 +554,15 @@ export default defineComponent({
 					'Right to left',
 				]),
 			),
+			h('label', {class: 'label'}, 'Width'),
+			h('div', {class: 'control'},
+				h('input', {
+						class: 'input',
+						type: 'number',
+						value: size.value,
+						onInput: (e : InputEvent) => size.value = parseInt((e.target as HTMLInputElement).value),
+					},
+				)),
 		])
 
 		let mediaServiceReturns = {}
@@ -581,6 +590,7 @@ export default defineComponent({
 			articles,
 			columnCount,
 			rightToLeft,
+			size,
 			onArticleClicks,
 			onArticleClick,
 			containerEl,

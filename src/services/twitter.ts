@@ -73,6 +73,7 @@ export class TwitterService extends Service<TwitterArticle> {
 			container: 'ColumnContainer',
 			defaults: {
 				rtl: false,
+				size: 1,
 			},
 		}]
 	}

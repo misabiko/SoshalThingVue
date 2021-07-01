@@ -5,5 +5,6 @@ export interface TimelineData {
 	container : string
 	defaults : {
 		rtl : boolean
+		size : number
 	}
 }

@@ -39,6 +39,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						container: 'MasonryContainer',
 						defaults: {
 							rtl: false,
+							size: 1,
 						},
 					},
 				]
@@ -51,6 +52,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						container: 'MasonryContainer',
 						defaults: {
 							rtl: false,
+							size: 1,
 						},
 					},
 				]
@@ -63,6 +65,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						container: 'MasonryContainer',
 						defaults: {
 							rtl: false,
+							size: 1,
 						},
 					},
 				]
