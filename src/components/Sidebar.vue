@@ -3,6 +3,14 @@
 		<div v-if='expanded' class='sidebarMenu'>
 			<div v-for='s in services' class='box'>
 				{{s.name}}
+				<div class='level' v-if='s.name === "Twitter"'>
+					<div class='level-left'/>
+					<div class='level-right'>
+						<a class='button level-item' href='/twitter/login'>
+							Login
+						</a>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div id='sidebarButtons'>

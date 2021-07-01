@@ -1,6 +1,11 @@
 const Twitter = require('twitter-lite')
 const morgan = require('morgan')
 const got = require('got')
+const cookieParser = require('cookie-parser')
+const session = require('express-session')
+const connectMemoryStore = require('memorystore')
+const passport = require('passport')
+const TwitterStrategy = require('passport-twitter')
 
 function parseQueryErrors(e, next) {
 	if ('errors' in e) {
@@ -34,10 +39,46 @@ function logRateLimit(response) {
 	console.log(`Reset: ${Math.ceil(delta / 1000 / 60)} minutes`)
 }
 
-module.exports = app => {
-	app.use(morgan('dev'))
+function preventUnauthorized(req, res, next) {
+	if (req.user)
+		next()
+	else
+		res.sendStatus(401)
+}
 
-	let credentials, clientV1, clientV2
+module.exports = app => {
+	const MemoryStore = connectMemoryStore(session)
+
+	app.use(morgan('dev'))
+	app.use(cookieParser())
+	app.use(session({
+		cookie: {maxAge: 86400000},
+		store: new MemoryStore({
+			checkPeriod: 86400000,
+		}),
+		secret: 'ehyAv3bH2AwKMMWiOgOeNlOYg',
+		resave: false,
+		saveUninitialized: true,
+		//cookie: {secure: true},	TODO Implement HTTPS
+	}))
+	app.use(passport.initialize())
+	app.use(passport.session())
+
+	let credentials, clientV1, clientV2, authUser
+
+	passport.serializeUser(function(user, cb) {
+		cb(null, user.id)
+	})
+
+	passport.deserializeUser(function(id, cb) {
+		if (!authUser)
+			cb(new Error(`User login data hasn't been initialized.`))
+		else if (id !== authUser.id)
+			cb(new Error(`"${id}" isn't a valid user id.`))
+		else
+			cb(null, authUser)
+	})
+
 	try {
 		credentials = require('../../credentials.json')
 
@@ -49,16 +90,53 @@ module.exports = app => {
 		})
 
 		clientV2 = new Twitter({
-			version: "2",
+			version: '2',
 			extension: false,
 			//consumer_key: credentials.consumer_key,
 			//consumer_secret: credentials.consumer_secret,
 			bearer_token: credentials.bearer_token,
 		})
+
+		passport.use(new TwitterStrategy({
+				consumerKey: credentials.consumer_key,
+				consumerSecret: credentials.consumer_secret,
+				callbackURL: 'http://localhost:8080/twitter/callback',
+			},
+			function(access_token_key, access_token_secret, profile, cb) {
+				try {
+					clientV2 = new Twitter({
+						version: '2',
+						extension: false,
+						consumer_key: credentials.consumer_key,
+						consumer_secret: credentials.consumer_secret,
+						access_token_key,
+						access_token_secret,
+					})
+
+					authUser = {
+						id: profile.id,
+						username: profile.username,
+					}
+
+					cb(null, authUser)
+				}catch (e) {
+					cb(e)
+				}
+			}))
 	}catch (e) {
 		console.error("Please include a 'credentials.json' file with {consumer_key, consumer_secret, access_key, access_secret}\n", e)
 		process.exit(1)
 	}
+
+	app.post('/twitter/login',
+		passport.authenticate('twitter')
+	)
+
+	app.get('/twitter/callback',
+		passport.authenticate('twitter', {
+			successRedirect: '/',
+			//failureRedirect: '/' TODO Have a way to signal failure
+		}))
 
 	app.route('/twitter/v1/:endpoint1/:endpoint2')
 		.get(async (req, res, next) => {
@@ -112,40 +190,37 @@ module.exports = app => {
 			}
 		})
 
-	app.route('/twitter/users/:id')
-		.get(async (req, res, next) => {
-			try {
-				const response = await clientV2.get(`users/${req.params.id}/tweets`, {...(req.query)})
+	app.get('/twitter/users/:id', async (req, res, next) => {
+		try {
+			const response = await clientV2.get(`users/${req.params.id}/tweets`, {...(req.query)})
 
-				logRateLimit(response)
-				res.json(response)
-			}catch (e) {
-				parseQueryErrors(e, next)
-			}
-		})
+			logRateLimit(response)
+			res.json(response)
+		}catch (e) {
+			parseQueryErrors(e, next)
+		}
+	})
 
-	app.route('/twitter/search')
-		.get(async (req, res, next) => {
-			try {
-				const response = await clientV2.get('tweets/search/recent', {...(req.query)})
+	app.get('/twitter/search', async (req, res, next) => {
+		try {
+			const response = await clientV2.get('tweets/search/recent', {...(req.query)})
 
-				logRateLimit(response)
-				res.json(response)
-			}catch (e) {
-				parseQueryErrors(e, next)
-			}
-		})
+			logRateLimit(response)
+			res.json(response)
+		}catch (e) {
+			parseQueryErrors(e, next)
+		}
+	})
 
-	app.route('/generic/page/*')
-		.get(async (req, res, next) => {
-			try {
-				console.log("Redirect: " + req.params[0])
+	app.get('/generic/page/*', async (req, res, next) => {
+		try {
+			console.log("Redirect: " + req.params[0])
 
-				const response = await got(req.params[0])
-				res.send(response.body)
-			}catch (err) {
-				console.error(err)
-				next(err)
-			}
-		})
+			const response = await got(req.params[0])
+			res.send(response.body)
+		}catch (err) {
+			console.error(err)
+			next(err)
+		}
+	})
 }
