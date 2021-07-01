@@ -127,9 +127,6 @@ export default defineComponent({
 			serviceIndex: firstServiceIndex,
 			endpointIndex: 0,
 			container: 'ColumnContainer',
-			defaults: {
-				rtl: false,
-			}
 		})
 
 		const baseTitle = timelineData.value.title

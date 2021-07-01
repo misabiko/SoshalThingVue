@@ -312,8 +312,8 @@ export default defineComponent({
 		const showOptions = ref(false)
 
 		const columnCount = ref(5)
-		const rightToLeft = ref(props.timeline.defaults.rtl)
-		const size = ref(props.timeline.defaults.size)
+		const rightToLeft = ref(props.timeline.defaults?.rtl ?? false)
+		const size = ref(props.timeline.defaults?.size ?? 1)
 
 		const showArticle = (id : string) => {
 			const el = document.querySelector('.article' + id)

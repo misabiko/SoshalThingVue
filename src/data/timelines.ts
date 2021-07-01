@@ -3,8 +3,8 @@ export interface TimelineData {
 	serviceIndex : number
 	endpointIndex? : number
 	container : string
-	defaults : {
-		rtl : boolean
-		size : number
+	defaults? : {
+		rtl? : boolean
+		size? : number
 	}
 }

@@ -71,10 +71,6 @@ export class TwitterService extends Service<TwitterArticle> {
 			serviceIndex,
 			endpointIndex: 0,
 			container: 'ColumnContainer',
-			defaults: {
-				rtl: false,
-				size: 1,
-			},
 		}]
 	}
 
