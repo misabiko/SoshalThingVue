@@ -124,6 +124,18 @@ module.exports = app => {
 			}
 		})
 
+	app.route('/twitter/search')
+		.get(async (req, res, next) => {
+			try {
+				const response = await clientV2.get('tweets/search/recent', {...(req.query)})
+
+				logRateLimit(response)
+				res.json(response)
+			}catch (e) {
+				parseQueryErrors(e, next)
+			}
+		})
+
 	app.route('/generic/page/*')
 		.get(async (req, res, next) => {
 			try {

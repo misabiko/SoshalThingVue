@@ -3,6 +3,7 @@ import {Article, getImageFormat, LazyMedia, MediaArticle, MediaLoadStatus, Media
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {TimelineData} from '@/data/timelines'
+import {Filters} from '@/composables/useFilters'
 
 export enum TwitterArticleType {
 	Tweet,
@@ -44,12 +45,24 @@ export interface QuoteArticle extends TweetArticle {
 }
 
 export class TwitterService extends Service<TwitterArticle> {
+	filters : Filters<TwitterArticle> = {
+		Retweet: {
+			filter: () => a => a.type !== TwitterArticleType.Retweet,
+			defaultConfig: {
+				enabled: true,
+				config: {},
+				option: () => null,
+			}
+		}
+	}
+
 	constructor() {
 		super('Twitter', {
-			[UserTimelineEndpoint.name]: ({userId}: {userId: string}) => new UserTimelineEndpoint(userId)
+			[UserTimelineEndpoint.name]: ({userId}: {userId: string}) => new UserTimelineEndpoint(userId),
+			[SearchEndpoint.name]: ({query}: {query: string}) => new SearchEndpoint(query),
 		}, TweetComponent, true)
 
-		this.endpoints.push(new UserTimelineEndpoint('112543028'))
+		this.endpoints.push(new SearchEndpoint('-is:retweet (#深夜の真剣お絵描き60分一本勝負 OR #東方の90分お絵描き OR #東方ワンドロバトル)'))
 	}
 
 	initialTimelines(serviceIndex : number) : TimelineData[] {
@@ -239,6 +252,68 @@ function parseRetweet(retweet : APITweetData, author : APIUserData, retweetedTwe
 	return result
 }
 
+function parseResponse(response: TwitterAPIPayload) {
+	const payload : Payload<TwitterArticle> = {articles: [], newArticles: []}
+
+	dataTweetLoop: for (const tweet of response.data) {
+		const user = response.includes.users.find((u : APIUserData) => u.id === tweet.author_id)
+		if (!user) {
+			console.error(`Couldn't find user ${tweet.author_id} for article ${tweet.id}`)
+			continue
+		}
+
+		if (tweet.referenced_tweets)
+			for (const referencedTweet of tweet.referenced_tweets)
+				switch (referencedTweet.type) {
+					case 'retweeted':
+						const retweetedTweet = response.includes.tweets.find((t : APITweetData) => t.id === referencedTweet.id)
+						if (!retweetedTweet) {
+							console.error(`Couldn't find retweeted article ${referencedTweet.id} for retweet ${tweet.id}`)
+							continue dataTweetLoop
+						}
+
+						const retweetedTweetAuthor = response.includes.users.find((u : APIUserData) => u.id === retweetedTweet.author_id)
+						if (!retweetedTweetAuthor) {
+							console.error(`Couldn't find retweeted article author ${retweetedTweet.author_id} for retweet ${tweet.id}`)
+							continue dataTweetLoop
+						}
+
+						const retweetedMedia = []
+						if (retweetedTweet.attachments?.media_keys)
+							for (const mediaKey of retweetedTweet.attachments.media_keys) {
+								const media = response.includes.media.find(m => m.media_key === mediaKey)
+								if (media)
+									retweetedMedia.push(media)
+							}
+
+						const {
+							articles,
+							newArticles,
+						} = parseRetweet(tweet, user, retweetedTweet, retweetedTweetAuthor, retweetedMedia)
+						payload.articles.push(...articles)
+						payload.newArticles.push(...newArticles)
+						break
+					default:
+						console.warn(`Reference tweet type "${referencedTweet.type}"`)
+				}
+		else {
+			const tweetMedia = []
+			if (tweet.attachments?.media_keys)
+				for (const mediaKey of tweet.attachments.media_keys) {
+					const media = response.includes.media.find(m => m.media_key === mediaKey)
+					if (media)
+						tweetMedia.push(media)
+				}
+
+			const parsed = parseTweet(tweet, user, tweetMedia)
+			payload.articles.push(parsed)
+			payload.newArticles.push(parsed.id)
+		}
+	}
+
+	return payload
+}
+
 interface UserTimelineCallOpt {
 
 }
@@ -249,7 +324,6 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
 	}
 
 	async call(options : UserTimelineCallOpt) : Promise<Payload> {
-		const payload : Payload<TwitterArticle> = {articles: [], newArticles: []}
 		const params = new URLSearchParams()
 		params.set('tweet.fields', 'created_at,public_metrics,referenced_tweets,entities,attachments')
 		params.set('user.fields', 'name,username,profile_image_url')
@@ -259,48 +333,7 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
 		const response : TwitterAPIPayload = await fetch(`/twitter/users/${this.userId}?${params.toString()}`).then(r => r.json())
 		console.dir(response)
 
-		dataTweetLoop: for (const tweet of response.data) {
-			const user = response.includes.users.find((u : APIUserData) => u.id === tweet.author_id)
-			if (!user) {
-				console.error(`Couldn't find user ${tweet.author_id} for article ${tweet.id}`)
-				continue
-			}
-
-			if (tweet.referenced_tweets)
-				for (const referencedTweet of tweet.referenced_tweets)
-					switch (referencedTweet.type) {
-						case 'retweeted':
-							const retweetedTweet = response.includes.tweets.find((t : APITweetData) => t.id === referencedTweet.id)
-							if (!retweetedTweet) {
-								console.error(`Couldn't find retweeted article ${referencedTweet.id} for retweet ${tweet.id}`)
-								continue dataTweetLoop
-							}
-
-							const retweetedTweetAuthor = response.includes.users.find((u : APIUserData) => u.id === retweetedTweet.author_id)
-							if (!retweetedTweetAuthor) {
-								console.error(`Couldn't find retweeted article author ${retweetedTweet.author_id} for retweet ${tweet.id}`)
-								continue dataTweetLoop
-							}
-
-							const retweetedMedia = []
-							if (retweetedTweet.attachments?.media_keys)
-								for (const mediaKey of retweetedTweet.attachments.media_keys) {
-									const media = response.includes.media.find(m => m.media_key === mediaKey)
-									if (media)
-										retweetedMedia.push(media)
-								}
-
-							const {
-								articles,
-								newArticles,
-							} = parseRetweet(tweet, user, retweetedTweet, retweetedTweetAuthor, retweetedMedia)
-							payload.articles.push(...articles)
-							payload.newArticles.push(...newArticles)
-							break
-						default:
-							console.warn(`Reference tweet type "${referencedTweet.type}"`)
-					}
-		}
+		const payload = parseResponse(response)
 
 		this.updateInstance(options, payload)
 
@@ -331,5 +364,46 @@ class HomeTimelineEndpoint extends Endpoint<HomeTimelineCallOpt> {
 
 	getKeyOptions() {
 		return {}
+	}
+}
+
+interface SearchCallOpt {
+
+}
+
+class SearchEndpoint extends Endpoint<SearchCallOpt> {
+	constructor(readonly query : string) {
+		super(query)
+	}
+
+	async call(options : SearchCallOpt) : Promise<Payload> {
+		const params = new URLSearchParams()
+		params.set('query', this.query)
+		params.set('max_results', '100')
+		params.set('tweet.fields', 'created_at,public_metrics,referenced_tweets,entities,attachments')
+		params.set('user.fields', 'name,username,profile_image_url')
+		params.set('media.fields', 'width,height,preview_image_url,url')
+		params.set('expansions', 'author_id,referenced_tweets.id,referenced_tweets.id.author_id,attachments.media_keys')
+
+		const response : TwitterAPIPayload = await fetch(`/twitter/search?${params.toString()}`)
+			.then(r => r.json())
+			.catch(e => console.error('Failed to parse search response', e))
+		console.dir(response)
+
+		const payload = parseResponse(response)
+
+		this.updateInstance(options, payload)
+
+		return payload
+	}
+
+	updateInstance(options : SearchCallOpt, payload : Payload) {
+		for (const id of payload.newArticles)
+			if (!this.articles.includes(id))
+				this.articles.push(id)
+	}
+
+	getKeyOptions() {
+		return {query: this.query}
 	}
 }

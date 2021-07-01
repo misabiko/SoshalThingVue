@@ -148,7 +148,14 @@ export default defineComponent({
 		const service = ref(Service.instances[props.timeline.serviceIndex] as Service)
 		const endpoint = computed(() => props.timeline.endpointIndex === undefined ? undefined : service.value.endpoints[props.timeline.endpointIndex])
 
-		const endpointOptions = computed(() => endpoint.value?.getKeyOptions() ?? {})
+		const endpointOptions = computed(() => {
+			if (modifiedEndpointOptions.serviceIndex !== undefined && modifiedEndpointOptions.serviceIndex !== props.timeline.serviceIndex)
+				return Service.instances[modifiedEndpointOptions.serviceIndex].endpoints[modifiedEndpointOptions.endpointIndex ?? 0].getKeyOptions()
+			else if (modifiedEndpointOptions.endpointIndex === undefined || modifiedEndpointOptions.endpointIndex === props.timeline.endpointIndex)
+				return endpoint.value?.getKeyOptions() ?? {}
+			else
+				return service.value.endpoints[modifiedEndpointOptions.endpointIndex].getKeyOptions()
+		})
 		const modifiedEndpointOptions = reactive<any>({})
 
 		const endpointPackage = computed<EndpointPackage>(() => {
@@ -356,9 +363,7 @@ export default defineComponent({
 						h('select', {
 							value: props.timeline.serviceIndex,
 							onInput: (e : InputEvent) => {
-								const value = parseInt((e.target as HTMLInputElement).value)
-								if (value !== props.timeline.serviceIndex)
-									emit('changeService', value)
+								modifiedEndpointOptions.serviceIndex = parseInt((e.target as HTMLInputElement).value)
 							},
 						}, Service.instances.map((s, i) =>
 							h('option', {value: i, selected: props.timeline.serviceIndex == i}, s.name),
@@ -369,16 +374,16 @@ export default defineComponent({
 			h('div', {class: 'endpointOptions'},
 				[
 					h('div', {class: 'field is-horizontal'}, [
-						h('label', {class: 'field-label'}, 'Endpoint'),
+						h('label', {class: 'field-label'}, 'Endpoint Type'),
 						h('div', {class: 'control'},
 							h('div', {class: 'select'}, [
 								h('select', {
-									value: props.timeline.endpointIndex,
+									value: endpoint.value?.constructor.name,
 									onInput: (e : InputEvent) => {
-										modifiedEndpointOptions['endpointIndex'] = parseInt((e.target as HTMLInputElement).value)
+										modifiedEndpointOptions.endpointType = (e.target as HTMLInputElement).value
 									},
-								}, service.value.endpoints.map((e, i) =>
-									h('option', {value: i, selected: props.timeline.endpointIndex == i}, e.name),
+								}, Object.keys(service.value.endpointTypes).map(e =>
+									h('option', {value: e}, e),
 								)),
 							]),
 						),
