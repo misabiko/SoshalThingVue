@@ -62,7 +62,7 @@ export class TwitterService extends Service<TwitterArticle> {
 			[SearchEndpoint.name]: ({query}: {query: string}) => new SearchEndpoint(query),
 		}, TweetComponent, true)
 
-		this.endpoints.push(new SearchEndpoint('-is:retweet (#深夜の真剣お絵描き60分一本勝負 OR #東方の90分お絵描き OR #東方ワンドロバトル)'))
+		this.endpoints.push(new SearchEndpoint('-is:retweet #深夜の真剣お絵描き60分一本勝負 OR -is:retweet #東方の90分お絵描き OR -is:retweet #東方ワンドロバトル'))
 	}
 
 	initialTimelines(serviceIndex : number) : TimelineData[] {

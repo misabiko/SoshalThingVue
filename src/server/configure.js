@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const connectMemoryStore = require('memorystore')
 const passport = require('passport')
-const TwitterStrategy = require('passport-twitter')
+const {Strategy: TwitterStrategy} = require('passport-twitter')
 
 function parseQueryErrors(e, next) {
 	if ('errors' in e) {
@@ -85,8 +85,6 @@ module.exports = app => {
 		clientV1 = new Twitter({
 			consumer_key: credentials.consumer_key,
 			consumer_secret: credentials.consumer_secret,
-			//access_token_key: credentials.access_key,
-			//access_token_secret: credentials.access_secret,
 		})
 
 		clientV2 = new Twitter({
@@ -104,6 +102,13 @@ module.exports = app => {
 			},
 			function(access_token_key, access_token_secret, profile, cb) {
 				try {
+					clientV1 = new Twitter({
+						consumer_key: credentials.consumer_key,
+						consumer_secret: credentials.consumer_secret,
+						access_token_key,
+						access_token_secret,
+					})
+
 					clientV2 = new Twitter({
 						version: '2',
 						extension: false,
@@ -128,7 +133,7 @@ module.exports = app => {
 		process.exit(1)
 	}
 
-	app.post('/twitter/login',
+	app.get('/twitter/login',
 		passport.authenticate('twitter')
 	)
 
@@ -136,7 +141,8 @@ module.exports = app => {
 		passport.authenticate('twitter', {
 			successRedirect: '/',
 			//failureRedirect: '/' TODO Have a way to signal failure
-		}))
+		})
+	)
 
 	app.route('/twitter/v1/:endpoint1/:endpoint2')
 		.get(async (req, res, next) => {
