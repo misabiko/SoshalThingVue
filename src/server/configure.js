@@ -220,12 +220,25 @@ module.exports = app => {
 		}
 	})
 
-	app.get('/generic/page/*', async (req, res, next) => {
+	app.get('/generic/redirect', async (req, res, next) => {
 		try {
 			console.log("Redirect: " + req.params[0])
 
 			const response = await got(req.params[0])
 			res.send(response.body)
+		}catch (err) {
+			console.error(err)
+			next(err)
+		}
+	})
+
+	app.get('/generic/json/*', async (req, res, next) => {
+		try {
+			const url = `${req.params[0]}?${new URLSearchParams([...Object.entries(req.query)]).toString()}`
+			console.log(`Querying JSON: ${url}`)
+
+			const body = await got(url).json()
+			res.send(body)
 		}catch (err) {
 			console.error(err)
 			next(err)

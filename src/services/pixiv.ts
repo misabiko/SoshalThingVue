@@ -219,7 +219,7 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageCallOpt> {
 		if (this.pageInfo)
 			htmlEl.innerHTML = await fetch(url).then(response => response.text())
 		else	//TODO if proxy server
-			htmlEl.innerHTML = await fetch('/generic/page/' + url).then(response => response.text())
+			htmlEl.innerHTML = await fetch('/generic/redirect/' + url).then(response => response.text())
 
 		return FollowPageEndpoint.parsePageArticles(htmlEl)
 	}

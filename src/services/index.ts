@@ -113,6 +113,10 @@ export abstract class Service<ArticleType extends Article = Article> {
 	abstract getAPIArticleData(id : string) : Promise<any>;
 
 	abstract getExternalLink(id : string) : string
+
+	optionComponent(props: any): any {
+		return null
+	}
 }
 
 export interface HostPageService {

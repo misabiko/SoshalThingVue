@@ -46,8 +46,6 @@ import {Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
 
-const LOCALSTORAGE_TIMELINE_TITLE = 'SoshalThing Timelines'
-
 export default defineComponent({
 	name: 'FavViewer',
 	components: {AddTimelineModal, Timeline},
@@ -58,14 +56,9 @@ export default defineComponent({
 		}
 	},
 	setup(props) {
-		const timelineStorage = localStorage.getItem(LOCALSTORAGE_TIMELINE_TITLE)
-		const timelines = ref<TimelineData[]>(timelineStorage ? JSON.parse(timelineStorage) : [])
+		const timelines = ref<TimelineData[]>([])
 
-		function updateLocalStorage() {
-			localStorage.setItem(LOCALSTORAGE_TIMELINE_TITLE, JSON.stringify(timelines.value))
-		}
-
-		function addTimeline(data : TimelineData & { newEndpointOptions? : any }, serialize = true) {
+		function addTimeline(data : TimelineData & { newEndpointOptions? : any }) {
 			if (timelines.value.find(t => t.title === data.title)) {
 				console.error(`Timeline "${data.title}" already exists.`)
 				return
@@ -79,9 +72,6 @@ export default defineComponent({
 
 			delete data.newEndpointOptions
 			timelines.value.push(data)
-
-			if (serialize)
-				updateLocalStorage()
 		}
 
 		function changeTimelineEndpoint(timelineIndex : number, options : { serviceIndex? : number, endpointType? : number } & any) {
@@ -103,24 +93,18 @@ export default defineComponent({
 			service.endpoints.push(endpoint)
 
 			timelines.value[timelineIndex].endpointIndex = service.endpoints.length - 1
-
-			updateLocalStorage()
 		}
 
 		function deleteTimeline(timelineIndex : number) {
 			timelines.value.splice(timelineIndex, 1)
-			updateLocalStorage()
 		}
 
 		const showAddTimeline = ref(false)
 
-		if (!timelines.value.length) {
+		if (!timelines.value.length)
 			for (let i = 0; i < Service.instances.length; i++)
 				for (const t of Service.instances[i].initialTimelines(i))
-					addTimeline(t, false)
-
-			updateLocalStorage()
-		}
+					addTimeline(t)
 
 		if (!timelines.value.length)
 			console.warn('No timelines were initialized')

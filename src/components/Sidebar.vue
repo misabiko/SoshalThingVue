@@ -3,6 +3,7 @@
 		<div v-if='expanded' class='sidebarMenu'>
 			<div v-for='s in services' class='box'>
 				{{s.name}}
+				<component :is='s.optionComponent'/>
 				<div class='level' v-if='s.name === "Twitter"'>
 					<div class='level-left'/>
 					<div class='level-right'>

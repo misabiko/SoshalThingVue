@@ -27,9 +27,9 @@ import {TimelineData} from '@/data/timelines'
 import {Service} from '@/services'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
 
-const LOCALSTORAGE_TIMELINE_TITLE = 'SoshalThing Timelines'
+export const LOCALSTORAGE_TIMELINE_TITLE = 'SoshalThing Timelines'
 
-interface TimelineDataSerialized extends TimelineData {
+export interface TimelineDataSerialized extends TimelineData {
 	endpointOptions? : any
 }
 
