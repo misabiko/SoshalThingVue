@@ -57,11 +57,6 @@ export const defaultDefaultFilters : FilterConfigs = {
 		config: {},
 		option: () => null,
 	},
-	Interval: {
-		enabled: false,
-		config: {offset: 0, interval: 3, inverted: false},
-		option: intervalOption,
-	},
 }
 
 export function useFilters<ArticleType extends Article>(defaultFilters = defaultDefaultFilters, additionalFiters : Filters<ArticleType> = {}) {
