@@ -39,25 +39,39 @@
 							class='level-item articleButton repostButton'
 							:class='{repostedPostButton: actualArticle.reposted}'
 						>
-						<span class='icon'>
-							<FontAwesomeIcon icon='retweet'/>
-						</span>
+							<span class='icon'>
+								<FontAwesomeIcon icon='retweet'/>
+							</span>
 							<span v-if='actualArticle.repostCount'>{{actualArticle.repostCount}}</span>
 						</a>
 						<a
 							class='level-item articleButton likeButton'
 							:class='{likedPostButton: actualArticle.liked}'
 						>
-						<span class='icon'>
-							<FontAwesomeIcon :icon='[actualArticle.liked ? "fas" : "far", "heart"]'/>
-						</span>
+							<span class='icon'>
+								<FontAwesomeIcon :icon='[actualArticle.liked ? "fas" : "far", "heart"]'/>
+							</span>
 							<span v-if='actualArticle.likeCount'>{{actualArticle.likeCount}}</span>
 						</a>
-						<a class='level-item articleButton articleMenuButton'>
-						<span class='icon'>
-							<FontAwesomeIcon icon='ellipsis-h'/>
-						</span>
-						</a>
+						<div class='dropdown' :class='{"is-active": showDropdown}'>
+							<div class='dropdown-trigger'>
+								<a class='level-item articleButton articleMenuButton'
+								   aria-haspopup='true'
+								   aria-controls='dropdown-menu'
+								   @click='showDropdown = !showDropdown'
+								>
+									<span class='icon'>
+										<FontAwesomeIcon icon='ellipsis-h'/>
+									</span>
+								</a>
+							</div>
+							<div class='dropdown-menu'>
+								<div class='dropdown-content'>
+									<div class='dropdown-item' @click='service.toggleHideArticle(article.id)'>Hide</div>
+									<div class='dropdown-item' @click='logArticle()'>Log</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</nav>
 			</div>
@@ -82,7 +96,7 @@
 </template>
 
 <script lang='ts'>
-import {computed, defineComponent, PropType, ref, toRefs} from 'vue'
+import {computed, defineComponent, PropType, ref, toRaw, toRefs} from 'vue'
 import {
 	TwitterArticle,
 	TwitterService,
@@ -145,7 +159,11 @@ export default defineComponent({
 			return size.width > size.height ? 'landscape' : 'portrait'
 		}
 
-		return {service, addUserTimeline, TwitterArticleType, MediaLoadStatus, MediaType, actualArticle, compact, imageFormatClass}
+		const showDropdown = ref(false)
+
+		const logArticle = () => console.dir({article: toRaw(article.value), actualArticle: toRaw(actualArticle.value)})
+
+		return {service, addUserTimeline, TwitterArticleType, MediaLoadStatus, MediaType, actualArticle, compact, imageFormatClass, showDropdown, logArticle}
 	}
 })
 </script>
