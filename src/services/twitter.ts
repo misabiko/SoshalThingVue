@@ -349,7 +349,7 @@ interface UserTimelineCallOpt {
 
 class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
 	constructor(readonly userId : string) {
-		super('User Timeline')
+		super('User Timeline ' + userId)
 	}
 
 	async call(options : UserTimelineCallOpt) : Promise<Payload> {
@@ -405,7 +405,7 @@ interface SearchCallOpt {
 
 class SearchEndpoint extends Endpoint<SearchCallOpt> {
 	constructor(readonly query : string) {
-		super(query)
+		super('Search ' + query)
 	}
 
 	async call(options : SearchCallOpt) : Promise<Payload> {

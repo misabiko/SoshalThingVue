@@ -64,19 +64,19 @@ export default defineComponent({
 			})))
 		}
 
-		function addTimeline(data : TimelineData & { newEndpointOptions? : any }, serialize = true) {
+		function addTimeline(data : TimelineDataSerialized, serialize = true) {
 			if (timelines.value.find(t => t.title === data.title)) {
 				console.error(`Timeline "${data.title}" already exists.`)
 				return
 			}
 
 			const service = Service.instances[data.serviceIndex]
-			if (data.newEndpointOptions !== undefined) {
-				service.endpoints.push(service.endpointTypes[data.newEndpointOptions.endpointType].factory(data.newEndpointOptions))
+			if (data.endpointOptions !== undefined) {
+				service.endpoints.push(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
 				data.endpointIndex = service.endpoints.length - 1
 			}
 
-			delete data.newEndpointOptions
+			delete data.endpointOptions
 			timelines.value.push(data)
 
 			if (serialize)

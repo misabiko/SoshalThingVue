@@ -1,5 +1,5 @@
 <template>
-	<div class='modal is-active' @click='$emit($event.target.className.includes("modal") ? "close" : "")'>
+	<div class='modal is-active' @click='$emit($event.target.classList.contains("modal") ? "close" : "")'>
 		<div class='modal-background'/>
 		<div class='modal-content'>
 			<div class='card'>
@@ -17,61 +17,17 @@
 					<div class='field'>
 						<label class='label'>Title</label>
 						<div class='control'>
-							<input class='input' :class='{"is-danger": !validations.title}' type='text' v-model='timelineData.title'>
+							<input class='input' :class='{"is-danger": !validations.title}' type='text'
+								   v-model='timelineData.title'>
 						</div>
 						<p v-if='!validations.title' class='help is-danger'>
 							Timeline "{{ timelineData.title }}" already exists.
 						</p>
 					</div>
-					<div class='field'>
-						<label class='label'>Service</label>
-						<div class='control'>
-							<div class='select'>
-								<select v-model='timelineData.serviceIndex'>
-									<option v-for='(s, i) in services' :value='i'>
-										{{ s.name }}
-									</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div class='field' v-if='Object.values(service.endpointTypes).length'>
-						<div class='control'>
-							<input type='checkbox' v-model='newEndpoint'/>
-							New Endpoint?
-						</div>
-					</div>
-					<template v-if='newEndpoint'>
-						<div class='field'>
-							<label class='label'>Endpoint Type</label>
-							<div class='control'>
-								<div class='select'>
-									<select v-model='endpointOptions.endpointType'>
-										<option v-for='(e, i) in service.endpointTypes' :value='i'>
-											{{ i }}
-										</option>
-									</select>
-								</div>
-							</div>
-						</div>
-						<component
-							:is='service.endpointTypes[endpointOptions.endpointType].optionComponent'
-							:endpointOptions='endpointOptions'
-							@changeOptions='endpointOptions = $event'
-						/>
-					</template>
-					<div class='field' v-else>
-						<label class='label'>Endpoint</label>
-						<div class='control'>
-							<div class='select'>
-								<select v-model='timelineData.endpointIndex'>
-									<option v-for='(e, i) in service.endpoints' :value='i'>
-										{{ e.name }}
-									</option>
-								</select>
-							</div>
-						</div>
-					</div>
+					<EndpointSelection
+						v-model='timelineData'
+						:service='service'
+					/>
 					<div class='field'>
 						<label class='label'>Container</label>
 						<div class='control'>
@@ -95,7 +51,7 @@
 				<footer class='card-footer'>
 					<button
 						class='button card-footer-item'
-						@click='$emit("add", {...timelineData, newEndpointOptions: endpointOptions}), $emit("close")'
+						@click='$emit("add", timelineData), initTimelineData(), $emit("close")'
 						:disabled='!valid'
 					>Add
 					</button>
@@ -107,15 +63,18 @@
 </template>
 
 <script lang='ts'>
-import {computed, defineComponent, PropType, ref, toRefs, watch} from 'vue'
+import {computed, defineComponent, onBeforeMount, PropType, ref, toRefs, watch} from 'vue'
 import {HostPageService, Service} from '@/services'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faTimes} from '@fortawesome/free-solid-svg-icons'
 import {TimelineData} from '@/data/timelines'
+import EndpointSelection from '@/components/EndpointSelection.vue'
+import {TimelineDataSerialized} from '@/App.vue'
 
 library.add(faTimes)
 
 export default defineComponent({
+	components: {EndpointSelection},
 	props: {
 		timelines: {
 			type: Array as PropType<TimelineData[]>,
@@ -130,22 +89,14 @@ export default defineComponent({
 		if (firstServiceIndex < 0)
 			firstServiceIndex = 0
 
-		const timelineData = ref<{ endpointType? : string, endpointOptions? : any } & TimelineData>({
-				...Service.instances[firstServiceIndex].initialTimelines(0)[0],
+		const timelineData = ref<TimelineDataSerialized>({
 				title: 'New Timeline',
 				serviceIndex: firstServiceIndex,
-				endpointIndex: 0,
+				endpointIndex: undefined,
 				container: 'ColumnContainer',
 				defaults: {},
 			},
 		)
-
-		const baseTitle = timelineData.value.title
-		let title = baseTitle
-		const titles = timelines.value.map(t => t.title)
-		for (let i = 2; titles.includes(title); i++)
-			title = `${baseTitle} ${i}`
-		timelineData.value.title = title
 
 		const service = computed(() => Service.instances[timelineData.value.serviceIndex])
 
@@ -156,21 +107,37 @@ export default defineComponent({
 			'MasonryContainer',
 		]
 
+		function initTimelineData() {
+			timelineData.value = {
+				endpointIndex: undefined,
+				...Service.instances[firstServiceIndex].initialTimelines(0)[0],
+				title: 'New Timeline',
+				serviceIndex: firstServiceIndex,
+				container: 'ColumnContainer',
+				defaults: {},
+			}
+
+			const baseTitle = timelineData.value.title
+			let title = baseTitle
+			const titles = timelines.value.map(t => t.title)
+			for (let i = 2; titles.includes(title); i++)
+				title = `${baseTitle} ${i}`
+			timelineData.value.title = title
+
+			if (timelineData.value.endpointIndex === undefined) {
+				if (service.value.endpoints.length)
+					timelineData.value.endpointIndex = 0
+				else if (Object.keys(service.value.endpointTypes).length)
+					timelineData.value.endpointOptions = {endpointType: Object.keys(service.value.endpointTypes)[0]}
+			}
+		}
+
+		onBeforeMount(initTimelineData)
+
 		const validations = computed<{ [name : string] : boolean }>(() => ({
 			title: !timelines.value.some(t => t.title === timelineData.value.title),
 		}))
 		const valid = computed(() => Object.values(validations.value).every(isValid => isValid))
-
-		const newEndpoint = ref(false)
-		const endpointOptions = ref<any>({})
-
-		watch(
-			newEndpoint,
-			(value, oldValue) => {
-				if (value && value != oldValue)
-					endpointOptions.value = {endpointType: Object.keys(service.value.endpointTypes)[0]}
-			},
-		)
 
 		return {
 			timelineData,
@@ -179,8 +146,7 @@ export default defineComponent({
 			containers,
 			validations,
 			valid,
-			newEndpoint,
-			endpointOptions,
+			initTimelineData,
 		}
 	},
 })
