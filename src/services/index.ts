@@ -9,9 +9,11 @@ export interface Payload<ArticleType = Article> {
 	newArticles : string[]
 }
 
-export interface LocalStorage {
+export interface ServiceLocalStorage {
 	articles : { [id : string] : Article }
 }
+
+const LOCALSTORAGE_TITLE = 'SoshalThing Services'
 
 export type MediaService = Service<MediaArticle>
 
@@ -64,18 +66,18 @@ export abstract class Service<ArticleType extends Article = Article> {
 		this.saveLocalStorage()
 	}
 
-	loadLocalStorage(storage : LocalStorage) : void {
+	loadLocalStorage(storage : ServiceLocalStorage) : void {
 		//TODO Remove ts=ignore
 		// @ts-ignore
 		this.articles = storage.articles
 	}
 
-	async generateLocalStorage() : Promise<LocalStorage> {
+	async generateLocalStorage() : Promise<ServiceLocalStorage> {
 		return {articles: this.articles}
 	}
 
 	static async initLocalStorage() {
-		const rawStorage = localStorage.getItem('FavViewer')
+		const rawStorage = localStorage.getItem(LOCALSTORAGE_TITLE)
 		if (rawStorage) {
 			const storage = JSON.parse(rawStorage)
 			for (const serviceName in storage) {
@@ -90,22 +92,22 @@ export abstract class Service<ArticleType extends Article = Article> {
 		}
 
 		console.log('Initializing local storage...')
-		const storage : { [serviceName : string] : LocalStorage } = {}
+		const storage : { [serviceName : string] : ServiceLocalStorage } = {}
 		for (const service of Service.instances)
 			storage[service.name] = await service.generateLocalStorage()
-		localStorage.setItem('FavViewer', JSON.stringify(storage))
+		localStorage.setItem(LOCALSTORAGE_TITLE, JSON.stringify(storage))
 	}
 
 	async saveLocalStorage() {
 		console.log(`Saving local storage...`)
 
-		const rawStorage = localStorage.getItem('FavViewer')
+		const rawStorage = localStorage.getItem(LOCALSTORAGE_TITLE)
 		if (!rawStorage)
 			throw "Local storage isn't initialized"
 
-		const storage = JSON.parse(rawStorage)
+		const storage : { [serviceName : string] : ServiceLocalStorage }  = JSON.parse(rawStorage)
 		storage[this.name] = await this.generateLocalStorage()
-		localStorage.setItem('FavViewer', JSON.stringify(storage))
+		localStorage.setItem(LOCALSTORAGE_TITLE, JSON.stringify(storage))
 	}
 
 	abstract getAPIArticleData(id : string) : Promise<any>;

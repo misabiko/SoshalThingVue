@@ -50,6 +50,11 @@
 					<component :is='option'></component>
 				</div>
 			</template>
+			<div class='box'>
+				<button @click='$emit("delete")'>
+					Delete Timeline
+				</button>
+			</div>
 		</div>
 		<component
 			class='articlesContainer'

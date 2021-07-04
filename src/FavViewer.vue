@@ -9,19 +9,21 @@
 				:view-modes='Object.keys(pageInfo.viewModes)'
 				main-timeline
 				@change-container='t.container = $event'
-				@change-endpoint='t.endpointIndex = $event'
+				@change-endpoint='changeTimelineEndpoint(i, $event)'
 				@change-service='t.serviceIndex = $event'
 				@hide-soshal='setViewMode("hidden")'
 				@set-viewmode='setViewMode($event)'
 				@add-timeline='showAddTimeline = true'
+				@delete='deleteTimeline(i)'
 			></Timeline>
 			<Timeline
 				v-else
 				:key='t.title'
 				:timeline='t'
 				@change-container='t.container = $event'
-				@change-endpoint='t.endpointIndex = $event'
+				@change-endpoint='changeTimelineEndpoint(i, $event)'
 				@change-service='t.serviceIndex = $event'
+				@delete='deleteTimeline(i)'
 			></Timeline>
 		</template>
 	</div>
@@ -44,6 +46,8 @@ import {Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
 
+const LOCALSTORAGE_TIMELINE_TITLE = 'SoshalThing Timelines'
+
 export default defineComponent({
 	name: 'FavViewer',
 	components: {AddTimelineModal, Timeline},
@@ -54,9 +58,14 @@ export default defineComponent({
 		}
 	},
 	setup(props) {
-		const timelines = ref<TimelineData[]>([])
+		const timelineStorage = localStorage.getItem(LOCALSTORAGE_TIMELINE_TITLE)
+		const timelines = ref<TimelineData[]>(timelineStorage ? JSON.parse(timelineStorage) : [])
 
-		function addTimeline(data : TimelineData & { newEndpointOptions? : any }) {
+		function updateLocalStorage() {
+			localStorage.setItem(LOCALSTORAGE_TIMELINE_TITLE, JSON.stringify(timelines.value))
+		}
+
+		function addTimeline(data : TimelineData & { newEndpointOptions? : any }, serialize = true) {
 			if (timelines.value.find(t => t.title === data.title)) {
 				console.error(`Timeline "${data.title}" already exists.`)
 				return
@@ -69,13 +78,48 @@ export default defineComponent({
 			}
 
 			timelines.value.push(data)
+
+			if (serialize)
+				updateLocalStorage()
+		}
+
+		function changeTimelineEndpoint(timelineIndex : number, options : { serviceIndex? : number, endpointType? : number } & any) {
+			const timeline = timelines.value[timelineIndex]
+
+			const service = Service.instances[options.serviceIndex ?? timeline.serviceIndex]
+
+			let endpointConstructor : any
+			if (options.endpointType === undefined) {
+				if (timeline.endpointIndex === undefined) {
+					console.warn('No endpoint chosen.')
+					return
+				}else
+					endpointConstructor = service.endpointTypes[service.endpoints[timeline.endpointIndex].constructor.name]
+			}else
+				endpointConstructor = service.endpointTypes[options.endpointType]
+
+			const endpoint = endpointConstructor(options)
+			service.endpoints.push(endpoint)
+
+			timelines.value[timelineIndex].endpointIndex = service.endpoints.length - 1
+
+			updateLocalStorage()
+		}
+
+		function deleteTimeline(timelineIndex : number) {
+			timelines.value.splice(timelineIndex, 1)
+			updateLocalStorage()
 		}
 
 		const showAddTimeline = ref(false)
 
-		for (let i = 0; i < Service.instances.length; i++)
-			for (const t of Service.instances[i].initialTimelines(i))
-				addTimeline(t)
+		if (!timelines.value.length) {
+			for (let i = 0; i < Service.instances.length; i++)
+				for (const t of Service.instances[i].initialTimelines(i))
+					addTimeline(t, false)
+
+			updateLocalStorage()
+		}
 
 		if (!timelines.value.length)
 			console.warn('No timelines were initialized')
@@ -88,7 +132,7 @@ export default defineComponent({
 			props.pageInfo.setViewMode(mode)
 		}
 
-		return {timelines, showAddTimeline, addTimeline, lastViewMode, viewMode, setViewMode}
+		return {timelines, showAddTimeline, addTimeline, changeTimelineEndpoint, deleteTimeline, lastViewMode, viewMode, setViewMode}
 	}
 })
 </script>
