@@ -106,15 +106,6 @@ export class TwitterService extends Service<TwitterArticle> {
 		//this.endpoints.push(new SearchEndpoint('-is:retweet #深夜の真剣お絵描き60分一本勝負 OR -is:retweet #東方の90分お絵描き OR -is:retweet #東方ワンドロバトル'))
 	}
 
-	initialTimelines(serviceIndex : number) : TimelineData[] {
-		return [{
-			title: 'Home',
-			serviceIndex,
-			endpointIndex: 0,
-			container: 'ColumnContainer',
-		}]
-	}
-
 	getAPIArticleData(id : string) : Promise<any> {
 		return Promise.resolve(undefined)
 	}
@@ -385,7 +376,10 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
 	}
 
 	getKeyOptions() {
-		return {userId: this.userId}
+		return {
+			endpointType: this.constructor.name,
+			userId: this.userId,
+		}
 	}
 }
 
@@ -401,7 +395,7 @@ class HomeTimelineEndpoint extends Endpoint<HomeTimelineCallOpt> {
 	}
 
 	getKeyOptions() {
-		return {}
+		return {endpointType: this.constructor.name}
 	}
 }
 
@@ -442,6 +436,9 @@ class SearchEndpoint extends Endpoint<SearchCallOpt> {
 	}
 
 	getKeyOptions() {
-		return {query: this.query}
+		return {
+			endpointType: this.constructor.name,
+			query: this.query,
+		}
 	}
 }

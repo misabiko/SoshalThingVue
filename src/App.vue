@@ -29,14 +29,39 @@ import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
 
 const LOCALSTORAGE_TIMELINE_TITLE = 'SoshalThing Timelines'
 
+interface TimelineDataSerialized extends TimelineData {
+	endpointOptions? : any
+}
+
 export default defineComponent({
 	components: {AddTimelineModal, Timeline, Sidebar},
 	setup() {
-		const timelineStorage = localStorage.getItem(LOCALSTORAGE_TIMELINE_TITLE)
-		const timelines = ref<TimelineData[]>(timelineStorage ? JSON.parse(timelineStorage) : [])
+		const timelineStorage : TimelineData[] = JSON.parse(localStorage.getItem(LOCALSTORAGE_TIMELINE_TITLE) || '[]')
+			.map((t : TimelineDataSerialized) => {
+				const copy = {...t}
+				if (t.endpointOptions) {
+					const service = Service.instances[t.serviceIndex]
+					service.endpoints.push(service.endpointTypes[t.endpointOptions.endpointType].factory(t.endpointOptions))
+					copy.endpointIndex = service.endpoints.length - 1
+				}
+
+				delete copy.endpointOptions
+				return copy
+			})
+
+		const timelines = ref<TimelineData[]>(timelineStorage)
 
 		function updateLocalStorage() {
-			localStorage.setItem(LOCALSTORAGE_TIMELINE_TITLE, JSON.stringify(timelines.value))
+			localStorage.setItem(LOCALSTORAGE_TIMELINE_TITLE, JSON.stringify(timelines.value.map(t => {
+				const copy : TimelineDataSerialized = {...t}
+				if (copy.endpointIndex !== undefined) {
+					const service = Service.instances[copy.serviceIndex]
+					copy.endpointOptions = service.endpoints[copy.endpointIndex].getKeyOptions()
+				}
+
+				delete copy.endpointIndex
+				return copy
+			})))
 		}
 
 		function addTimeline(data : TimelineData & { newEndpointOptions? : any }, serialize = true) {
@@ -51,6 +76,7 @@ export default defineComponent({
 				data.endpointIndex = service.endpoints.length - 1
 			}
 
+			delete data.newEndpointOptions
 			timelines.value.push(data)
 
 			if (serialize)

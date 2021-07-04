@@ -77,6 +77,7 @@ export default defineComponent({
 				data.endpointIndex = service.endpoints.length - 1
 			}
 
+			delete data.newEndpointOptions
 			timelines.value.push(data)
 
 			if (serialize)

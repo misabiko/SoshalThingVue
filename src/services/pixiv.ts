@@ -187,7 +187,7 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageCallOpt> {
 	}
 
 	getKeyOptions() {
-		return {}
+		return {endpointType: this.constructor.name}
 	}
 
 	async call(options : FollowPageCallOpt) {
@@ -314,7 +314,7 @@ class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
 	}
 
 	getKeyOptions() {
-		return {}
+		return {endpointType: this.constructor.name}
 	}
 
 	async call(options : UserPageCallOpt) {
@@ -426,7 +426,10 @@ class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageCallOpt> {
 	}
 
 	getKeyOptions() {
-		return {priv: this.priv}
+		return {
+			endpointType: this.constructor.name,
+			priv: this.priv,
+		}
 	}
 
 	async call(options : BookmarkPageCallOpt) {

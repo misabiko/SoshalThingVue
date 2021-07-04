@@ -32,7 +32,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	protected constructor(
 		public name : string,
-		readonly endpointTypes : { [className : string] : { factory: Function, optionComponent: Function } },
+		readonly endpointTypes : { [className : string] : { factory : Function, optionComponent : Function } },
 		articleComponentRaw : Component,
 		readonly hasMedia : boolean,	//TODO Check programatically
 	) {
@@ -105,7 +105,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 		if (!rawStorage)
 			throw "Local storage isn't initialized"
 
-		const storage : { [serviceName : string] : ServiceLocalStorage }  = JSON.parse(rawStorage)
+		const storage : { [serviceName : string] : ServiceLocalStorage } = JSON.parse(rawStorage)
 		storage[this.name] = await this.generateLocalStorage()
 		localStorage.setItem(LOCALSTORAGE_TITLE, JSON.stringify(storage))
 	}
@@ -132,7 +132,7 @@ export abstract class Endpoint<CallOpt> {
 		return !this.calling
 	}
 
-	abstract getKeyOptions() : any
+	abstract getKeyOptions() : { endpointType : string } & any
 
 	setOptions(value : any) {
 	}
