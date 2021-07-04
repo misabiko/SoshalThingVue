@@ -90,7 +90,7 @@ export default defineComponent({
 			}
 
 			delete data.endpointOptions
-			timelines.value[timelineIndex] = data
+			timelines.value[timelineIndex] = {...data}
 
 			updateLocalStorage()
 		}

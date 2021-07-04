@@ -319,9 +319,27 @@ export default defineComponent({
 
 		const showOptions = ref(false)
 
-		const columnCount = ref(5)
-		const rightToLeft = ref(props.timeline.defaults?.rtl ?? false)
-		const size = ref(props.timeline.defaults?.size ?? 1)
+		const columnCount = computed({
+			get: () => modifiedTimelineData.value.columnCount ?? 5,
+			set: val => {
+				modifiedTimelineData.value.columnCount = val
+				emit('changeTimeline', modifiedTimelineData.value)
+			},
+		})
+		const rightToLeft = computed({
+			get: () => modifiedTimelineData.value.rtl ?? false,
+			set: val => {
+				modifiedTimelineData.value.rtl = val
+				emit('changeTimeline', modifiedTimelineData.value)
+			},
+		})
+		const size = computed({
+			get: () => modifiedTimelineData.value.size ?? 1,
+			set: val => {
+				modifiedTimelineData.value.size = val
+				emit('changeTimeline', modifiedTimelineData.value)
+			},
+		})
 
 		const showArticle = (id : string) => {
 			const el = document.querySelector('.article' + id)
@@ -442,7 +460,14 @@ export default defineComponent({
 				h('input', {
 					type: 'radio',
 					value: c,
-					onChange: ($event : Event) => emit('changeContainer', ($event.target as HTMLInputElement).value),
+					onChange: ($event : Event) => {
+						const target = ($event.target as HTMLInputElement)
+						if (!target.checked)
+							return
+
+						modifiedTimelineData.value.container = target.value
+						emit('changeTimeline', modifiedTimelineData.value)
+					},
 					checked: c === props.timeline.container,
 				}),
 				c,

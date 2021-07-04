@@ -38,10 +38,21 @@
 						</div>
 					</div>
 					<div class='field'>
-						<label class='label'>Defaults</label>
 						<div class='control'>
-							<input type='checkbox' v-model='timelineData.defaults.rtl'/>
+							<input type='checkbox' v-model='timelineData.rtl'/>
 							Right to Left
+						</div>
+					</div>
+					<div class='field'>
+						<label class='label'>Column Count</label>
+						<div class='control'>
+							<input type='number' placeholder='5' v-model='timelineData.columnCount'/>
+						</div>
+					</div>
+					<div class='field'>
+						<label class='label'>Width</label>
+						<div class='control'>
+							<input type='number' placeholder='1' v-model='timelineData.size'/>
 						</div>
 					</div>
 				</div>
@@ -90,7 +101,6 @@ export default defineComponent({
 				serviceIndex: firstServiceIndex,
 				endpointIndex: undefined,
 				container: 'ColumnContainer',
-				defaults: {},
 			},
 		)
 
@@ -110,7 +120,6 @@ export default defineComponent({
 				title: 'New Timeline',
 				serviceIndex: firstServiceIndex,
 				container: 'ColumnContainer',
-				defaults: {},
 			}
 
 			const baseTitle = timelineData.value.title

@@ -83,7 +83,7 @@ export default defineComponent({
 			}
 
 			delete data.endpointOptions
-			timelines.value[timelineIndex] = data
+			timelines.value[timelineIndex] = {...data}
 		}
 
 		function deleteTimeline(timelineIndex : number) {

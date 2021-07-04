@@ -3,10 +3,9 @@ export interface TimelineData {
 	serviceIndex : number
 	endpointIndex? : number
 	container : string
-	defaults? : {
-		rtl? : boolean
-		size? : number
-	}
+	rtl? : boolean
+	size? : number
+	columnCount? : number
 }
 
 export interface TimelineDataSerialized extends TimelineData {
