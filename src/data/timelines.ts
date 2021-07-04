@@ -8,3 +8,7 @@ export interface TimelineData {
 		size? : number
 	}
 }
+
+export interface TimelineDataSerialized extends TimelineData {
+	endpointOptions? : any
+}

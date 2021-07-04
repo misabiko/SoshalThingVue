@@ -45,6 +45,21 @@
 			</div>
 		</div>
 		<div class='timelineOptions' v-if='showOptions'>
+			<div class='box'>
+				<EndpointSelection v-model='modifiedTimelineData'/>
+				<div class='field is-grouped'>
+					<div class='control'>
+						<button class='button' @click='$emit("changeTimeline", modifiedTimelineData)'>
+							Apply
+						</button>
+					</div>
+					<div class='control'>
+						<button class='button' @click='modifiedTimelineData = {...timeline}'>
+							Reset
+						</button>
+					</div>
+				</div>
+			</div>
 			<template v-for='option in options'>
 				<div v-if='option' class='box'>
 					<component :is='option'></component>
@@ -93,8 +108,8 @@ import {
 	VNode,
 	watch,
 } from 'vue'
-import {Endpoint, MediaService, PagedEndpoint, Service} from '@/services'
-import {TimelineData} from '@/data/timelines'
+import {MediaService, PagedEndpoint, Service} from '@/services'
+import {TimelineData, TimelineDataSerialized} from '@/data/timelines'
 import {useQueryManagerContainer} from '@/composables/QueryManager'
 import {useLoadManagerTimeline} from '@/composables/LoadManager'
 import ColumnContainer from '@/components/Containers/ColumnContainer.vue'
@@ -115,6 +130,7 @@ import {
 	faScroll,
 	faSyncAlt,
 } from '@fortawesome/free-solid-svg-icons'
+import EndpointSelection from '@/components/EndpointSelection.vue'
 
 library.add(faEllipsisV, faArrowDown, faSyncAlt, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
 
@@ -145,7 +161,7 @@ export default defineComponent({
 		viewMode: String,
 		viewModes: Array as PropType<string[]>,
 	},
-	components: {Modal},
+	components: {EndpointSelection, Modal},
 	setup(props, {emit}) {
 		const {viewMode} = toRefs(props)
 		const options : (() => VNode | VNode[] | undefined)[] = []
@@ -162,6 +178,9 @@ export default defineComponent({
 				return service.value.endpoints[modifiedEndpointOptions.endpointIndex].getKeyOptions()
 		})
 		const modifiedEndpointOptions = reactive<any>({})
+		const modifiedTimelineData = ref<TimelineDataSerialized>({
+			...props.timeline
+		})
 
 		const endpointPackage = computed<EndpointPackage>(() => {
 			if (!endpoint.value)
@@ -362,101 +381,6 @@ export default defineComponent({
 		provide('service', service)
 
 		options.push(() => [
-			h('div', {class: 'field is-horizontal'}, [
-				h('label', {class: 'field-label'}, 'Service'),
-				h('div', {class: 'control'},
-					h('div', {class: 'select'}, [
-						h('select', {
-							value: props.timeline.serviceIndex,
-							onInput: (e : InputEvent) => {
-								modifiedEndpointOptions.serviceIndex = parseInt((e.target as HTMLInputElement).value)
-							},
-						}, Service.instances.map((s, i) =>
-							h('option', {value: i, selected: props.timeline.serviceIndex == i}, s.name),
-						)),
-					]),
-				),
-			]),
-			h('div', {class: 'endpointOptions'},
-				[
-					h('div', {class: 'field is-horizontal'}, [
-						h('label', {class: 'field-label'}, 'Endpoint Type'),
-						h('div', {class: 'control'},
-							h('div', {class: 'select'}, [
-								h('select', {
-									value: endpoint.value?.constructor.name,
-									onInput: (e : InputEvent) => {
-										modifiedEndpointOptions.endpointType = (e.target as HTMLInputElement).value
-									},
-								}, Object.keys(service.value.endpointTypes).map(e =>
-									h('option', {value: e}, e),
-								)),
-							]),
-						),
-					]),
-					...Object.keys(endpointOptions.value).filter(key => !key.startsWith('_')).map((optionKey : string) => {
-						let input : string | VNode
-						try {
-							input = endpointOptions.value[optionKey].constructor.name
-						}catch (e) {
-							console.error(`Failed to parse ${optionKey}'s contructor.`, e)
-							return optionKey
-						}
-
-						switch (input) {
-							case 'String':
-								input = h('input', {
-									class: 'input',
-									type: 'text',
-									value: modifiedEndpointOptions[optionKey] || endpointOptions.value[optionKey],
-									onInput: (e : InputEvent) => modifiedEndpointOptions[optionKey] = (e.target as HTMLInputElement).value,
-								})
-								break
-							case 'Array':
-								input = h('input', {
-									class: 'input',
-									type: 'text',
-									value: JSON.stringify(modifiedEndpointOptions[optionKey] || endpointOptions.value[optionKey]),
-									onInput: (e : InputEvent) => {
-										try {
-											const parsed = JSON.parse((e.target as HTMLInputElement).value)
-											modifiedEndpointOptions[optionKey] = parsed
-										}catch (err) {
-											//console.error("Parsing failure: " + (e.target as HTMLInputElement).value, err)
-										}
-									},
-								})
-								break
-						}
-
-						return h('div', {class: 'field'}, [
-							h('label', {class: 'field-label'}, optionKey),
-							h('div', {class: 'control'}, input),
-						])
-					}),
-					h('div', {class: 'field is-grouped'}, [
-						h('div', {class: 'control'},
-							h('button', {
-								class: 'button',
-								onClick: () => {
-									console.log('Apply!', modifiedEndpointOptions)
-									emit('changeEndpoint', modifiedEndpointOptions)
-									resetModifiedEndpoints()
-								},
-							}, 'Apply'),
-						),
-						h('div', {class: 'control'},
-							h('button', {
-								class: 'button',
-								onClick: () => resetModifiedEndpoints(),
-							}, 'Reset'),
-						),
-					]),
-				],
-			),
-		])
-
-		options.push(() => [
 			h('label', {class: 'field-label'}, 'On article click'),
 			h('div', {class: 'select'}, [
 				h('select', {
@@ -603,6 +527,7 @@ export default defineComponent({
 			showOptions,
 			options,
 			...mediaServiceReturns,
+			modifiedTimelineData,
 		}
 	},
 })

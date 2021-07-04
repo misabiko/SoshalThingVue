@@ -8,9 +8,7 @@
 				:view-mode='viewMode'
 				:view-modes='Object.keys(pageInfo.viewModes)'
 				main-timeline
-				@change-container='t.container = $event'
-				@change-endpoint='changeTimelineEndpoint(i, $event)'
-				@change-service='t.serviceIndex = $event'
+				@changeTimeline='changeTimelineData(i, $event)'
 				@hide-soshal='setViewMode("hidden")'
 				@set-viewmode='setViewMode($event)'
 				@add-timeline='showAddTimeline = true'
@@ -20,9 +18,7 @@
 				v-else
 				:key='t.title'
 				:timeline='t'
-				@change-container='t.container = $event'
-				@change-endpoint='changeTimelineEndpoint(i, $event)'
-				@change-service='t.serviceIndex = $event'
+				@changeTimeline='changeTimelineData(i, $event)'
 				@delete='deleteTimeline(i)'
 			></Timeline>
 		</template>
@@ -41,7 +37,7 @@
 <script lang='ts'>
 import {computed, defineComponent, PropType, ref} from 'vue'
 import Timeline from '@/components/Timeline.vue'
-import {TimelineData} from '@/data/timelines'
+import {TimelineData, TimelineDataSerialized} from '@/data/timelines'
 import {Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
@@ -58,41 +54,36 @@ export default defineComponent({
 	setup(props) {
 		const timelines = ref<TimelineData[]>([])
 
-		function addTimeline(data : TimelineData & { newEndpointOptions? : any }) {
+		function addTimeline(data : TimelineDataSerialized) {
 			if (timelines.value.find(t => t.title === data.title)) {
 				console.error(`Timeline "${data.title}" already exists.`)
 				return
 			}
 
 			const service = Service.instances[data.serviceIndex]
-			if (data.newEndpointOptions !== undefined) {
-				service.endpoints.push(service.endpointTypes[data.newEndpointOptions.endpointType].factory(data.newEndpointOptions))
+			if (data.endpointOptions !== undefined) {
+				service.endpoints.push(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
 				data.endpointIndex = service.endpoints.length - 1
 			}
 
-			delete data.newEndpointOptions
+			delete data.endpointOptions
 			timelines.value.push(data)
 		}
 
-		function changeTimelineEndpoint(timelineIndex : number, options : { serviceIndex? : number, endpointType? : number } & any) {
-			const timeline = timelines.value[timelineIndex]
+		function changeTimelineData(timelineIndex : number, data : TimelineDataSerialized) {
+			if (timelines.value.find((t, i) => i != timelineIndex && t.title === data.title)) {
+				console.error(`Timeline "${data.title}" already exists.`)
+				return
+			}
 
-			const service = Service.instances[options.serviceIndex ?? timeline.serviceIndex]
+			const service = Service.instances[data.serviceIndex]
+			if (data.endpointOptions !== undefined) {
+				service.endpoints.push(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
+				data.endpointIndex = service.endpoints.length - 1
+			}
 
-			let endpointConstructor : any
-			if (options.endpointType === undefined) {
-				if (timeline.endpointIndex === undefined) {
-					console.warn('No endpoint chosen.')
-					return
-				}else
-					endpointConstructor = service.endpointTypes[service.endpoints[timeline.endpointIndex].constructor.name]
-			}else
-				endpointConstructor = service.endpointTypes[options.endpointType]
-
-			const endpoint = endpointConstructor(options)
-			service.endpoints.push(endpoint)
-
-			timelines.value[timelineIndex].endpointIndex = service.endpoints.length - 1
+			delete data.endpointOptions
+			timelines.value[timelineIndex] = data
 		}
 
 		function deleteTimeline(timelineIndex : number) {
@@ -117,7 +108,7 @@ export default defineComponent({
 			props.pageInfo.setViewMode(mode)
 		}
 
-		return {timelines, showAddTimeline, addTimeline, changeTimelineEndpoint, deleteTimeline, lastViewMode, viewMode, setViewMode}
+		return {timelines, showAddTimeline, addTimeline, changeTimelineData, deleteTimeline, lastViewMode, viewMode, setViewMode}
 	}
 })
 </script>

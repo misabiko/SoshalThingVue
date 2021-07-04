@@ -24,10 +24,7 @@
 							Timeline "{{ timelineData.title }}" already exists.
 						</p>
 					</div>
-					<EndpointSelection
-						v-model='timelineData'
-						:service='service'
-					/>
+					<EndpointSelection v-model='timelineData'/>
 					<div class='field'>
 						<label class='label'>Container</label>
 						<div class='control'>
@@ -67,9 +64,8 @@ import {computed, defineComponent, onBeforeMount, PropType, ref, toRefs, watch} 
 import {HostPageService, Service} from '@/services'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faTimes} from '@fortawesome/free-solid-svg-icons'
-import {TimelineData} from '@/data/timelines'
+import {TimelineData, TimelineDataSerialized} from '@/data/timelines'
 import EndpointSelection from '@/components/EndpointSelection.vue'
-import {TimelineDataSerialized} from '@/App.vue'
 
 library.add(faTimes)
 

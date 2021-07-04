@@ -58,14 +58,10 @@
 <script lang='ts'>
 import {computed, defineComponent, PropType, ref, watch} from 'vue'
 import {Service} from '@/services'
-import {TimelineDataSerialized} from '@/App.vue'
+import {TimelineDataSerialized} from '@/data/timelines'
 
 export default defineComponent({
 	props: {
-		service: {
-			type: Object as PropType<Service>,
-			required: true,
-		},
 		modelValue: {
 			type: Object as PropType<TimelineDataSerialized>,
 			required: true,
@@ -74,6 +70,8 @@ export default defineComponent({
 	emits: ['update:modelValue'],
 
 	setup(props, {emit}) {
+		const service = computed(() => Service.instances[props.modelValue.serviceIndex])
+
 		const endpointOptions = computed<any>({
 			get: () => props.modelValue.endpointOptions,
 			set: val => {
@@ -86,7 +84,7 @@ export default defineComponent({
 		const newEndpoint = ref(!!endpointOptions.value)
 
 		watch(
-			() => props.service,
+			service,
 			(newService, oldService) => {
 				if (newService.name !== oldService.name)
 					endpointOptions.value = undefined
@@ -96,11 +94,12 @@ export default defineComponent({
 			newEndpoint,
 			(value, oldValue) => {
 				if (value && value != oldValue)
-					endpointOptions.value = {endpointType: Object.keys(props.service.endpointTypes)[0]}
+					endpointOptions.value = {endpointType: Object.keys(service.value.endpointTypes)[0]}
 			},
 		)
 
 		return {
+			service,
 			services: Service.instances,
 			newEndpoint,
 			endpointOptions,
