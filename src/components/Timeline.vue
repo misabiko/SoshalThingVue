@@ -166,18 +166,9 @@ export default defineComponent({
 		const {viewMode} = toRefs(props)
 		const options : (() => VNode | VNode[] | undefined)[] = []
 
-		const service = ref(Service.instances[props.timeline.serviceIndex] as Service)
+		const service = computed(() => Service.instances[props.timeline.serviceIndex] as Service)
 		const endpoint = computed(() => props.timeline.endpointIndex === undefined ? undefined : service.value.endpoints[props.timeline.endpointIndex])
 
-		const endpointOptions = computed(() => {
-			if (modifiedEndpointOptions.serviceIndex !== undefined && modifiedEndpointOptions.serviceIndex !== props.timeline.serviceIndex)
-				return Service.instances[modifiedEndpointOptions.serviceIndex].endpoints[modifiedEndpointOptions.endpointIndex ?? 0].getKeyOptions()
-			else if (modifiedEndpointOptions.endpointIndex === undefined || modifiedEndpointOptions.endpointIndex === props.timeline.endpointIndex)
-				return endpoint.value?.getKeyOptions() ?? {}
-			else
-				return service.value.endpoints[modifiedEndpointOptions.endpointIndex].getKeyOptions()
-		})
-		const modifiedEndpointOptions = reactive<any>({})
 		const modifiedTimelineData = ref<TimelineDataSerialized>({
 			...props.timeline
 		})
@@ -263,12 +254,6 @@ export default defineComponent({
 				])
 		})
 
-		function resetModifiedEndpoints() {
-			for (const key in modifiedEndpointOptions)
-				if (modifiedEndpointOptions.hasOwnProperty(key))
-					delete modifiedEndpointOptions[key]
-		}
-
 		function initEndpoint() {
 			if (endpoint.value && endpoint.value instanceof PagedEndpoint)
 				newPage.value ??= endpoint.value.basePageNum
@@ -283,7 +268,6 @@ export default defineComponent({
 
 				//endpointOptions.value = newEndpoint.initOptions()
 				initEndpoint()
-				resetModifiedEndpoints()
 
 				if (!articleIds.value.length && getNewArticles)
 					getNewArticles()

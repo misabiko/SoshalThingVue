@@ -48,6 +48,12 @@
 				</select>
 			</div>
 		</div>
+		<fieldset disabled>
+			<component
+				:is='service.endpointTypes[service.endpoints[modelValue.endpointIndex].getKeyOptions().endpointType].optionComponent'
+				:endpointOptions='service.endpoints[modelValue.endpointIndex].getKeyOptions()'
+			/>
+		</fieldset>
 	</div>
 	<div class='field' v-else>
 		<label class='label'>Endpoint</label>
@@ -86,8 +92,15 @@ export default defineComponent({
 		watch(
 			service,
 			(newService, oldService) => {
-				if (newService.name !== oldService.name)
-					endpointOptions.value = undefined
+				if (newService.name !== oldService.name) {
+					if (newService.endpoints.length)
+						props.modelValue.endpointIndex = 0
+					else {
+						props.modelValue.endpointIndex = undefined
+						const endpointTypes = Object.keys(service.value.endpointTypes)
+						endpointOptions.value = endpointTypes.length ? {endpointType: endpointTypes[0]} : undefined
+					}
+				}
 			}
 		)
 		watch(
