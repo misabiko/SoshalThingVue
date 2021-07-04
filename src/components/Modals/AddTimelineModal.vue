@@ -41,18 +41,25 @@
 							New Endpoint?
 						</div>
 					</div>
-					<div class='field' v-if='newEndpoint'>
-						<label class='label'>Endpoint Type</label>
-						<div class='control'>
-							<div class='select'>
-								<select v-model='endpointType'>
-									<option v-for='(e, i) in service.endpointTypes' :value='i'>
-										{{ i }}
-									</option>
-								</select>
+					<template v-if='newEndpoint'>
+						<div class='field'>
+							<label class='label'>Endpoint Type</label>
+							<div class='control'>
+								<div class='select'>
+									<select v-model='endpointOptions.endpointType'>
+										<option v-for='(e, i) in service.endpointTypes' :value='i'>
+											{{ i }}
+										</option>
+									</select>
+								</div>
 							</div>
 						</div>
-					</div>
+						<component
+							:is='service.endpointTypes[endpointOptions.endpointType].optionComponent'
+							:endpointOptions='endpointOptions'
+							@changeOptions='endpointOptions = $event'
+						/>
+					</template>
 					<div class='field' v-else>
 						<label class='label'>Endpoint</label>
 						<div class='control'>
@@ -88,9 +95,10 @@
 				<footer class='card-footer'>
 					<button
 						class='button card-footer-item'
-						@click='$emit("add", timelineData), $emit("close")'
+						@click='$emit("add", {...timelineData, newEndpointOptions: endpointOptions}), $emit("close")'
 						:disabled='!valid'
-					>Add</button>
+					>Add
+					</button>
 					<button class='button card-footer-item' @click='$emit("close")'>Cancel</button>
 				</footer>
 			</div>
@@ -112,7 +120,7 @@ export default defineComponent({
 		timelines: {
 			type: Array as PropType<TimelineData[]>,
 			required: true,
-		}
+		},
 	},
 
 	setup(props) {
@@ -122,12 +130,15 @@ export default defineComponent({
 		if (firstServiceIndex < 0)
 			firstServiceIndex = 0
 
-		const timelineData = ref<{endpointType? : string, endpointOptions? : any} & TimelineData>(Service.instances[firstServiceIndex].initialTimelines(0)[0] || {
-			title: 'New Timeline',
-			serviceIndex: firstServiceIndex,
-			endpointIndex: 0,
-			container: 'ColumnContainer',
-		})
+		const timelineData = ref<{ endpointType? : string, endpointOptions? : any } & TimelineData>({
+				...Service.instances[firstServiceIndex].initialTimelines(0)[0],
+				title: 'New Timeline',
+				serviceIndex: firstServiceIndex,
+				endpointIndex: 0,
+				container: 'ColumnContainer',
+				defaults: {},
+			},
+		)
 
 		const baseTitle = timelineData.value.title
 		let title = baseTitle
@@ -145,24 +156,32 @@ export default defineComponent({
 			'MasonryContainer',
 		]
 
-		const validations = computed<{[name:string]:boolean}>(() => ({
-			title: !timelines.value.some(t => t.title === timelineData.value.title)
+		const validations = computed<{ [name : string] : boolean }>(() => ({
+			title: !timelines.value.some(t => t.title === timelineData.value.title),
 		}))
 		const valid = computed(() => Object.values(validations.value).every(isValid => isValid))
 
 		const newEndpoint = ref(false)
-		const endpointType = ref('')
+		const endpointOptions = ref<any>({})
 
 		watch(
 			newEndpoint,
 			(value, oldValue) => {
-				//I will regret this, setting endpointIndex to length + typeIndex so it can be created later
 				if (value && value != oldValue)
-					timelineData.value.endpointType = endpointType.value
-			}
+					endpointOptions.value = {endpointType: Object.keys(service.value.endpointTypes)[0]}
+			},
 		)
 
-		return {timelineData, services: Service.instances, service, containers, validations, valid, newEndpoint, endpointType}
+		return {
+			timelineData,
+			services: Service.instances,
+			service,
+			containers,
+			validations,
+			valid,
+			newEndpoint,
+			endpointOptions,
+		}
 	},
 })
 </script>

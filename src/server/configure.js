@@ -123,6 +123,8 @@ module.exports = app => {
 						username: profile.username,
 					}
 
+					console.log('Twitter Login: ', authUser)
+
 					cb(null, authUser)
 				}catch (e) {
 					cb(e)

@@ -1,4 +1,4 @@
-import {Component, markRaw, reactive, ref} from 'vue'
+import {Component, h, markRaw, reactive, ref} from 'vue'
 import {Article, MediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
@@ -30,7 +30,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	protected constructor(
 		public name : string,
-		readonly endpointTypes : { [className : string] : Function },
+		readonly endpointTypes : { [className : string] : { factory: Function, optionComponent: Function } },
 		articleComponentRaw : Component,
 		readonly hasMedia : boolean,	//TODO Check programatically
 	) {

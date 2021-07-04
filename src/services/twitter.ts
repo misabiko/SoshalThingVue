@@ -4,6 +4,7 @@ import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {TimelineData} from '@/data/timelines'
 import {Filters} from '@/composables/useFilters'
+import {h} from 'vue'
 
 export enum TwitterArticleType {
 	Tweet,
@@ -52,14 +53,54 @@ export class TwitterService extends Service<TwitterArticle> {
 				enabled: true,
 				config: {},
 				option: () => null,
-			}
-		}
+			},
+		},
 	}
 
 	constructor() {
 		super('Twitter', {
-			[UserTimelineEndpoint.name]: ({userId}: {userId: string}) => new UserTimelineEndpoint(userId),
-			[SearchEndpoint.name]: ({query}: {query: string}) => new SearchEndpoint(query),
+			[UserTimelineEndpoint.name]: {
+				factory({userId} : { userId : string }) {
+					return new UserTimelineEndpoint(userId)
+				},
+				optionComponent(props : any, {emit}: {emit: any}) {
+					return h('div', {class: 'field'}, [
+						h('label', {class: 'field-label'}, 'User Id'),
+						h('div', {class: 'control'},
+							h('input', {
+								class: 'input',
+								type: 'text',
+								value: props.endpointOptions.userId,
+								onInput: (e : InputEvent) => {
+									props.endpointOptions.userId = (e.target as HTMLInputElement).value
+									emit('changeOptions', props.endpointOptions)
+								},
+							}),
+						),
+					])
+				},
+			},
+			[SearchEndpoint.name]: {
+				factory({query} : { query : string }) {
+					return new SearchEndpoint(query)
+				},
+				optionComponent(props : any, {emit}: {emit: any}) {
+					return h('div', {class: 'field'}, [
+						h('label', {class: 'field-label'}, 'Query'),
+						h('div', {class: 'control'},
+							h('input', {
+								class: 'input',
+								type: 'text',
+								value: props.endpointOptions.query,
+								onInput: (e : InputEvent) => {
+									props.endpointOptions.query = (e.target as HTMLInputElement).value
+									emit('changeOptions', props.endpointOptions)
+								},
+							}),
+						),
+					])
+				},
+			},
 		}, TweetComponent, true)
 
 		this.endpoints.push(new SearchEndpoint('-is:retweet #深夜の真剣お絵描き60分一本勝負 OR -is:retweet #東方の90分お絵描き OR -is:retweet #東方ワンドロバトル'))
@@ -93,7 +134,7 @@ interface TwitterAPIPayload {
 	includes : {
 		users : APIUserData[]
 		tweets : APITweetData[]
-		media: APIMediaData[]
+		media : APIMediaData[]
 	}
 	meta : {
 		oldest_id : string
@@ -117,7 +158,7 @@ interface APITweetData {
 	author_id : string
 	entities? : APIEntities
 	attachments? : {
-		media_keys: string[]
+		media_keys : string[]
 	}
 	public_metrics : {
 		retweet_count : number
@@ -133,26 +174,26 @@ interface APITweetData {
 
 interface APIEntities {
 	urls : {
-		start: number
-		end: number
-		url: string
-		expanded_url: string
-		display_url: string
+		start : number
+		end : number
+		url : string
+		expanded_url : string
+		display_url : string
 	}[]
 }
 
 type APIMediaData = {
-	media_key: string
-	type: 'photo'
-	url: string
-	width: number
-	height: number
+	media_key : string
+	type : 'photo'
+	url : string
+	width : number
+	height : number
 } | {
-	media_key: string
-	type: 'video'
-	preview_image_url: string
-	width: number
-	height: number
+	media_key : string
+	type : 'video'
+	preview_image_url : string
+	width : number
+	height : number
 }
 
 function parseTweetText(rawText : string, entities? : APIEntities) {
@@ -168,8 +209,8 @@ function parseTweetText(rawText : string, entities? : APIEntities) {
 	return copyText.trim()
 }
 
-function parseTweet(tweet : APITweetData, author : APIUserData, mediaData : APIMediaData[]): TweetArticle {
-	const media: (PlainMedia | LazyMedia)[] = []
+function parseTweet(tweet : APITweetData, author : APIUserData, mediaData : APIMediaData[]) : TweetArticle {
+	const media : (PlainMedia | LazyMedia)[] = []
 	for (const data of mediaData)
 		switch (data.type) {
 			case 'photo':
@@ -249,7 +290,7 @@ function parseRetweet(retweet : APITweetData, author : APIUserData, retweetedTwe
 	return result
 }
 
-function parseResponse(response: TwitterAPIPayload) {
+function parseResponse(response : TwitterAPIPayload) {
 	const payload : Payload<TwitterArticle> = {articles: [], newArticles: []}
 
 	dataTweetLoop: for (const tweet of response.data) {

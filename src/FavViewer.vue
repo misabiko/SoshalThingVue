@@ -56,15 +56,15 @@ export default defineComponent({
 	setup(props) {
 		const timelines = ref<TimelineData[]>([])
 
-		function addTimeline(data : {endpointType? : string, endpointOptions? : any} & TimelineData) {
+		function addTimeline(data : TimelineData & { newEndpointOptions? : any }) {
 			if (timelines.value.find(t => t.title === data.title)) {
 				console.error(`Timeline "${data.title}" already exists.`)
 				return
 			}
 
 			const service = Service.instances[data.serviceIndex]
-			if (data.endpointType !== undefined) {
-				service.endpoints.push(new (service.endpointTypes[data.endpointType] as any)(data.endpointOptions))
+			if (data.newEndpointOptions !== undefined) {
+				service.endpoints.push(service.endpointTypes[data.newEndpointOptions.endpointType].factory(data.newEndpointOptions))
 				data.endpointIndex = service.endpoints.length - 1
 			}
 
