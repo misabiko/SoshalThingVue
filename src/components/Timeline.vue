@@ -51,7 +51,7 @@
 				</div>
 			</template>
 			<div class='box'>
-				<button @click='$emit("delete")'>
+				<button class='button' @click='$emit("delete")'>
 					Delete Timeline
 				</button>
 			</div>
