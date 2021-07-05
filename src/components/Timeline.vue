@@ -131,6 +131,7 @@ import {
 	faSyncAlt,
 } from '@fortawesome/free-solid-svg-icons'
 import EndpointSelection from '@/components/EndpointSelection.vue'
+import {articleLists} from '@/components/Modals/ArticleListManager.vue'
 
 library.add(faEllipsisV, faArrowDown, faSyncAlt, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
 
@@ -198,9 +199,9 @@ export default defineComponent({
 
 			const newArticles = await service.value.getNewArticles(endpoint.value, callOpts)
 
-			for (const a of newArticles)
-				if (!articleIds.value.includes(a))
-					articleIds.value.push(a)
+			for (const id of newArticles)
+				if (!articleIds.value.find(listA => listA.articleId === id))
+					articleIds.value.push({serviceIndex: props.timeline.serviceIndex, articleId: id})
 
 			const oldNewPage = newPage.value ?? -1
 			const pages = remainingPages.value
@@ -264,9 +265,8 @@ export default defineComponent({
 			(newEndpoint, oldEndpoint) => {
 				console.debug('Changing endpoint options!')
 
-				articleIds.value = []
+				articleLists.value[props.timeline.articleList] = []
 
-				//endpointOptions.value = newEndpoint.initOptions()
 				initEndpoint()
 
 				if (!articleIds.value.length && getNewArticles)
@@ -274,7 +274,10 @@ export default defineComponent({
 			},
 		)
 
-		const articleIds = ref([...(endpoint.value?.articles || [])])
+		const articleIds = computed(() => {
+			articleLists.value[props.timeline.articleList] ??= []
+			return articleLists.value[props.timeline.articleList]
+		})
 
 		const sectionArticles = ref(false)
 		const firstArticle = ref(0)
@@ -293,7 +296,7 @@ export default defineComponent({
 
 		const articles = computed(() => {
 				let unsorted = articleIds.value
-					.map((id : string) => service.value.articles[id])
+					.map(({serviceIndex, articleId}: {serviceIndex: number, articleId: string}) => Service.instances[serviceIndex].articles[articleId])
 					.filter(a => !!a)	//Rerender happens before all of articleIds is added to service.articles
 
 				for (const [method, opts] of Object.entries(filters.value))

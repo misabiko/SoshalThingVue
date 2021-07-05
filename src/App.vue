@@ -1,5 +1,5 @@
 <template>
-	<Sidebar @add-timeline='showAddTimeline = true'></Sidebar>
+	<Sidebar @addTimeline='showAddTimeline = true' @showListManager='showArticleListManager = true'></Sidebar>
 	<div id='timelineContainer'>
 		<Timeline
 			v-for='(t, i) in timelines'
@@ -15,6 +15,7 @@
 		@add='addTimeline($event)'
 		@close='showAddTimeline = false'
 	/>
+	<ArticleListManager v-if='showArticleListManager'/>
 </template>
 
 <script lang='ts'>
@@ -24,11 +25,13 @@ import Timeline from '@/components/Timeline.vue'
 import {TimelineData} from '@/data/timelines'
 import {Service} from '@/services'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
+import ArticleListManager from '@/components/Modals/ArticleListManager.vue'
+import {articleLists} from '@/components/Modals/ArticleListManager.vue'
 
 export const LOCALSTORAGE_TIMELINE_TITLE = 'SoshalThing Timelines'
 
 export default defineComponent({
-	components: {AddTimelineModal, Timeline, Sidebar},
+	components: {ArticleListManager, AddTimelineModal, Timeline, Sidebar},
 	setup() {
 		const timelineStorage : TimelineData[] = JSON.parse(localStorage.getItem(LOCALSTORAGE_TIMELINE_TITLE) || '[]')
 			.map((t : TimelineData) => {
@@ -101,6 +104,7 @@ export default defineComponent({
 		}
 
 		const showAddTimeline = ref(false)
+		const showArticleListManager = ref(false)
 
 		if (!timelines.value.length) {
 			for (let i = 0; i < Service.instances.length; i++)
@@ -113,7 +117,7 @@ export default defineComponent({
 		if (!timelines.value.length)
 			console.warn('No timelines were initialized')
 
-		return {timelines, showAddTimeline, addTimeline, changeTimelineData, deleteTimeline}
+		return {timelines, showAddTimeline, showArticleListManager, addTimeline, changeTimelineData, deleteTimeline}
 	},
 })
 </script>

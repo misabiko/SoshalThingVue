@@ -77,6 +77,7 @@ import {library} from '@fortawesome/fontawesome-svg-core'
 import {faTimes} from '@fortawesome/free-solid-svg-icons'
 import {TimelineData} from '@/data/timelines'
 import EndpointSelection from '@/components/EndpointSelection.vue'
+import {getNewId} from '@/components/Modals/ArticleListManager.vue'
 
 library.add(faTimes)
 
@@ -98,6 +99,7 @@ export default defineComponent({
 
 		const timelineData = ref<TimelineData>({
 				title: 'New Timeline',
+				articleList: getNewId(),
 				serviceIndex: firstServiceIndex,
 				endpointIndex: undefined,
 				container: 'ColumnContainer',
@@ -118,6 +120,7 @@ export default defineComponent({
 				endpointIndex: undefined,
 				...Service.instances[firstServiceIndex].initialTimelines(0)[0],
 				title: 'New Timeline',
+				articleList: getNewId(),
 				serviceIndex: firstServiceIndex,
 				container: 'ColumnContainer',
 			}

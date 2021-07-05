@@ -26,6 +26,11 @@
 						<FontAwesomeIcon icon='plus' size='2x'/>
 					</span>
 				</button>
+				<button @click='$emit("showListManager")'>
+					<span class='icon'>
+						<FontAwesomeIcon icon='list' size='2x'/>
+					</span>
+				</button>
 			</div>
 			<div>
 				<a href='https://github.com/misabiko/SoshalThing/tree/master'>
@@ -43,11 +48,11 @@
 <script lang="ts">
 import {defineComponent, ref} from 'vue'
 import {library} from '@fortawesome/fontawesome-svg-core'
-import {faAngleDoubleLeft, faAngleDoubleRight, faPlus} from '@fortawesome/free-solid-svg-icons'
+import {faAngleDoubleLeft, faAngleDoubleRight, faList, faPlus} from '@fortawesome/free-solid-svg-icons'
 import {Service} from '@/services'
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
 
-library.add(faAngleDoubleLeft, faAngleDoubleRight, faPlus, faGithub)
+library.add(faAngleDoubleLeft, faAngleDoubleRight, faPlus, faGithub, faList)
 
 export default defineComponent({
 	setup() {

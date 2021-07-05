@@ -3,6 +3,7 @@ import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
 import PixivComponent from '@/components/Articles/PixivArticle.vue'
 import {Article, getImageFormat, ImageData, LazyMedia, MediaArticle, MediaLoadStatus, MediaType} from '@/data/articles'
+import {getNewId} from '@/components/Modals/ArticleListManager.vue'
 
 export interface PixivArticle extends Article, MediaArticle {
 	title : string
@@ -34,6 +35,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 				return [
 					{
 						title: 'Following',
+						articleList: getNewId(),
 						serviceIndex,
 						endpointIndex: 0,
 						container: 'MasonryContainer',
@@ -43,6 +45,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 				return [
 					{
 						title: 'User',
+						articleList: getNewId(),
 						serviceIndex,
 						endpointIndex: 1,
 						container: 'MasonryContainer',
@@ -52,6 +55,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 				return [
 					{
 						title: 'Bookmarks',
+						articleList: getNewId(),
 						serviceIndex,
 						endpointIndex: 2,
 						container: 'MasonryContainer',
