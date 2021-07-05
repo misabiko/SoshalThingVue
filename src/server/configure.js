@@ -150,7 +150,7 @@ module.exports = app => {
 		.get(async (req, res, next) => {
 			try {
 				const response = await clientV1.get(`${req.params.endpoint1}/${req.params.endpoint2}`, {
-					...(req.query),
+					...req.query,
 				})
 
 				logRateLimit(response)
@@ -162,7 +162,7 @@ module.exports = app => {
 		.post(async (req, res, next) => {
 			try {
 				const response = await clientV1.post(`${req.params.endpoint1}/${req.params.endpoint2}`, {
-					...(req.query),
+					...req.query,
 				})
 
 				logRateLimit(response)
@@ -176,7 +176,7 @@ module.exports = app => {
 		.get(async (req, res, next) => {
 			try {
 				const response = await clientV2.get(`${req.params.endpoint1}/${req.params.endpoint2}`, {
-					...(req.query),
+					...req.query,
 				})
 
 				logRateLimit(response)
@@ -188,7 +188,7 @@ module.exports = app => {
 		.post(async (req, res, next) => {
 			try {
 				const response = await clientV2.post(`${req.params.endpoint1}/${req.params.endpoint2}`, {
-					...(req.query),
+					...req.query,
 				})
 
 				logRateLimit(response)
@@ -200,7 +200,7 @@ module.exports = app => {
 
 	app.get('/twitter/users/:id', async (req, res, next) => {
 		try {
-			const response = await clientV2.get(`users/${req.params.id}/tweets`, {...(req.query)})
+			const response = await clientV2.get(`users/${req.params.id}/tweets`, {...req.query})
 
 			logRateLimit(response)
 			res.json(response)
@@ -211,7 +211,7 @@ module.exports = app => {
 
 	app.get('/twitter/search', async (req, res, next) => {
 		try {
-			const response = await clientV2.get('tweets/search/recent', {...(req.query)})
+			const response = await clientV2.get('tweets/search/recent', {...req.query})
 
 			logRateLimit(response)
 			res.json(response)

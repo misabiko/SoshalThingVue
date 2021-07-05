@@ -45,14 +45,20 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	async getNewArticles(endpoint : number | Endpoint<any>, options : object) : Promise<string[]> {
 		const actualEndpoint = endpoint instanceof Endpoint ? endpoint : this.endpoints[endpoint]
-		const {articles, newArticles} = await actualEndpoint.call(options)
 
-		for (const a of articles)
-			this.updateArticle(a as ArticleType)
+		try {
+			const {articles, newArticles} = await actualEndpoint.call(options)
 
-		await this.saveLocalStorage()
+			for (const a of articles)
+				this.updateArticle(a as ArticleType)
 
-		return newArticles
+			await this.saveLocalStorage()
+
+			return newArticles
+		}catch (e) {
+			console.error('Failed to use endpoint ' + actualEndpoint.name, e)
+			return []
+		}
 	}
 
 	updateArticle(article : ArticleType) {

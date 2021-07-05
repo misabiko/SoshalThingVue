@@ -201,18 +201,20 @@ export default defineComponent({
 				return
 			endpoint.value.calling = true
 
-			const newArticles = await service.value.getNewArticles(endpoint.value, callOpts)
+			try {
+				const newArticles = await service.value.getNewArticles(endpoint.value, callOpts)
 
-			for (const id of newArticles)
-				if (!articleIds.value.find(listA => listA.articleId === id))
-					articleIds.value.push({serviceIndex: props.timeline.serviceIndex, articleId: id})
+				for (const id of newArticles)
+					if (!articleIds.value.find(listA => listA.articleId === id))
+						articleIds.value.push({serviceIndex: props.timeline.serviceIndex, articleId: id})
 
-			const oldNewPage = newPage.value ?? -1
-			const pages = remainingPages.value
-			if (pages?.length)
-				newPage.value = pages.filter(p => p > oldNewPage)[0] || pages[pages.length - 1]
-
-			endpoint.value.calling = false
+				const oldNewPage = newPage.value ?? -1
+				const pages = remainingPages.value
+				if (pages?.length)
+					newPage.value = pages.filter(p => p > oldNewPage)[0] || pages[pages.length - 1]
+			}finally {
+				endpoint.value.calling = false
+			}
 		}
 
 		const getRandomNewArticles = () => {

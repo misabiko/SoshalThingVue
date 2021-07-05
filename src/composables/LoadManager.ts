@@ -19,7 +19,7 @@ class LoadManager {
 		return Object.values(service.articles)
 			.filter(a => mountedArticles.includes(a.id))
 			.flatMap(
-				a => (a.media as GenericMedia[])
+				a => ((a.media || []) as GenericMedia[])
 					.filter((m : GenericMedia) => m.status == MediaLoadStatus.Loading)
 					.map((m : GenericMedia, i : number) => ({id: a.id, media: i}))
 			)
@@ -51,7 +51,7 @@ class LoadManager {
 		const queue = this.getQueue(service, flatMountedArticles)
 
 		for (const id of flatMountedArticles) {
-			if (!service.articles.hasOwnProperty(id))
+			if (!service.articles.hasOwnProperty(id) || !service.articles[id].media)
 				continue
 
 			for (const [i, media] of service.articles[id].media.entries()) {
