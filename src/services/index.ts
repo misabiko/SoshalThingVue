@@ -1,4 +1,4 @@
-import {Component, h, markRaw, reactive, ref} from 'vue'
+import {Component, h, markRaw, reactive, Ref, ref} from 'vue'
 import {Article, MediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
@@ -133,12 +133,21 @@ export abstract class Endpoint<CallOpt> {
 	articles : string[] = reactive([])
 	calling = false
 
+	rateLimitInfo? : {
+		maxCalls: number
+		remainingCalls: number
+		secUntilNextReset: number
+	}
+
 	protected constructor(readonly name : string) {
 	}
 
 	abstract call(options : CallOpt) : Promise<Payload>
 
 	get ready() {
+		if (this.rateLimitInfo && this.rateLimitInfo.secUntilNextReset * 1000 < Date.now())
+			this.rateLimitInfo.remainingCalls = this.rateLimitInfo.maxCalls
+
 		return !this.calling
 	}
 

@@ -4,6 +4,7 @@
 			<div v-for='s in services' class='box'>
 				{{s.name}}
 				<component :is='s.optionComponent'/>
+				<SidebarEndpointMenu v-for='e in s.endpoints' :endpoint='e'/>
 				<div class='level' v-if='s.name === "Twitter"'>
 					<div class='level-left'/>
 					<div class='level-right'>
@@ -51,10 +52,12 @@ import {library} from '@fortawesome/fontawesome-svg-core'
 import {faAngleDoubleLeft, faAngleDoubleRight, faList, faPlus} from '@fortawesome/free-solid-svg-icons'
 import {Service} from '@/services'
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
+import SidebarEndpointMenu from '@/components/SidebarEndpointMenu.vue'
 
 library.add(faAngleDoubleLeft, faAngleDoubleRight, faPlus, faGithub, faList)
 
 export default defineComponent({
+	components: {SidebarEndpointMenu},
 	setup() {
 		const expanded = ref(false)
 

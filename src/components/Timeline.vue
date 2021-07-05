@@ -147,10 +147,13 @@ enum EndpointPackageType {
 
 type EndpointPackage = {
 	type: EndpointPackageType.NoEndpoint,
+	ready: false,
 } | {
 	type: EndpointPackageType.RefreshEndpoint,
+	ready: boolean,
 } | {
 	type: EndpointPackageType.PagedEndpoint,
+	ready: boolean,
 	endpoint: ComputedRef<PagedEndpoint>,
 	remainingPages: ComputedRef<number[]>,
 	newPage: Ref<undefined | number>,
@@ -182,10 +185,12 @@ export default defineComponent({
 			if (!endpoint.value)
 				return {
 					type: EndpointPackageType.NoEndpoint,
+					ready: false,
 				}
 			else if (endpoint.value instanceof PagedEndpoint)
 				return {
 					type: EndpointPackageType.PagedEndpoint,
+					get ready() {return endpoint.value?.ready ?? false},
 					endpoint: endpoint as ComputedRef<PagedEndpoint>,
 					remainingPages,
 					newPage,
@@ -193,12 +198,16 @@ export default defineComponent({
 			else
 				return {
 					type: EndpointPackageType.RefreshEndpoint,
+					get ready() {return endpoint.value?.ready ?? false},
 				}
 		})
 
 		const getNewArticles = async function(callOpts : object = {pageNum: newPage.value}) {
-			if (!endpoint.value?.ready)
+			if (!endpoint.value?.ready) {
+				if (endpoint.value)
+					console.debug(`${endpoint.value.name} isn't ready.`)
 				return
+			}
 			endpoint.value.calling = true
 
 			try {
@@ -324,7 +333,10 @@ export default defineComponent({
 
 		initEndpoint()
 
-		onBeforeMount(() => getNewArticles())
+		onBeforeMount(() => {
+			if (!endpoint.value?.rateLimitInfo || endpoint.value.rateLimitInfo.remainingCalls > 100)
+				getNewArticles()
+		})
 
 		const showOptions = ref(false)
 
@@ -531,6 +543,7 @@ export default defineComponent({
 			getRandomNewArticles,
 			getNewArticles,
 			EndpointPackageType,
+			endpoint,
 			endpointPackage,
 			containers,
 			service,

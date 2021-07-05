@@ -3,8 +3,8 @@ import {Article, LazyMedia, MediaArticle, PlainMedia} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {Filters} from '@/composables/useFilters'
-import {h} from 'vue'
-import {parseResponse, TwitterAPIPayload} from '@/data/TwitterV2'
+import {h, reactive, ref} from 'vue'
+import {parseRateLimits, parseResponse, TwitterAPIPayload} from '@/data/TwitterV2'
 import {TwitterV1APIPayload, parseResponse as parseV1Response} from '@/data/TwitterV1'
 
 export enum TwitterArticleType {
@@ -102,6 +102,14 @@ export class TwitterService extends Service<TwitterArticle> {
 					])
 				},
 			},
+			[HomeTimelineEndpoint.name]: {
+				factory() {
+					return new HomeTimelineEndpoint()
+				},
+				optionComponent() {
+					return null
+				},
+			},
 			[SearchEndpoint.name]: {
 				factory({query} : { query : string }) {
 					return new SearchEndpoint(query)
@@ -147,8 +155,18 @@ interface UserTimelineCallOpt {
 }
 
 class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
+	rateLimitInfo = reactive({
+		maxCalls: 900,
+		remainingCalls: 1,
+		secUntilNextReset: Date.now() / 1000 + 15 * 60,
+	})
+
 	constructor(readonly userId : string) {
 		super('User Timeline ' + userId)
+	}
+
+	get ready() : boolean {
+		return super.ready && !!this.rateLimitInfo.remainingCalls
 	}
 
 	async call(options : UserTimelineCallOpt) : Promise<Payload> {
@@ -162,6 +180,9 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
 		console.dir(response)
 
 		const payload = parseResponse(response)
+
+		this.rateLimitInfo.remainingCalls--
+		parseRateLimits(this, response)
 
 		for (const id of payload.newArticles)
 			if (!this.articles.includes(id))
@@ -183,16 +204,30 @@ interface UserTimelineV1CallOpt {
 }
 
 class UserTimelineV1Endpoint extends Endpoint<UserTimelineCallOpt> {
+	rateLimitInfo = reactive({
+		maxCalls: 900,
+		remainingCalls: 1,
+		secUntilNextReset: Date.now() / 1000 + 15 * 60,
+	})
+
 	constructor(readonly userId : string) {
 		super('User Timeline V1 ' + userId)
+	}
+
+	get ready() : boolean {
+		return super.ready && !!this.rateLimitInfo.remainingCalls
 	}
 
 	async call(options : UserTimelineCallOpt) : Promise<Payload> {
 		const params = new URLSearchParams()
 		params.set('tweet_mode', 'extended')
+		params.set('user_id', this.userId)
 
-		const response : TwitterV1APIPayload = await fetch(`/twitter/v1/statuses/home_timeline?${params.toString()}`).then(r => r.json())
+		const response : TwitterV1APIPayload = await fetch(`/twitter/v1/statuses/user_timeline?${params.toString()}`).then(r => r.json())
 		console.dir(response)
+
+		this.rateLimitInfo.remainingCalls--
+		parseRateLimits(this, response)
 
 		const payload = parseV1Response(response)
 
@@ -214,12 +249,37 @@ class UserTimelineV1Endpoint extends Endpoint<UserTimelineCallOpt> {
 interface HomeTimelineCallOpt {}
 
 class HomeTimelineEndpoint extends Endpoint<HomeTimelineCallOpt> {
+	rateLimitInfo = reactive({
+		maxCalls: 15,
+		remainingCalls: 1,
+		secUntilNextReset: Date.now() / 1000 + 15 * 60,
+	})
+
 	constructor() {
 		super('Home Timeline')
 	}
 
-	async call(options : HomeTimelineCallOpt) : Promise<Payload> {
-		return {articles: [], newArticles: []}
+	get ready() : boolean {
+		return super.ready && !!this.rateLimitInfo.remainingCalls
+	}
+
+	async call(options : UserTimelineCallOpt) : Promise<Payload> {
+		const params = new URLSearchParams()
+		params.set('tweet_mode', 'extended')
+
+		const response : TwitterV1APIPayload = await fetch(`/twitter/v1/statuses/home_timeline?${params.toString()}`).then(r => r.json())
+		console.dir(response)
+
+		this.rateLimitInfo.remainingCalls--
+		parseRateLimits(this, response)
+
+		const payload = parseV1Response(response)
+
+		for (const id of payload.newArticles)
+			if (!this.articles.includes(id))
+				this.articles.push(id)
+
+		return payload
 	}
 
 	getKeyOptions() {
@@ -232,8 +292,18 @@ interface SearchCallOpt {
 }
 
 class SearchEndpoint extends Endpoint<SearchCallOpt> {
+	rateLimitInfo = reactive({
+		maxCalls: 180,
+		remainingCalls: 1,
+		secUntilNextReset: Date.now() / 1000 + 15 * 60,
+	})
+
 	constructor(readonly query : string) {
 		super('Search ' + query)
+	}
+
+	get ready() : boolean {
+		return super.ready && !!this.rateLimitInfo.remainingCalls
 	}
 
 	async call(options : SearchCallOpt) : Promise<Payload> {
@@ -249,6 +319,9 @@ class SearchEndpoint extends Endpoint<SearchCallOpt> {
 			.then(r => r.json())
 			.catch(e => console.error('Failed to parse search response', e))
 		console.dir(response)
+
+		this.rateLimitInfo.remainingCalls--
+		parseRateLimits(this, response)
 
 		const payload = parseResponse(response)
 

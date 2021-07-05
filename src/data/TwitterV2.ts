@@ -1,5 +1,5 @@
 import {getImageFormat, LazyMedia, MediaLoadStatus, MediaType, PlainMedia} from '@/data/articles'
-import {Payload} from '@/services'
+import {Endpoint, Payload} from '@/services'
 import {RetweetArticle, TweetArticle, TwitterArticle, TwitterArticleType} from '@/services/twitter'
 
 export interface TwitterLitePayload {
@@ -231,4 +231,13 @@ export function parseResponse(response : TwitterAPIPayload) {
 	}
 
 	return payload
+}
+
+export function parseRateLimits(endpoint : Endpoint<any>, response : TwitterLitePayload) {
+	if (!endpoint.rateLimitInfo)
+		return
+
+	endpoint.rateLimitInfo.maxCalls = parseInt(response._headers['x-rate-limit-limit'])
+	endpoint.rateLimitInfo.remainingCalls = parseInt(response._headers['x-rate-limit-remaining'])
+	endpoint.rateLimitInfo.secUntilNextReset = parseInt(response._headers['x-rate-limit-reset'])
 }
