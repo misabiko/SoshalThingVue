@@ -3,7 +3,7 @@ import {Article, LazyMedia, MediaArticle, PlainMedia} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {Filters} from '@/composables/useFilters'
-import {h, reactive, ref} from 'vue'
+import {h, reactive} from 'vue'
 import {parseRateLimits, parseResponse, TwitterAPIPayload} from '@/data/TwitterV2'
 import {TwitterV1APIPayload, parseResponse as parseV1Response} from '@/data/TwitterV1'
 

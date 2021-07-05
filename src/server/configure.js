@@ -7,14 +7,23 @@ const connectMemoryStore = require('memorystore')
 const passport = require('passport')
 const {Strategy: TwitterStrategy} = require('passport-twitter')
 
-function parseQueryErrors(e, next) {
+function parseQueryErrors(e, res, next) {
+	console.error('Parsing errors:')
+	let response = {}
+
 	if ('errors' in e) {
 		for (const error of e.errors)
 			console.error(error)
-	}else
+		response = {...response, ...e}
+	}else {
 		console.error(e)
+		response.errors = [e]
+	}
 
-	next(e)
+	if (response.errors?.find(err => err.code === 89 || err.code === 88))
+		res.json(e)
+	else
+		next(e)
 }
 
 function objectifyResponse(response) {
@@ -156,7 +165,7 @@ module.exports = app => {
 				logRateLimit(response)
 				res.json(objectifyResponse(response))
 			}catch (e) {
-				parseQueryErrors(e, next)
+				parseQueryErrors(e, res, next)
 			}
 		})
 		.post(async (req, res, next) => {
@@ -168,7 +177,7 @@ module.exports = app => {
 				logRateLimit(response)
 				res.json(objectifyResponse(response))
 			}catch (e) {
-				parseQueryErrors(e, next)
+				parseQueryErrors(e, res, next)
 			}
 		})
 
@@ -182,7 +191,7 @@ module.exports = app => {
 				logRateLimit(response)
 				res.json(objectifyResponse(response))
 			}catch (e) {
-				parseQueryErrors(e, next)
+				parseQueryErrors(e, res, next)
 			}
 		})
 		.post(async (req, res, next) => {
@@ -194,7 +203,7 @@ module.exports = app => {
 				logRateLimit(response)
 				res.json(objectifyResponse(response))
 			}catch (e) {
-				parseQueryErrors(e, next)
+				parseQueryErrors(e, res, next)
 			}
 		})
 
@@ -205,7 +214,7 @@ module.exports = app => {
 			logRateLimit(response)
 			res.json(response)
 		}catch (e) {
-			parseQueryErrors(e, next)
+			parseQueryErrors(e, res, next)
 		}
 	})
 
@@ -216,7 +225,7 @@ module.exports = app => {
 			logRateLimit(response)
 			res.json(response)
 		}catch (e) {
-			parseQueryErrors(e, next)
+			parseQueryErrors(e, res, next)
 		}
 	})
 
