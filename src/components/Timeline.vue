@@ -4,6 +4,11 @@
 			<div class='timelineLeftHeader'>
 				<strong>{{ timeline.title }}</strong>
 				<div class='timelineButtons' v-if='mainTimeline'>
+					<button @click='$emit("showSidebar")'>
+						<span class='icon'>
+							<FontAwesomeIcon icon='ellipsis-v' size='lg'/>
+						</span>
+					</button>
 					<button @click='$emit("hideSoshal")'>
 						<span class='icon'>
 							<FontAwesomeIcon icon='eye-slash' size='lg'/>
@@ -102,7 +107,6 @@ import {
 	onBeforeMount,
 	PropType,
 	provide,
-	reactive,
 	Ref,
 	ref, toRefs,
 	VNode,
@@ -229,7 +233,7 @@ export default defineComponent({
 
 			const remaining = []
 			for (let i = 0; i <= lastPage; i++)
-				if (!loadedPages.includes(i))
+				if (!loadedPages.hasOwnProperty(i))
 					remaining.push(i)
 
 			return remaining

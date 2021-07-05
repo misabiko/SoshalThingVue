@@ -1,18 +1,20 @@
 <template>
+	<Sidebar v-if='showSidebar' @addTimeline='showAddTimeline = true' @showListManager='showArticleListManager = true'></Sidebar>
 	<div id='timelineContainer'>
 		<template v-for='(t, i) in timelines'>
 			<Timeline
-				v-if='!i'
+				v-if='!showSidebar && !i'
 				:key='t.title'
 				:timeline='t'
-				:view-mode='viewMode'
-				:view-modes='Object.keys(pageInfo.viewModes)'
-				main-timeline
+				:viewMode='viewMode'
+				:viewModes='Object.keys(pageInfo.viewModes)'
+				:mainTimeline='!showSidebar'
 				@changeTimeline='changeTimelineData(i, $event)'
-				@hide-soshal='setViewMode("hidden")'
-				@set-viewmode='setViewMode($event)'
-				@add-timeline='showAddTimeline = true'
+				@hideSoshal='setViewMode("hidden")'
+				@setViewmode='setViewMode($event)'
+				@addTimeline='showAddTimeline = true'
 				@delete='deleteTimeline(i)'
+				@showSidebar='showSidebar = true'
 			></Timeline>
 			<Timeline
 				v-else
@@ -29,6 +31,10 @@
 		@add='addTimeline($event)'
 		@close='showAddTimeline = false'
 	/>
+	<ArticleListManager
+		v-if='showArticleListManager'
+		@close='showArticleListManager = false'
+	/>
 	<teleport v-if='pageInfo && viewMode === "hidden"' :to='pageInfo.activatorSelector'>
 		<component :is='pageInfo.activator' @click='setViewMode(lastViewMode)'></component>
 	</teleport>
@@ -36,15 +42,17 @@
 
 <script lang='ts'>
 import {computed, defineComponent, PropType, ref} from 'vue'
+import Sidebar from '@/components/Sidebar.vue'
 import Timeline from '@/components/Timeline.vue'
 import {TimelineData} from '@/data/timelines'
 import {Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
+import ArticleListManager from '@/components/Modals/ArticleListManager.vue'
 
 export default defineComponent({
 	name: 'FavViewer',
-	components: {AddTimelineModal, Timeline},
+	components: {ArticleListManager, AddTimelineModal, Timeline, Sidebar},
 	props: {
 		pageInfo: {
 			type: Object as PropType<PageInfo>,
@@ -91,6 +99,7 @@ export default defineComponent({
 		}
 
 		const showAddTimeline = ref(false)
+		const showArticleListManager = ref(false)
 
 		if (!timelines.value.length)
 			for (let i = 0; i < Service.instances.length; i++)
@@ -100,6 +109,8 @@ export default defineComponent({
 		if (!timelines.value.length)
 			console.warn('No timelines were initialized')
 
+		const showSidebar = ref(false)
+
 		const lastViewMode = computed(() => props.pageInfo.currentViewMode)
 		const viewMode = ref(lastViewMode.value)
 
@@ -108,7 +119,7 @@ export default defineComponent({
 			props.pageInfo.setViewMode(mode)
 		}
 
-		return {timelines, showAddTimeline, addTimeline, changeTimelineData, deleteTimeline, lastViewMode, viewMode, setViewMode}
+		return {timelines, showAddTimeline, showArticleListManager, addTimeline, changeTimelineData, deleteTimeline, showSidebar, lastViewMode, viewMode, setViewMode}
 	}
 })
 </script>
@@ -134,6 +145,9 @@ export default defineComponent({
 #favviewer
 	width: 100vw
 	height: 90vh
+	display: flex
+	-webkit-font-smoothing: antialiased
+	-moz-osx-font-smoothing: grayscale
 </style>
 
 <style scoped lang='sass'>

@@ -145,17 +145,20 @@ export abstract class Endpoint<CallOpt> {
 export type WrappedPayload = { payload : Payload, basePageNum : number, lastPage : number }
 
 export abstract class PagedEndpoint<CallOpt extends { pageNum : number } = { pageNum : number }> extends Endpoint<CallOpt> {
-	loadedPages : number[] = []
+	loadedPages : { [page: number]: string[] } = {}
 
 	protected constructor(name : string, public basePageNum : number, public lastPage? : number) {
 		super(name)
 	}
 
 	updateInstance(options : CallOpt, wrappedPayload : WrappedPayload) {
+		this.loadedPages[options.pageNum] ??= []
+
 		for (const id of wrappedPayload.payload.newArticles)
-			if (!this.articles.includes(id))
+			if (!this.articles.includes(id)) {
 				this.articles.push(id)
-		this.loadedPages.push(options.pageNum)
+				this.loadedPages[options.pageNum].push(id)
+			}
 		this.basePageNum = wrappedPayload.basePageNum
 		this.lastPage = wrappedPayload.lastPage
 	}

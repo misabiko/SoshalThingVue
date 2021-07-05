@@ -180,15 +180,6 @@ export default defineComponent({
 	&:hover
 		opacity: unset
 
-.timeline .modal-content
-	width: 100%
-	display: flex
-	justify-content: center
-	overflow-y: scroll
-
-	& .articleModal
-		width: 80%
-
 //TODO Remove this when bulma is updated?
 .card-header-icon
 	background: 0 0

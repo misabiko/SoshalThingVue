@@ -15,7 +15,10 @@
 		@add='addTimeline($event)'
 		@close='showAddTimeline = false'
 	/>
-	<ArticleListManager v-if='showArticleListManager'/>
+	<ArticleListManager
+		v-if='showArticleListManager'
+		@close='showArticleListManager = false'
+	/>
 </template>
 
 <script lang='ts'>
@@ -26,7 +29,6 @@ import {TimelineData} from '@/data/timelines'
 import {Service} from '@/services'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
 import ArticleListManager from '@/components/Modals/ArticleListManager.vue'
-import {articleLists} from '@/components/Modals/ArticleListManager.vue'
 
 export const LOCALSTORAGE_TIMELINE_TITLE = 'SoshalThing Timelines'
 
