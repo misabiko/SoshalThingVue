@@ -75,7 +75,7 @@ import {computed, defineComponent, onBeforeMount, PropType, ref, toRefs, watch} 
 import {HostPageService, Service} from '@/services'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faTimes} from '@fortawesome/free-solid-svg-icons'
-import {TimelineData, TimelineDataSerialized} from '@/data/timelines'
+import {TimelineData} from '@/data/timelines'
 import EndpointSelection from '@/components/EndpointSelection.vue'
 
 library.add(faTimes)
@@ -96,7 +96,7 @@ export default defineComponent({
 		if (firstServiceIndex < 0)
 			firstServiceIndex = 0
 
-		const timelineData = ref<TimelineDataSerialized>({
+		const timelineData = ref<TimelineData>({
 				title: 'New Timeline',
 				serviceIndex: firstServiceIndex,
 				endpointIndex: undefined,

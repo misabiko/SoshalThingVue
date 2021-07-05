@@ -21,7 +21,7 @@
 import {defineComponent, ref} from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 import Timeline from '@/components/Timeline.vue'
-import {TimelineData, TimelineDataSerialized} from '@/data/timelines'
+import {TimelineData} from '@/data/timelines'
 import {Service} from '@/services'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
 
@@ -31,7 +31,7 @@ export default defineComponent({
 	components: {AddTimelineModal, Timeline, Sidebar},
 	setup() {
 		const timelineStorage : TimelineData[] = JSON.parse(localStorage.getItem(LOCALSTORAGE_TIMELINE_TITLE) || '[]')
-			.map((t : TimelineDataSerialized) => {
+			.map((t : TimelineData) => {
 				const copy = {...t}
 				if (t.endpointOptions) {
 					const service = Service.instances[t.serviceIndex]
@@ -47,7 +47,7 @@ export default defineComponent({
 
 		function updateLocalStorage() {
 			localStorage.setItem(LOCALSTORAGE_TIMELINE_TITLE, JSON.stringify(timelines.value.map(t => {
-				const copy : TimelineDataSerialized = {...t}
+				const copy : TimelineData = {...t}
 				if (copy.endpointIndex !== undefined) {
 					const service = Service.instances[copy.serviceIndex]
 					copy.endpointOptions = service.endpoints[copy.endpointIndex].getKeyOptions()
@@ -58,7 +58,7 @@ export default defineComponent({
 			})))
 		}
 
-		function addTimeline(data : TimelineDataSerialized, serialize = true) {
+		function addTimeline(data : TimelineData, serialize = true) {
 			if (timelines.value.find(t => t.title === data.title)) {
 				console.error(`Timeline "${data.title}" already exists.`)
 				return
@@ -77,7 +77,7 @@ export default defineComponent({
 				updateLocalStorage()
 		}
 
-		function changeTimelineData(timelineIndex : number, data : TimelineDataSerialized) {
+		function changeTimelineData(timelineIndex : number, data : TimelineData) {
 			if (timelines.value.find((t, i) => i != timelineIndex && t.title === data.title)) {
 				console.error(`Timeline "${data.title}" already exists.`)
 				return

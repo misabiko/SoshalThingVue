@@ -64,12 +64,12 @@
 <script lang='ts'>
 import {computed, defineComponent, PropType, ref, watch} from 'vue'
 import {Service} from '@/services'
-import {TimelineDataSerialized} from '@/data/timelines'
+import {TimelineData} from '@/data/timelines'
 
 export default defineComponent({
 	props: {
 		modelValue: {
-			type: Object as PropType<TimelineDataSerialized>,
+			type: Object as PropType<TimelineData>,
 			required: true,
 		},
 	},

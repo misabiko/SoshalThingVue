@@ -37,7 +37,7 @@
 <script lang='ts'>
 import {computed, defineComponent, PropType, ref} from 'vue'
 import Timeline from '@/components/Timeline.vue'
-import {TimelineData, TimelineDataSerialized} from '@/data/timelines'
+import {TimelineData} from '@/data/timelines'
 import {Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
@@ -54,7 +54,7 @@ export default defineComponent({
 	setup(props) {
 		const timelines = ref<TimelineData[]>([])
 
-		function addTimeline(data : TimelineDataSerialized) {
+		function addTimeline(data : TimelineData) {
 			if (timelines.value.find(t => t.title === data.title)) {
 				console.error(`Timeline "${data.title}" already exists.`)
 				return
@@ -70,7 +70,7 @@ export default defineComponent({
 			timelines.value.push(data)
 		}
 
-		function changeTimelineData(timelineIndex : number, data : TimelineDataSerialized) {
+		function changeTimelineData(timelineIndex : number, data : TimelineData) {
 			if (timelines.value.find((t, i) => i != timelineIndex && t.title === data.title)) {
 				console.error(`Timeline "${data.title}" already exists.`)
 				return

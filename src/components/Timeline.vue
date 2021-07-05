@@ -109,7 +109,7 @@ import {
 	watch,
 } from 'vue'
 import {MediaService, PagedEndpoint, Service} from '@/services'
-import {TimelineData, TimelineDataSerialized} from '@/data/timelines'
+import {TimelineData} from '@/data/timelines'
 import {useQueryManagerContainer} from '@/composables/QueryManager'
 import {useLoadManagerTimeline} from '@/composables/LoadManager'
 import ColumnContainer from '@/components/Containers/ColumnContainer.vue'
@@ -169,7 +169,7 @@ export default defineComponent({
 		const service = computed(() => Service.instances[props.timeline.serviceIndex] as Service)
 		const endpoint = computed(() => props.timeline.endpointIndex === undefined ? undefined : service.value.endpoints[props.timeline.endpointIndex])
 
-		const modifiedTimelineData = ref<TimelineDataSerialized>({
+		const modifiedTimelineData = ref<TimelineData>({
 			...props.timeline
 		})
 
