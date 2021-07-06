@@ -62,10 +62,15 @@ export abstract class Service<ArticleType extends Article = Article> {
 		}
 	}
 
-	updateArticle(article : ArticleType) {
+	updateArticle(newArticle : ArticleType) {
+		const oldArticle = this.articles[newArticle.id]
 		//TODO Remove ts=ignore
 		// @ts-ignore
-		this.articles[article.id] = article
+		this.articles[article.id] = {
+			...newArticle,
+			hidden: oldArticle.hidden,
+			queried: oldArticle.queried || newArticle.queried,
+		}
 	}
 
 	toggleHideArticle(id : string) {
