@@ -89,7 +89,7 @@ library.add(faTimes)
 const timelineData = ref<undefined | TimelineData>()
 
 export function resetTimelineData(dataOverride? : any) {
-	let serviceIndex = dataOverride.serviceIndex ?? Service.instances.findIndex(s => (s as HostPageService).pageInfo)
+	let serviceIndex = dataOverride?.serviceIndex ?? Service.instances.findIndex(s => (s as HostPageService).pageInfo)
 	if (serviceIndex < 0)
 		serviceIndex = 0
 

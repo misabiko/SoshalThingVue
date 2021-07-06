@@ -159,8 +159,12 @@ export abstract class Endpoint<CallOpt> {
 	abstract call(options : CallOpt) : Promise<Payload>
 
 	get ready() {
-		if (this.rateLimitInfo && this.rateLimitInfo.secUntilNextReset * 1000 < Date.now())
-			this.rateLimitInfo.remainingCalls = this.rateLimitInfo.maxCalls
+		if (this.rateLimitInfo) {
+			if (this.rateLimitInfo.secUntilNextReset * 1000 < Date.now())
+				this.rateLimitInfo.remainingCalls = this.rateLimitInfo.maxCalls
+			else if (!this.rateLimitInfo.remainingCalls)
+				return false
+		}
 
 		return !this.calling
 	}

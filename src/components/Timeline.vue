@@ -364,7 +364,7 @@ export default defineComponent({
 		const showOptions = ref(false)
 
 		const columnCount = computed({
-			get: () => modifiedTimelineData.value.columnCount ?? 5,
+			get: () => modifiedTimelineData.value.columnCount ?? 2,
 			set: val => {
 				modifiedTimelineData.value.columnCount = val
 				emit('changeTimeline', modifiedTimelineData.value)

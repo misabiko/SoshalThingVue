@@ -3,7 +3,7 @@ import {Article, LazyMedia, MediaArticle, PlainMedia} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {Filters} from '@/composables/useFilters'
-import {h, reactive, ref, toRaw} from 'vue'
+import {h, reactive, toRaw} from 'vue'
 import {parseRateLimits, parseResponse, TwitterAPIPayload} from '@/data/TwitterV2'
 import {
 	TwitterV1APIPayload,
@@ -152,9 +152,40 @@ export class TwitterService extends Service<TwitterArticle> {
 					])
 				},
 			},
+			[LikesV1Endpoint.name]: {
+				factory(opts : {userId? : string, handle? : string}) {
+					return new LikesV1Endpoint(opts)
+				},
+				optionComponent(props : any, {emit}: {emit: any}) {
+					return h('div', {class: 'field'}, [
+						h('label', {class: 'field-label'}, 'User Id'),
+						h('div', {class: 'control'},
+							h('input', {
+								class: 'input',
+								type: 'text',
+								value: props.endpointOptions.userId,
+								onInput: (e : InputEvent) => {
+									props.endpointOptions.userId = (e.target as HTMLInputElement).value
+									emit('changeOptions', props.endpointOptions)
+								},
+							}),
+						),
+						h('label', {class: 'field-label'}, 'Handle'),
+						h('div', {class: 'control'},
+							h('input', {
+								class: 'input',
+								type: 'text',
+								value: props.endpointOptions.handle,
+								onInput: (e : InputEvent) => {
+									props.endpointOptions.handle = (e.target as HTMLInputElement).value
+									emit('changeOptions', props.endpointOptions)
+								},
+							}),
+						),
+					])
+				},
+			},
 		}, TweetComponent, true)
-
-		//this.endpoints.push(new SearchEndpoint('-is:retweet #深夜の真剣お絵描き60分一本勝負 OR -is:retweet #東方の90分お絵描き OR -is:retweet #東方ワンドロバトル'))
 	}
 
 	getAPIArticleData(id : string) : Promise<any> {
@@ -227,11 +258,11 @@ export class TwitterService extends Service<TwitterArticle> {
 	}
 }
 
-interface UserTimelineCallOpt {
+interface TwitterCallOpt {
 	fromEnd: boolean
 }
 
-class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
+class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 	rateLimitInfo = reactive({
 		maxCalls: 900,
 		remainingCalls: 1,
@@ -242,11 +273,7 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
 		super('User Timeline ' + userId)
 	}
 
-	get ready() : boolean {
-		return super.ready && !!this.rateLimitInfo.remainingCalls
-	}
-
-	async call(options : UserTimelineCallOpt) : Promise<Payload> {
+	async call(options : TwitterCallOpt) : Promise<Payload> {
 		const params = new URLSearchParams()
 		params.set('tweet.fields', 'created_at,public_metrics,referenced_tweets,entities,attachments')
 		params.set('user.fields', 'name,username,profile_image_url')
@@ -279,11 +306,7 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
 	}
 }
 
-interface UserTimelineV1CallOpt {
-	fromEnd: boolean
-}
-
-export class UserTimelineV1Endpoint extends Endpoint<UserTimelineCallOpt> {
+export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
 	rateLimitInfo = reactive({
 		maxCalls: 900,
 		remainingCalls: 1,
@@ -294,11 +317,7 @@ export class UserTimelineV1Endpoint extends Endpoint<UserTimelineCallOpt> {
 		super('User Timeline V1 ' + userId)
 	}
 
-	get ready() : boolean {
-		return super.ready && !!this.rateLimitInfo.remainingCalls
-	}
-
-	async call(options : UserTimelineCallOpt) : Promise<Payload> {
+	async call(options : TwitterCallOpt) : Promise<Payload> {
 		const params = new URLSearchParams()
 		params.set('tweet_mode', 'extended')
 		params.set('user_id', this.userId)
@@ -329,11 +348,7 @@ export class UserTimelineV1Endpoint extends Endpoint<UserTimelineCallOpt> {
 	}
 }
 
-interface HomeTimelineCallOpt {
-	fromEnd: boolean
-}
-
-class HomeTimelineEndpoint extends Endpoint<HomeTimelineCallOpt> {
+class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 	rateLimitInfo = reactive({
 		maxCalls: 15,
 		remainingCalls: 1,
@@ -344,11 +359,7 @@ class HomeTimelineEndpoint extends Endpoint<HomeTimelineCallOpt> {
 		super('Home Timeline')
 	}
 
-	get ready() : boolean {
-		return super.ready && !!this.rateLimitInfo.remainingCalls
-	}
-
-	async call(options : UserTimelineCallOpt) : Promise<Payload> {
+	async call(options : TwitterCallOpt) : Promise<Payload> {
 		const params = new URLSearchParams()
 		params.set('count', '200')
 		params.set('tweet_mode', 'extended')
@@ -375,11 +386,7 @@ class HomeTimelineEndpoint extends Endpoint<HomeTimelineCallOpt> {
 	}
 }
 
-interface SearchCallOpt {
-	fromEnd: boolean
-}
-
-class SearchEndpoint extends Endpoint<SearchCallOpt> {
+class SearchEndpoint extends Endpoint<TwitterCallOpt> {
 	rateLimitInfo = reactive({
 		maxCalls: 180,
 		remainingCalls: 1,
@@ -390,11 +397,7 @@ class SearchEndpoint extends Endpoint<SearchCallOpt> {
 		super('Search ' + query)
 	}
 
-	get ready() : boolean {
-		return super.ready && !!this.rateLimitInfo.remainingCalls
-	}
-
-	async call(options : SearchCallOpt) : Promise<Payload> {
+	async call(options : TwitterCallOpt) : Promise<Payload> {
 		const params = new URLSearchParams()
 		params.set('query', this.query)
 		params.set('max_results', '100')
@@ -420,7 +423,7 @@ class SearchEndpoint extends Endpoint<SearchCallOpt> {
 		return payload
 	}
 
-	updateInstance(options : SearchCallOpt, payload : Payload) {
+	updateInstance(options : TwitterCallOpt, payload : Payload) {
 		for (const id of payload.newArticles)
 			if (!this.articles.includes(id))
 				this.articles.push(id)
@@ -430,6 +433,58 @@ class SearchEndpoint extends Endpoint<SearchCallOpt> {
 		return {
 			endpointType: this.constructor.name,
 			query: this.query,
+		}
+	}
+}
+
+class LikesV1Endpoint extends Endpoint<TwitterCallOpt> {
+	readonly userId? : string
+	readonly handle? : string
+
+	rateLimitInfo = reactive({
+		maxCalls: 75,
+		remainingCalls: 1,
+		secUntilNextReset: Date.now() / 1000 + 15 * 60,
+	})
+
+	constructor({userId, handle} : {userId? : string, handle? : string}) {
+		super('Likes ' + (handle || userId))
+
+		this.userId = userId
+		this.handle = handle
+	}
+
+	async call(options : TwitterCallOpt) : Promise<Payload> {
+		const params = new URLSearchParams()
+		params.set('tweet_mode', 'extended')
+		if (this.handle)
+			params.set('screen_name', this.handle)
+		else if (this.userId)
+			params.set('user_id', this.userId)
+		params.set('count', '200')
+		if (options.fromEnd && this.articles.length)
+			params.set('max_id', this.articles[this.articles.length - 1])
+
+		const response : TwitterV1APIPayload = await fetch(`/twitter/v1/statuses/user_timeline?${params.toString()}`).then(r => r.json())
+		console.dir(response)
+
+		this.rateLimitInfo.remainingCalls--
+		parseRateLimits(this, response)
+
+		const payload = parseV1Response(response)
+
+		for (const id of payload.newArticles)
+			if (!this.articles.includes(id))
+				this.articles.push(id)
+
+		return payload
+	}
+
+	getKeyOptions() {
+		return {
+			endpointType: this.constructor.name,
+			userId: this.userId,
+			handle: this.handle,
 		}
 	}
 }
