@@ -1,4 +1,4 @@
-import {Component, h, markRaw, reactive, Ref, ref} from 'vue'
+import {Component, h, markRaw, reactive, Ref, ref, toRaw} from 'vue'
 import {Article, MediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
@@ -122,6 +122,10 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	optionComponent(props: any): any {
 		return null
+	}
+
+	logArticle(id : string) {
+		console.dir(toRaw(this.articles[id]))
 	}
 }
 

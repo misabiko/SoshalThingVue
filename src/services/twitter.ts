@@ -3,9 +3,14 @@ import {Article, LazyMedia, MediaArticle, PlainMedia} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {Filters} from '@/composables/useFilters'
-import {h, reactive} from 'vue'
+import {h, reactive, toRaw} from 'vue'
 import {parseRateLimits, parseResponse, TwitterAPIPayload} from '@/data/TwitterV2'
-import {TwitterV1APIPayload, parseResponse as parseV1Response} from '@/data/TwitterV1'
+import {
+	TwitterV1APIPayload,
+	parseResponse as parseV1Response,
+	parseGenericTweet,
+	TwitterV1Tweet,
+} from '@/data/TwitterV1'
 
 export enum TwitterArticleType {
 	Tweet,
@@ -147,6 +152,59 @@ export class TwitterService extends Service<TwitterArticle> {
 
 	getUserURL(handle : string) {
 		return 'https://twitter.com/' + handle
+	}
+
+	async like(id : string) {
+		const article = this.articles[id]
+		if (!article || article.type == TwitterArticleType.Retweet)
+			return
+
+		const params = new URLSearchParams()
+		params.set('id', id)
+		params.set('tweet_mode', 'extended')
+		const response = await fetch(`/twitter/v1/favorites/${(article as TweetArticle).liked ? 'destroy' : 'create'}?${params.toString()}`, {method: 'POST'})
+			.then(r => r.json())
+		console.dir(response)
+
+		if (response.statuses) {
+			const payload = parseV1Response(response)
+
+			for (const a of payload.articles)
+				this.updateArticle(a)
+		}else if (response.errors?.find((e: {code: number}) => e.code == 139))	//tweet already liked
+			(this.articles[id] as TweetArticle).liked = true
+	}
+
+	async retweet(id : string) {
+		const article = this.articles[id]
+		if (!article || article.type == TwitterArticleType.Retweet || (article as TweetArticle).reposted)
+			return
+
+		const params = new URLSearchParams()
+		params.set('id', id)
+		const response = await fetch(`/twitter/retweet?${params.toString()}`, {method: 'POST'})
+			.then(r => r.json())
+		console.dir(response)
+
+		if ((response as TwitterV1Tweet).id_str === id) {
+			const payload = parseGenericTweet(response)
+
+			for (const a of payload.articles)
+				this.updateArticle(a)
+		}else if (response.errors?.find((e: {code: number}) => e.code == 327))	//tweet already retweeted
+			(this.articles[id] as TweetArticle).reposted = true
+	}
+
+	logArticle(id : string) {
+		const article = this.articles[id]
+		switch (article.type) {
+			case TwitterArticleType.Tweet:
+				return super.logArticle(id)
+			case TwitterArticleType.Retweet:
+				return console.dir({article: toRaw(article), actualArticle: toRaw(this.articles[(article as RetweetArticle).retweetedId])})
+			case TwitterArticleType.Quote:
+				return console.dir({article: toRaw(article), actualArticle: toRaw(this.articles[(article as QuoteArticle).quotedId])})
+		}
 	}
 }
 

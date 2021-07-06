@@ -1,6 +1,7 @@
 import {getImageFormat, LazyMedia, MediaLoadStatus, MediaType, PlainMedia} from '@/data/articles'
 import {Endpoint, Payload} from '@/services'
 import {RetweetArticle, TweetArticle, TwitterArticle, TwitterArticleType} from '@/services/twitter'
+import {reactive} from 'vue'
 
 export interface TwitterLitePayload {
 	_headers: {
@@ -146,7 +147,7 @@ function parseRetweet(retweet : APITweetData, author : APIUserData, retweetedTwe
 	const retweetedArticle = parseTweet(retweetedTweet, retweetedAuthor, retweetedMedia)
 	result.articles.push(retweetedArticle)
 
-	result.articles.push(<RetweetArticle>{
+	const retweetArticle : RetweetArticle = {
 		type: TwitterArticleType.Retweet,
 		id: retweet.id,
 		creationDate: new Date(retweet.created_at),
@@ -158,14 +159,10 @@ function parseRetweet(retweet : APITweetData, author : APIUserData, retweetedTwe
 			avatarURL: author.profile_image_url,
 		},
 		index: 0,
-		media: [],
-		liked: false,
-		likeCount: retweet.public_metrics.like_count,
-		reposted: false,
-		repostCount: retweet.public_metrics.retweet_count,
 		hidden: false,
 		queried: false,
-	})
+	}
+	result.articles.push(retweetArticle)
 	result.newArticles.push(retweet.id)
 
 	return result

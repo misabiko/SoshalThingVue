@@ -7,7 +7,7 @@ export interface TwitterV1APIPayload extends TwitterLitePayload {
 	statuses: TwitterV1Tweet[]
 }
 
-type TwitterV1Tweet = {
+export type TwitterV1Tweet = {
 	created_at : string
 	id : number
 	id_str : string
@@ -413,7 +413,7 @@ function parseQuote(tweet: TwitterV1Tweet) {
 	return result
 }
 
-function parseGenericTweet(tweet : TwitterV1Tweet) {
+export function parseGenericTweet(tweet : TwitterV1Tweet) {
 	const result : Payload<TwitterArticle> = {articles: [], newArticles: []}
 	if (tweet.retweeted_status) {
 		const {

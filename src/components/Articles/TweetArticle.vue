@@ -38,6 +38,7 @@
 						<a
 							class='level-item articleButton repostButton'
 							:class='{repostedPostButton: actualArticle.reposted}'
+							@click='actualArticle.reposted || service.retweet(actualArticle.id)'
 						>
 							<span class='icon'>
 								<FontAwesomeIcon icon='retweet'/>
@@ -47,6 +48,7 @@
 						<a
 							class='level-item articleButton likeButton'
 							:class='{likedPostButton: actualArticle.liked}'
+							@click='service.like(actualArticle.id)'
 						>
 							<span class='icon'>
 								<FontAwesomeIcon :icon='[actualArticle.liked ? "fas" : "far", "heart"]'/>
@@ -68,7 +70,7 @@
 							<div class='dropdown-menu'>
 								<div class='dropdown-content'>
 									<div class='dropdown-item' @click='service.toggleHideArticle(article.id)'>Hide</div>
-									<div class='dropdown-item' @click='logArticle()'>Log</div>
+									<div class='dropdown-item' @click='service.logArticle(article.id)'>Log</div>
 								</div>
 							</div>
 						</div>
@@ -161,9 +163,7 @@ export default defineComponent({
 
 		const showDropdown = ref(false)
 
-		const logArticle = () => console.dir({article: toRaw(article.value), actualArticle: toRaw(actualArticle.value)})
-
-		return {service, addUserTimeline, TwitterArticleType, MediaLoadStatus, MediaType, actualArticle, compact, imageFormatClass, showDropdown, logArticle}
+		return {service, addUserTimeline, TwitterArticleType, MediaLoadStatus, MediaType, actualArticle, compact, imageFormatClass, showDropdown}
 	}
 })
 </script>

@@ -20,7 +20,7 @@ function parseQueryErrors(e, res, next) {
 		response.errors = [e]
 	}
 
-	if (response.errors?.find(err => err.code === 89 || err.code === 88))
+	if (response.errors?.find(err => err.code))
 		res.json(e)
 	else
 		next(e)
@@ -36,7 +36,7 @@ function objectifyResponse(response) {
 	}
 
 	return {
-		statuses: response,
+		statuses: Array.isArray(response) ? response : [response],
 		_headers: Object.fromEntries(response._headers.entries())
 	}
 }
@@ -224,6 +224,38 @@ module.exports = app => {
 
 			logRateLimit(response)
 			res.json(response)
+		}catch (e) {
+			parseQueryErrors(e, res, next)
+		}
+	})
+
+	app.post('/twitter/like', async (req, res, next) => {
+		try {
+			const response = await clientV2.post(`users/${req.user.id}/likes`, {...req.query})	//TODO Needs Content-Type: JSON
+
+			logRateLimit(response)
+			res.json(response)
+		}catch (e) {
+			parseQueryErrors(e, res, next)
+		}
+	})
+
+	app.delete('/twitter/like', async (req, res, next) => {
+		try {
+			const response = await clientV2.delete(`users/${req.user.id}/likes/${req.query.tweet_id}`, {...req.query})
+
+			logRateLimit(response)
+			res.json(response)
+		}catch (e) {
+			parseQueryErrors(e, res, next)
+		}
+	})
+
+	app.post('/twitter/retweet', async (req, res, next) => {
+		try {
+			const response = await clientV1.post('statuses/retweet', {...req.query})
+
+			await res.json(response)
 		}catch (e) {
 			parseQueryErrors(e, res, next)
 		}
