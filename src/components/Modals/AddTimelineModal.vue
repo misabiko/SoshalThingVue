@@ -1,5 +1,5 @@
 <template>
-	<div class='modal is-active' @click='$emit($event.target.classList.contains("modal") ? "close" : "")'>
+	<div class='modal is-active' @click='$event.target.classList.contains("modal") && (modal = undefined)'>
 		<div class='modal-background'/>
 		<div class='modal-content'>
 			<div class='card'>
@@ -7,7 +7,7 @@
 					<p class='card-header-title'>
 						Add Timeline
 					</p>
-					<button class='card-header-icon' aria-label='more options' @click='$emit("close")'>
+					<button class='card-header-icon' aria-label='more options' @click='modal = undefined'>
 						<span class='icon'>
 							<FontAwesomeIcon icon='times' aria-hidden='true'/>
 						</span>
@@ -59,11 +59,11 @@
 				<footer class='card-footer'>
 					<button
 						class='button card-footer-item'
-						@click='$emit("add", timelineData), initTimelineData(), $emit("close")'
+						@click='$emit("add", timelineData), timelineData = undefined, resetTimelineData(), modal = undefined'
 						:disabled='!valid'
 					>Add
 					</button>
-					<button class='button card-footer-item' @click='$emit("close")'>Cancel</button>
+					<button class='button card-footer-item' @click='modal = undefined'>Cancel</button>
 				</footer>
 			</div>
 		</div>
@@ -78,8 +78,43 @@ import {faTimes} from '@fortawesome/free-solid-svg-icons'
 import {TimelineData} from '@/data/timelines'
 import EndpointSelection from '@/components/EndpointSelection.vue'
 import {getNewId} from '@/data/articleLists'
+import {modal} from '@/composables/ModalManager'
 
 library.add(faTimes)
+
+const timelineData = ref<undefined | TimelineData>()
+
+export function resetTimelineData(dataOverride? : any) {
+	let serviceIndex = dataOverride.serviceIndex ?? Service.instances.findIndex(s => (s as HostPageService).pageInfo)
+	if (serviceIndex < 0)
+		serviceIndex = 0
+
+	const service = Service.instances[serviceIndex]
+
+	timelineData.value = {
+		endpointIndex: undefined,
+		...service.initialTimelines(0)[0],
+		title: 'New Timeline',
+		articleList: getNewId(),
+		serviceIndex,
+		container: 'ColumnContainer',
+		filters: service.defaultFilters,
+		sortConfig: {
+			method: service.defaultSortMethod,
+			reversed: false,
+		},
+		...dataOverride,
+	}
+
+	const data = timelineData.value as TimelineData
+
+	if (data.endpointIndex === undefined) {
+		if (service.endpoints.length)
+			data.endpointIndex = 0
+		else if (Object.keys(service.endpointTypes).length)
+			data.endpointOptions = {endpointType: Object.keys(service.endpointTypes)[0]}
+	}
+}
 
 export default defineComponent({
 	components: {EndpointSelection},
@@ -90,28 +125,10 @@ export default defineComponent({
 		},
 	},
 
-	setup(props) {
-		const {timelines} = toRefs(props)
+	setup() {
+		//const {timelines} = toRefs(props)
 
-		let firstServiceIndex = Service.instances.findIndex(s => (s as HostPageService).pageInfo)
-		if (firstServiceIndex < 0)
-			firstServiceIndex = 0
-
-		const timelineData = ref<TimelineData>({
-				title: 'New Timeline',
-				articleList: getNewId(),
-				serviceIndex: firstServiceIndex,
-				endpointIndex: undefined,
-				container: 'ColumnContainer',
-				filters: Service.instances[firstServiceIndex].defaultFilters,
-				sortConfig: {
-					method: Service.instances[firstServiceIndex].defaultSortMethod,
-					reversed: false,
-				},
-			},
-		)
-
-		const service = computed(() => Service.instances[timelineData.value.serviceIndex])
+		const service = computed(() => timelineData.value && Service.instances[timelineData.value.serviceIndex])
 
 		//TODO Centralize containers
 		const containers = [
@@ -120,51 +137,23 @@ export default defineComponent({
 			'MasonryContainer',
 		]
 
-		function initTimelineData() {
-			timelineData.value = {
-				endpointIndex: undefined,
-				...Service.instances[firstServiceIndex].initialTimelines(0)[0],
-				title: 'New Timeline',
-				articleList: getNewId(),
-				serviceIndex: firstServiceIndex,
-				container: 'ColumnContainer',
-				filters: Service.instances[firstServiceIndex].defaultFilters,
-				sortConfig: {
-					method: Service.instances[firstServiceIndex].defaultSortMethod,
-					reversed: false,
-				},
-			}
+		onBeforeMount(() => {
+			if (!timelineData.value)
+				resetTimelineData()
+		})
 
-			const baseTitle = timelineData.value.title
-			let title = baseTitle
-			const titles = timelines.value.map(t => t.title)
-			for (let i = 2; titles.includes(title); i++)
-				title = `${baseTitle} ${i}`
-			timelineData.value.title = title
-
-			if (timelineData.value.endpointIndex === undefined) {
-				if (service.value.endpoints.length)
-					timelineData.value.endpointIndex = 0
-				else if (Object.keys(service.value.endpointTypes).length)
-					timelineData.value.endpointOptions = {endpointType: Object.keys(service.value.endpointTypes)[0]}
-			}
-		}
-
-		onBeforeMount(initTimelineData)
-
-		const validations = computed<{ [name : string] : boolean }>(() => ({
-			title: !timelines.value.some(t => t.title === timelineData.value.title),
-		}))
+		const validations = computed<{ [name : string] : boolean }>(() => ({title: true}))
 		const valid = computed(() => Object.values(validations.value).every(isValid => isValid))
 
 		return {
+			modal,
 			timelineData,
 			services: Service.instances,
 			service,
 			containers,
 			validations,
 			valid,
-			initTimelineData,
+			resetTimelineData,
 		}
 	},
 })

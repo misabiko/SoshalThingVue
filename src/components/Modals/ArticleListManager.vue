@@ -1,5 +1,5 @@
 <template>
-	<div class='modal is-active' @click='$emit($event.target.classList.contains("modal") ? "close" : "")'>
+	<div class='modal is-active' @click='$event.target.classList.contains("modal")  && (modal = undefined)'>
 		<div class='modal-background'/>
 		<div class='modal-content'>
 			<div class='card'>
@@ -7,7 +7,7 @@
 					<p class='card-header-title'>
 						Manage Article Lists
 					</p>
-					<button class='card-header-icon' aria-label='more options' @click='$emit("close")'>
+					<button class='card-header-icon' aria-label='more options' @click='modal = undefined'>
 						<span class='icon'>
 							<FontAwesomeIcon icon='times' aria-hidden='true'/>
 						</span>
@@ -134,6 +134,7 @@
 import {computed, defineComponent, onBeforeUpdate, ref} from 'vue'
 import {PagedEndpoint, Service} from '@/services'
 import {articleLists} from '@/data/articleLists'
+import {modal} from '@/composables/ModalManager'
 
 export enum SelectionMode {
 	ServiceArticles,
@@ -202,6 +203,7 @@ export default defineComponent({
 		}
 
 		return {
+			modal,
 			articleLists,
 			editedListName,
 			editedListArticles,

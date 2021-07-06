@@ -1,5 +1,5 @@
 <template>
-	<Sidebar @addTimeline='showAddTimeline = true' @showListManager='showArticleListManager = true'></Sidebar>
+	<Sidebar/>
 	<div id='timelineContainer'>
 		<Timeline
 			v-for='(t, i) in timelines'
@@ -11,14 +11,12 @@
 		></Timeline>
 	</div>
 	<AddTimelineModal
-		v-if='showAddTimeline'
+		v-if='modal === "AddTimelineModal"'
 		:timelines='timelines'
 		@add='addTimeline($event)'
-		@close='showAddTimeline = false'
 	/>
 	<ArticleListManager
-		v-if='showArticleListManager'
-		@close='showArticleListManager = false'
+		v-if='modal === "ArticleListManager"'
 	/>
 </template>
 
@@ -30,6 +28,7 @@ import {TimelineData} from '@/data/timelines'
 import {Service} from '@/services'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
 import ArticleListManager from '@/components/Modals/ArticleListManager.vue'
+import {modal} from '@/composables/ModalManager'
 
 export const LOCALSTORAGE_TIMELINE_TITLE = 'SoshalThing Timelines'
 
@@ -120,7 +119,7 @@ export default defineComponent({
 		if (!timelines.value.length)
 			console.warn('No timelines were initialized')
 
-		return {timelines, showAddTimeline, showArticleListManager, addTimeline, changeTimelineData, deleteTimeline, updateLocalStorage}
+		return {timelines, showAddTimeline, showArticleListManager, modal, addTimeline, changeTimelineData, deleteTimeline, updateLocalStorage}
 	},
 })
 </script>

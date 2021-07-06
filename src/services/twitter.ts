@@ -202,7 +202,7 @@ export class TwitterService extends Service<TwitterArticle> {
 			.then(r => r.json())
 		console.dir(response)
 
-		if ((response as TwitterV1Tweet).id_str === id) {
+		if ((response as TwitterV1Tweet).id_str) {
 			const payload = parseGenericTweet(response)
 
 			for (const a of payload.articles)
@@ -279,7 +279,7 @@ interface UserTimelineV1CallOpt {
 	fromEnd: boolean
 }
 
-class UserTimelineV1Endpoint extends Endpoint<UserTimelineCallOpt> {
+export class UserTimelineV1Endpoint extends Endpoint<UserTimelineCallOpt> {
 	rateLimitInfo = reactive({
 		maxCalls: 900,
 		remainingCalls: 1,

@@ -21,7 +21,7 @@
 							:href='service.getUserURL(actualArticle.author.handle)'
 							target='_blank'
 							rel='noopener noreferrer'
-							@click.left.prevent='addUserTimeline(actualArticle.author.handle)'
+							@click.left.prevent='addUserTimeline(actualArticle.author)'
 						>
 							<strong>{{ actualArticle.author.name }}</strong>
 							<small>@{{actualArticle.author.handle}}</small>
@@ -71,6 +71,7 @@
 								<div class='dropdown-content'>
 									<div class='dropdown-item' @click='service.toggleHideArticle(article.id)'>Hide</div>
 									<div class='dropdown-item' @click='service.logArticle(article.id)'>Log</div>
+									<div class='dropdown-item' @click='$emit("expand", article.id)'>Expand</div>
 								</div>
 							</div>
 						</div>
@@ -109,12 +110,15 @@ import {
 	TwitterArticleType,
 	RetweetArticle,
 	QuoteArticle,
-	TweetArticle,
+	TweetArticle, UserTimelineV1Endpoint, TwitterUser,
 } from '@/services/twitter'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faEllipsisH, faHeart as fasHeart, faRetweet} from '@fortawesome/free-solid-svg-icons'
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons'
 import {MediaLoadStatus, MediaType} from '@/data/articles'
+import {resetTimelineData} from '@/components/Modals/AddTimelineModal.vue'
+import {modal} from '@/composables/ModalManager'
+import {Service} from '@/services'
 
 library.add(faRetweet, fasHeart, farHeart, faEllipsisH)
 
@@ -148,8 +152,16 @@ export default defineComponent({
 			}
 		})
 
-		function addUserTimeline(handle : string) {
-			console.log('boop ' + handle)
+		function addUserTimeline(user : TwitterUser) {
+			resetTimelineData({
+				title: user.name,
+				serviceIndex: Service.instances.findIndex(s => s.name === 'Twitter'),	//TODO Index services by name
+				endpointOptions: {
+					endpointType: UserTimelineV1Endpoint.name,
+					userId: user.id,
+				}
+			})
+			modal.value = 'AddTimelineModal'
 		}
 
 		const compact = ref(false)

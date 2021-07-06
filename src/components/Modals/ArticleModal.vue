@@ -1,6 +1,6 @@
 <template>
 	<div class='modal is-active' @click='$emit($event.target.classList.contains("modal") ? "close" : "")'>
-		<div class='modal-background'></div>
+		<div class='modal-background'/>
 		<div class='modal-content' :style='{width: zoom + "%"}'>
 			<div class='articleModal'>
 				<component
@@ -10,7 +10,7 @@
 					:on-article-click='() => {}'
 					@loading-full-media='$emit("loadingFullMedia", $event)'
 					@done-loading='$emit("doneLoading", $event)'
-				></component>
+				/>
 			</div>
 			<div class='modalButtons'>
 				<button class='button' @click='zoom = Math.max(zoom - 10, 10)'>
@@ -25,7 +25,7 @@
 				</button>
 			</div>
 		</div>
-		<button class='modal-close is-large' aria-label='close' @click='$emit("close")'></button>
+		<button class='modal-close is-large' aria-label='close' @click='$emit("close")'/>
 	</div>
 </template>
 
@@ -46,9 +46,7 @@ export default defineComponent({
 		article: Object,
 	},
 	setup() {
-		return {
-			zoom: ref(90)
-		}
+		return {zoom: ref(90)}
 	},
 })
 </script>

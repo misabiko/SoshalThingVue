@@ -22,12 +22,12 @@
 						<FontAwesomeIcon :icon='expanded ? "angle-double-left" : "angle-double-right"' size='2x'/>
 					</span>
 				</button>
-				<button @click='$emit("addTimeline")'>
+				<button @click='modal = "AddTimelineModal"'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='plus' size='2x'/>
 					</span>
 				</button>
-				<button @click='$emit("showListManager")'>
+				<button @click='modal = "ArticleListManager"'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='list' size='2x'/>
 					</span>
@@ -53,6 +53,7 @@ import {faAngleDoubleLeft, faAngleDoubleRight, faList, faPlus} from '@fortawesom
 import {Service} from '@/services'
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
 import SidebarEndpointMenu from '@/components/SidebarEndpointMenu.vue'
+import {modal} from '@/composables/ModalManager'
 
 library.add(faAngleDoubleLeft, faAngleDoubleRight, faPlus, faGithub, faList)
 
@@ -61,7 +62,7 @@ export default defineComponent({
 	setup() {
 		const expanded = ref(false)
 
-		return {expanded, services: Service.instances}
+		return {expanded, services: Service.instances, modal}
 	}
 })
 </script>
