@@ -1,7 +1,7 @@
 import {TwitterLitePayload} from '@/data/TwitterV2'
 import {Payload} from '@/services'
 import {QuoteArticle, RetweetArticle, TweetArticle, TwitterArticle, TwitterArticleType} from '@/services/twitter'
-import {getImageFormat, LazyMedia, MediaLoadStatus, MediaType, PlainMedia} from '@/data/articles'
+import {getImageFormat, MediaFormat, MediaLoadStatus, MediaType, PlainMedia} from '@/data/articles'
 
 export interface TwitterV1APIPayload extends TwitterLitePayload {
 	statuses: TwitterV1Tweet[]
@@ -302,14 +302,15 @@ function parseEntities(tweet : TwitterV1Tweet) {
 					break
 				case 'video':
 				case 'animated_gif':
-					if (entitiesMedia.video_info && entitiesMedia.video_info.variants) {
+					const variant = entitiesMedia.video_info?.variants.find(v => v.content_type === 'video/mp4')
+					if (variant) {
 						media.push({
 							type: MediaType.Video,
 							status: MediaLoadStatus.Plain,
 							content: {
-								url: entitiesMedia.media_url_https,
+								url: variant.url,
 								size: {width: entitiesMedia.sizes.large.w, height: entitiesMedia.sizes.large.h},
-								format: getImageFormat(entitiesMedia.media_url_https),
+								format: MediaFormat.MP4,
 							}
 						})
 					}

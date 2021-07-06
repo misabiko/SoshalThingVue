@@ -1,5 +1,5 @@
 <template>
-	<article class='article' :articleId='actualArticle.id'>
+	<article class='article' :articleId='article.id' :referencedId='actualArticle.id'>
 		<div v-if='article.type === TwitterArticleType.Retweet' class='repostLabel'>
 			<a
 				:href='service.getUserURL(article.author.handle)'
@@ -91,7 +91,7 @@
 		<div v-else-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Video' class='postMedia postVideo'>
 			<div class='is-hidden imgPlaceholder'/>
 			<video controls :autoplay='false' :loop='false'>
-				<source :src='actualArticle.media[0].content.url'/>
+				<source :src='actualArticle.media[0].content.url' type='video/mp4'/>
 			</video>
 		</div>
 	</article>
