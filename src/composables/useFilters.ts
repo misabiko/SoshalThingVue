@@ -1,15 +1,16 @@
-import {Article} from '@/data/articles'
+import {Article, MediaArticle} from '@/data/articles'
 import {h, Ref, ref} from 'vue'
 
 export type Filters<ArticleType extends Article> = {
 	[method : string] : {
-		filter: (config : any) => (article : ArticleType) => boolean
-		defaultConfig: FilterConfig
+		filter : (inverted : boolean, config : any) => (article : ArticleType) => boolean
+		defaultConfig : FilterConfig
 	}
 }
 
 type FilterConfig = {
 	enabled : boolean,
+	inverted : boolean,
 	config : any,
 	option : (filters : Ref<FilterConfigs>) => any
 }
@@ -54,6 +55,7 @@ const intervalOption = (filters : Ref<FilterConfigs>) => [
 export const defaultDefaultFilters : FilterConfigs = {
 	Hidden: {
 		enabled: true,
+		inverted: false,
 		config: {},
 		option: () => null,
 	},
@@ -62,20 +64,31 @@ export const defaultDefaultFilters : FilterConfigs = {
 export function useFilters<ArticleType extends Article>(defaultFilters = defaultDefaultFilters, additionalFiters : Filters<ArticleType> = {}) {
 	const filterMethods : Filters<ArticleType> = {
 		Hidden: {
-			filter: () => a => !a.hidden,
+			filter: (inverted) => a => !a.hidden != inverted,
 			defaultConfig: {
 				enabled: true,
+				inverted: false,
 				config: {},
 				option: () => null,
-			}
+			},
 		},
 		Interval: {
-			filter: ({offset, interval, inverted}) => a => (Math.max(a.index - offset, 0) % interval == 0) != inverted,
+			filter: (inverted, {offset, interval}) => a => (Math.max(a.index - offset, 0) % interval == 0) != inverted,
 			defaultConfig: {
 				enabled: false,
-				config: {offset: 0, interval: 3, inverted: false},
+				inverted: false,
+				config: {offset: 0, interval: 3},
 				option: intervalOption,
-			}
+			},
+		},
+		HasMedia: {
+			filter: (inverted) => a => !!(a as unknown as MediaArticle).media?.length != inverted,
+			defaultConfig: {
+				enabled: true,
+				inverted: false,
+				config: {},
+				option: () => null,
+			},
 		},
 		...additionalFiters,
 	}
@@ -91,25 +104,29 @@ export function useFilters<ArticleType extends Article>(defaultFilters = default
 				h('div', {class: 'select'},
 					h('select', {
 						onInput: (e : InputEvent) => newFilter.value = (e.target as HTMLInputElement).value,
-					}, Object.keys(filterMethods).map(method => h('option', {value: method}, method)))
-				)
+					}, Object.keys(filterMethods).map(method => h('option', {value: method}, method))),
+				),
 			),
 			h('div', {class: 'control'},
 				h('button', {
 					class: 'button',
-					onClick: () => filters.value[newFilter.value] = filterMethods[newFilter.value].defaultConfig
-				}, 'Add Filter')
-			)
+					onClick: () => filters.value[newFilter.value] = filterMethods[newFilter.value].defaultConfig,
+				}, 'Add Filter'),
+			),
 		]),
 		...Object.entries(filters.value).map(([method, opts]) => h('div', {class: 'field'},
 			[
 				h('label', {class: 'label'}, method),
-				h('div', {class: 'control'},
+				h('div', {class: 'control has-addons'}, [
 					h('button', {
 						class: 'button',
 						onClick: () => filters.value[method].enabled = !filters.value[method].enabled,
 					}, filters.value[method].enabled ? 'On' : 'Off'),
-				),
+					h('button', {
+						class: 'button',
+						onClick: () => filters.value[method].inverted = !filters.value[method].inverted,
+					}, filters.value[method].inverted ? 'Inverted' : 'Normal'),
+				]),
 				filters.value[method].option(filters),
 			])),
 	]

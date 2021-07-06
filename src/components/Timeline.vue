@@ -316,7 +316,7 @@ export default defineComponent({
 
 				for (const [method, opts] of Object.entries(filters.value))
 					if (opts.enabled)
-						unsorted = unsorted.filter(filterMethods[method].filter(opts.config))
+						unsorted = unsorted.filter(filterMethods[method].filter(opts.inverted, opts.config))
 
 				let sorted = sortMethods[sortMethod.value](unsorted)
 				if (sortReversed.value)

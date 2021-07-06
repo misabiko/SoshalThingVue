@@ -3,7 +3,7 @@ import {Article, LazyMedia, MediaArticle, PlainMedia} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {Filters} from '@/composables/useFilters'
-import {h, reactive, toRaw} from 'vue'
+import {h, reactive, ref, toRaw} from 'vue'
 import {parseRateLimits, parseResponse, TwitterAPIPayload} from '@/data/TwitterV2'
 import {
 	TwitterV1APIPayload,
@@ -54,9 +54,25 @@ export interface QuoteArticle extends TweetArticle {
 export class TwitterService extends Service<TwitterArticle> {
 	filters : Filters<TwitterArticle> = {
 		Retweet: {
-			filter: () => a => a.type !== TwitterArticleType.Retweet,
+			filter: (inverted) => a => a.type === TwitterArticleType.Retweet != inverted,
 			defaultConfig: {
 				enabled: true,
+				inverted: false,
+				config: {},
+				option: () => null,
+			},
+		},
+		HasMedia: {
+			filter: (inverted) => a => {
+				const refId = (a as RetweetArticle).retweetedId ?? (a as QuoteArticle).quotedId
+				if (refId)
+					return (!!(a as unknown as MediaArticle).media?.length || !!(this.articles[refId] as unknown as MediaArticle).media?.length) != inverted
+				else
+					return !!(a as unknown as MediaArticle).media?.length != inverted
+			},
+			defaultConfig: {
+				enabled: true,
+				inverted: false,
 				config: {},
 				option: () => null,
 			},
@@ -323,6 +339,7 @@ class HomeTimelineEndpoint extends Endpoint<HomeTimelineCallOpt> {
 
 	async call(options : UserTimelineCallOpt) : Promise<Payload> {
 		const params = new URLSearchParams()
+		params.set('count', '200')
 		params.set('tweet_mode', 'extended')
 
 		const response : TwitterV1APIPayload = await fetch(`/twitter/v1/statuses/home_timeline?${params.toString()}`).then(r => r.json())
