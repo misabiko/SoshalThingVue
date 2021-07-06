@@ -72,6 +72,13 @@
 									<div class='dropdown-item' @click='service.toggleHideArticle(article.id)'>Hide</div>
 									<div class='dropdown-item' @click='service.logArticle(article.id)'>Log</div>
 									<div class='dropdown-item' @click='$emit("expand", article.id)'>Expand</div>
+									<a
+										class='dropdown-item'
+										:href='service.getExternalLink(actualArticle.id)'
+										target='_blank' rel='noopener noreferrer'
+									>
+										External Link
+									</a>
 								</div>
 							</div>
 						</div>
