@@ -1,5 +1,5 @@
 import {Article, MediaArticle} from '@/data/articles'
-import {h, Ref, ref} from 'vue'
+import {ComputedRef, h, Ref, ref} from 'vue'
 
 export type Filters<ArticleType extends Article> = {
 	[method : string] : {
@@ -60,7 +60,7 @@ export const defaultDefaultFilters : FilterConfigs = {
 	},
 }
 
-export function useFilters<ArticleType extends Article>(filters : Ref<FilterConfigs>, additionalFiters : Filters<ArticleType>) {
+export function useFilters<ArticleType extends Article>(filters : ComputedRef<FilterConfigs>, additionalFiters : Filters<ArticleType>) {
 	const filterMethods : Filters<ArticleType> = {
 		Hidden: {
 			filter: (inverted) => a => !a.hidden != inverted,
@@ -101,7 +101,9 @@ export function useFilters<ArticleType extends Article>(filters : Ref<FilterConf
 				h('div', {class: 'select'},
 					h('select', {
 						onInput: (e : InputEvent) => newFilter.value = (e.target as HTMLInputElement).value,
-					}, Object.keys(filterMethods).map(method => h('option', {value: method}, method))),
+					}, Object.keys(filterMethods)
+						.filter(method => !Object.keys(filters.value).includes(method))
+						.map(method => h('option', {value: method}, method))),
 				),
 			),
 			h('div', {class: 'control'},

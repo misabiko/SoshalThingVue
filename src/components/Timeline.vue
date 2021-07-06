@@ -300,19 +300,19 @@ export default defineComponent({
 		const firstArticle = ref(0)
 		const lastArticle = ref(30)
 
+		const sortConfig = computed(() => props.timeline.sortConfig)
+
+		watch(sortConfig, () => emit('saveTimeline'))
+
 		const {
 			sortMethods,
-			sortMethod,
-			sortReversed,
 			sortOption,
-		} = useSortMethods(service.value.defaultSortMethod, service.value.sortMethods)
+		} = useSortMethods(sortConfig, service.value.sortMethods)
 		options.push(sortOption)
 
 		const filters = computed(() => props.timeline.filters)
 
-		watch(filters, () => {
-			emit('saveTimeline')
-		}, {deep: true})
+		watch(filters, () => emit('saveTimeline'), {deep: true})
 
 		const {filterMethods, filterOptions} = useFilters(filters, service.value.filters)
 		options.push(filterOptions)
@@ -326,8 +326,8 @@ export default defineComponent({
 					if (opts.enabled)
 						unsorted = unsorted.filter(filterMethods[method].filter(opts.inverted, opts.config))
 
-				let sorted = sortMethods[sortMethod.value](unsorted)
-				if (sortReversed.value)
+				let sorted = sortMethods[sortConfig.value.method](unsorted)
+				if (sortConfig.value.reversed)
 					sorted = sorted.reverse()
 
 				if (sectionArticles.value)
@@ -546,7 +546,6 @@ export default defineComponent({
 		return {
 			shuffle,
 			articleIds,
-			sortMethod,
 			autoScroll,
 			getRandomNewArticles,
 			getNewArticles,

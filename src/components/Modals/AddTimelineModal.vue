@@ -104,6 +104,10 @@ export default defineComponent({
 				endpointIndex: undefined,
 				container: 'ColumnContainer',
 				filters: Service.instances[firstServiceIndex].defaultFilters,
+				sortConfig: {
+					method: Service.instances[firstServiceIndex].defaultSortMethod,
+					reversed: false,
+				},
 			},
 		)
 
@@ -125,6 +129,10 @@ export default defineComponent({
 				serviceIndex: firstServiceIndex,
 				container: 'ColumnContainer',
 				filters: Service.instances[firstServiceIndex].defaultFilters,
+				sortConfig: {
+					method: Service.instances[firstServiceIndex].defaultSortMethod,
+					reversed: false,
+				},
 			}
 
 			const baseTitle = timelineData.value.title

@@ -40,6 +40,10 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						endpointIndex: 0,
 						container: 'MasonryContainer',
 						filters: this.defaultFilters,
+						sortConfig: {
+							method: this.defaultSortMethod,
+							reversed: false,
+						},
 					},
 				]
 			case PixivUserPage:
@@ -51,6 +55,10 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						endpointIndex: 1,
 						container: 'MasonryContainer',
 						filters: this.defaultFilters,
+						sortConfig: {
+							method: this.defaultSortMethod,
+							reversed: false,
+						},
 					},
 				]
 			case PixivBookmarkPage:
@@ -62,6 +70,10 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						endpointIndex: 2,
 						container: 'MasonryContainer',
 						filters: this.defaultFilters,
+						sortConfig: {
+							method: this.defaultSortMethod,
+							reversed: false,
+						},
 					},
 				]
 			default: return []

@@ -84,7 +84,7 @@ function arrangeColumns(columnCount : number, articles : MediaArticle[], rightTo
 
 function getRelativeHeight(medias : PlainMedia[] | LazyMedia[] | QueriedMedia[]) : number {
 	let sum = 1
-	for (const media of medias)
+	for (const media of (medias ?? []))
 		switch (media.status) {
 			case MediaLoadStatus.NothingLoaded:
 				sum += 0
