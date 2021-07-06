@@ -14,7 +14,7 @@
 				@setViewmode='setViewMode($event)'
 				@addTimeline='showAddTimeline = true'
 				@delete='deleteTimeline(i)'
-				@showSidebar='showSidebar = true'
+				@showSidebar='showSidebar = !showSidebar'
 			></Timeline>
 			<Timeline
 				v-else

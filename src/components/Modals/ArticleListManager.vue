@@ -56,10 +56,18 @@
 							<label class='radio'>
 								<input
 									type='radio'
-									:value='SelectionMode.EndpointPage'
+									:value='SelectionMode.EndpointLoadedPages'
 									v-model='selectionMode'
 								/>
-								Endpoint Pages
+								Endpoint Loaded Pages
+							</label>
+							<label class='radio'>
+								<input
+									type='radio'
+									:value='SelectionMode.EndpointNewPages'
+									v-model='selectionMode'
+								/>
+								Endpoint New Pages
 							</label>
 						</div>
 					</div>
@@ -75,9 +83,9 @@
 							</div>
 						</div>
 						<div class='control' v-if='selectionMode === SelectionMode.ServiceArticles'>
-							<div class='select is-multiple' v-if='Object.keys(service.articles).length'>
+							<div class='select is-multiple' v-if='Object.keys(service.articles.value).length'>
 								<select multiple size='5' v-model='serviceArticles'>
-									<option v-for='(a, id) in service.articles' :value='id'>
+									<option v-for='(a, id) in service.articles.value' :value='id'>
 										{{ id }}
 									</option>
 								</select>
@@ -100,7 +108,7 @@
 							</div>
 						</div>
 						<div class='control'
-							 v-if='selectionMode === SelectionMode.EndpointPage && endpointLoadedPages && endpointLoadedPages.length'>
+							 v-if='selectionMode === SelectionMode.EndpointLoadedPages && endpointLoadedPages && endpointLoadedPages.length'>
 							<div class='select'>
 								<select v-model='selectedPage'>
 									<option v-for='page in endpointLoadedPages' :value='page'>
@@ -109,19 +117,29 @@
 								</select>
 							</div>
 						</div>
+						<div class='control'
+							 v-else-if='selectionMode === SelectionMode.EndpointNewPages && endpointRemainingPages && endpointRemainingPages.length'>
+							<div class='select'>
+								<select v-model='selectedPage'>
+									<option v-for='page in endpointRemainingPages' :value='page'>
+										{{ page }}
+									</option>
+								</select>
+							</div>
+						</div>
 					</div>
 				</div>
 				<footer class='card-footer'>
-					<button class='button card-footer-item' @click='addArticles(false)'>
+					<button class='button card-footer-item' @click='addArticles(false)' :disabled='!editedListName'>
 						Add
 					</button>
-					<button class='button card-footer-item' @click='addArticles(true)'>
+					<button class='button card-footer-item' @click='addArticles(true)' :disabled='!editedListName'>
 						Add Missing
 					</button>
-					<button class='button card-footer-item' @click='removeArticles'>
+					<button class='button card-footer-item' @click='removeArticles' :disabled='!editedListName'>
 						Remove
 					</button>
-					<button class='button card-footer-item' @click='articleLists[editedListName] = []'>
+					<button class='button card-footer-item' @click='articleLists[editedListName] = []' :disabled='!editedListName'>
 						Clear
 					</button>
 				</footer>
@@ -136,10 +154,11 @@ import {PagedEndpoint, Service} from '@/services'
 import {articleLists} from '@/data/articleLists'
 import {modal} from '@/composables/ModalManager'
 
-export enum SelectionMode {
+enum SelectionMode {
 	ServiceArticles,
 	EndpointArticles,
-	EndpointPage,
+	EndpointLoadedPages,
+	EndpointNewPages,
 }
 
 export default defineComponent({
@@ -163,7 +182,7 @@ export default defineComponent({
 		const selectedPage = ref<undefined | number>(undefined)
 		const endpointLoadedPages = computed(() => {
 			if (endpoint.value instanceof PagedEndpoint) {
-				const loadedPages = Object.keys(endpoint.value.loadedPages)
+				const loadedPages = Object.keys(endpoint.value.loadedPages.value)
 				if (selectedPage.value === undefined && loadedPages.length)
 					selectedPage.value = parseInt(loadedPages[0])
 				return loadedPages
@@ -171,7 +190,7 @@ export default defineComponent({
 				return undefined
 		})
 
-		function addArticles(ignoreIncluded : boolean) {
+		async function addArticles(ignoreIncluded : boolean) {
 			switch (selectionMode.value) {
 				case SelectionMode.ServiceArticles:
 					articleLists.value[editedListName.value].push(...serviceArticles.value
@@ -183,14 +202,26 @@ export default defineComponent({
 					break
 				case SelectionMode.EndpointArticles:
 					break
-				case SelectionMode.EndpointPage:
+				case SelectionMode.EndpointLoadedPages:
 					if (selectedPage.value !== undefined)
-						articleLists.value[editedListName.value].push(...(endpoint.value as PagedEndpoint).loadedPages[selectedPage.value]
+						articleLists.value[editedListName.value].push(...(endpoint.value as PagedEndpoint).loadedPages.value[selectedPage.value]
 							.filter((id : string) => !ignoreIncluded || !articleLists.value[editedListName.value].find(a => a.articleId === id))
 							.map((id : string) => {
 								return {articleId: id, serviceIndex: serviceIndex.value}
 							}),
 						)
+					break
+				case SelectionMode.EndpointNewPages:
+					if (selectedPage.value !== undefined) {
+						const articles = await service.value.getNewArticles(endpoint.value, {pageNum: selectedPage.value})
+						console.dir((endpoint.value as PagedEndpoint)?.remainingPages.value)
+						articleLists.value[editedListName.value].push(...articles
+							.filter((id : string) => !ignoreIncluded || !articleLists.value[editedListName.value].find(a => a.articleId === id))
+							.map((id : string) => {
+								return {articleId: id, serviceIndex: serviceIndex.value}
+							}),
+						)
+					}
 					break
 			}
 		}
@@ -216,6 +247,7 @@ export default defineComponent({
 			endpointIndex,
 			endpoint,
 			endpointLoadedPages,
+			endpointRemainingPages: (endpoint.value as PagedEndpoint)?.remainingPages,
 			selectedPage,
 			addArticles,
 			removeArticles,

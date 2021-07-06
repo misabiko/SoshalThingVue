@@ -254,15 +254,7 @@ export default defineComponent({
 			if (!endpoint.value || !(endpoint.value instanceof PagedEndpoint))
 				return []
 
-			const lastPage = endpoint.value.lastPage ?? 10
-			const loadedPages = endpoint.value.loadedPages
-
-			const remaining = []
-			for (let i = 0; i <= lastPage; i++)
-				if (!loadedPages.hasOwnProperty(i))
-					remaining.push(i)
-
-			return remaining
+			return endpoint.value.remainingPages.value
 		})
 
 		options.push(() => {

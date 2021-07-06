@@ -1,4 +1,4 @@
-import {Component, markRaw, reactive, ref, toRaw} from 'vue'
+import {Component, computed, markRaw, reactive, ref, toRaw} from 'vue'
 import {Article, MediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
@@ -11,6 +11,7 @@ export interface Payload<ArticleType = Article> {
 
 export interface ServiceLocalStorage {
 	articles : { [id : string] : Article }
+	//endpoints : any[]
 }
 
 const LOCALSTORAGE_TITLE = 'SoshalThing Services'
@@ -89,7 +90,10 @@ export abstract class Service<ArticleType extends Article = Article> {
 	}
 
 	async generateLocalStorage() : Promise<ServiceLocalStorage> {
-		return {articles: this.articles.value}
+		return {
+			articles: this.articles.value,
+			//endpoints: this.endpoints.map(e => e.serialize())
+		}
 	}
 
 	static async initLocalStorage() {
@@ -171,28 +175,53 @@ export abstract class Endpoint<CallOpt> {
 
 	abstract getKeyOptions() : { endpointType : string } & any
 
-	setOptions(value : any) {
-	}
+	serialize() : any {}
+
+	deserialize(data : any) {}
 }
 
 export type WrappedPayload = { payload : Payload, basePageNum : number, lastPage : number }
 
 export abstract class PagedEndpoint<CallOpt extends { pageNum : number } = { pageNum : number }> extends Endpoint<CallOpt> {
-	loadedPages : { [page : number] : string[] } = {}
+	loadedPages = ref<{ [page : number] : string[] }>({})
 
 	protected constructor(name : string, public basePageNum : number, public lastPage? : number) {
 		super(name)
 	}
 
 	updateInstance(options : CallOpt, wrappedPayload : WrappedPayload) {
-		this.loadedPages[options.pageNum] ??= []
+		this.loadedPages.value[options.pageNum] ??= []
 
 		for (const id of wrappedPayload.payload.newArticles)
 			if (!this.articles.includes(id)) {
 				this.articles.push(id)
-				this.loadedPages[options.pageNum].push(id)
+				this.loadedPages.value[options.pageNum].push(id)
 			}
 		this.basePageNum = wrappedPayload.basePageNum
 		this.lastPage = wrappedPayload.lastPage
+	}
+
+	remainingPages = computed<number[]>(() => {
+		const lastPage = this.lastPage ?? 10
+
+		const remaining = []
+		for (let i = 0; i <= lastPage; i++)
+			if (!this.loadedPages.value.hasOwnProperty(i))
+				remaining.push(i)
+
+		return remaining
+	})
+
+	serialize() {
+		return {
+			loadedPages: toRaw(this.loadedPages.value)
+		}
+	}
+
+	deserialize(data : any) {
+		this.loadedPages.value = {
+			...this.loadedPages.value,
+			...data.loadedPages,
+		}
 	}
 }
