@@ -153,7 +153,7 @@ body
 	@include pretty-scrollbar
 
 	height: 100%
-	overflow-x: auto
+	overflow-x: scroll
 	display: flex
 	flex-grow: 1
 </style>

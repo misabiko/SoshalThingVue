@@ -597,6 +597,7 @@ export default defineComponent({
 	display: flex
 	flex-flow: column
 	width: 500px
+	flex-shrink: 0
 
 	&:first-child
 		padding: 0
@@ -621,6 +622,11 @@ export default defineComponent({
 
 .timelineLeftHeader
 	display: flex
+	flex-shrink: 8
+
+.timelineButtons
+	display: flex
+	flex-wrap: nowrap
 
 .timelineButtons > button
 	@include borderless-button(0 1rem)
