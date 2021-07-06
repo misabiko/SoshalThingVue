@@ -3,7 +3,7 @@ import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
 import PixivComponent from '@/components/Articles/PixivArticle.vue'
 import {Article, getImageFormat, ImageData, LazyMedia, MediaArticle, MediaLoadStatus, MediaType} from '@/data/articles'
-import {getNewId} from '@/components/Modals/ArticleListManager.vue'
+import {getNewId} from '@/data/articleLists'
 
 export interface PixivArticle extends Article, MediaArticle {
 	title : string

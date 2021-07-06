@@ -133,18 +133,9 @@
 <script lang='ts'>
 import {computed, defineComponent, onBeforeUpdate, ref} from 'vue'
 import {PagedEndpoint, Service} from '@/services'
+import {articleLists} from '@/data/articleLists'
 
-export const articleLists = ref<{ [id : string] : { serviceIndex : number, articleId : string }[] }>({})
-
-export function getNewId() {
-	let id = 0
-	while (articleLists.value.hasOwnProperty('generated' + id))
-		id++
-
-	return 'generated' + id
-}
-
-enum SelectionMode {
+export enum SelectionMode {
 	ServiceArticles,
 	EndpointArticles,
 	EndpointPage,

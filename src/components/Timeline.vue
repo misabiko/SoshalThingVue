@@ -135,7 +135,7 @@ import {
 	faSyncAlt,
 } from '@fortawesome/free-solid-svg-icons'
 import EndpointSelection from '@/components/EndpointSelection.vue'
-import {articleLists} from '@/components/Modals/ArticleListManager.vue'
+import {articleLists, saveLists} from '@/data/articleLists'
 
 library.add(faEllipsisV, faArrowDown, faSyncAlt, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
 
@@ -216,6 +216,8 @@ export default defineComponent({
 				for (const id of newArticles)
 					if (!articleIds.value.find(listA => listA.articleId === id))
 						articleIds.value.push({serviceIndex: props.timeline.serviceIndex, articleId: id})
+
+				saveLists()
 
 				const oldNewPage = newPage.value ?? -1
 				const pages = remainingPages.value

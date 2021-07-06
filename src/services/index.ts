@@ -3,6 +3,7 @@ import {Article, MediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
 import {defaultDefaultFilters, FilterConfigs, Filters} from '@/composables/useFilters'
+import {saveLists} from '@/data/articleLists'
 
 export interface Payload<ArticleType = Article> {
 	articles : ArticleType[],

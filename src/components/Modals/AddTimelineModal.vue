@@ -77,7 +77,7 @@ import {library} from '@fortawesome/fontawesome-svg-core'
 import {faTimes} from '@fortawesome/free-solid-svg-icons'
 import {TimelineData} from '@/data/timelines'
 import EndpointSelection from '@/components/EndpointSelection.vue'
-import {getNewId} from '@/components/Modals/ArticleListManager.vue'
+import {getNewId} from '@/data/articleLists'
 
 library.add(faTimes)
 
