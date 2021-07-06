@@ -85,7 +85,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 	loadLocalStorage(storage : ServiceLocalStorage) : void {
 		//TODO Remove ts=ignore
 		// @ts-ignore
-		this.articles = storage.articles
+		this.articles.value = storage.articles
 	}
 
 	async generateLocalStorage() : Promise<ServiceLocalStorage> {
