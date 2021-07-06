@@ -58,7 +58,7 @@ export class TwitterService extends Service<TwitterArticle> {
 			option: () => null,
 			defaultConfig: {
 				enabled: true,
-				inverted: false,
+				inverted: true,
 				config: {},
 			},
 		},
