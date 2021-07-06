@@ -609,6 +609,7 @@ export default defineComponent({
 .timeline.mainTimeline
 	flex-grow: 2
 	width: unset
+	max-width: 100%
 
 .timelineHeader
 	height: 50px
