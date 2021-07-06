@@ -225,7 +225,7 @@ export class TwitterService extends Service<TwitterArticle> {
 }
 
 interface UserTimelineCallOpt {
-
+	fromEnd: boolean
 }
 
 class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
@@ -249,6 +249,8 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
 		params.set('user.fields', 'name,username,profile_image_url')
 		params.set('media.fields', 'width,height,preview_image_url,url')
 		params.set('expansions', 'author_id,referenced_tweets.id,referenced_tweets.id.author_id,attachments.media_keys')
+		if (options.fromEnd && this.articles.length)
+			params.set('until_id', this.articles[this.articles.length - 1])
 
 		const response : TwitterAPIPayload = await fetch(`/twitter/users/${this.userId}?${params.toString()}`).then(r => r.json())
 		console.dir(response)
@@ -274,7 +276,7 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
 }
 
 interface UserTimelineV1CallOpt {
-
+	fromEnd: boolean
 }
 
 class UserTimelineV1Endpoint extends Endpoint<UserTimelineCallOpt> {
@@ -296,6 +298,8 @@ class UserTimelineV1Endpoint extends Endpoint<UserTimelineCallOpt> {
 		const params = new URLSearchParams()
 		params.set('tweet_mode', 'extended')
 		params.set('user_id', this.userId)
+		if (options.fromEnd && this.articles.length)
+			params.set('max_id', this.articles[this.articles.length - 1])
 
 		const response : TwitterV1APIPayload = await fetch(`/twitter/v1/statuses/user_timeline?${params.toString()}`).then(r => r.json())
 		console.dir(response)
@@ -320,7 +324,9 @@ class UserTimelineV1Endpoint extends Endpoint<UserTimelineCallOpt> {
 	}
 }
 
-interface HomeTimelineCallOpt {}
+interface HomeTimelineCallOpt {
+	fromEnd: boolean
+}
 
 class HomeTimelineEndpoint extends Endpoint<HomeTimelineCallOpt> {
 	rateLimitInfo = reactive({
@@ -341,6 +347,8 @@ class HomeTimelineEndpoint extends Endpoint<HomeTimelineCallOpt> {
 		const params = new URLSearchParams()
 		params.set('count', '200')
 		params.set('tweet_mode', 'extended')
+		if (options.fromEnd && this.articles.length)
+			params.set('max_id', this.articles[this.articles.length - 1])
 
 		const response : TwitterV1APIPayload = await fetch(`/twitter/v1/statuses/home_timeline?${params.toString()}`).then(r => r.json())
 		console.dir(response)
@@ -363,7 +371,7 @@ class HomeTimelineEndpoint extends Endpoint<HomeTimelineCallOpt> {
 }
 
 interface SearchCallOpt {
-
+	fromEnd: boolean
 }
 
 class SearchEndpoint extends Endpoint<SearchCallOpt> {
@@ -389,6 +397,8 @@ class SearchEndpoint extends Endpoint<SearchCallOpt> {
 		params.set('user.fields', 'name,username,profile_image_url')
 		params.set('media.fields', 'width,height,preview_image_url,url')
 		params.set('expansions', 'author_id,referenced_tweets.id,referenced_tweets.id.author_id,attachments.media_keys')
+		if (options.fromEnd && this.articles.length)
+			params.set('until_id', this.articles[this.articles.length - 1])
 
 		const response : TwitterAPIPayload = await fetch(`/twitter/search?${params.toString()}`)
 			.then(r => r.json())

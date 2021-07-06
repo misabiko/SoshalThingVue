@@ -37,11 +37,18 @@
 						<FontAwesomeIcon icon='magic' size='lg'/>
 					</span>
 				</button>
-				<button v-if='endpointPackage.type !== EndpointPackageType.NoEndpoint' @click='getNewArticles()'>
-					<span class='icon'>
-						<FontAwesomeIcon :icon='endpointPackage.type === EndpointPackageType.PagedEndpoint ? "arrow-down" : "sync-alt"' size='lg'/>
-					</span>
-				</button>
+				<template v-if='endpointPackage.type !== EndpointPackageType.NoEndpoint'>
+					<button @click='getNewArticles({fromTop: true})'>
+						<span class='icon'>
+							<FontAwesomeIcon icon='sync-alt' size='lg'/>
+						</span>
+					</button>
+					<button @click='getNewArticles({fromEnd: true})'>
+						<span class='icon'>
+							<FontAwesomeIcon icon='arrow-down' size='lg'/>
+						</span>
+					</button>
+				</template>
 				<button @click='showOptions = !showOptions'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='ellipsis-v' size='lg'/>
@@ -202,7 +209,7 @@ export default defineComponent({
 				}
 		})
 
-		const getNewArticles = async function(callOpts : object = {pageNum: newPage.value}) {
+		const getNewArticles = async function(callOpts : any = {pageNum: newPage.value}) {
 			if (!endpoint.value?.ready) {
 				if (endpoint.value)
 					console.debug(`${endpoint.value.name} isn't ready.`)
@@ -213,9 +220,15 @@ export default defineComponent({
 			try {
 				const newArticles = await service.value.getNewArticles(endpoint.value, callOpts)
 
-				for (const id of newArticles)
-					if (!articleIds.value.find(listA => listA.articleId === id))
-						articleIds.value.push({serviceIndex: props.timeline.serviceIndex, articleId: id})
+				if (callOpts.fromTop) {
+					for (const id of newArticles.reverse())
+						if (!articleIds.value.find(listA => listA.articleId === id))
+							articleIds.value.unshift({serviceIndex: props.timeline.serviceIndex, articleId: id})
+				}else {
+					for (const id of newArticles)
+						if (!articleIds.value.find(listA => listA.articleId === id))
+							articleIds.value.push({serviceIndex: props.timeline.serviceIndex, articleId: id})
+				}
 
 				saveLists()
 

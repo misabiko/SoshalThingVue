@@ -1,9 +1,8 @@
-import {Component, h, markRaw, reactive, Ref, ref, toRaw} from 'vue'
+import {Component, markRaw, reactive, toRaw} from 'vue'
 import {Article, MediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
 import {defaultDefaultFilters, FilterConfigs, Filters} from '@/composables/useFilters'
-import {saveLists} from '@/data/articleLists'
 
 export interface Payload<ArticleType = Article> {
 	articles : ArticleType[],
@@ -64,12 +63,17 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	updateArticle(newArticle : ArticleType) {
 		const oldArticle = this.articles[newArticle.id]
-		//TODO Remove ts=ignore
-		// @ts-ignore
-		this.articles[article.id] = {
-			...newArticle,
-			hidden: oldArticle.hidden,
-			queried: oldArticle.queried || newArticle.queried,
+		if (!oldArticle) {
+			// @ts-ignore
+			this.articles[newArticle.id] = newArticle
+		}else {
+			//TODO Remove ts=ignore
+			// @ts-ignore
+			this.articles[newArticle.id] = {
+				...newArticle,
+				hidden: oldArticle.hidden,
+				queried: oldArticle.queried || newArticle.queried,
+			}
 		}
 	}
 
@@ -126,7 +130,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	abstract getExternalLink(id : string) : string
 
-	optionComponent(props: any): any {
+	optionComponent(props : any) : any {
 		return null
 	}
 
@@ -144,9 +148,9 @@ export abstract class Endpoint<CallOpt> {
 	calling = false
 
 	rateLimitInfo? : {
-		maxCalls: number
-		remainingCalls: number
-		secUntilNextReset: number
+		maxCalls : number
+		remainingCalls : number
+		secUntilNextReset : number
 	}
 
 	protected constructor(readonly name : string) {
@@ -170,7 +174,7 @@ export abstract class Endpoint<CallOpt> {
 export type WrappedPayload = { payload : Payload, basePageNum : number, lastPage : number }
 
 export abstract class PagedEndpoint<CallOpt extends { pageNum : number } = { pageNum : number }> extends Endpoint<CallOpt> {
-	loadedPages : { [page: number]: string[] } = {}
+	loadedPages : { [page : number] : string[] } = {}
 
 	protected constructor(name : string, public basePageNum : number, public lastPage? : number) {
 		super(name)
