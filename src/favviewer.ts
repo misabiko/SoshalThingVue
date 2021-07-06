@@ -5,6 +5,7 @@ import {PixivService} from '@/services/pixiv'
 import {PageInfo} from '@/hostpages/pageinfo'
 import FavViewer from '@/FavViewer.vue'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
+import {articleLists} from '@/data/articleLists'
 
 (async () => {
 	let page : PageInfo | undefined
@@ -24,7 +25,8 @@ import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 			break
 		}
 
-	(globalThis as any).services = Service.instances
+	(globalThis as any).services = Service.instances;
+	(globalThis as any).articleLists = articleLists;
 
 	Service.instances.push(new PixivService(page))
 

@@ -225,3 +225,14 @@ export abstract class PagedEndpoint<CallOpt extends { pageNum : number } = { pag
 		}
 	}
 }
+
+/*
+var stop = false;
+(async () => {
+for (let i = 2; i < 203 && !stop; i++) {
+	console.log('Loading page ' + i)
+	services[1].getNewArticles(0, {pageNum: i})
+	await new Promise(r => setTimeout(r, 1000))
+}
+})()
+*/

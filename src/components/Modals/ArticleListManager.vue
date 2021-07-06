@@ -84,7 +84,7 @@
 						</div>
 						<div class='control' v-if='selectionMode === SelectionMode.ServiceArticles'>
 							<div class='select is-multiple' v-if='Object.keys(service.articles.value).length'>
-								<select multiple size='5' v-model='serviceArticles'>
+								<select multiple size='5' v-model='selectedArticles'>
 									<option v-for='(a, id) in service.articles.value' :value='id'>
 										{{ id }}
 									</option>
@@ -106,6 +106,18 @@
 									</option>
 								</select>
 							</div>
+						</div>
+						<div class='control' v-if='endpoint && selectionMode === SelectionMode.EndpointArticles'>
+							<div class='select is-multiple' v-if='Object.keys(endpoint.articles).length'>
+								<select multiple size='5' v-model='selectedArticles'>
+									<option v-for='(a, id) in service.articles.value' :value='id'>
+										{{ id }}
+									</option>
+								</select>
+							</div>
+							<span v-else>
+								{{ endpoint.name }} doesn't have any articles.
+							</span>
 						</div>
 						<div class='control'
 							 v-if='selectionMode === SelectionMode.EndpointLoadedPages && endpointLoadedPages && endpointLoadedPages.length'>
@@ -151,7 +163,7 @@
 <script lang='ts'>
 import {computed, defineComponent, onBeforeUpdate, ref} from 'vue'
 import {PagedEndpoint, Service} from '@/services'
-import {articleLists} from '@/data/articleLists'
+import {articleLists, saveLists} from '@/data/articleLists'
 import {modal} from '@/composables/ModalManager'
 
 enum SelectionMode {
@@ -175,7 +187,7 @@ export default defineComponent({
 
 		const serviceIndex = ref(0)
 		const service = computed(() => Service.instances[serviceIndex.value])
-		const serviceArticles = ref([])
+		const selectedArticles = ref([])
 
 		const endpointIndex = ref(0)
 		const endpoint = computed(() => service.value?.endpoints[endpointIndex.value])
@@ -193,14 +205,13 @@ export default defineComponent({
 		async function addArticles(ignoreIncluded : boolean) {
 			switch (selectionMode.value) {
 				case SelectionMode.ServiceArticles:
-					articleLists.value[editedListName.value].push(...serviceArticles.value
+				case SelectionMode.EndpointArticles:
+					articleLists.value[editedListName.value].push(...selectedArticles.value
 						.filter((id : string) => !ignoreIncluded || !articleLists.value[editedListName.value].find(a => a.articleId === id))
 						.map(id => {
 							return {articleId: id, serviceIndex: serviceIndex.value}
 						}),
 					)
-					break
-				case SelectionMode.EndpointArticles:
 					break
 				case SelectionMode.EndpointLoadedPages:
 					if (selectedPage.value !== undefined)
@@ -224,6 +235,8 @@ export default defineComponent({
 					}
 					break
 			}
+
+			saveLists()
 		}
 
 		function removeArticles() {
@@ -243,7 +256,7 @@ export default defineComponent({
 			services: Service.instances,
 			serviceIndex,
 			service,
-			serviceArticles,
+			selectedArticles,
 			endpointIndex,
 			endpoint,
 			endpointLoadedPages,

@@ -30,12 +30,13 @@
 				</div>
 			</div>
 		</div>
-		<component
-			v-if='service.endpointTypes[endpointOptions.endpointType]'
-			:is='service.endpointTypes[endpointOptions.endpointType].optionComponent'
-			:endpointOptions='endpointOptions'
-			@changeOptions='endpointOptions = $event'
-		/>
+		<template v-if='service.endpointTypes[endpointOptions.endpointType] !== undefined'>
+			<component
+				:is='service.endpointTypes[endpointOptions.endpointType] ? service.endpointTypes[endpointOptions.endpointType].optionComponent : undefined'
+				:endpointOptions='endpointOptions'
+				@changeOptions='endpointOptions = $event'
+			/>
+		</template>
 	</template>
 	<div class='field' v-else-if='service.endpoints.length'>
 		<label class='label'>Endpoint</label>

@@ -72,6 +72,20 @@
 					</div>
 				</div>
 			</div>
+			<div class='box'>
+				<div class='field'>
+					<label class='label'>Article List</label>
+					<div class='control'>
+						<div class='select'>
+							<select v-model='timeline.articleList' @input='$emit("saveTimeline")'>
+								<option v-for='(list, listName) in articleLists' :value='listName'>
+									{{ listName }}
+								</option>
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
 			<template v-for='option in options'>
 				<div v-if='option' class='box'>
 					<component :is='option'></component>
@@ -576,6 +590,7 @@ export default defineComponent({
 			...mediaServiceReturns,
 			modifiedTimelineData,
 			newPage,
+			articleLists,
 		}
 	},
 })
