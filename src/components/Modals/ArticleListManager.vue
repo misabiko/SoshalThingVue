@@ -139,6 +139,28 @@
 								</select>
 							</div>
 						</div>
+						<div class='control' v-if='endpoint && selectionMode === SelectionMode.EndpointArticles'>
+							<div class='select is-multiple' v-if='Object.keys(endpoint.articles).length'>
+								<select multiple size='5' v-model='selectedArticles'>
+									<option v-for='(a, id) in service.articles.value' :value='id'>
+										{{ id }}
+									</option>
+								</select>
+							</div>
+							<span v-else>
+								{{ endpoint.name }} doesn't have any articles.
+							</span>
+						</div>
+						<div class='control'
+							 v-else-if='selectionMode === SelectionMode.EndpointNewPages && endpointRemainingPages && endpointRemainingPages.length'>
+							<div class='select'>
+								<select v-model='selectedPage'>
+									<option v-for='page in endpointRemainingPages' :value='page'>
+										{{ page }}
+									</option>
+								</select>
+							</div>
+						</div>
 					</div>
 				</div>
 				<footer class='card-footer'>
