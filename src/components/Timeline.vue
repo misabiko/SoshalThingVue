@@ -317,17 +317,19 @@ export default defineComponent({
 
 		watch(sortConfig, () => emit('saveTimeline'))
 
+		const serviceSortMethods = computed(() => service.value.sortMethods)
 		const {
 			sortMethods,
 			sortOption,
-		} = useSortMethods(sortConfig, service.value.sortMethods)
+		} = useSortMethods(sortConfig, serviceSortMethods)
 		options.push(sortOption)
 
 		const filters = computed(() => props.timeline.filters)
 
 		watch(filters, () => emit('saveTimeline'), {deep: true})
 
-		const {filterMethods, filterOptions} = useFilters(filters, service.value.filters)
+		const serviceFilters = computed(() => service.value.filters)
+		const {filterMethods, filterOptions} = useFilters(filters, serviceFilters)
 		options.push(filterOptions)
 
 		const articles = computed(() => {
@@ -337,9 +339,9 @@ export default defineComponent({
 
 				for (const [method, opts] of Object.entries(filters.value))
 					if (opts.enabled)
-						unsorted = unsorted.filter(filterMethods[method].filter(opts.inverted, opts.config))
+						unsorted = unsorted.filter(filterMethods.value[method].filter(opts.inverted, opts.config))
 
-				let sorted = sortMethods[sortConfig.value.method](unsorted)
+				let sorted = sortMethods.value[sortConfig.value.method](unsorted)
 				if (sortConfig.value.reversed)
 					sorted = sorted.reverse()
 

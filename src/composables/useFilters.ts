@@ -60,8 +60,8 @@ export const defaultDefaultFilters : FilterConfigs = {
 	},
 }
 
-export function useFilters<ArticleType extends Article>(filters : ComputedRef<FilterConfigs>, additionalFiters : Filters<ArticleType>) {
-	const filterMethods : Filters<ArticleType> = {
+export function useFilters<ArticleType extends Article>(filters : ComputedRef<FilterConfigs>, additionalFiters : ComputedRef<Filters<ArticleType>>) {
+	const filterMethods = ref<Filters<ArticleType>>({
 		Hidden: {
 			filter: (inverted) => a => !a.hidden != inverted,
 			option: () => null,
@@ -89,8 +89,8 @@ export function useFilters<ArticleType extends Article>(filters : ComputedRef<Fi
 				config: {},
 			},
 		},
-		...additionalFiters,
-	}
+		...additionalFiters.value,
+	})
 
 	const newFilter = ref('Hidden')
 
@@ -101,7 +101,7 @@ export function useFilters<ArticleType extends Article>(filters : ComputedRef<Fi
 				h('div', {class: 'select'},
 					h('select', {
 						onInput: (e : InputEvent) => newFilter.value = (e.target as HTMLInputElement).value,
-					}, Object.keys(filterMethods)
+					}, Object.keys(filterMethods.value)
 						.filter(method => !Object.keys(filters.value).includes(method))
 						.map(method => h('option', {value: method}, method))),
 				),
@@ -109,7 +109,7 @@ export function useFilters<ArticleType extends Article>(filters : ComputedRef<Fi
 			h('div', {class: 'control'},
 				h('button', {
 					class: 'button',
-					onClick: () => filters.value[newFilter.value] = filterMethods[newFilter.value].defaultConfig,
+					onClick: () => filters.value[newFilter.value] = filterMethods.value[newFilter.value].defaultConfig,
 				}, 'Add Filter'),
 			),
 		]),
@@ -126,7 +126,7 @@ export function useFilters<ArticleType extends Article>(filters : ComputedRef<Fi
 						onClick: () => filters.value[method].inverted = !filters.value[method].inverted,
 					}, filters.value[method].inverted ? 'Inverted' : 'Normal'),
 				]),
-				filterMethods[method].option(filters),
+				filterMethods.value[method].option(filters),
 			])),
 	]
 

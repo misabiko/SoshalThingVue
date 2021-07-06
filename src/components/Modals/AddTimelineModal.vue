@@ -37,6 +37,8 @@
 							</div>
 						</div>
 					</div>
+					<component :is='sortOption'/>
+					<component :is='filterOptions'/>
 					<div class='field'>
 						<div class='control'>
 							<input type='checkbox' v-model='timelineData.rtl'/>
@@ -59,7 +61,7 @@
 				<footer class='card-footer'>
 					<button
 						class='button card-footer-item'
-						@click='$emit("add", timelineData), timelineData = undefined, resetTimelineData(), modal = undefined'
+						@click='$emit("add", timelineData), timelineData = undefined, modal = undefined'
 						:disabled='!valid'
 					>Add
 					</button>
@@ -79,6 +81,8 @@ import {TimelineData} from '@/data/timelines'
 import EndpointSelection from '@/components/EndpointSelection.vue'
 import {getNewId} from '@/data/articleLists'
 import {modal} from '@/composables/ModalManager'
+import {useSortMethods} from '@/composables/useSortMethods'
+import {useFilters} from '@/composables/useFilters'
 
 library.add(faTimes)
 
@@ -145,6 +149,17 @@ export default defineComponent({
 		const validations = computed<{ [name : string] : boolean }>(() => ({title: true}))
 		const valid = computed(() => Object.values(validations.value).every(isValid => isValid))
 
+		const serviceSortMethods = computed(() => service.value?.sortMethods ?? {})
+		const sortConfig = computed(() => timelineData.value?.sortConfig ?? {
+			method : 'Unsorted',
+			reversed : false,
+		})
+		const {sortOption} = useSortMethods(sortConfig, serviceSortMethods)
+
+		const serviceFitlers = computed(() => service.value?.filters ?? {})
+		const filters = computed(() => timelineData.value?.filters ?? {})
+		const {filterOptions} = useFilters(filters, serviceFitlers)
+
 		return {
 			modal,
 			timelineData,
@@ -154,6 +169,8 @@ export default defineComponent({
 			validations,
 			valid,
 			resetTimelineData,
+			sortOption,
+			filterOptions,
 		}
 	},
 })

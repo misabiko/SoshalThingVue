@@ -166,6 +166,23 @@ export default defineComponent({
 				endpointOptions: {
 					endpointType: UserTimelineV1Endpoint.name,
 					userId: user.id,
+				},
+				filters: {
+					Hidden: {
+						enabled: true,
+						inverted: false,
+						config: {}
+					},
+					HasMedia: {
+						enabled: false,
+						inverted: false,
+						config: {}
+					},
+					Retweet: {
+						enabled: false,
+						inverted: true,
+						config: {},
+					}
 				}
 			})
 			modal.value = 'AddTimelineModal'

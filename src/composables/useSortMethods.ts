@@ -8,12 +8,12 @@ export type SortConfig = {
 	reversed : boolean
 }
 
-export function useSortMethods<ArticleType extends Article>(sortConfig : ComputedRef<SortConfig>, additionalMethods : SortMethods<ArticleType>) {
-	const sortMethods : SortMethods<ArticleType> = {
-		...additionalMethods,
+export function useSortMethods<ArticleType extends Article>(sortConfig : ComputedRef<SortConfig>, additionalMethods : ComputedRef<SortMethods<ArticleType>>) {
+	const sortMethods = ref<SortMethods<ArticleType>>({
 		Unsorted: (articles : ArticleType[]) => articles,
 		Id: (articles : ArticleType[]) => articles.sort((a : ArticleType, b : ArticleType) => parseInt(b.id) - parseInt(a.id)),
-	}
+		...additionalMethods.value,
+	})
 
 	const sortOption = () => h('div', {class: 'field is-horizontal'}, [
 		h('div', {class: 'field-label'},
@@ -27,7 +27,7 @@ export function useSortMethods<ArticleType extends Article>(sortConfig : Compute
 									value: sortConfig.value.method,
 									onInput: (e : InputEvent) => sortConfig.value.method = (e.target as HTMLSelectElement).value,
 								},
-								Object.keys(sortMethods).map(method => h('option', {value: method}, method)),
+								Object.keys(sortMethods.value).map(method => h('option', {value: method}, method)),
 							),
 						),
 					),
