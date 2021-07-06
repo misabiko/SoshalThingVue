@@ -65,8 +65,8 @@ export default defineComponent({
 			},
 		)
 
-		const {medias} = useLazyMedia(service, article, onArticleClick)
-		const {holderBoxes} = useFavViewerButtons(service, article, [], bottomButtons)
+		const {medias} = useLazyMedia(<any>service, article, onArticleClick)
+		const {holderBoxes} = useFavViewerButtons(<any>service, article, [], bottomButtons)
 
 		return {medias, holderBoxes}
 	},

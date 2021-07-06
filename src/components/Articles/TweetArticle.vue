@@ -85,7 +85,11 @@
 				:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(i), actualArticle.media.length === 3 && i === 2 ? 'thirdImage' : '']"
 			>
 				<div class='is-hidden imgPlaceholder'/>
-				<img :alt='actualArticle.id' :src='mediaData.status === MediaLoadStatus.ThumbnailOnly ? mediaData.thumbnail.url : mediaData.content.url' @click='$emit("expanded", i)'/>
+				<img
+					:alt='actualArticle.id'
+					:src='mediaData.status === MediaLoadStatus.ThumbnailOnly ? mediaData.thumbnail.url : mediaData.content.url'
+					@click='onArticleClick(article.id)'
+				/>
 			</div>
 		</div>
 		<div v-else-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Video' class='postMedia postVideo'>
@@ -138,9 +142,9 @@ export default defineComponent({
 				case TwitterArticleType.Tweet:
 					return article.value as TweetArticle
 				case TwitterArticleType.Retweet:
-					return service.value.articles[(article.value as RetweetArticle).retweetedId] as TweetArticle
+					return (<any>service.value.articles.value)[(article.value as RetweetArticle).retweetedId] as TweetArticle
 				case TwitterArticleType.Quote:
-					return service.value.articles[(article.value as QuoteArticle).quotedId] as TweetArticle
+					return (<any>service.value.articles.value)[(article.value as QuoteArticle).quotedId] as TweetArticle
 			}
 		})
 

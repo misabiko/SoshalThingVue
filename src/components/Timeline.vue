@@ -99,7 +99,7 @@
 		<Modal
 			v-if='modalArticle.length'
 			:service='service'
-			:article='service.articles[modalArticle]'
+			:article='service.articles.value[modalArticle]'
 			:on-article-click='onArticleClicks[onArticleClick]'
 			@close='modalArticle = ""'
 		></Modal>
@@ -332,7 +332,7 @@ export default defineComponent({
 
 		const articles = computed(() => {
 				let unsorted = articleIds.value
-					.map(({serviceIndex, articleId}: {serviceIndex: number, articleId: string}) => Service.instances[serviceIndex].articles[articleId])
+					.map(({serviceIndex, articleId}: {serviceIndex: number, articleId: string}) => Service.instances[serviceIndex].articles.value[articleId])
 					.filter(a => !!a)	//Rerender happens before all of articleIds is added to service.articles
 
 				for (const [method, opts] of Object.entries(filters.value))
@@ -416,7 +416,7 @@ export default defineComponent({
 
 		const onArticleClicks : { [method : string] : (id : string) => void } = {
 			Hide: (id : string) => service.value.toggleHideArticle(id),
-			Log: (id : string) => console.dir(service.value.articles[id]),
+			Log: (id : string) => console.dir(service.value.articles.value[id]),
 			Expand: (id : string) => modalArticle.value = id,
 		}
 

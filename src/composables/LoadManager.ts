@@ -51,10 +51,10 @@ class LoadManager {
 		const queue = this.getQueue(service, flatMountedArticles)
 
 		for (const id of flatMountedArticles) {
-			if (!service.articles.hasOwnProperty(id) || !service.articles[id].media)
+			if (!service.articles.hasOwnProperty(id) || !service.articles.value[id].media)
 				continue
 
-			for (const [i, media] of service.articles[id].media.entries()) {
+			for (const [i, media] of service.articles.value[id].media.entries()) {
 				if (media.status != MediaLoadStatus.ReadyToLoad)
 					continue
 
@@ -84,18 +84,18 @@ class LoadManager {
 		if (queue.length > this.maxLoadCount)
 			return
 
-		service.articles[id].media[mediaIndex].status = MediaLoadStatus.Loading
+		service.articles.value[id].media[mediaIndex].status = MediaLoadStatus.Loading
 	}
 
 	doneLoadingArticle(id : string, mediaIndex: number, service: MediaService) {
-		service.articles[id].media[mediaIndex].status = MediaLoadStatus.FullyLoaded
+		service.articles.value[id].media[mediaIndex].status = MediaLoadStatus.FullyLoaded
 
 		const flatMountedArticles = Object.values(this.mountedArticles).flat()
 		const queue = this.getQueue(service, flatMountedArticles)
 
 		for (const id of flatMountedArticles)
 			if (service.articles.hasOwnProperty(id))
-				for (const [i, media] of service.articles[id].media.entries())
+				for (const [i, media] of service.articles.value[id].media.entries())
 					if (media.status == MediaLoadStatus.ReadyToLoad && !queue.find(m => m.id === id && m.media === i)) {
 						queue.push({id, media: i})
 						this.startLoadingArticle(id, i, service, queue)

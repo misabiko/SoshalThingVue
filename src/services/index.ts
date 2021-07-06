@@ -1,4 +1,4 @@
-import {Component, markRaw, reactive, toRaw} from 'vue'
+import {Component, markRaw, reactive, ref, toRaw} from 'vue'
 import {Article, MediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
@@ -19,7 +19,7 @@ export type MediaService = Service<MediaArticle>
 
 export abstract class Service<ArticleType extends Article = Article> {
 	static readonly instances : Service[] = []
-	articles = reactive<{ [id : string] : ArticleType }>({})
+	articles = ref<{ [id : string] : ArticleType }>({})
 	readonly articleComponent : Component
 
 	endpoints : Endpoint<any>[] = []
@@ -62,14 +62,14 @@ export abstract class Service<ArticleType extends Article = Article> {
 	}
 
 	updateArticle(newArticle : ArticleType) {
-		const oldArticle = this.articles[newArticle.id]
+		const oldArticle = this.articles.value[newArticle.id]
 		if (!oldArticle) {
 			// @ts-ignore
-			this.articles[newArticle.id] = newArticle
+			this.articles.value[newArticle.id] = newArticle
 		}else {
 			//TODO Remove ts=ignore
 			// @ts-ignore
-			this.articles[newArticle.id] = {
+			this.articles.value[newArticle.id] = {
 				...newArticle,
 				hidden: oldArticle.hidden,
 				queried: oldArticle.queried || newArticle.queried,
@@ -78,7 +78,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 	}
 
 	toggleHideArticle(id : string) {
-		this.articles[id].hidden = !this.articles[id].hidden
+		this.articles.value[id].hidden = !this.articles.value[id].hidden
 		this.saveLocalStorage()
 	}
 
@@ -89,7 +89,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 	}
 
 	async generateLocalStorage() : Promise<ServiceLocalStorage> {
-		return {articles: this.articles}
+		return {articles: this.articles.value}
 	}
 
 	static async initLocalStorage() {
@@ -135,7 +135,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 	}
 
 	logArticle(id : string) {
-		console.dir(toRaw(this.articles[id]))
+		console.dir(toRaw(this.articles.value[id]))
 	}
 }
 

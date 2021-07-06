@@ -66,7 +66,7 @@ export class TwitterService extends Service<TwitterArticle> {
 			filter: (inverted) => a => {
 				const refId = (a as RetweetArticle).retweetedId ?? (a as QuoteArticle).quotedId
 				if (refId)
-					return (!!(a as unknown as MediaArticle).media?.length || !!(this.articles[refId] as unknown as MediaArticle).media?.length) != inverted
+					return (!!(a as unknown as MediaArticle).media?.length || !!(this.articles.value[refId] as unknown as MediaArticle).media?.length) != inverted
 				else
 					return !!(a as unknown as MediaArticle).media?.length != inverted
 			},
@@ -162,7 +162,7 @@ export class TwitterService extends Service<TwitterArticle> {
 	}
 
 	getExternalLink(id : string) : string {
-		const {id: tweetId, author} = this.articles[id]
+		const {id: tweetId, author} = this.articles.value[id]
 		return `https://twitter.com/${author.handle}/status/${tweetId}`
 	}
 
@@ -171,7 +171,7 @@ export class TwitterService extends Service<TwitterArticle> {
 	}
 
 	async like(id : string) {
-		const article = this.articles[id]
+		const article = this.articles.value[id]
 		if (!article || article.type == TwitterArticleType.Retweet)
 			return
 
@@ -188,11 +188,11 @@ export class TwitterService extends Service<TwitterArticle> {
 			for (const a of payload.articles)
 				this.updateArticle(a)
 		}else if (response.errors?.find((e: {code: number}) => e.code == 139))	//tweet already liked
-			(this.articles[id] as TweetArticle).liked = true
+			(this.articles.value[id] as TweetArticle).liked = true
 	}
 
 	async retweet(id : string) {
-		const article = this.articles[id]
+		const article = this.articles.value[id]
 		if (!article || article.type == TwitterArticleType.Retweet || (article as TweetArticle).reposted)
 			return
 
@@ -208,18 +208,18 @@ export class TwitterService extends Service<TwitterArticle> {
 			for (const a of payload.articles)
 				this.updateArticle(a)
 		}else if (response.errors?.find((e: {code: number}) => e.code == 327))	//tweet already retweeted
-			(this.articles[id] as TweetArticle).reposted = true
+			(this.articles.value[id] as TweetArticle).reposted = true
 	}
 
 	logArticle(id : string) {
-		const article = this.articles[id]
+		const article = this.articles.value[id]
 		switch (article.type) {
 			case TwitterArticleType.Tweet:
 				return super.logArticle(id)
 			case TwitterArticleType.Retweet:
-				return console.dir({article: toRaw(article), actualArticle: toRaw(this.articles[(article as RetweetArticle).retweetedId])})
+				return console.dir({article: toRaw(article), actualArticle: toRaw(this.articles.value[(article as RetweetArticle).retweetedId])})
 			case TwitterArticleType.Quote:
-				return console.dir({article: toRaw(article), actualArticle: toRaw(this.articles[(article as QuoteArticle).quotedId])})
+				return console.dir({article: toRaw(article), actualArticle: toRaw(this.articles.value[(article as QuoteArticle).quotedId])})
 		}
 	}
 }

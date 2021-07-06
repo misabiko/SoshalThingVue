@@ -116,7 +116,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 		else
 			console.log('Liked ' + id)
 
-		this.articles[id].liked = true
+		this.articles.value[id].liked = true
 	}
 
 	async bookmark(id : string, priv: boolean) {
@@ -149,7 +149,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 
 		console.log('Bookmarked ' + id)
 
-		this.articles[id].bookmarked = true
+		this.articles.value[id].bookmarked = true
 	}
 }
 

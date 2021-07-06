@@ -3,7 +3,7 @@ import {Service} from '@/services'
 import {MediaArticle} from '@/data/articles'
 
 export interface Queryable {
-	articles : {[id : string] : MediaArticle}
+	articles : Ref<{[id : string] : MediaArticle}>
 	getData : (id : string) => void
 	onDoneQuerying : () => void
 }
@@ -27,7 +27,7 @@ class QueryManager {
 
 	confirmQueue(queryable : Queryable) {
 		for (const queryingId of this.queue)
-			if (queryable.articles[queryingId].queried) {
+			if (queryable.articles.value[queryingId].queried) {
 				console.debug(`Deleting ${queryingId} from queue.`)
 				this.queue.delete(queryingId)
 			}
@@ -43,7 +43,7 @@ class QueryManager {
 		const flatMountedArticles = Object.values(this.mountedArticles).flat()
 
 		for (const id of flatMountedArticles) {
-			if (!queryable.articles.hasOwnProperty(id) || queryable.articles[id].queried)
+			if (!queryable.articles.hasOwnProperty(id) || queryable.articles.value[id].queried)
 				continue
 
 			if (this.queue.size >= this.maxQueryCount) {

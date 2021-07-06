@@ -44,7 +44,7 @@ export function useFavViewerButtons(service : Ref<MediaService>, article : Ref<M
 				topButtons.unshift(h('button', {
 						class: 'button',
 						title: 'Load',
-						onClick: () => service.value.articles[article.value.id].media[0].status = MediaLoadStatus.Loading,
+						onClick: () => service.value.articles.value[article.value.id].media[0].status = MediaLoadStatus.Loading,
 					}, [h('span', {class: 'icon darkIcon is-small'}, h(FontAwesomeIcon, {icon: 'truck-loading'}))]),
 				)
 				break
