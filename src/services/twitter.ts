@@ -178,6 +178,7 @@ export class TwitterService extends Service<TwitterArticle> {
 		const params = new URLSearchParams()
 		params.set('id', id)
 		params.set('tweet_mode', 'extended')
+
 		const response = await fetch(`/twitter/v1/favorites/${(article as TweetArticle).liked ? 'destroy' : 'create'}?${params.toString()}`, {method: 'POST'})
 			.then(r => r.json())
 		console.dir(response)
@@ -198,6 +199,8 @@ export class TwitterService extends Service<TwitterArticle> {
 
 		const params = new URLSearchParams()
 		params.set('id', id)
+		params.set('tweet_mode', 'extended')
+
 		const response = await fetch(`/twitter/retweet?${params.toString()}`, {method: 'POST'})
 			.then(r => r.json())
 		console.dir(response)
@@ -249,6 +252,7 @@ class UserTimelineEndpoint extends Endpoint<UserTimelineCallOpt> {
 		params.set('user.fields', 'name,username,profile_image_url')
 		params.set('media.fields', 'width,height,preview_image_url,url')
 		params.set('expansions', 'author_id,referenced_tweets.id,referenced_tweets.id.author_id,attachments.media_keys')
+		params.set('max_results', '100')
 		if (options.fromEnd && this.articles.length)
 			params.set('until_id', this.articles[this.articles.length - 1])
 
@@ -298,6 +302,7 @@ export class UserTimelineV1Endpoint extends Endpoint<UserTimelineCallOpt> {
 		const params = new URLSearchParams()
 		params.set('tweet_mode', 'extended')
 		params.set('user_id', this.userId)
+		params.set('count', '200')
 		if (options.fromEnd && this.articles.length)
 			params.set('max_id', this.articles[this.articles.length - 1])
 
