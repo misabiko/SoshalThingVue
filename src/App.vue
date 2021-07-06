@@ -6,6 +6,7 @@
 			:key='t.title'
 			:timeline='t'
 			@changeTimeline='changeTimelineData(i, $event)'
+			@saveTimeline='updateLocalStorage()'
 			@delete='deleteTimeline(i)'
 		></Timeline>
 	</div>
@@ -119,7 +120,7 @@ export default defineComponent({
 		if (!timelines.value.length)
 			console.warn('No timelines were initialized')
 
-		return {timelines, showAddTimeline, showArticleListManager, addTimeline, changeTimelineData, deleteTimeline}
+		return {timelines, showAddTimeline, showArticleListManager, addTimeline, changeTimelineData, deleteTimeline, updateLocalStorage}
 	},
 })
 </script>

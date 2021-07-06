@@ -55,11 +55,11 @@ export class TwitterService extends Service<TwitterArticle> {
 	filters : Filters<TwitterArticle> = {
 		Retweet: {
 			filter: (inverted) => a => a.type === TwitterArticleType.Retweet != inverted,
+			option: () => null,
 			defaultConfig: {
 				enabled: true,
 				inverted: false,
 				config: {},
-				option: () => null,
 			},
 		},
 		HasMedia: {
@@ -70,11 +70,11 @@ export class TwitterService extends Service<TwitterArticle> {
 				else
 					return !!(a as unknown as MediaArticle).media?.length != inverted
 			},
+			option: () => null,
 			defaultConfig: {
 				enabled: true,
 				inverted: false,
 				config: {},
-				option: () => null,
 			},
 		},
 	}

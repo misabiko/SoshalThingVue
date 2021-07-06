@@ -308,7 +308,13 @@ export default defineComponent({
 		} = useSortMethods(service.value.defaultSortMethod, service.value.sortMethods)
 		options.push(sortOption)
 
-		const {filterMethods, filters, filterOptions} = useFilters(service.value.defaultFilters, service.value.filters)
+		const filters = computed(() => props.timeline.filters)
+
+		watch(filters, () => {
+			emit('saveTimeline')
+		}, {deep: true})
+
+		const {filterMethods, filterOptions} = useFilters(filters, service.value.filters)
 		options.push(filterOptions)
 
 		const articles = computed(() => {

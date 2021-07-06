@@ -39,6 +39,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						serviceIndex,
 						endpointIndex: 0,
 						container: 'MasonryContainer',
+						filters: this.defaultFilters,
 					},
 				]
 			case PixivUserPage:
@@ -49,6 +50,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						serviceIndex,
 						endpointIndex: 1,
 						container: 'MasonryContainer',
+						filters: this.defaultFilters,
 					},
 				]
 			case PixivBookmarkPage:
@@ -59,6 +61,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						serviceIndex,
 						endpointIndex: 2,
 						container: 'MasonryContainer',
+						filters: this.defaultFilters,
 					},
 				]
 			default: return []

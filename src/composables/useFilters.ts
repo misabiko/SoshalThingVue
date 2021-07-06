@@ -4,6 +4,7 @@ import {h, Ref, ref} from 'vue'
 export type Filters<ArticleType extends Article> = {
 	[method : string] : {
 		filter : (inverted : boolean, config : any) => (article : ArticleType) => boolean
+		option : (filters : Ref<FilterConfigs>) => any
 		defaultConfig : FilterConfig
 	}
 }
@@ -12,7 +13,6 @@ type FilterConfig = {
 	enabled : boolean,
 	inverted : boolean,
 	config : any,
-	option : (filters : Ref<FilterConfigs>) => any
 }
 
 export type FilterConfigs = {
@@ -57,43 +57,40 @@ export const defaultDefaultFilters : FilterConfigs = {
 		enabled: true,
 		inverted: false,
 		config: {},
-		option: () => null,
 	},
 }
 
-export function useFilters<ArticleType extends Article>(defaultFilters = defaultDefaultFilters, additionalFiters : Filters<ArticleType> = {}) {
+export function useFilters<ArticleType extends Article>(filters : Ref<FilterConfigs>, additionalFiters : Filters<ArticleType>) {
 	const filterMethods : Filters<ArticleType> = {
 		Hidden: {
 			filter: (inverted) => a => !a.hidden != inverted,
+			option: () => null,
 			defaultConfig: {
 				enabled: true,
 				inverted: false,
 				config: {},
-				option: () => null,
 			},
 		},
 		Interval: {
 			filter: (inverted, {offset, interval}) => a => (Math.max(a.index - offset, 0) % interval == 0) != inverted,
+			option: intervalOption,
 			defaultConfig: {
 				enabled: false,
 				inverted: false,
 				config: {offset: 0, interval: 3},
-				option: intervalOption,
 			},
 		},
 		HasMedia: {
 			filter: (inverted) => a => !!(a as unknown as MediaArticle).media?.length != inverted,
+			option: () => null,
 			defaultConfig: {
 				enabled: true,
 				inverted: false,
 				config: {},
-				option: () => null,
 			},
 		},
 		...additionalFiters,
 	}
-
-	const filters = ref<FilterConfigs>(defaultFilters)
 
 	const newFilter = ref('Hidden')
 
@@ -127,10 +124,10 @@ export function useFilters<ArticleType extends Article>(defaultFilters = default
 						onClick: () => filters.value[method].inverted = !filters.value[method].inverted,
 					}, filters.value[method].inverted ? 'Inverted' : 'Normal'),
 				]),
-				filters.value[method].option(filters),
+				filterMethods[method].option(filters),
 			])),
 	]
 
 
-	return {filterMethods, filters, filterOptions}
+	return {filterMethods, filterOptions}
 }

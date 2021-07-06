@@ -103,6 +103,7 @@ export default defineComponent({
 				serviceIndex: firstServiceIndex,
 				endpointIndex: undefined,
 				container: 'ColumnContainer',
+				filters: Service.instances[firstServiceIndex].defaultFilters,
 			},
 		)
 
@@ -123,6 +124,7 @@ export default defineComponent({
 				articleList: getNewId(),
 				serviceIndex: firstServiceIndex,
 				container: 'ColumnContainer',
+				filters: Service.instances[firstServiceIndex].defaultFilters,
 			}
 
 			const baseTitle = timelineData.value.title
