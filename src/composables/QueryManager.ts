@@ -43,7 +43,7 @@ class QueryManager {
 		const flatMountedArticles = Object.values(this.mountedArticles).flat()
 
 		for (const id of flatMountedArticles) {
-			if (!queryable.articles.hasOwnProperty(id) || queryable.articles.value[id].queried)
+			if (!queryable.articles.value.hasOwnProperty(id) || queryable.articles.value[id].queried)
 				continue
 
 			if (this.queue.size >= this.maxQueryCount) {

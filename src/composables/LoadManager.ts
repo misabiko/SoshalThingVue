@@ -51,7 +51,7 @@ class LoadManager {
 		const queue = this.getQueue(service, flatMountedArticles)
 
 		for (const id of flatMountedArticles) {
-			if (!service.articles.hasOwnProperty(id) || !service.articles.value[id].media)
+			if (!service.articles.value.hasOwnProperty(id) || !service.articles.value[id].media)
 				continue
 
 			for (const [i, media] of service.articles.value[id].media.entries()) {
@@ -94,7 +94,7 @@ class LoadManager {
 		const queue = this.getQueue(service, flatMountedArticles)
 
 		for (const id of flatMountedArticles)
-			if (service.articles.hasOwnProperty(id))
+			if (service.articles.value.hasOwnProperty(id))
 				for (const [i, media] of service.articles.value[id].media.entries())
 					if (media.status == MediaLoadStatus.ReadyToLoad && !queue.find(m => m.id === id && m.media === i)) {
 						queue.push({id, media: i})
