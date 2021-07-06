@@ -10,7 +10,6 @@
 				:viewModes='Object.keys(pageInfo.viewModes)'
 				:mainTimeline='!showSidebar'
 				@changeTimeline='changeTimelineData(i, $event)'
-				@saveTimeline='updateLocalStorage()'
 				@hideSoshal='setViewMode("hidden")'
 				@setViewmode='setViewMode($event)'
 				@addTimeline='showAddTimeline = true'
@@ -22,7 +21,6 @@
 				:key='t.title'
 				:timeline='t'
 				@changeTimeline='changeTimelineData(i, $event)'
-				@saveTimeline='updateLocalStorage()'
 				@delete='deleteTimeline(i)'
 			></Timeline>
 		</template>
@@ -36,7 +34,7 @@
 		v-if='modal === "ArticleListManager"'
 	/>
 	<teleport v-if='pageInfo && viewMode === "hidden"' :to='pageInfo.activatorSelector'>
-		<component :is='pageInfo.activator' @click='setViewMode(lastViewMode)'></component>
+		<component :is='pageInfo.activator' @click='setViewMode(lastViewMode)'/>
 	</teleport>
 </template>
 
@@ -120,7 +118,7 @@ export default defineComponent({
 			props.pageInfo.setViewMode(mode)
 		}
 
-		return {timelines, showAddTimeline, showArticleListManager, modal, addTimeline, changeTimelineData, deleteTimeline, updateLocalStorage, showSidebar, lastViewMode, viewMode, setViewMode}
+		return {timelines, showAddTimeline, showArticleListManager, modal, addTimeline, changeTimelineData, deleteTimeline, showSidebar, lastViewMode, viewMode, setViewMode}
 	}
 })
 </script>

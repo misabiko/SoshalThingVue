@@ -88,19 +88,19 @@
 			:is='containers[timeline.container]'
 			:service='service'
 			:articles='articles'
-			:column-count='Math.min(articles.length, columnCount)'
-			:right-to-left='rightToLeft'
-			:on-article-click='onArticleClicks[onArticleClick]'
+			:columnCount='Math.min(articles.length, columnCount)'
+			:rightToLeft='rightToLeft'
+			:onArticleClick='onArticleClicks[onArticleClick]'
 			@expand='modalArticle = $event'
-			:update-queries='updateQueries'
-			:update-loadings='updateLoadings'
+			:updateQueries='updateQueries'
+			:updateLoadings='updateLoadings'
 			ref='containerEl'
 		></component>
 		<Modal
 			v-if='modalArticle.length'
 			:service='service'
 			:article='service.articles.value[modalArticle]'
-			:on-article-click='onArticleClicks[onArticleClick]'
+			:onArticleClick='onArticleClicks[onArticleClick]'
 			@close='modalArticle = ""'
 		></Modal>
 	</div>
@@ -522,6 +522,7 @@ export default defineComponent({
 				h('input', {
 						class: 'input',
 						type: 'number',
+						min: '1',
 						value: columnCount.value,
 						onInput: (e : InputEvent) => columnCount.value = parseInt((e.target as HTMLInputElement).value),
 					},
@@ -542,6 +543,7 @@ export default defineComponent({
 						class: 'input',
 						type: 'number',
 						value: size.value,
+						min: '1',
 						onInput: (e : InputEvent) => size.value = parseInt((e.target as HTMLInputElement).value),
 					},
 				)),
