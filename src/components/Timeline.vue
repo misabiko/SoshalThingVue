@@ -38,12 +38,12 @@
 					</span>
 				</button>
 				<template v-if='endpointPackage.type !== EndpointPackageType.NoEndpoint'>
-					<button @click='getNewArticles({fromTop: true})'>
+					<button @click='getNewArticles({fromTop: true, pageNum: endpoint.loadedPages && Object.keys(endpoint.loadedPages)[0]})'>
 						<span class='icon'>
 							<FontAwesomeIcon icon='sync-alt' size='lg'/>
 						</span>
 					</button>
-					<button @click='getNewArticles({fromEnd: true})'>
+					<button @click='getNewArticles({fromEnd: true, pageNum: newPage})'>
 						<span class='icon'>
 							<FontAwesomeIcon icon='arrow-down' size='lg'/>
 						</span>
@@ -583,6 +583,7 @@ export default defineComponent({
 			options,
 			...mediaServiceReturns,
 			modifiedTimelineData,
+			newPage,
 		}
 	},
 })
