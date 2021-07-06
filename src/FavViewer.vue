@@ -10,6 +10,7 @@
 				:viewModes='Object.keys(pageInfo.viewModes)'
 				:mainTimeline='!showSidebar'
 				@changeTimeline='changeTimelineData(i, $event)'
+				@saveTimeline='updateLocalStorage()'
 				@hideSoshal='setViewMode("hidden")'
 				@setViewmode='setViewMode($event)'
 				@addTimeline='showAddTimeline = true'
@@ -21,19 +22,18 @@
 				:key='t.title'
 				:timeline='t'
 				@changeTimeline='changeTimelineData(i, $event)'
+				@saveTimeline='updateLocalStorage()'
 				@delete='deleteTimeline(i)'
 			></Timeline>
 		</template>
 	</div>
 	<AddTimelineModal
-		v-if='showAddTimeline'
+		v-if='modal === "AddTimelineModal"'
 		:timelines='timelines'
 		@add='addTimeline($event)'
-		@close='showAddTimeline = false'
 	/>
 	<ArticleListManager
-		v-if='showArticleListManager'
-		@close='showArticleListManager = false'
+		v-if='modal === "ArticleListManager"'
 	/>
 	<teleport v-if='pageInfo && viewMode === "hidden"' :to='pageInfo.activatorSelector'>
 		<component :is='pageInfo.activator' @click='setViewMode(lastViewMode)'></component>
@@ -49,6 +49,7 @@ import {Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
 import ArticleListManager from '@/components/Modals/ArticleListManager.vue'
+import {modal} from '@/composables/ModalManager'
 
 export default defineComponent({
 	name: 'FavViewer',
@@ -119,7 +120,7 @@ export default defineComponent({
 			props.pageInfo.setViewMode(mode)
 		}
 
-		return {timelines, showAddTimeline, showArticleListManager, addTimeline, changeTimelineData, deleteTimeline, showSidebar, lastViewMode, viewMode, setViewMode}
+		return {timelines, showAddTimeline, showArticleListManager, modal, addTimeline, changeTimelineData, deleteTimeline, updateLocalStorage, showSidebar, lastViewMode, viewMode, setViewMode}
 	}
 })
 </script>
