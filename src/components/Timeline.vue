@@ -122,7 +122,7 @@
 
 <script lang='ts'>
 import {
-	computed, ComputedRef,
+	computed,
 	defineComponent,
 	h,
 	onBeforeMount,
@@ -175,8 +175,8 @@ type EndpointPackage = {
 } | {
 	type: EndpointPackageType.PagedEndpoint,
 	ready: boolean,
-	endpoint: ComputedRef<PagedEndpoint>,
-	remainingPages: ComputedRef<number[]>,
+	endpoint: Readonly<Ref<PagedEndpoint>>,
+	remainingPages: Readonly<Ref<number[]>>,
 	newPage: Ref<undefined | number>,
 }
 
@@ -212,7 +212,7 @@ export default defineComponent({
 				return {
 					type: EndpointPackageType.PagedEndpoint,
 					get ready() {return endpoint.value?.ready ?? false},
-					endpoint: endpoint as ComputedRef<PagedEndpoint>,
+					endpoint: endpoint as unknown as Readonly<Ref<PagedEndpoint>>,
 					remainingPages,
 					newPage,
 				}

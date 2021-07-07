@@ -1,5 +1,5 @@
 import {Article, MediaArticle} from '@/data/articles'
-import {ComputedRef, h, Ref, ref} from 'vue'
+import {h, Ref, ref} from 'vue'
 
 export type Filters<ArticleType extends Article> = {
 	[method : string] : {
@@ -60,7 +60,7 @@ export const defaultDefaultFilters : FilterConfigs = {
 	},
 }
 
-export function useFilters<ArticleType extends Article>(filters : ComputedRef<FilterConfigs>, additionalFiters : ComputedRef<Filters<ArticleType>>) {
+export function useFilters<ArticleType extends Article>(filters : Readonly<Ref<FilterConfigs>>, additionalFiters : Readonly<Ref<Filters<ArticleType>>>) {
 	const filterMethods = ref<Filters<ArticleType>>({
 		Hidden: {
 			filter: (inverted) => a => !a.hidden != inverted,
