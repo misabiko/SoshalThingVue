@@ -96,13 +96,13 @@
 						</div>
 					</div>
 					<div class='field'
-						 v-if='selectionMode !== SelectionMode.ServiceArticles && services[serviceName].endpoints.length'>
+						 v-if='selectionMode !== SelectionMode.ServiceArticles && Object.keys(services[serviceName].endpoints).length'>
 						<label class='label'>Endpoint Articles</label>
 						<div class='control'>
 							<div class='select'>
 								<select v-model='endpointName'>
-									<option v-for='(e, name) in service.endpoints' :value='name'>
-										{{ name }}
+									<option v-for='(e, opts) in service.endpoints' :value='opts'>
+										{{ e.name }}
 									</option>
 								</select>
 							</div>

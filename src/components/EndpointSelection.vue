@@ -11,13 +11,13 @@
 			</div>
 		</div>
 	</div>
-	<div class='field' v-if='Object.values(service.endpointTypes).length && service.endpoints.length'>
+	<div class='field' v-if='Object.values(service.endpointTypes).length && Object.keys(service.endpoints).length'>
 		<div class='control'>
 			<input type='checkbox' v-model='newEndpoint'/>
 			New Endpoint?
 		</div>
 	</div>
-	<template v-if='endpointOptions && (!service.endpoints.length || newEndpoint)'>
+	<template v-if='endpointOptions && (!Object.keys(service.endpoints).length || newEndpoint)'>
 		<div class='field'>
 			<label class='label'>Endpoint Type</label>
 			<div class='control'>
@@ -38,13 +38,13 @@
 			/>
 		</template>
 	</template>
-	<div class='field' v-else-if='service.endpoints.length'>
+	<div class='field' v-else-if='Object.keys(service.endpoints).length'>
 		<label class='label'>Endpoint</label>
 		<div class='control'>
 			<div class='select'>
 				<select v-model='modelValue.endpointName'>
-					<option v-for='(e, name) in service.endpoints' :value='name'>
-						{{ name }}
+					<option v-for='(e, opts) in service.endpoints' :value='opts'>
+						{{ e.name }}
 					</option>
 				</select>
 			</div>
@@ -94,7 +94,7 @@ export default defineComponent({
 			service,
 			(newService, oldService) => {
 				if (newService.name !== oldService.name) {
-					if (newService.endpoints.length)
+					if (Object.keys(newService.endpoints).length)
 						props.modelValue.endpointName = Object.keys(newService.endpoints)[Object.keys(newService.endpoints).length - 1]
 					else {
 						props.modelValue.endpointName = undefined

@@ -114,7 +114,7 @@ export function resetTimelineData(dataOverride? : any) {
 
 	const data = timelineData.value as TimelineData
 
-	if (data.endpointName === undefined) {
+	if (data.endpointName === undefined && data.endpointOptions === undefined) {
 		if (Object.keys(service.endpoints).length)
 			data.endpointName = Object.keys(service.endpoints)[0]
 		else if (Object.keys(service.endpointTypes).length)

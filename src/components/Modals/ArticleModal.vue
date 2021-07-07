@@ -1,6 +1,6 @@
 <template>
-	<div class='modal is-active' @click='$emit($event.target.classList.contains("modal") ? "close" : "")'>
-		<div class='modal-background'/>
+	<div class='modal is-active'>
+		<div class='modal-background' @click='$emit($event.target.classList.contains("modal-background") ? "close" : "")'/>
 		<div class='modal-content' :style='{width: zoom + "%"}'>
 			<div class='articleModal'>
 				<component
