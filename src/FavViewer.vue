@@ -67,10 +67,10 @@ export default defineComponent({
 				return
 			}
 
-			const service = Service.instances[data.serviceIndex]
+			const service = Service.instances[data.serviceName]
 			if (data.endpointOptions !== undefined) {
-				service.endpoints.push(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
-				data.endpointIndex = service.endpoints.length - 1
+				service.addEndpoint(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
+				data.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
 			}
 
 			delete data.endpointOptions
@@ -83,10 +83,10 @@ export default defineComponent({
 				return
 			}
 
-			const service = Service.instances[data.serviceIndex]
+			const service = Service.instances[data.serviceName]
 			if (data.endpointOptions !== undefined) {
-				service.endpoints.push(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
-				data.endpointIndex = service.endpoints.length - 1
+				service.addEndpoint(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
+				data.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
 			}
 
 			delete data.endpointOptions

@@ -3,9 +3,9 @@
 		<label class='label'>Service</label>
 		<div class='control'>
 			<div class='select'>
-				<select v-model='modelValue.serviceIndex'>
-					<option v-for='(s, i) in services' :value='i'>
-						{{ s.name }}
+				<select v-model='modelValue.serviceName'>
+					<option v-for='(s, name) in services' :value='name'>
+						{{ name }}
 					</option>
 				</select>
 			</div>
@@ -42,17 +42,17 @@
 		<label class='label'>Endpoint</label>
 		<div class='control'>
 			<div class='select'>
-				<select v-model='modelValue.endpointIndex'>
-					<option v-for='(e, i) in service.endpoints' :value='i'>
-						{{ e.name }}
+				<select v-model='modelValue.endpointName'>
+					<option v-for='(e, name) in service.endpoints' :value='name'>
+						{{ name }}
 					</option>
 				</select>
 			</div>
 		</div>
 		<fieldset disabled>
 			<component
-				:is='service.endpointTypes[service.endpoints[modelValue.endpointIndex].getKeyOptions().endpointType].optionComponent'
-				:endpointOptions='service.endpoints[modelValue.endpointIndex].getKeyOptions()'
+				:is='service.endpointTypes[service.endpoints[modelValue.endpointName].getKeyOptions().endpointType].optionComponent'
+				:endpointOptions='service.endpoints[modelValue.endpointName].getKeyOptions()'
 			/>
 		</fieldset>
 	</div>
@@ -77,7 +77,7 @@ export default defineComponent({
 	emits: ['update:modelValue'],
 
 	setup(props, {emit}) {
-		const service = computed(() => Service.instances[props.modelValue.serviceIndex])
+		const service = computed(() => Service.instances[props.modelValue.serviceName])
 
 		const endpointOptions = computed<any>({
 			get: () => props.modelValue.endpointOptions,
@@ -95,9 +95,9 @@ export default defineComponent({
 			(newService, oldService) => {
 				if (newService.name !== oldService.name) {
 					if (newService.endpoints.length)
-						props.modelValue.endpointIndex = 0
+						props.modelValue.endpointName = Object.keys(newService.endpoints)[Object.keys(newService.endpoints).length - 1]
 					else {
-						props.modelValue.endpointIndex = undefined
+						props.modelValue.endpointName = undefined
 						const endpointTypes = Object.keys(service.value.endpointTypes)
 						endpointOptions.value = endpointTypes.length ? {endpointType: endpointTypes[0]} : undefined
 					}

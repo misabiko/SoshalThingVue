@@ -19,11 +19,20 @@ const LOCALSTORAGE_TITLE = 'SoshalThing Services'
 export type MediaService = Service<MediaArticle>
 
 export abstract class Service<ArticleType extends Article = Article> {
-	static readonly instances : Service[] = []
+	static readonly instances : { [name : string] : Service } = {}
+
+	static addService(service : Service) : Service {
+		return Service.instances[service.name] = service
+	}
+
+	addEndpoint(endpoint : Endpoint<any>) : Endpoint<any> {
+		return this.endpoints[JSON.stringify(endpoint.getKeyOptions())] = endpoint
+	}
+
 	articles = ref<{ [id : string] : ArticleType }>({})
 	readonly articleComponent : Component
 
-	endpoints : Endpoint<any>[] = []
+	endpoints : { [name : string] : Endpoint<any> } = {}
 
 	defaultSortMethod = 'Unsorted'
 	sortMethods = {}
@@ -40,7 +49,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 		this.articleComponent = markRaw(articleComponentRaw)
 	}
 
-	initialTimelines(serviceIndex : number) : TimelineData[] {
+	initialTimelines() : TimelineData[] {
 		return []
 	}
 
@@ -104,16 +113,14 @@ export abstract class Service<ArticleType extends Article = Article> {
 				if (!storage.hasOwnProperty(serviceName))
 					continue
 
-				const serviceIndex = Service.instances.findIndex(service => service.name === serviceName)
-				if (serviceIndex > -1)
-					Service.instances[serviceIndex].loadLocalStorage(storage[serviceName])
+				Service.instances[serviceName]?.loadLocalStorage(storage[serviceName])
 			}
 			return
 		}
 
 		console.log('Initializing local storage...')
 		const storage : { [serviceName : string] : ServiceLocalStorage } = {}
-		for (const service of Service.instances)
+		for (const service of Object.values(Service.instances))
 			storage[service.name] = await service.generateLocalStorage()
 		localStorage.setItem(LOCALSTORAGE_TITLE, JSON.stringify(storage))
 	}

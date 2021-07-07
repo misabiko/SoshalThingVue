@@ -39,9 +39,9 @@ export default defineComponent({
 			.map((t : TimelineData) => {
 				const copy = {...t}
 				if (t.endpointOptions) {
-					const service = Service.instances[t.serviceIndex]
-					service.endpoints.push(service.endpointTypes[t.endpointOptions.endpointType].factory(t.endpointOptions))
-					copy.endpointIndex = service.endpoints.length - 1
+					const service = Service.instances[t.serviceName]
+					service.addEndpoint(service.endpointTypes[t.endpointOptions.endpointType].factory(t.endpointOptions))
+					copy.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
 				}
 
 				delete copy.endpointOptions
@@ -53,12 +53,12 @@ export default defineComponent({
 		function updateLocalStorage() {
 			localStorage.setItem(LOCALSTORAGE_TIMELINE_TITLE, JSON.stringify(timelines.value.map(t => {
 				const copy : TimelineData = {...t}
-				if (copy.endpointIndex !== undefined) {
-					const service = Service.instances[copy.serviceIndex]
-					copy.endpointOptions = service.endpoints[copy.endpointIndex].getKeyOptions()
+				if (copy.endpointName !== undefined) {
+					const service = Service.instances[copy.serviceName]
+					copy.endpointOptions = service.endpoints[copy.endpointName].getKeyOptions()
 				}
 
-				delete copy.endpointIndex
+				delete copy.endpointName
 				return copy
 			})))
 		}
@@ -69,10 +69,10 @@ export default defineComponent({
 				return
 			}
 
-			const service = Service.instances[data.serviceIndex]
+			const service = Service.instances[data.serviceName]
 			if (data.endpointOptions !== undefined) {
-				service.endpoints.push(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
-				data.endpointIndex = service.endpoints.length - 1
+				service.addEndpoint(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
+				data.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
 			}
 
 			delete data.endpointOptions
@@ -88,10 +88,10 @@ export default defineComponent({
 				return
 			}
 
-			const service = Service.instances[data.serviceIndex]
+			const service = Service.instances[data.serviceName]
 			if (data.endpointOptions !== undefined) {
-				service.endpoints.push(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
-				data.endpointIndex = service.endpoints.length - 1
+				service.addEndpoint(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
+				data.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
 			}
 
 			delete data.endpointOptions
@@ -109,8 +109,8 @@ export default defineComponent({
 		const showArticleListManager = ref(false)
 
 		if (!timelines.value.length) {
-			for (let i = 0; i < Service.instances.length; i++)
-				for (const t of Service.instances[i].initialTimelines(i))
+			for (const service of Object.values(Service.instances))
+				for (const t of service.initialTimelines())
 					addTimeline(t, false)
 
 			updateLocalStorage()

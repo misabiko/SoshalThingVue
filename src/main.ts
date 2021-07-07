@@ -5,8 +5,8 @@ import {Service} from '@/services'
 import {TwitterService} from '@/services/twitter'
 import {PixivService} from '@/services/pixiv'
 
-Service.instances.push(new TwitterService())
-Service.instances.push(new PixivService())
+Service.addService(new TwitterService())
+Service.addService(new PixivService())
 
 Service.initLocalStorage().then(() =>
 	createApp(App)

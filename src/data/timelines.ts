@@ -3,9 +3,9 @@ import {SortConfig} from '@/composables/useSortMethods'
 
 export interface TimelineData {
 	title : string
-	serviceIndex : number
+	serviceName : string
 	articleList : string
-	endpointIndex? : number
+	endpointName? : string
 	endpointOptions? : any
 	container : string
 	filters : FilterConfigs

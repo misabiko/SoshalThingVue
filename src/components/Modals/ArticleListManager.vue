@@ -29,7 +29,7 @@
 							<div class='select is-multiple'>
 								<select multiple size='5' v-model='editedListArticles'>
 									<option v-for='(a, i) in articleLists[editedListName]' :value='i'>
-										{{ services[a.serviceIndex].name }}: {{ a.articleId }}
+										{{ a.serviceName }}: {{ a.articleId }}
 									</option>
 								</select>
 							</div>
@@ -75,9 +75,9 @@
 						<label class='label'>Service Articles</label>
 						<div class='control'>
 							<div class='select'>
-								<select v-model='serviceIndex'>
-									<option v-for='(s, i) in services' :value='i'>
-										{{ s.name }}
+								<select v-model='serviceName'>
+									<option v-for='(s, name) in services' :value='name'>
+										{{ name }}
 									</option>
 								</select>
 							</div>
@@ -96,13 +96,13 @@
 						</div>
 					</div>
 					<div class='field'
-						 v-if='selectionMode !== SelectionMode.ServiceArticles && services[serviceIndex].endpoints.length'>
+						 v-if='selectionMode !== SelectionMode.ServiceArticles && services[serviceName].endpoints.length'>
 						<label class='label'>Endpoint Articles</label>
 						<div class='control'>
 							<div class='select'>
-								<select v-model='endpointIndex'>
-									<option v-for='(e, i) in service.endpoints' :value='i'>
-										{{ e.name }}
+								<select v-model='endpointName'>
+									<option v-for='(e, name) in service.endpoints' :value='name'>
+										{{ name }}
 									</option>
 								</select>
 							</div>
@@ -207,12 +207,12 @@ export default defineComponent({
 
 		const selectionMode = ref<SelectionMode>(SelectionMode.ServiceArticles)
 
-		const serviceIndex = ref(0)
-		const service = computed(() => Service.instances[serviceIndex.value])
+		const serviceName = ref(Object.keys(Service.instances)[0])
+		const service = computed(() => Service.instances[serviceName.value])
 		const selectedArticles = ref([])
 
-		const endpointIndex = ref(0)
-		const endpoint = computed(() => service.value?.endpoints[endpointIndex.value])
+		const endpointName = ref(Object.keys(service.value.endpoints)[0])
+		const endpoint = computed(() => service.value?.endpoints[endpointName.value])
 		const selectedPage = ref<undefined | number>(undefined)
 		const endpointLoadedPages = computed(() => {
 			if (endpoint.value instanceof PagedEndpoint) {
@@ -231,7 +231,7 @@ export default defineComponent({
 					articleLists.value[editedListName.value].push(...selectedArticles.value
 						.filter((id : string) => !ignoreIncluded || !articleLists.value[editedListName.value].find(a => a.articleId === id))
 						.map(id => {
-							return {articleId: id, serviceIndex: serviceIndex.value}
+							return {articleId: id, serviceName: serviceName.value}
 						}),
 					)
 					break
@@ -240,7 +240,7 @@ export default defineComponent({
 						articleLists.value[editedListName.value].push(...(endpoint.value as PagedEndpoint).loadedPages.value[selectedPage.value]
 							.filter((id : string) => !ignoreIncluded || !articleLists.value[editedListName.value].find(a => a.articleId === id))
 							.map((id : string) => {
-								return {articleId: id, serviceIndex: serviceIndex.value}
+								return {articleId: id, serviceName: serviceName.value}
 							}),
 						)
 					break
@@ -251,7 +251,7 @@ export default defineComponent({
 						articleLists.value[editedListName.value].push(...articles
 							.filter((id : string) => !ignoreIncluded || !articleLists.value[editedListName.value].find(a => a.articleId === id))
 							.map((id : string) => {
-								return {articleId: id, serviceIndex: serviceIndex.value}
+								return {articleId: id, serviceName: serviceName.value}
 							}),
 						)
 					}
@@ -276,10 +276,10 @@ export default defineComponent({
 			SelectionMode,
 			selectionMode,
 			services: Service.instances,
-			serviceIndex,
+			serviceName,
 			service,
 			selectedArticles,
-			endpointIndex,
+			endpointName,
 			endpoint,
 			endpointLoadedPages,
 			endpointRemainingPages: (endpoint.value as PagedEndpoint)?.remainingPages,

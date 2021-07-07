@@ -89,18 +89,18 @@ library.add(faTimes)
 const timelineData = ref<undefined | TimelineData>()
 
 export function resetTimelineData(dataOverride? : any) {
-	let serviceIndex = dataOverride?.serviceIndex ?? Service.instances.findIndex(s => (s as HostPageService).pageInfo)
-	if (serviceIndex < 0)
-		serviceIndex = 0
+	const serviceName = dataOverride?.serviceName
+		?? Object.keys(Service.instances).find(s => (s as HostPageService).pageInfo)
+		?? Object.keys(Service.instances)[0]
 
-	const service = Service.instances[serviceIndex]
+	const service = Service.instances[serviceName]
 
 	timelineData.value = {
-		endpointIndex: undefined,
-		...service.initialTimelines(0)[0],
+		endpointName: undefined,
+		...service.initialTimelines()[0],
 		title: 'New Timeline',
 		articleList: getNewId(),
-		serviceIndex,
+		serviceName,
 		container: 'ColumnContainer',
 		filters: service.defaultFilters,
 		sortConfig: {
@@ -112,9 +112,9 @@ export function resetTimelineData(dataOverride? : any) {
 
 	const data = timelineData.value as TimelineData
 
-	if (data.endpointIndex === undefined) {
-		if (service.endpoints.length)
-			data.endpointIndex = 0
+	if (data.endpointName === undefined) {
+		if (Object.keys(service.endpoints).length)
+			data.endpointName = Object.keys(service.endpoints)[0]
 		else if (Object.keys(service.endpointTypes).length)
 			data.endpointOptions = {endpointType: Object.keys(service.endpointTypes)[0]}
 	}
@@ -132,7 +132,7 @@ export default defineComponent({
 	setup() {
 		//const {timelines} = toRefs(props)
 
-		const service = computed(() => timelineData.value && Service.instances[timelineData.value.serviceIndex])
+		const service = computed(() => timelineData.value && Service.instances[timelineData.value.serviceName])
 
 		//TODO Centralize containers
 		const containers = [

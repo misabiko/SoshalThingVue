@@ -22,22 +22,22 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 			this.pageInfo = pageInfoObj
 
 		if (this.pageInfo instanceof PixivFollowPage)
-			this.endpoints.push(new FollowPageEndpoint(this.pageInfo))
+			this.addEndpoint(new FollowPageEndpoint(this.pageInfo))
 		if (this.pageInfo instanceof PixivUserPage)
-			this.endpoints.push(new UserPageEndpoint(this.pageInfo))
+			this.addEndpoint(new UserPageEndpoint(this.pageInfo))
 		if (this.pageInfo instanceof PixivBookmarkPage)
-			this.endpoints.push(new BookmarkPageEndpoint(this.pageInfo))
+			this.addEndpoint(new BookmarkPageEndpoint(this.pageInfo))
 	}
 
-	initialTimelines(serviceIndex : number) {
+	initialTimelines() {
 		switch (this.pageInfo?.constructor) {
 			case PixivFollowPage:
 				return [
 					{
 						title: 'Following',
 						articleList: getNewId(),
-						serviceIndex,
-						endpointIndex: 0,
+						serviceName: this.name,
+						endpointName: JSON.stringify({endpointType: FollowPageEndpoint.name}),
 						container: 'MasonryContainer',
 						filters: this.defaultFilters,
 						sortConfig: {
@@ -51,8 +51,8 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 					{
 						title: 'User',
 						articleList: getNewId(),
-						serviceIndex,
-						endpointIndex: 1,
+						serviceName: this.name,
+						endpointName: JSON.stringify({endpointType: UserPageEndpoint.name}),
 						container: 'MasonryContainer',
 						filters: this.defaultFilters,
 						sortConfig: {
@@ -66,8 +66,11 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 					{
 						title: 'Bookmarks',
 						articleList: getNewId(),
-						serviceIndex,
-						endpointIndex: 2,
+						serviceName: this.name,
+						endpointName: JSON.stringify({
+							endpointType: BookmarkPageEndpoint.name,
+							priv: (this.pageInfo as PixivBookmarkPage).priv
+						}),
 						container: 'MasonryContainer',
 						filters: this.defaultFilters,
 						sortConfig: {

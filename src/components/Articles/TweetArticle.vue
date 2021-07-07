@@ -162,7 +162,7 @@ export default defineComponent({
 		function addUserTimeline(user : TwitterUser) {
 			resetTimelineData({
 				title: user.name,
-				serviceIndex: Service.instances.findIndex(s => s.name === 'Twitter'),	//TODO Index services by name
+				serviceName: 'Twitter',
 				endpointOptions: {
 					endpointType: UserTimelineV1Endpoint.name,
 					userId: user.id,

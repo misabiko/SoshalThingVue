@@ -2,7 +2,7 @@ import {ref} from 'vue'
 
 const LOCALSTORAGE_LISTS_TITLE = 'SoshalThing ArticleLists'
 
-export const articleLists = ref<{ [id : string] : { serviceIndex : number, articleId : string }[] }>(JSON.parse(localStorage.getItem(LOCALSTORAGE_LISTS_TITLE) || '{}'))
+export const articleLists = ref<{ [id : string] : { serviceName : string, articleId : string }[] }>(JSON.parse(localStorage.getItem(LOCALSTORAGE_LISTS_TITLE) || '{}'))
 
 export function getNewId() {
 	let id = 0

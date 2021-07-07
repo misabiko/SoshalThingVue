@@ -195,8 +195,8 @@ export default defineComponent({
 		const {viewMode} = toRefs(props)
 		const options : (() => VNode | VNode[] | undefined)[] = []
 
-		const service = computed(() => Service.instances[props.timeline.serviceIndex] as Service)
-		const endpoint = computed(() => props.timeline.endpointIndex === undefined ? undefined : service.value.endpoints[props.timeline.endpointIndex])
+		const service = computed(() => Service.instances[props.timeline.serviceName] as Service)
+		const endpoint = computed(() => props.timeline.endpointName === undefined ? undefined : service.value.endpoints[props.timeline.endpointName])
 
 		const modifiedTimelineData = ref<TimelineData>({
 			...props.timeline
@@ -237,11 +237,11 @@ export default defineComponent({
 				if (callOpts.fromTop) {
 					for (const id of newArticles.reverse())
 						if (!articleIds.value.find(listA => listA.articleId === id))
-							articleIds.value.unshift({serviceIndex: props.timeline.serviceIndex, articleId: id})
+							articleIds.value.unshift({serviceName: props.timeline.serviceName, articleId: id})
 				}else {
 					for (const id of newArticles)
 						if (!articleIds.value.find(listA => listA.articleId === id))
-							articleIds.value.push({serviceIndex: props.timeline.serviceIndex, articleId: id})
+							articleIds.value.push({serviceName: props.timeline.serviceName, articleId: id})
 				}
 
 				saveLists()
@@ -340,7 +340,7 @@ export default defineComponent({
 
 		const articles = computed(() => {
 				let unsorted = articleIds.value
-					.map(({serviceIndex, articleId}: {serviceIndex: number, articleId: string}) => Service.instances[serviceIndex].articles.value[articleId])
+					.map(({serviceName, articleId}: {serviceName: string, articleId: string}) => Service.instances[serviceName].articles.value[articleId])
 					.filter(a => !!a)	//Rerender happens before all of articleIds is added to service.articles
 
 				for (const [method, opts] of Object.entries(filters.value))
