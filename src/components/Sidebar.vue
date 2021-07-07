@@ -34,7 +34,7 @@
 				</button>
 			</div>
 			<div>
-				<a href='https://github.com/misabiko/SoshalThing/tree/master'>
+				<a href='https://github.com/misabiko/SoshalThing'>
 					<button>
 						<span class='icon'>
 							<FontAwesomeIcon :icon='["fab", "github"]' size='2x'/>
