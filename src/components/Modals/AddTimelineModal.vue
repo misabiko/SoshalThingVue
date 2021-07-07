@@ -48,13 +48,13 @@
 					<div class='field'>
 						<label class='label'>Column Count</label>
 						<div class='control'>
-							<input type='number' placeholder='5' v-model='timelineData.columnCount'/>
+							<input type='number' min='1' v-model='timelineData.columnCount'/>
 						</div>
 					</div>
 					<div class='field'>
 						<label class='label'>Width</label>
 						<div class='control'>
-							<input type='number' placeholder='1' v-model='timelineData.size'/>
+							<input type='number' min='1' v-model='timelineData.size'/>
 						</div>
 					</div>
 				</div>
@@ -102,6 +102,8 @@ export function resetTimelineData(dataOverride? : any) {
 		articleList: getNewId(),
 		serviceName,
 		container: 'ColumnContainer',
+		columnCount: 2,
+		size: 1,
 		filters: service.defaultFilters,
 		sortConfig: {
 			method: service.defaultSortMethod,
