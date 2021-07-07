@@ -5,6 +5,7 @@
 				:href='service.getUserURL(article.author.handle)'
 				target='_blank'
 				rel='noopener noreferrer'
+				@click.left.prevent='addUserTimeline(article.author)'
 			>{{ article.author.name}} retweeted</a>
 		</div>
 		<div class='media'>
