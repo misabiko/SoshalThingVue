@@ -54,13 +54,14 @@ export interface QuoteArticle extends TweetArticle {
 
 export class TwitterService extends Service<TwitterArticle> {
 	sortMethods : SortMethods<TwitterArticle> = {
-		RefId: (articles) => articles.sort((a, b) => {
-			const aId = parseInt(a.type == TwitterArticleType.Retweet ? this.articles.value[(a as RetweetArticle).retweetedId].id : a.id)
-			const bId = parseInt(b.type == TwitterArticleType.Retweet ? this.articles.value[(b as RetweetArticle).retweetedId].id : b.id)
-			return bId - aId
-		}),
-		Likes: (articles) => articles.sort((a, b) => ((b as TweetArticle).likeCount ?? 0) - ((a as TweetArticle).likeCount ?? 0)),
-		Retweets: (articles) => articles.sort((a, b) => ((b as TweetArticle).repostCount ?? 0) - ((a as TweetArticle).repostCount ?? 0)),
+		RefId: (articles) => articles.sort(
+			(a, b) => parseInt(this.actualTweet(b, true).id) - parseInt(this.actualTweet(a, true).id)
+		),
+		Likes: (articles) => articles.sort(
+			(a, b) => (this.actualTweet(b, true).likeCount ?? 0) - (this.actualTweet(a, true).likeCount ?? 0)),
+		Retweets: (articles) => articles.sort(
+			(a, b) => (this.actualTweet(b, true).repostCount ?? 0) - (this.actualTweet(a, true).repostCount ?? 0)
+		),
 	}
 
 	filters : Filters<TwitterArticle> = {
@@ -75,12 +76,26 @@ export class TwitterService extends Service<TwitterArticle> {
 		},
 		HasMedia: {
 			filter: (inverted) => a => {
-				const refId = (a as RetweetArticle).retweetedId ?? (a as QuoteArticle).quotedId
-				if (refId)
-					return (!!(a as unknown as MediaArticle).media?.length || !!(this.articles.value[refId] as unknown as MediaArticle).media?.length) != inverted
-				else
-					return !!(a as unknown as MediaArticle).media?.length != inverted
+				return (!!(a as unknown as MediaArticle).media?.length || !!(this.actualTweet(a) as unknown as MediaArticle)?.media?.length) != inverted
 			},
+			option: () => null,
+			defaultConfig: {
+				enabled: true,
+				inverted: false,
+				config: {},
+			},
+		},
+		Liked: {
+			filter: (inverted) => a => (a.type !== TwitterArticleType.Retweet && (a as TweetArticle).liked) != inverted,
+			option: () => null,
+			defaultConfig: {
+				enabled: true,
+				inverted: false,
+				config: {},
+			},
+		},
+		Retweeted: {
+			filter: (inverted) => a => (a.type !== TwitterArticleType.Retweet && (a as TweetArticle).reposted) != inverted,
 			option: () => null,
 			defaultConfig: {
 				enabled: true,
@@ -265,6 +280,21 @@ export class TwitterService extends Service<TwitterArticle> {
 				return console.dir({article: toRaw(article), actualArticle: toRaw(this.articles.value[(article as RetweetArticle).retweetedId])})
 			case TwitterArticleType.Quote:
 				return console.dir({article: toRaw(article), actualArticle: toRaw(this.articles.value[(article as QuoteArticle).quotedId])})
+		}
+	}
+
+	actualTweet(a : string | TwitterArticle, includeQuote = false) : TweetArticle {
+		const article = (typeof a === 'object') ? a : this.articles.value[a]
+		switch (article.type) {
+			case TwitterArticleType.Tweet:
+				return article as TweetArticle
+			case TwitterArticleType.Retweet:
+				return (this.articles.value)[(article as RetweetArticle).retweetedId] as TweetArticle
+			case TwitterArticleType.Quote:
+				if (includeQuote)
+					return article as TweetArticle
+				else
+					return (this.articles.value)[(article as QuoteArticle).quotedId] as TweetArticle
 		}
 	}
 }

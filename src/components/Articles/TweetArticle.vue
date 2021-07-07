@@ -80,6 +80,14 @@
 									>
 										External Link
 									</a>
+									<a
+										v-if='article.type === TwitterArticleType.Retweet'
+										class='dropdown-item'
+										:href='service.getExternalLink(article.id)'
+										target='_blank' rel='noopener noreferrer'
+									>
+										Retweet's External Link
+									</a>
 								</div>
 							</div>
 						</div>
@@ -149,16 +157,7 @@ export default defineComponent({
 	setup(props) {
 		const {article, service} = toRefs(props)
 
-		const actualArticle = computed<TweetArticle>(() => {
-			switch (article.value.type) {
-				case TwitterArticleType.Tweet:
-					return article.value as TweetArticle
-				case TwitterArticleType.Retweet:
-					return (<any>service.value.articles.value)[(article.value as RetweetArticle).retweetedId] as TweetArticle
-				case TwitterArticleType.Quote:
-					return (<any>service.value.articles.value)[(article.value as QuoteArticle).quotedId] as TweetArticle
-			}
-		})
+		const actualArticle = computed<TweetArticle>(() => service.value.actualTweet(article.value.id))
 
 		function addUserTimeline(user : TwitterUser) {
 			resetTimelineData({
