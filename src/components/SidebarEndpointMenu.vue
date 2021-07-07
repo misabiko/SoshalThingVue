@@ -2,7 +2,7 @@
 	<div>
 		{{ endpoint.name }}
 		<template v-if='endpoint.rateLimitInfo'>
-			<progress class='progress' :value='endpoint.rateLimitInfo.remainingCalls' :max='endpoint.rateLimitInfo.maxCalls'>
+			<progress class='progress' :value='endpoint.rateLimitInfo.remainingCalls' :max='(endpoint.rateLimitInfo && endpoint.rateLimitInfo.maxCalls) || 1'>
 				{{Math.round(endpoint.rateLimitInfo.remainingCalls / endpoint.rateLimitInfo.maxCalls * 1000) / 10}}%
 			</progress>
 			{{timeLeft}} minutes until reset
