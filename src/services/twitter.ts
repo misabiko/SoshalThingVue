@@ -11,6 +11,7 @@ import {
 	parseGenericTweet,
 	TwitterV1Tweet,
 } from '@/data/TwitterV1'
+import {SortMethods} from '@/composables/useSortMethods'
 
 export enum TwitterArticleType {
 	Tweet,
@@ -52,6 +53,16 @@ export interface QuoteArticle extends TweetArticle {
 }
 
 export class TwitterService extends Service<TwitterArticle> {
+	sortMethods : SortMethods<TwitterArticle> = {
+		RefId: (articles) => articles.sort((a, b) => {
+			const aId = parseInt(a.type == TwitterArticleType.Retweet ? this.articles.value[(a as RetweetArticle).retweetedId].id : a.id)
+			const bId = parseInt(b.type == TwitterArticleType.Retweet ? this.articles.value[(b as RetweetArticle).retweetedId].id : b.id)
+			return bId - aId
+		}),
+		Likes: (articles) => articles.sort((a, b) => ((b as TweetArticle).likeCount ?? 0) - ((a as TweetArticle).likeCount ?? 0)),
+		Retweets: (articles) => articles.sort((a, b) => ((b as TweetArticle).repostCount ?? 0) - ((a as TweetArticle).repostCount ?? 0)),
+	}
+
 	filters : Filters<TwitterArticle> = {
 		Retweet: {
 			filter: (inverted) => a => a.type === TwitterArticleType.Retweet != inverted,
