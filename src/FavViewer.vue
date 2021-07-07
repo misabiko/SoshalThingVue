@@ -101,8 +101,8 @@ export default defineComponent({
 		const showArticleListManager = ref(false)
 
 		if (!timelines.value.length)
-			for (let i = 0; i < Service.instances.length; i++)
-				for (const t of Service.instances[i].initialTimelines(i))
+			for (const service of Object.values(Service.instances))
+				for (const t of service.initialTimelines())
 					addTimeline(t)
 
 		if (!timelines.value.length)

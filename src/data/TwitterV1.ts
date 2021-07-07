@@ -284,10 +284,7 @@ function parseEntities(tweet : TwitterV1Tweet) {
 	const media : PlainMedia[] = []
 
 	if (tweet.extended_entities) {
-		const entitiesMedias = tweet.extended_entities.media
-		if (entitiesMedias) {
-			const entitiesMedia = entitiesMedias[0]
-
+		for (const entitiesMedia of (tweet.extended_entities.media ?? [])) {
 			switch (entitiesMedia.type) {
 				case 'photo':
 					media.push({
