@@ -229,7 +229,7 @@ export default defineComponent({
 					console.debug(`${endpoint.value.name} isn't ready.`)
 				return
 			}
-			endpoint.value.calling = true
+			//endpoint.value.calling = true
 
 			try {
 				const newArticles = await service.value.getNewArticles(endpoint.value, callOpts)
@@ -251,7 +251,7 @@ export default defineComponent({
 				if (pages?.length)
 					newPage.value = pages.filter(p => p > oldNewPage)[0] || pages[pages.length - 1]
 			}finally {
-				endpoint.value.calling = false
+				//endpoint.value.calling = false
 			}
 		}
 

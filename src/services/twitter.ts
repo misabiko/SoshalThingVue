@@ -347,7 +347,7 @@ interface TwitterCallOpt {
 class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 	rateLimitInfo = reactive({
 		maxCalls: 900,
-		remainingCalls: 1,
+		remainingCalls: 900,
 		secUntilNextReset: Date.now() / 1000 + 15 * 60,
 	})
 
@@ -390,7 +390,7 @@ class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
 	rateLimitInfo = reactive({
 		maxCalls: 900,
-		remainingCalls: 1,
+		remainingCalls: 900,
 		secUntilNextReset: Date.now() / 1000 + 15 * 60,
 	})
 
@@ -431,7 +431,7 @@ export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
 class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 	rateLimitInfo = reactive({
 		maxCalls: 15,
-		remainingCalls: 1,
+		remainingCalls: 15,
 		secUntilNextReset: Date.now() / 1000 + 15 * 60,
 	})
 
@@ -468,7 +468,7 @@ class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 class SearchEndpoint extends Endpoint<TwitterCallOpt> {
 	rateLimitInfo = reactive({
 		maxCalls: 180,
-		remainingCalls: 1,
+		remainingCalls: 180,
 		secUntilNextReset: Date.now() / 1000 + 15 * 60,
 	})
 
@@ -520,7 +520,7 @@ class LikesV1Endpoint extends Endpoint<TwitterCallOpt> {
 
 	rateLimitInfo = reactive({
 		maxCalls: 75,
-		remainingCalls: 1,
+		remainingCalls: 75,
 		secUntilNextReset: Date.now() / 1000 + 15 * 60,
 	})
 

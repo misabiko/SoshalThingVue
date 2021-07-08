@@ -171,7 +171,7 @@ export interface HostPageService {
 
 export abstract class Endpoint<CallOpt> {
 	articles : string[] = reactive([])
-	calling = false
+	//calling = false
 
 	rateLimitInfo? : {
 		maxCalls : number
@@ -192,7 +192,7 @@ export abstract class Endpoint<CallOpt> {
 				return false
 		}
 
-		return !this.calling
+		return true//!this.calling
 	}
 
 	abstract getKeyOptions() : { endpointType : string } & any
