@@ -148,6 +148,21 @@ export abstract class Service<ArticleType extends Article = Article> {
 	logArticle(id : string) {
 		console.dir(toRaw(this.articles.value[id]))
 	}
+
+	static async fetchProxy(url : string, opts? : any) : Promise<any> {
+		const response = await fetch(url, opts)
+		const json = await response.json()
+
+		console.dir(json)
+
+		if (json.soshalServices)
+			for (const [name, status] of Object.entries(json.soshalServices))
+				Service.instances[name]?.loadStatus(status)
+
+		return json
+	}
+
+	loadStatus(status : any) {}
 }
 
 export interface HostPageService {
@@ -182,9 +197,11 @@ export abstract class Endpoint<CallOpt> {
 
 	abstract getKeyOptions() : { endpointType : string } & any
 
-	serialize() : any {}
+	serialize() : any {
+	}
 
-	deserialize(data : any) {}
+	deserialize(data : any) {
+	}
 }
 
 export type WrappedPayload = { payload : Payload, basePageNum : number, lastPage : number }
@@ -221,7 +238,7 @@ export abstract class PagedEndpoint<CallOpt extends { pageNum : number } = { pag
 
 	serialize() {
 		return {
-			loadedPages: toRaw(this.loadedPages.value)
+			loadedPages: toRaw(this.loadedPages.value),
 		}
 	}
 

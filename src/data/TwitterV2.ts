@@ -1,14 +1,20 @@
 import {getImageFormat, LazyMedia, MediaLoadStatus, MediaType, PlainMedia} from '@/data/articles'
 import {Endpoint, Payload} from '@/services'
 import {RetweetArticle, TweetArticle, TwitterArticle, TwitterArticleType} from '@/services/twitter'
-import {reactive} from 'vue'
+
+export interface TwitterAuth {
+	id_str : string
+	name : string
+	screen_name : string
+}
 
 export interface TwitterLitePayload {
-	_headers: {
-		'x-rate-limit-limit': string,
-		'x-rate-limit-remaining': string,
-		'x-rate-limit-reset': string,
-	}
+	_headers : {
+		'x-rate-limit-limit' : string,
+		'x-rate-limit-remaining' : string,
+		'x-rate-limit-reset' : string,
+	},
+	soshalServices : { Twitter : { authUser? : TwitterAuth } }
 }
 
 export interface TwitterAPIPayload extends TwitterLitePayload {

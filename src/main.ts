@@ -8,8 +8,10 @@ import {PixivService} from '@/services/pixiv'
 Service.addService(new TwitterService())
 Service.addService(new PixivService())
 
-Service.initLocalStorage().then(() =>
-	createApp(App)
-		.component('FontAwesomeIcon', FontAwesomeIcon)
-		.mount('#app')
+Service.initLocalStorage()
+	.then(() => Service.fetchProxy('status'))
+	.then(() =>
+		createApp(App)
+			.component('FontAwesomeIcon', FontAwesomeIcon)
+			.mount('#app')
 )

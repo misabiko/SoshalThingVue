@@ -7,6 +7,13 @@ const connectMemoryStore = require('memorystore')
 const passport = require('passport')
 const {Strategy: TwitterStrategy} = require('passport-twitter')
 
+let credentials, clientV1, clientV2, authUser
+
+function populateResponse(response) {
+	response.soshalServices = { Twitter: {authUser} }
+	return response
+}
+
 function parseQueryErrors(e, res, next) {
 	console.error('Parsing errors:')
 	let response = {}
@@ -21,7 +28,7 @@ function parseQueryErrors(e, res, next) {
 	}
 
 	if (response.errors?.find(err => err.code))
-		res.json(e)
+		res.json(populateResponse(e))
 	else
 		next(e)
 }
@@ -72,8 +79,6 @@ module.exports = app => {
 	}))
 	app.use(passport.initialize())
 	app.use(passport.session())
-
-	let credentials, clientV1, clientV2, authUser
 
 	passport.serializeUser(function(user, cb) {
 		cb(null, user.id)
@@ -127,12 +132,7 @@ module.exports = app => {
 						access_token_secret,
 					})
 
-					authUser = {
-						id: profile.id,
-						username: profile.username,
-					}
-
-					console.log('Twitter Login: ', authUser)
+					authUser = profile._json
 
 					cb(null, authUser)
 				}catch (e) {
@@ -155,6 +155,8 @@ module.exports = app => {
 		})
 	)
 
+	app.get('/status', (req, res) => res.json(populateResponse({})))
+
 	app.route('/twitter/v1/:endpoint1/:endpoint2')
 		.get(async (req, res, next) => {
 			try {
@@ -163,7 +165,7 @@ module.exports = app => {
 				})
 
 				logRateLimit(response)
-				res.json(objectifyResponse(response))
+				res.json(populateResponse(objectifyResponse(response)))
 			}catch (e) {
 				parseQueryErrors(e, res, next)
 			}
@@ -175,7 +177,7 @@ module.exports = app => {
 				})
 
 				logRateLimit(response)
-				res.json(objectifyResponse(response))
+				res.json(populateResponse(objectifyResponse(response)))
 			}catch (e) {
 				parseQueryErrors(e, res, next)
 			}
@@ -189,7 +191,7 @@ module.exports = app => {
 				})
 
 				logRateLimit(response)
-				res.json(objectifyResponse(response))
+				res.json(populateResponse(objectifyResponse(response)))
 			}catch (e) {
 				parseQueryErrors(e, res, next)
 			}
@@ -201,7 +203,7 @@ module.exports = app => {
 				})
 
 				logRateLimit(response)
-				res.json(objectifyResponse(response))
+				res.json(populateResponse(objectifyResponse(response)))
 			}catch (e) {
 				parseQueryErrors(e, res, next)
 			}
@@ -212,7 +214,7 @@ module.exports = app => {
 			const response = await clientV2.get(`users/${req.params.id}/tweets`, {...req.query})
 
 			logRateLimit(response)
-			res.json(response)
+			res.json(populateResponse(response))
 		}catch (e) {
 			parseQueryErrors(e, res, next)
 		}
@@ -223,7 +225,7 @@ module.exports = app => {
 			const response = await clientV2.get('tweets/search/recent', {...req.query})
 
 			logRateLimit(response)
-			res.json(response)
+			res.json(populateResponse(response))
 		}catch (e) {
 			parseQueryErrors(e, res, next)
 		}
@@ -234,7 +236,7 @@ module.exports = app => {
 			const response = await clientV2.post(`users/${req.user.id}/likes`, {...req.query})	//TODO Needs Content-Type: JSON
 
 			logRateLimit(response)
-			res.json(response)
+			res.json(populateResponse(response))
 		}catch (e) {
 			parseQueryErrors(e, res, next)
 		}
@@ -245,7 +247,7 @@ module.exports = app => {
 			const response = await clientV2.delete(`users/${req.user.id}/likes/${req.query.tweet_id}`, {...req.query})
 
 			logRateLimit(response)
-			res.json(response)
+			res.json(populateResponse(response))
 		}catch (e) {
 			parseQueryErrors(e, res, next)
 		}
@@ -255,7 +257,7 @@ module.exports = app => {
 		try {
 			const response = await clientV1.post('statuses/retweet', {...req.query})
 
-			await res.json(response)
+			res.json(populateResponse(response))
 		}catch (e) {
 			parseQueryErrors(e, res, next)
 		}
@@ -279,7 +281,7 @@ module.exports = app => {
 			console.log(`Querying JSON: ${url}`)
 
 			const body = await got(url).json()
-			res.send(body)
+			res.json(populateResponse(body))
 		}catch (err) {
 			console.error(err)
 			next(err)

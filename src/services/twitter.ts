@@ -4,7 +4,7 @@ import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {Filters} from '@/composables/useFilters'
 import {h, reactive, toRaw} from 'vue'
-import {parseRateLimits, parseResponse, TwitterAPIPayload} from '@/data/TwitterV2'
+import {parseRateLimits, parseResponse, TwitterAPIPayload, TwitterAuth} from '@/data/TwitterV2'
 import {
 	TwitterV1APIPayload,
 	parseResponse as parseV1Response,
@@ -53,6 +53,8 @@ export interface QuoteArticle extends TweetArticle {
 }
 
 export class TwitterService extends Service<TwitterArticle> {
+	authUser? : TwitterAuth
+
 	sortMethods : SortMethods<TwitterArticle> = {
 		RefId: (articles) => articles.sort(
 			(a, b) => parseInt(this.actualTweet(b, true).id) - parseInt(this.actualTweet(a, true).id)
@@ -236,9 +238,7 @@ export class TwitterService extends Service<TwitterArticle> {
 		params.set('id', id)
 		params.set('tweet_mode', 'extended')
 
-		const response = await fetch(`/twitter/v1/favorites/${(article as TweetArticle).liked ? 'destroy' : 'create'}?${params.toString()}`, {method: 'POST'})
-			.then(r => r.json())
-		console.dir(response)
+		const response = await Service.fetchProxy(`/twitter/v1/favorites/${(article as TweetArticle).liked ? 'destroy' : 'create'}?${params.toString()}`, {method: 'POST'})
 
 		if (response.statuses) {
 			const payload = parseV1Response(response)
@@ -258,9 +258,7 @@ export class TwitterService extends Service<TwitterArticle> {
 		params.set('id', id)
 		params.set('tweet_mode', 'extended')
 
-		const response = await fetch(`/twitter/retweet?${params.toString()}`, {method: 'POST'})
-			.then(r => r.json())
-		console.dir(response)
+		const response = await Service.fetchProxy(`/twitter/retweet?${params.toString()}`, {method: 'POST'})
 
 		if ((response as TwitterV1Tweet).id_str) {
 			const payload = parseGenericTweet(response)
@@ -297,6 +295,25 @@ export class TwitterService extends Service<TwitterArticle> {
 					return (this.articles.value)[(article as QuoteArticle).quotedId] as TweetArticle
 		}
 	}
+
+	optionComponent = (props : any) => {
+		if (this.authUser)
+			return null
+		else
+			return h('div', {class: 'level'}, [
+				h('div', {class: 'level-left'}),
+				h('div', {class: 'level-right'},
+					h('a', {
+						class: 'button level-item',
+						href: '/twitter/login',
+					}, 'Login')
+				),
+			])
+	}
+
+	loadStatus(status : any) {
+		this.authUser = status.authUser
+	}
 }
 
 interface TwitterCallOpt {
@@ -324,8 +341,7 @@ class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 		if (options.fromEnd && this.articles.length)
 			params.set('until_id', this.articles[this.articles.length - 1])
 
-		const response : TwitterAPIPayload = await fetch(`/twitter/users/${this.userId}?${params.toString()}`).then(r => r.json())
-		console.dir(response)
+		const response : TwitterAPIPayload = await Service.fetchProxy(`/twitter/users/${this.userId}?${params.toString()}`)
 
 		const payload = parseResponse(response)
 
@@ -366,8 +382,7 @@ export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
 		if (options.fromEnd && this.articles.length)
 			params.set('max_id', this.articles[this.articles.length - 1])
 
-		const response : TwitterV1APIPayload = await fetch(`/twitter/v1/statuses/user_timeline?${params.toString()}`).then(r => r.json())
-		console.dir(response)
+		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/statuses/user_timeline?${params.toString()}`)
 
 		this.rateLimitInfo.remainingCalls--
 		parseRateLimits(this, response)
@@ -407,8 +422,7 @@ class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 		if (options.fromEnd && this.articles.length)
 			params.set('max_id', this.articles[this.articles.length - 1])
 
-		const response : TwitterV1APIPayload = await fetch(`/twitter/v1/statuses/home_timeline?${params.toString()}`).then(r => r.json())
-		console.dir(response)
+		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/statuses/home_timeline?${params.toString()}`)
 
 		this.rateLimitInfo.remainingCalls--
 		parseRateLimits(this, response)
@@ -449,10 +463,8 @@ class SearchEndpoint extends Endpoint<TwitterCallOpt> {
 		if (options.fromEnd && this.articles.length)
 			params.set('until_id', this.articles[this.articles.length - 1])
 
-		const response : TwitterAPIPayload = await fetch(`/twitter/search?${params.toString()}`)
-			.then(r => r.json())
+		const response : TwitterAPIPayload = await Service.fetchProxy(`/twitter/search?${params.toString()}`)
 			.catch(e => console.error('Failed to parse search response', e))
-		console.dir(response)
 
 		this.rateLimitInfo.remainingCalls--
 		parseRateLimits(this, response)
@@ -506,8 +518,7 @@ class LikesV1Endpoint extends Endpoint<TwitterCallOpt> {
 		if (options.fromEnd && this.articles.length)
 			params.set('max_id', this.articles[this.articles.length - 1])
 
-		const response : TwitterV1APIPayload = await fetch(`/twitter/v1/statuses/user_timeline?${params.toString()}`).then(r => r.json())
-		console.dir(response)
+		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/statuses/user_timeline?${params.toString()}`)
 
 		this.rateLimitInfo.remainingCalls--
 		parseRateLimits(this, response)

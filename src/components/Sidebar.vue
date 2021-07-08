@@ -5,14 +5,6 @@
 				{{s.name}}
 				<component :is='s.optionComponent'/>
 				<SidebarEndpointMenu v-for='e in s.endpoints' :endpoint='e'/>
-				<div class='level' v-if='s.name === "Twitter"'>
-					<div class='level-left'/>
-					<div class='level-right'>
-						<a class='button level-item' href='/twitter/login'>
-							Login
-						</a>
-					</div>
-				</div>
 			</div>
 		</div>
 		<div id='sidebarButtons'>
