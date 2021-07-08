@@ -135,6 +135,9 @@ export default defineComponent({
 @import "~bulma/sass/elements/icon.sass"
 @import "~bulma/sass/elements/box.sass"
 
+.input.is-static
+	color: $text
+
 .icon
 	color: $white-ter
 

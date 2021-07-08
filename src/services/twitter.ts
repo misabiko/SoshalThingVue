@@ -57,12 +57,12 @@ export class TwitterService extends Service<TwitterArticle> {
 
 	sortMethods : SortMethods<TwitterArticle> = {
 		RefId: (articles) => articles.sort(
-			(a, b) => parseInt(this.actualTweet(b, true).id) - parseInt(this.actualTweet(a, true).id)
+			(a, b) => parseInt(this.actualTweet(b, true).id) - parseInt(this.actualTweet(a, true).id),
 		),
 		Likes: (articles) => articles.sort(
 			(a, b) => (this.actualTweet(b, true).likeCount ?? 0) - (this.actualTweet(a, true).likeCount ?? 0)),
 		Retweets: (articles) => articles.sort(
-			(a, b) => (this.actualTweet(b, true).repostCount ?? 0) - (this.actualTweet(a, true).repostCount ?? 0)
+			(a, b) => (this.actualTweet(b, true).repostCount ?? 0) - (this.actualTweet(a, true).repostCount ?? 0),
 		),
 	}
 
@@ -113,7 +113,7 @@ export class TwitterService extends Service<TwitterArticle> {
 				factory({userId} : { userId : string }) {
 					return new UserTimelineEndpoint(userId)
 				},
-				optionComponent(props : any, {emit}: {emit: any}) {
+				optionComponent(props : any, {emit} : { emit : any }) {
 					return h('div', {class: 'field'}, [
 						h('label', {class: 'field-label'}, 'User Id'),
 						h('div', {class: 'control'},
@@ -134,7 +134,7 @@ export class TwitterService extends Service<TwitterArticle> {
 				factory({userId} : { userId : string }) {
 					return new UserTimelineV1Endpoint(userId)
 				},
-				optionComponent(props : any, {emit}: {emit: any}) {
+				optionComponent(props : any, {emit} : { emit : any }) {
 					return h('div', {class: 'field'}, [
 						h('label', {class: 'field-label'}, 'User Id'),
 						h('div', {class: 'control'},
@@ -163,7 +163,7 @@ export class TwitterService extends Service<TwitterArticle> {
 				factory({query} : { query : string }) {
 					return new SearchEndpoint(query)
 				},
-				optionComponent(props : any, {emit}: {emit: any}) {
+				optionComponent(props : any, {emit} : { emit : any }) {
 					return h('div', {class: 'field'}, [
 						h('label', {class: 'field-label'}, 'Query'),
 						h('div', {class: 'control'},
@@ -181,10 +181,10 @@ export class TwitterService extends Service<TwitterArticle> {
 				},
 			},
 			[LikesV1Endpoint.name]: {
-				factory(opts : {userId? : string, handle? : string}) {
+				factory(opts : { userId? : string, handle? : string }) {
 					return new LikesV1Endpoint(opts)
 				},
-				optionComponent(props : any, {emit}: {emit: any}) {
+				optionComponent(props : any, {emit} : { emit : any }) {
 					return h('div', {class: 'field'}, [
 						h('label', {class: 'field-label'}, 'User Id'),
 						h('div', {class: 'control'},
@@ -245,7 +245,7 @@ export class TwitterService extends Service<TwitterArticle> {
 
 			for (const a of payload.articles)
 				this.updateArticle(a)
-		}else if (response.errors?.find((e: {code: number}) => e.code == 139))	//tweet already liked
+		}else if (response.errors?.find((e : { code : number }) => e.code == 139))	//tweet already liked
 			(this.articles.value[id] as TweetArticle).liked = true
 	}
 
@@ -265,7 +265,7 @@ export class TwitterService extends Service<TwitterArticle> {
 
 			for (const a of payload.articles)
 				this.updateArticle(a)
-		}else if (response.errors?.find((e: {code: number}) => e.code == 327))	//tweet already retweeted
+		}else if (response.errors?.find((e : { code : number }) => e.code == 327))	//tweet already retweeted
 			(this.articles.value[id] as TweetArticle).reposted = true
 	}
 
@@ -275,9 +275,15 @@ export class TwitterService extends Service<TwitterArticle> {
 			case TwitterArticleType.Tweet:
 				return super.logArticle(id)
 			case TwitterArticleType.Retweet:
-				return console.dir({article: toRaw(article), actualArticle: toRaw(this.articles.value[(article as RetweetArticle).retweetedId])})
+				return console.dir({
+					article: toRaw(article),
+					actualArticle: toRaw(this.articles.value[(article as RetweetArticle).retweetedId]),
+				})
 			case TwitterArticleType.Quote:
-				return console.dir({article: toRaw(article), actualArticle: toRaw(this.articles.value[(article as QuoteArticle).quotedId])})
+				return console.dir({
+					article: toRaw(article),
+					actualArticle: toRaw(this.articles.value[(article as QuoteArticle).quotedId]),
+				})
 		}
 	}
 
@@ -296,9 +302,27 @@ export class TwitterService extends Service<TwitterArticle> {
 		}
 	}
 
-	optionComponent = (props : any) => {
+	optionComponent = () => {
 		if (this.authUser)
-			return null
+			return [['Name', this.authUser.screen_name], ['Handle', this.authUser.name], ['Id', this.authUser.id_str]]
+				.map(([label, value]) =>
+					h('div', {class: 'field is-horizontal'}, [
+						h('div', {class: 'field-label is-normal'},
+							h('label', {class: 'label'}, label),
+						),
+						h('div', {class: 'field-body'},
+							h('div', {class: 'field'},
+								h('p', {class: 'control'},
+									h('input', {
+										class: 'input is-static',
+										readonly: true,
+										value,
+									}),
+								),
+							),
+						),
+					]),
+				)
 		else
 			return h('div', {class: 'level'}, [
 				h('div', {class: 'level-left'}),
@@ -306,7 +330,7 @@ export class TwitterService extends Service<TwitterArticle> {
 					h('a', {
 						class: 'button level-item',
 						href: '/twitter/login',
-					}, 'Login')
+					}, 'Login'),
 				),
 			])
 	}
@@ -317,7 +341,7 @@ export class TwitterService extends Service<TwitterArticle> {
 }
 
 interface TwitterCallOpt {
-	fromEnd: boolean
+	fromEnd : boolean
 }
 
 class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
@@ -500,7 +524,7 @@ class LikesV1Endpoint extends Endpoint<TwitterCallOpt> {
 		secUntilNextReset: Date.now() / 1000 + 15 * 60,
 	})
 
-	constructor({userId, handle} : {userId? : string, handle? : string}) {
+	constructor({userId, handle} : { userId? : string, handle? : string }) {
 		super('Likes ' + (handle || userId))
 
 		this.userId = userId

@@ -130,6 +130,9 @@ export default defineComponent({
 
 @include pretty-scrollbar
 
+.input.is-static
+	color: $text
+
 .icon
 	color: $white-ter
 
