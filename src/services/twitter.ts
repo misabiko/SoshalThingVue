@@ -361,6 +361,21 @@ export class TwitterService extends Service<TwitterArticle> {
 	loadStatus(status : any) {
 		this.authUser = status.authUser
 	}
+
+	async fetchV1Status(id : string) {
+		const params = new URLSearchParams()
+		params.set('id', id)
+		params.set('tweet_mode', 'extended')
+
+		const response = await Service.fetchProxy(`/twitter/v1/statuses/show?${params.toString()}`)
+
+		const payload = parseV1Response(response)
+
+		for (const a of payload.articles)
+			this.updateArticle(a)
+
+		return response
+	}
 }
 
 interface TwitterCallOpt {

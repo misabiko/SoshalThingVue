@@ -72,6 +72,7 @@
 								<div class='dropdown-content'>
 									<div class='dropdown-item' @click='service.toggleHideArticle(article.id)'>Hide</div>
 									<div class='dropdown-item' @click='service.logArticle(article.id)'>Log</div>
+									<div class='dropdown-item' @click='fetchLog'>Fetch Status V1</div>
 									<div class='dropdown-item' @click='$emit("expand", article.id)'>Expand</div>
 									<a
 										class='dropdown-item'
@@ -203,7 +204,11 @@ export default defineComponent({
 
 		const showDropdown = ref(false)
 
-		return {service, addUserTimeline, TwitterArticleType, MediaLoadStatus, MediaType, actualArticle, compact, imageFormatClass, showDropdown}
+		async function fetchLog() {
+			console.dir(await service.value.fetchV1Status(article.value.id))
+		}
+
+		return {service, addUserTimeline, TwitterArticleType, MediaLoadStatus, MediaType, actualArticle, compact, imageFormatClass, showDropdown, fetchLog}
 	}
 })
 </script>
