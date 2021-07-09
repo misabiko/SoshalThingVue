@@ -213,6 +213,29 @@ export class TwitterService extends Service<TwitterArticle> {
 					])
 				},
 			},
+			[ListV1Endpoint.name]: {
+				factory(opts : { listId? : string, slug? : string, ownerId? : string, ownerHandle? : string }) {
+					return new ListV1Endpoint(opts)
+				},
+				optionComponent(props : any, {emit} : { emit : any }) {
+					return h('div', {class: 'field'},
+						[['List Id', 'listId'], ['Slug', 'slug'], ['Owner Id', 'ownerId'], ['Owner Handle', 'ownerHandle']]
+							.flatMap(([label, field]) => [
+								h('label', {class: 'field-label'}, label),
+								h('div', {class: 'control'},
+									h('input', {
+										class: 'input',
+										type: 'text',
+										value: props.endpointOptions[field],
+										onInput: (e : InputEvent) => {
+											props.endpointOptions[field] = (e.target as HTMLInputElement).value
+											emit('changeOptions', props.endpointOptions)
+										},
+									}),
+								)]),
+					)
+				},
+			},
 		}, TweetComponent, true)
 	}
 
@@ -561,6 +584,79 @@ class LikesV1Endpoint extends Endpoint<TwitterCallOpt> {
 			endpointType: this.constructor.name,
 			userId: this.userId,
 			handle: this.handle,
+		}
+	}
+}
+
+interface ListCallOpt extends TwitterCallOpt {
+	includeRetweets? : boolean
+}
+
+class ListV1Endpoint extends Endpoint<ListCallOpt> {
+	readonly listId? : string
+	readonly slug? : string
+	readonly ownerId? : string
+	readonly ownerHandle? : string
+
+	rateLimitInfo = reactive({
+		maxCalls: 900,
+		remainingCalls: 900,
+		secUntilNextReset: Date.now() / 1000 + 15 * 60,
+	})
+
+	constructor({
+					listId,
+					slug,
+					ownerId,
+					ownerHandle,
+				} : { listId? : string, slug? : string, ownerId? : string, ownerHandle? : string }) {
+		super('List ' + (listId || slug))
+
+		this.listId = listId
+		this.slug = slug
+		this.ownerId = ownerId
+		this.ownerHandle = ownerHandle
+	}
+
+	async call(options : ListCallOpt) : Promise<Payload> {
+		const params = new URLSearchParams()
+		params.set('tweet_mode', 'extended')
+		if (this.listId)
+			params.set('list_id', this.listId)
+		else if (this.slug) {
+			params.set('slug', this.slug)
+
+			if (this.ownerId)
+				params.set('owner_id', this.ownerId)
+			else if (this.ownerHandle)
+				params.set('owner_screen_name', this.ownerHandle)
+		}
+		params.set('count', '200')
+		params.set('include_rts', options.includeRetweets ? 'true' : 'false')
+		if (options.fromEnd && this.articles.length)
+			params.set('max_id', this.articles[this.articles.length - 1])
+
+		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/lists/statuses?${params.toString()}`)
+
+		this.rateLimitInfo.remainingCalls--
+		parseRateLimits(this, response)
+
+		const payload = parseV1Response(response)
+
+		for (const id of payload.newArticles)
+			if (!this.articles.includes(id))
+				this.articles.push(id)
+
+		return payload
+	}
+
+	getKeyOptions() {
+		return {
+			endpointType: this.constructor.name,
+			listId: this.listId,
+			slug: this.slug,
+			ownerId: this.ownerId,
+			ownerHandle: this.ownerHandle,
 		}
 	}
 }
