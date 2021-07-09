@@ -280,6 +280,17 @@ interface TwitterV1Poll {
 
 type TwitterV1Indices = [number, number]
 
+function parseText(tweet : TwitterV1Tweet) : string {
+	let text = tweet.full_text ?? tweet.text
+
+	if (tweet.extended_entities?.media) {
+		if (text.endsWith(tweet.extended_entities.media[0].url))
+			text = text.replace(tweet.extended_entities.media[0].url, '')
+	}
+
+	return text.trim()
+}
+
 function parseEntities(tweet : TwitterV1Tweet) {
 	const media : PlainMedia[] = []
 
@@ -344,7 +355,7 @@ function parseTweet(tweet: TwitterV1Tweet) : TweetArticle {
 		type: TwitterArticleType.Tweet,
 		id: tweet.id_str,
 		creationDate: new Date(tweet.created_at),
-		text: tweet.full_text,
+		text: parseText(tweet),
 		author: parseUser(tweet.user),
 		media: parseEntities(tweet),
 		liked: tweet.favorited,
@@ -392,7 +403,7 @@ function parseQuote(tweet: TwitterV1Tweet) {
 		id: tweet.id_str,
 		quotedId: tweet.quoted_status_id_str,
 		creationDate: new Date(tweet.created_at),
-		text: tweet.full_text,
+		text: parseText(tweet),
 		author: parseUser(tweet.user),
 		media: parseEntities(tweet),
 		liked: tweet.favorited,
