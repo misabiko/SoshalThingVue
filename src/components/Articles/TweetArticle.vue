@@ -31,7 +31,7 @@
 							<small title='long time!'>short time!</small>
 						</span>
 					</div>
-					<div class='tweet-paragraph'>{{ actualArticle.text }}</div>
+					<p class='articleParagraph'>{{ actualArticle.text }}</p>
 				</div>
 <!--			extra-->
 				<nav class='level is-mobile'>
