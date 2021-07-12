@@ -36,7 +36,7 @@ export abstract class PageInfo {
 		this.styleElement.id = 'FavViewerCSS'
 		document.head.appendChild(this.styleElement)
 
-		this.searchParams = new URLSearchParams(window.location.href)
+		this.searchParams = new URLSearchParams(window.location.search)
 	}
 
 	//by default do nothing
