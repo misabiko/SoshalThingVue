@@ -30,9 +30,9 @@
 				</div>
 			</div>
 		</div>
-		<template v-if='service.endpointTypes[endpointOptions.endpointType] !== undefined'>
+		<template v-if='endpointOptionComponent'>
 			<component
-				:is='service.endpointTypes[endpointOptions.endpointType] ? service.endpointTypes[endpointOptions.endpointType].optionComponent : undefined'
+				:is='endpointOptionComponent'
 				:endpointOptions='endpointOptions'
 				@changeOptions='endpointOptions = $event'
 			/>
@@ -49,9 +49,9 @@
 				</select>
 			</div>
 		</div>
-		<fieldset disabled>
+		<fieldset disabled v-if='endpointOptionComponent'>
 			<component
-				:is='service.endpointTypes[service.endpoints[modelValue.endpointName].getKeyOptions().endpointType].optionComponent'
+				:is='endpointOptionComponent'
 				:endpointOptions='service.endpoints[modelValue.endpointName].getKeyOptions()'
 			/>
 		</fieldset>
@@ -89,6 +89,10 @@ export default defineComponent({
 			}
 		})
 		const newEndpoint = ref(!!endpointOptions.value)
+		const endpointOptionComponent = computed(() => {
+			if (endpointOptions.value?.endpointType && Object.keys(service.value.endpointTypes).length)
+				return service.value.endpointTypes[endpointOptions.value.endpointType]?.optionComponent
+		})
 
 		watch(
 			service,
@@ -117,6 +121,7 @@ export default defineComponent({
 			services: Service.instances,
 			newEndpoint,
 			endpointOptions,
+			endpointOptionComponent,
 		}
 	}
 })
