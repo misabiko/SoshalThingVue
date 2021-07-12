@@ -3,7 +3,7 @@ import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
 import PixivComponent from '@/components/Articles/PixivArticle.vue'
 import {Article, getImageFormat, ImageData, LazyMedia, MediaArticle, MediaLoadStatus, MediaType} from '@/data/articles'
-import {getNewId} from '@/data/articleLists'
+import {h} from 'vue'
 
 export interface PixivArticle extends Article, MediaArticle {
 	title : string
@@ -14,15 +14,40 @@ export interface PixivArticle extends Article, MediaArticle {
 
 export class PixivService extends Service<PixivArticle> implements HostPageService {
 	pageInfo? : PixivPage
+	csrfToken? : string
 
 	constructor(pageInfoObj? : PageInfo) {
-		super('Pixiv', {}, PixivComponent, true)
+		super('Pixiv', {
+			[UserPageEndpoint.name]: {
+				factory(opts : { userId : string }) {
+					return new UserPageEndpoint(opts)
+				},
+				optionComponent(props : any, {emit} : { emit : any }) {
+					return h('div', {class: 'field'}, [
+						h('label', {class: 'field-label'}, 'User Id'),
+						h('div', {class: 'control'},
+							h('input', {
+								class: 'input',
+								type: 'text',
+								value: props.endpointOptions.userId,
+								onInput: (e : InputEvent) => {
+									props.endpointOptions.userId = (e.target as HTMLInputElement).value
+									emit('changeOptions', props.endpointOptions)
+								},
+							}),
+						),
+					])
+				},
+			},
+		}, PixivComponent, true)
 
 		if (pageInfoObj instanceof PixivPage)
 			this.pageInfo = pageInfoObj
 
-		if (this.pageInfo instanceof PixivFollowPage)
+		if (this.pageInfo instanceof PixivFollowPage) {
 			this.addEndpoint(new FollowPageEndpoint(this.pageInfo))
+			this.csrfToken = this.pageInfo.csrfToken
+		}
 		if (this.pageInfo instanceof PixivUserPage)
 			this.addEndpoint(new UserPageEndpoint({pageInfo: this.pageInfo, userId: this.pageInfo.userId}))
 		if (this.pageInfo instanceof PixivBookmarkPage)
@@ -342,10 +367,10 @@ class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
 	static defaultLastPage = 100
 
 	readonly userId: string
-	readonly pageInfo : PixivUserPage
+	readonly pageInfo? : PixivUserPage
 
-	constructor(opts : {pageInfo : PixivUserPage, userId : string}) {
-		super('User ' + opts.userId, opts.pageInfo.pageNum, opts.pageInfo.lastPage)
+	constructor(opts : {pageInfo? : PixivUserPage, userId : string}) {
+		super('User ' + opts.userId, opts.pageInfo?.pageNum, opts.pageInfo?.lastPage)
 
 		this.userId = opts.userId
 		this.pageInfo = opts.pageInfo
@@ -449,6 +474,59 @@ class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
 		}
 	}
 }
+
+//Request URL: https://www.pixiv.net/ajax/user/2865617/profile/illusts
+// ?ids[]=91065721
+// &ids[]=90382268
+// &ids[]=89658863
+// &ids[]=88985969
+// &ids[]=88266211
+// &ids[]=87583225
+// &ids[]=86873466
+// &ids[]=86143934
+// &ids[]=85505796
+// &ids[]=84851127
+// &ids[]=84208871
+// &ids[]=83495044
+// &ids[]=82806027
+// &ids[]=82144182
+// &ids[]=81365767
+// &ids[]=80617517
+// &ids[]=79941477
+// &ids[]=79325609
+// &ids[]=78172644
+// &ids[]=77689433
+// &ids[]=77155779
+// &ids[]=76656049
+// &ids[]=76118060
+// &ids[]=75588044
+// &ids[]=75094687
+// &ids[]=74607973
+// &ids[]=74079924
+// &ids[]=73550236
+// &ids[]=73260257
+// &ids[]=73043926
+// &ids[]=72918816
+// &ids[]=72536828
+// &ids[]=72123582
+// &ids[]=71998638
+// &ids[]=71539913
+// &ids[]=71273841
+// &ids[]=71263126
+// &ids[]=71057689
+// &ids[]=70997312
+// &ids[]=70902923
+// &ids[]=70575275
+// &ids[]=70290073
+// &ids[]=70061150
+// &ids[]=70059785
+// &ids[]=69751280
+// &ids[]=69568205
+// &ids[]=69138824
+// &ids[]=69108469
+// &work_category=illust
+// &is_first_page=1
+// &lang=en
 
 interface BookmarkPageCallOpt {
 	pageNum : number

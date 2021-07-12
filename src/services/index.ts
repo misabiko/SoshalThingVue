@@ -209,7 +209,7 @@ export type WrappedPayload = { payload : Payload, basePageNum : number, lastPage
 export abstract class PagedEndpoint<CallOpt extends { pageNum : number } = { pageNum : number }> extends Endpoint<CallOpt> {
 	loadedPages = ref<{ [page : number] : string[] }>({})
 
-	protected constructor(name : string, public basePageNum : number, public lastPage? : number) {
+	protected constructor(name : string, public basePageNum = 0, public lastPage? : number) {
 		super(name)
 	}
 
