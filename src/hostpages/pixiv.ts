@@ -42,6 +42,7 @@ export class PixivFollowPage extends PixivPage {
 export class PixivUserPage extends PixivPage {
 	pageNum! : number
 	lastPage! : number
+	readonly userId : string
 
 	currentViewMode = 'fullscreen'
 	activatorClassNames? : string
@@ -52,6 +53,10 @@ export class PixivUserPage extends PixivPage {
 			default: `#favviewer {width: 100%; height: 50%}`,
 			fullscreen: `#favviewer ~ div {display: none;`
 		})
+
+		this.userId = window.location.pathname.split('/').pop() ?? ''
+		if (!this.userId)
+			throw `Couldn't find userId in pathname "${window.location.pathname}"`
 	}
 
 	async waitUntilInjectable() : Promise<void> {

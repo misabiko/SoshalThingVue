@@ -24,20 +24,22 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 		if (this.pageInfo instanceof PixivFollowPage)
 			this.addEndpoint(new FollowPageEndpoint(this.pageInfo))
 		if (this.pageInfo instanceof PixivUserPage)
-			this.addEndpoint(new UserPageEndpoint(this.pageInfo))
+			this.addEndpoint(new UserPageEndpoint({pageInfo: this.pageInfo, userId: this.pageInfo.userId}))
 		if (this.pageInfo instanceof PixivBookmarkPage)
 			this.addEndpoint(new BookmarkPageEndpoint(this.pageInfo))
 	}
 
 	initialTimelines() {
+		let endpointName
 		switch (this.pageInfo?.constructor) {
 			case PixivFollowPage:
+				endpointName = JSON.stringify({endpointType: FollowPageEndpoint.name})
 				return [
 					{
 						title: 'Following',
-						articleList: getNewId(),
+						articleList: endpointName,
 						serviceName: this.name,
-						endpointName: JSON.stringify({endpointType: FollowPageEndpoint.name}),
+						endpointName,
 						container: 'MasonryContainer',
 						filters: this.defaultFilters,
 						sortConfig: {
@@ -47,12 +49,16 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 					},
 				]
 			case PixivUserPage:
+				endpointName = JSON.stringify({
+					endpointType: UserPageEndpoint.name,
+					userId: (this.pageInfo as PixivUserPage).userId,
+				})
 				return [
 					{
 						title: 'User',
-						articleList: getNewId(),
+						articleList: endpointName,
 						serviceName: this.name,
-						endpointName: JSON.stringify({endpointType: UserPageEndpoint.name}),
+						endpointName,
 						container: 'MasonryContainer',
 						filters: this.defaultFilters,
 						sortConfig: {
@@ -62,15 +68,16 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 					},
 				]
 			case PixivBookmarkPage:
+				endpointName = JSON.stringify({
+					endpointType: BookmarkPageEndpoint.name,
+					priv: (this.pageInfo as PixivBookmarkPage).priv
+				})
 				return [
 					{
 						title: 'Bookmarks',
-						articleList: getNewId(),
+						articleList: endpointName,
 						serviceName: this.name,
-						endpointName: JSON.stringify({
-							endpointType: BookmarkPageEndpoint.name,
-							priv: (this.pageInfo as PixivBookmarkPage).priv
-						}),
+						endpointName,
 						container: 'MasonryContainer',
 						filters: this.defaultFilters,
 						sortConfig: {
@@ -331,12 +338,21 @@ interface UserPageCallOpt {
 class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
 	static defaultLastPage = 100
 
-	constructor(readonly pageInfo : PixivUserPage) {
-		super('User', pageInfo.pageNum, pageInfo.lastPage)
+	readonly userId: string
+	readonly pageInfo : PixivUserPage
+
+	constructor(opts : {pageInfo : PixivUserPage, userId : string}) {
+		super('User ' + opts.userId, opts.pageInfo.pageNum, opts.pageInfo.lastPage)
+
+		this.userId = opts.userId
+		this.pageInfo = opts.pageInfo
 	}
 
 	getKeyOptions() {
-		return {endpointType: this.constructor.name}
+		return {
+			endpointType: this.constructor.name,
+			userId: this.userId,
+		}
 	}
 
 	async call(options : UserPageCallOpt) {
@@ -344,7 +360,7 @@ class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
 
 		const wrappedPayload = {
 			payload: options.pageNum === this.pageInfo?.pageNum ?
-				UserPageEndpoint.loadCurrentPageArticles() :
+				UserPageEndpoint.parsePageArticles(document) :
 				{articles: [], newArticles: []},
 			basePageNum: this.pageInfo?.pageNum || 0,
 			lastPage: UserPageEndpoint.defaultLastPage,
@@ -353,10 +369,6 @@ class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
 		this.updateInstance(options, wrappedPayload)
 
 		return wrappedPayload.payload
-	}
-
-	private static loadCurrentPageArticles() {
-		return UserPageEndpoint.parsePageArticles(document)
 	}
 
 	private static parsePageArticles(page : Document | HTMLHtmlElement) : Payload {

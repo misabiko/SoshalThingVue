@@ -38,7 +38,7 @@
 					</span>
 				</button>
 				<template v-if='endpointPackage.type !== EndpointPackageType.NoEndpoint'>
-					<button @click='getNewArticles({fromTop: true, pageNum: endpoint.loadedPages && Object.keys(endpoint.loadedPages)[0]})'>
+					<button @click='getNewArticles({fromTop: true, pageNum: refreshPageNum})'>
 						<span class='icon'>
 							<FontAwesomeIcon icon='sync-alt' size='lg'/>
 						</span>
@@ -223,7 +223,7 @@ export default defineComponent({
 				}
 		})
 
-		const getNewArticles = async function(callOpts : any = {pageNum: newPage.value}) {
+		const getNewArticles = async function(callOpts : any = {pageNum: newPage.value ?? refreshPageNum.value}) {
 			if (!endpoint.value?.ready) {
 				if (endpoint.value)
 					console.debug(`${endpoint.value.name} isn't ready.`)
@@ -263,6 +263,13 @@ export default defineComponent({
 		}
 
 		const newPage = ref(endpoint.value instanceof PagedEndpoint ? endpoint.value.basePageNum : undefined)
+		const refreshPageNum = computed(() => {
+			const e = endpoint.value
+			if (e instanceof PagedEndpoint)
+				return (e.loadedPages.value && Object.keys(e.loadedPages.value)[0]) || 0
+			else
+				return undefined
+		})
 
 		const remainingPages = computed<number[]>(() => {
 			if (!endpoint.value || !(endpoint.value instanceof PagedEndpoint))
@@ -590,6 +597,7 @@ export default defineComponent({
 			...mediaServiceReturns,
 			modifiedTimelineData,
 			newPage,
+			refreshPageNum,
 			articleLists,
 		}
 	},

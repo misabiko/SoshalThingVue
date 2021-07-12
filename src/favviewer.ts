@@ -28,7 +28,7 @@ import {articleLists} from '@/data/articleLists'
 	(globalThis as any).services = Service.instances;
 	(globalThis as any).articleLists = articleLists;
 
-	Service.instances.push(new PixivService(page))
+	Service.addService(new PixivService(page))
 
 	await Service.initLocalStorage()
 
