@@ -92,8 +92,15 @@ export class PixivUserPage extends PixivPage {
 		this.lastPage = lastPage
 	}
 
-	static getPageNums(page : Document | HTMLHtmlElement) : { pageNum : number, lastPage : number } {
+	static getPageNums(page : Document | HTMLHtmlElement = document) : { pageNum : number, lastPage : number } {
 		const result = {pageNum: 0, lastPage: 0}
+
+		const pageTab = page.querySelector('#favviewer')?.previousElementSibling?.querySelector('nav')
+		const currentPageIndex = Array.from(pageTab?.children as HTMLCollection, (child: any) => child.ariaCurrent).findIndex((current: string) => current === 'page')
+		if (currentPageIndex === undefined || currentPageIndex < 0)
+			throw "Couldn't find the page tabs"
+		else if (currentPageIndex == 0)
+			return result
 
 		const paginator = page.querySelector('#favviewer')?.nextElementSibling?.nextElementSibling
 		if (!paginator)

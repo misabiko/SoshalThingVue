@@ -41,6 +41,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						serviceName: this.name,
 						endpointName,
 						container: 'MasonryContainer',
+						columnCount: 5,
 						filters: this.defaultFilters,
 						sortConfig: {
 							method: this.defaultSortMethod,
@@ -60,6 +61,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						serviceName: this.name,
 						endpointName,
 						container: 'MasonryContainer',
+						columnCount: 5,
 						filters: this.defaultFilters,
 						sortConfig: {
 							method: this.defaultSortMethod,
@@ -79,6 +81,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						serviceName: this.name,
 						endpointName,
 						container: 'MasonryContainer',
+						columnCount: 5,
 						filters: this.defaultFilters,
 						sortConfig: {
 							method: this.defaultSortMethod,
@@ -359,7 +362,7 @@ class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
 		console.log('Loading page ' + options.pageNum)
 
 		const wrappedPayload = {
-			payload: options.pageNum === this.pageInfo?.pageNum ?
+			payload: options.pageNum === (this.pageInfo?.pageNum ?? PixivUserPage.getPageNums().pageNum) ?
 				UserPageEndpoint.parsePageArticles(document) :
 				{articles: [], newArticles: []},
 			basePageNum: this.pageInfo?.pageNum || 0,
@@ -372,12 +375,13 @@ class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
 	}
 
 	private static parsePageArticles(page : Document | HTMLHtmlElement) : Payload {
+		console.log(page)
 		const articles : PixivArticle[] = []
 		const newArticles = []
 
 		const {pageNum} = PixivUserPage.getPageNums(page)
 
-		const rawThumbs = document.getElementById('favviewer')?.nextElementSibling?.querySelector('ul')?.children
+		const rawThumbs = document.querySelector('#favviewer + div > div ul')?.children
 		if (!rawThumbs)
 			throw "Couldn't find thumbs"
 

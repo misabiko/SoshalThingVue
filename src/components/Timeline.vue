@@ -266,7 +266,7 @@ export default defineComponent({
 		const refreshPageNum = computed(() => {
 			const e = endpoint.value
 			if (e instanceof PagedEndpoint)
-				return (e.loadedPages.value && Object.keys(e.loadedPages.value)[0]) || 0
+				return (e.loadedPages.value && parseInt(Object.keys(e.loadedPages.value)[0])) || 0
 			else
 				return undefined
 		})
