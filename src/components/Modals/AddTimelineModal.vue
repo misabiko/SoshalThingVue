@@ -73,7 +73,7 @@
 </template>
 
 <script lang='ts'>
-import {computed, defineComponent, onBeforeMount, PropType, ref, toRefs, watch} from 'vue'
+import {computed, defineComponent, onBeforeMount, PropType, ref} from 'vue'
 import {HostPageService, Service} from '@/services'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faTimes} from '@fortawesome/free-solid-svg-icons'

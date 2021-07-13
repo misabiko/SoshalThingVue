@@ -1,19 +1,8 @@
 import './setup'
 import {expect} from 'chai'
-import {shallowMount} from '@vue/test-utils'
 import tweet from '../fixtures/tweet_4photos_1hashtag.json'
 import {parseGenericTweet, TwitterV1Tweet} from '@/data/TwitterV1'
 import {TweetArticle} from '@/services/twitter'
-
-/*describe('HelloWorld.vue', () => {
-	it('renders props.msg when passed', () => {
-		const msg = 'new message'
-		const wrapper = shallowMount(HelloWorld, {
-			props: {msg},
-		})
-		expect(wrapper.text()).to.include(msg)
-	})
-})*/
 
 describe('Twitter', () => {
 	describe('V1', () => {
