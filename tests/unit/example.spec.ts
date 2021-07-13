@@ -1,3 +1,4 @@
+import './setup'
 import {expect} from 'chai'
 import {shallowMount} from '@vue/test-utils'
 import tweet from '../fixtures/tweet_4photos_1hashtag.json'
@@ -20,7 +21,7 @@ describe('Twitter', () => {
 			const {articles} = parseGenericTweet(tweet as unknown as TwitterV1Tweet)
 			const parsedTweet = articles[0] as TweetArticle
 
-			expect(parsedTweet.text).to.be('今週だけどね #今月描いた絵を晒そう')
+			expect(parsedTweet.text).to.be.equal('今週だけどね\n#今月描いた絵を晒そう')
 		})
 	})
 })
