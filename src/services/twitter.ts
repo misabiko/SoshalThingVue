@@ -539,15 +539,54 @@ class SearchEndpoint extends Endpoint<TwitterCallOpt> {
 
 		const payload = parseResponse(response)
 
-		this.updateInstance(options, payload)
+		for (const id of payload.newArticles)
+			if (!this.articles.includes(id))
+				this.articles.push(id)
 
 		return payload
 	}
 
-	updateInstance(options : TwitterCallOpt, payload : Payload) {
+	getKeyOptions() {
+		return {
+			endpointType: this.constructor.name,
+			query: this.query,
+		}
+	}
+}
+
+class SearchV1Endpoint extends Endpoint<TwitterCallOpt> {
+	rateLimitInfo = reactive({
+		maxCalls: 180,
+		remainingCalls: 180,
+		secUntilNextReset: Date.now() / 1000 + 15 * 60,
+	})
+
+	constructor(readonly query : string) {
+		super('Search V1 ' + query)
+	}
+
+	async call(options : TwitterCallOpt) : Promise<Payload> {
+		const params = new URLSearchParams()
+		params.set('tweet_mode', 'extended')
+		params.set('result_type', 'recent')
+		params.set('q', this.query)
+
+		params.set('count', '100')
+		if (options.fromEnd && this.articles.length)
+			params.set('max_id', this.articles[this.articles.length - 1])
+
+		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/search/tweets?${params.toString()}`)
+
+		this.rateLimitInfo.remainingCalls--
+		parseRateLimits(this, response)
+
+		const payload = parseV1Response(response)
+
 		for (const id of payload.newArticles)
 			if (!this.articles.includes(id))
 				this.articles.push(id)
+
+		return payload
 	}
 
 	getKeyOptions() {
