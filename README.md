@@ -6,6 +6,11 @@ Most tasks are hosted on the [SoshalThingVue3 project](https://github.com/misabi
 
 SoshalThing is being rewritten from scratch with Vue.js 3, so the [vue2 branch](https://github.com/misabiko/SoshalThing/tree/vue2) still has a few more features.
 
+Build with
+`npm run serve`
+or
+`npm run build && npm run server`
+
 # FavViewer
 
 A userscript version of SoshalThing to inject timelines into webpages and profit of its features.

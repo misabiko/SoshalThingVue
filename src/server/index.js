@@ -4,7 +4,7 @@ const favicon = require('serve-favicon')
 const configure = require('./configure')
 
 const app = express()
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 8080
 //const icoPath = path.join('dist', 'favicon.ico')
 
 app.use(express.static('dist'))
