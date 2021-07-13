@@ -1,4 +1,4 @@
-import {HostPageService, PagedEndpoint, Payload, Service} from '@/services'
+import {HostPageService, PagedCallOpt, PagedEndpoint, Payload, Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
 import PixivComponent from '@/components/Articles/PixivArticle.vue'
@@ -233,11 +233,7 @@ interface MountPointData {
 	responseCount : number
 }
 
-interface FollowPageCallOpt {
-	pageNum : number
-}
-
-class FollowPageEndpoint extends PagedEndpoint<FollowPageCallOpt> {
+class FollowPageEndpoint extends PagedEndpoint {
 	static defaultLastPage = 100
 
 	constructor(readonly pageInfo : PixivFollowPage) {
@@ -248,7 +244,7 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageCallOpt> {
 		return {endpointType: this.constructor.name}
 	}
 
-	async call(options : FollowPageCallOpt) {
+	async call(options : PagedCallOpt) {
 		console.log('Loading page ' + options.pageNum)
 
 		const wrappedPayload = {
@@ -360,11 +356,7 @@ class FollowPageEndpoint extends PagedEndpoint<FollowPageCallOpt> {
 	}
 }
 
-interface UserPageCallOpt {
-	pageNum : number
-}
-
-class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
+class UserPageEndpoint extends PagedEndpoint {
 	static defaultLastPage = 100
 
 	readonly userId: string
@@ -384,7 +376,7 @@ class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
 		}
 	}
 
-	async call(options : UserPageCallOpt) {
+	async call(options : PagedCallOpt) {
 		console.log('Loading page ' + options.pageNum)
 
 		const wrappedPayload = {
@@ -476,64 +468,7 @@ class UserPageEndpoint extends PagedEndpoint<UserPageCallOpt> {
 	}
 }
 
-//Request URL: https://www.pixiv.net/ajax/user/2865617/profile/illusts
-// ?ids[]=91065721
-// &ids[]=90382268
-// &ids[]=89658863
-// &ids[]=88985969
-// &ids[]=88266211
-// &ids[]=87583225
-// &ids[]=86873466
-// &ids[]=86143934
-// &ids[]=85505796
-// &ids[]=84851127
-// &ids[]=84208871
-// &ids[]=83495044
-// &ids[]=82806027
-// &ids[]=82144182
-// &ids[]=81365767
-// &ids[]=80617517
-// &ids[]=79941477
-// &ids[]=79325609
-// &ids[]=78172644
-// &ids[]=77689433
-// &ids[]=77155779
-// &ids[]=76656049
-// &ids[]=76118060
-// &ids[]=75588044
-// &ids[]=75094687
-// &ids[]=74607973
-// &ids[]=74079924
-// &ids[]=73550236
-// &ids[]=73260257
-// &ids[]=73043926
-// &ids[]=72918816
-// &ids[]=72536828
-// &ids[]=72123582
-// &ids[]=71998638
-// &ids[]=71539913
-// &ids[]=71273841
-// &ids[]=71263126
-// &ids[]=71057689
-// &ids[]=70997312
-// &ids[]=70902923
-// &ids[]=70575275
-// &ids[]=70290073
-// &ids[]=70061150
-// &ids[]=70059785
-// &ids[]=69751280
-// &ids[]=69568205
-// &ids[]=69138824
-// &ids[]=69108469
-// &work_category=illust
-// &is_first_page=1
-// &lang=en
-
-interface BookmarkPageCallOpt {
-	pageNum : number
-}
-
-class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageCallOpt> {
+class BookmarkPageEndpoint extends PagedEndpoint {
 	priv: boolean
 
 	constructor(readonly pageInfo : PixivBookmarkPage) {
@@ -549,7 +484,7 @@ class BookmarkPageEndpoint extends PagedEndpoint<BookmarkPageCallOpt> {
 		}
 	}
 
-	async call(options : BookmarkPageCallOpt) {
+	async call(options : PagedCallOpt) {
 		console.log('Loading page ' + options.pageNum)
 
 		const wrappedPayload = {
