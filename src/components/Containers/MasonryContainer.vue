@@ -18,14 +18,14 @@
 <script lang='ts'>
 import {computed, defineComponent, onBeforeUpdate, PropType} from 'vue'
 import {LazyMedia, PlainMedia, MediaArticle, MediaLoadStatus, QueriedMedia} from '@/data/articles'
-import {MediaService} from '@/services'
+import {MediaService, Service} from '@/services'
 
 type RatioedArticle = [MediaArticle, number]
 
 export default defineComponent({
 	props: {
-		service: {
-			type: Object as PropType<MediaService>,
+		serviceName: {
+			type: String,
 			required: true,
 		},
 		columnCount: {
@@ -54,7 +54,10 @@ export default defineComponent({
 
 		const columns = computed(() => arrangeColumns(Math.min(props.columnCount, props.articles.length), props.articles, props.rightToLeft))
 
-		return {columns}
+		return {
+			columns,
+			service: computed(() => Service.instances[props.serviceName])
+		}
 	},
 })
 

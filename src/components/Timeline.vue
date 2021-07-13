@@ -100,7 +100,7 @@
 		<component
 			class='articlesContainer'
 			:is='containers[timeline.container]'
-			:service='service'
+			:serviceName='service.name'
 			:articles='articles'
 			:columnCount='Math.min(articles.length, columnCount)'
 			:rightToLeft='rightToLeft'
@@ -112,7 +112,7 @@
 		></component>
 		<Modal
 			v-if='modalArticle.length'
-			:service='service'
+			:serviceName='service.name'
 			:article='service.articles.value[modalArticle]'
 			:onArticleClick='onArticleClicks[onArticleClick]'
 			@close='modalArticle = ""'

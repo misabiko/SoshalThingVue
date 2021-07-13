@@ -15,14 +15,14 @@
 </template>
 
 <script lang='ts'>
-import {defineComponent, onBeforeUpdate, PropType} from 'vue'
+import {computed, defineComponent, onBeforeUpdate, PropType} from 'vue'
 import {Article} from '@/data/articles'
 import {Service} from '@/services'
 
 export default defineComponent({
 	props: {
-		service: {
-			type: Object as PropType<Service>,
+		serviceName: {
+			type: String,
 			required: true,
 		},
 		columnCount: {
@@ -48,6 +48,10 @@ export default defineComponent({
 	setup(props) {
 		onBeforeUpdate(props.updateQueries)
 		onBeforeUpdate(props.updateLoadings)
+
+		return {
+			service: computed(() => Service.instances[props.serviceName])
+		}
 	},
 })
 </script>

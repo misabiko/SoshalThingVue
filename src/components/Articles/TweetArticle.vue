@@ -33,7 +33,7 @@
 					</div>
 					<p class='articleParagraph'>{{ actualArticle.text }}</p>
 				</div>
-<!--			extra-->
+				<!--			extra-->
 				<nav class='level is-mobile'>
 					<div class='level-left'>
 						<a
@@ -141,10 +141,6 @@ library.add(faRetweet, fasHeart, farHeart, faEllipsisH)
 
 export default defineComponent({
 	props: {
-		service: {
-			type: Object as PropType<TwitterService>,
-			required: true,
-		},
 		onArticleClick: {
 			type: Function,
 			required: true,
@@ -156,8 +152,9 @@ export default defineComponent({
 	},
 
 	setup(props) {
-		const {article, service} = toRefs(props)
+		const {article} = toRefs(props)
 
+		const service = computed(() => Service.instances.Twitter as TwitterService)
 		const actualArticle = computed<TweetArticle>(() => service.value.actualTweet(article.value.id))
 
 		function addUserTimeline(user : TwitterUser) {

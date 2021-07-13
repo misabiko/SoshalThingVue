@@ -14,14 +14,14 @@
 </template>
 
 <script lang='ts'>
-import {defineComponent, onBeforeUpdate, PropType, markRaw} from 'vue'
+import {defineComponent, onBeforeUpdate, PropType, markRaw, ref, computed} from 'vue'
 import {Article} from '@/data/articles'
 import {Service} from '@/services'
 
 export default defineComponent({
 	props: {
-		service: {
-			type: Object as PropType<Service>,
+		serviceName: {
+			type: String,
 			required: true,
 		},
 		onArticleClick: Function,
@@ -42,6 +42,10 @@ export default defineComponent({
 	setup(props) {
 		onBeforeUpdate(props.updateQueries)
 		onBeforeUpdate(props.updateLoadings)
+
+		return {
+			service: computed(() => Service.instances[props.serviceName])
+		}
 	},
 })
 </script>

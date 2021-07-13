@@ -5,7 +5,6 @@
 			<div class='articleModal'>
 				<component
 					:is='service.articleComponent'
-					:service='service'
 					:article='article'
 					:on-article-click='() => {}'
 					@loading-full-media='$emit("loadingFullMedia", $event)'
@@ -30,7 +29,7 @@
 </template>
 
 <script lang='ts'>
-import {defineComponent, PropType, ref} from 'vue'
+import {computed, defineComponent, PropType, ref} from 'vue'
 import {Service} from '@/services'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faSearchMinus, faSearchPlus} from '@fortawesome/free-solid-svg-icons'
@@ -39,14 +38,17 @@ library.add(faSearchMinus, faSearchPlus)
 
 export default defineComponent({
 	props: {
-		service: {
-			type: Object as PropType<Service>,
+		serviceName: {
+			type: String,
 			required: true,
 		},
 		article: Object,
 	},
-	setup() {
-		return {zoom: ref(90)}
+	setup(props) {
+		return {
+			zoom: ref(90),
+			service: computed(() => Service.instances[props.serviceName])
+		}
 	},
 })
 </script>

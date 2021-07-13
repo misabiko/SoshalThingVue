@@ -6,7 +6,7 @@
 </template>
 
 <script lang='ts'>
-import {defineComponent, h, PropType, toRefs} from 'vue'
+import {computed, defineComponent, h, PropType, toRefs} from 'vue'
 import {PixivArticle, PixivService} from '@/services/pixiv'
 import {useFavViewerButtons} from '@/composables/useFavViewerButtons'
 import {useLazyMedia} from '@/composables/useLazyMedia'
@@ -14,16 +14,13 @@ import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faSmile} from '@fortawesome/free-regular-svg-icons'
 import {faHeart} from '@fortawesome/free-solid-svg-icons'
+import {Service} from '@/services'
 
 library.add(faSmile, faHeart)
 
 export default defineComponent({
 	name: 'PixivArticle',
 	props: {
-		service: {
-			type: Object as PropType<PixivService>,
-			required: true,
-		},
 		onArticleClick: {
 			type: Function as PropType<(id : string) => void>,
 			required: true,
@@ -35,9 +32,10 @@ export default defineComponent({
 	},
 
 	setup(props) {
-		const {service, article, onArticleClick} = toRefs(props)
+		const {article, onArticleClick} = toRefs(props)
 		const bottomButtons = []
 
+		const service = computed(() => Service.instances.Pixiv as PixivService)
 		bottomButtons.push(
 			() => {
 				if (!article.value.liked)
