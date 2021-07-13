@@ -605,7 +605,7 @@ export default defineComponent({
 </script>
 
 <style lang='sass'>
-@use '../sass/core' as *
+@use '~@/sass/core' as *
 
 .timeline
 	@include pretty-scrollbar

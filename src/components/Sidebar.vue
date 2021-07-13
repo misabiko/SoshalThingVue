@@ -60,7 +60,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="sass">
-@use '../sass/core' as *
+@use '~@/sass/core' as *
 
 @include pretty-scrollbar
 

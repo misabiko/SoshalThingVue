@@ -292,7 +292,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang='sass'>
-@use '../../sass/core' as *
+@use '~@/sass/core' as *
 @import "~bulma/sass/utilities/mixins"
 
 .modal.is-active

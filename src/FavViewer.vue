@@ -124,7 +124,7 @@ export default defineComponent({
 </script>
 
 <style lang='sass'>
-@use 'sass/core' as *
+@use '~@/sass/core' as *
 @import "~bulma/sass/utilities/_all.sass"
 @import "~bulma/sass/form/_all.sass"
 @import "~bulma/sass/components/level.sass"
@@ -153,7 +153,7 @@ export default defineComponent({
 </style>
 
 <style scoped lang='sass'>
-@use 'sass/core' as *
+@use '~@/sass/core' as *
 
 #timelineContainer
 	@include pretty-scrollbar
