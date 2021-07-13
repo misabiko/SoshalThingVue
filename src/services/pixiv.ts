@@ -19,6 +19,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 	constructor(pageInfoObj? : PageInfo) {
 		super('Pixiv', {
 			[UserPageEndpoint.name]: {
+				name: 'User Page Endpoint',
 				factory(opts : { userId : string }) {
 					return new UserPageEndpoint(opts)
 				},

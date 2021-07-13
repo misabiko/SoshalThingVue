@@ -24,7 +24,7 @@
 				<div class='select'>
 					<select v-model='endpointOptions.endpointType'>
 						<option v-for='(e, i) in service.endpointTypes' :value='i'>
-							{{ i }}
+							{{ e.name }}
 						</option>
 					</select>
 				</div>

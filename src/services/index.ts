@@ -42,7 +42,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	protected constructor(
 		public name : string,
-		readonly endpointTypes : { [className : string] : { factory : Function, optionComponent : Function } },
+		readonly endpointTypes : { [className : string] : { name : string, factory : Function, optionComponent : Function } },	//TODO Move to static properties
 		articleComponentRaw : Component,
 		readonly hasMedia : boolean,	//TODO Check programatically
 	) {
@@ -162,7 +162,8 @@ export abstract class Service<ArticleType extends Article = Article> {
 		return json
 	}
 
-	loadStatus(status : any) {}
+	loadStatus(status : any) {
+	}
 }
 
 export interface HostPageService {

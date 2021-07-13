@@ -110,6 +110,7 @@ export class TwitterService extends Service<TwitterArticle> {
 	constructor() {
 		super('Twitter', {
 			[UserTimelineEndpoint.name]: {
+				name: 'User Timeline V2 Endpoint',
 				factory({userId} : { userId : string }) {
 					return new UserTimelineEndpoint(userId)
 				},
@@ -131,6 +132,7 @@ export class TwitterService extends Service<TwitterArticle> {
 				},
 			},
 			[UserTimelineV1Endpoint.name]: {
+				name: 'User Timeline V1 Endpoint',
 				factory({userId} : { userId : string }) {
 					return new UserTimelineV1Endpoint(userId)
 				},
@@ -152,6 +154,7 @@ export class TwitterService extends Service<TwitterArticle> {
 				},
 			},
 			[HomeTimelineEndpoint.name]: {
+				name: 'Home Timeline V1 Endpoint',
 				factory() {
 					return new HomeTimelineEndpoint()
 				},
@@ -160,6 +163,7 @@ export class TwitterService extends Service<TwitterArticle> {
 				},
 			},
 			[SearchEndpoint.name]: {
+				name: 'Search V2 Endpoint',
 				factory({query} : { query : string }) {
 					return new SearchEndpoint(query)
 				},
@@ -181,6 +185,7 @@ export class TwitterService extends Service<TwitterArticle> {
 				},
 			},
 			[LikesV1Endpoint.name]: {
+				name: 'Likes V1 Endpoint',
 				factory(opts : { userId? : string, handle? : string }) {
 					return new LikesV1Endpoint(opts)
 				},
@@ -214,6 +219,7 @@ export class TwitterService extends Service<TwitterArticle> {
 				},
 			},
 			[ListV1Endpoint.name]: {
+				name: 'List V1 Endpoint',
 				factory(opts : { listId? : string, slug? : string, ownerId? : string, ownerHandle? : string }) {
 					return new ListV1Endpoint(opts)
 				},

@@ -14,7 +14,7 @@
 						<FontAwesomeIcon :icon='expanded ? "angle-double-left" : "angle-double-right"' size='2x'/>
 					</span>
 				</button>
-				<button @click='modal = "AddTimelineModal"'>
+				<button id='addTimelineButton' @click='modal = "AddTimelineModal"'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='plus' size='2x'/>
 					</span>

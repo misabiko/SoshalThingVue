@@ -116,9 +116,6 @@ export default defineComponent({
 			updateLocalStorage()
 		}
 
-		if (!timelines.value.length)
-			console.warn('No timelines were initialized')
-
 		return {timelines, showAddTimeline, showArticleListManager, modal, addTimeline, changeTimelineData, deleteTimeline, updateLocalStorage}
 	},
 })
