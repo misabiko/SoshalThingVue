@@ -51,6 +51,7 @@ import {computed, defineComponent, PropType} from 'vue'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faDownload, faTimes, faUpload} from '@fortawesome/free-solid-svg-icons'
 import {TimelineData} from '@/data/timelines'
+import {modal} from '@/composables/ModalManager'
 
 library.add(faTimes, faUpload, faDownload)
 
@@ -83,7 +84,7 @@ export default defineComponent({
 
 		const timelineDataStr = computed(() => 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(props.timelines, null, '\t')))
 
-		return {receiveFile, timelineDataStr}
+		return {receiveFile, timelineDataStr, modal}
 	},
 })
 </script>
