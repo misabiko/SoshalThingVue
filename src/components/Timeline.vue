@@ -93,7 +93,9 @@
 					</div>
 				</div>
 			</div>
-			<SortOptions :sortConfig='sortConfig' :sortMethods='sortMethods'/>
+			<div class='box'>
+				<SortOptions :sortConfig='sortConfig' :sortMethods='sortMethods'/>
+			</div>
 			<template v-for='option in options'>
 				<div v-if='option' class='box'>
 					<component :is='option'></component>
@@ -717,11 +719,16 @@ export default defineComponent({
 	background-color: $scheme-main-ter
 	padding: 1rem
 	display: flex
-	flex-flow: row wrap
+	flex-direction: column
 	align-items: flex-start
+	overflow-x: hidden
+	overflow-y: scroll
 
 	& input[type="number"]
 		width: 200px
+
+	& > .box
+		max-width: 100%
 
 .articlesContainer
 	overflow-y: scroll

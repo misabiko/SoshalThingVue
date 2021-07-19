@@ -1,24 +1,16 @@
 <template>
-	<div class='field is-horizontal'>
-		<div class='field-label'>
-			<label class='label'>Sort Method</label>
+	<div class='field'>
+		<label class='label'>Sort Method</label>
+		<div class='control select'>
+			<select v-model='sortConfig.method'>
+				<option v-for='(_, method) in sortMethods' :value='method'>{{method}}</option>
+			</select>
 		</div>
-		<div class='field-body'>
-			<div class='field'>
-				<div class='control select'>
-					<select v-model='sortConfig.method'>
-						<option v-for='method in sortMethods' :value='method'>{{method}}</option>
-					</select>
-				</div>
-			</div>
-			<div class='field'>
-				<div class='control'>
-					<label class='checkbox'>
-						<input type='checkbox' v-model='sortConfig.reversed'>
-						Reversed
-					</label>
-				</div>
-			</div>
+		<div class='control'>
+			<label class='checkbox'>
+				<input type='checkbox' v-model='sortConfig.reversed'>
+				Reversed
+			</label>
 		</div>
 	</div>
 </template>
