@@ -93,6 +93,7 @@
 					</div>
 				</div>
 			</div>
+			<SortOptions :sortConfig='sortConfig' :sortMethods='sortMethods'/>
 			<template v-for='option in options'>
 				<div v-if='option' class='box'>
 					<component :is='option'></component>
@@ -166,6 +167,7 @@ import {
 import EndpointSelection from '@/components/EndpointSelection.vue'
 import {articleLists, saveLists} from '@/data/articleLists'
 import {useAutoRefreshing} from '@/composables/useAutoRefreshing'
+import SortOptions from '@/components/SortOptions.vue'
 
 library.add(faEllipsisV, faArrowDown, faSyncAlt, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
 
@@ -199,7 +201,7 @@ export default defineComponent({
 		viewMode: String,
 		viewModes: Array as PropType<string[]>,
 	},
-	components: {EndpointSelection, Modal},
+	components: {SortOptions, EndpointSelection, Modal},
 	setup(props, {emit}) {
 		const {viewMode} = toRefs(props)
 		const options : (() => VNode | VNode[] | undefined)[] = []
@@ -359,11 +361,7 @@ export default defineComponent({
 		watch(sortConfig, () => emit('saveTimeline'))
 
 		const serviceSortMethods = computed(() => service.value.sortMethods)
-		const {
-			sortMethods,
-			sortOption,
-		} = useSortMethods(sortConfig, serviceSortMethods)
-		options.push(sortOption)
+		const {sortMethods} = useSortMethods(sortConfig, serviceSortMethods)
 
 		const filters = computed(() => props.timeline.filters)
 
@@ -660,6 +658,7 @@ export default defineComponent({
 			refreshPageNum,
 			articleLists,
 			sortConfig,
+			sortMethods,
 		}
 	},
 })

@@ -37,7 +37,7 @@
 							</div>
 						</div>
 					</div>
-					<component :is='sortOption'/>
+					<SortOptions :sortConfig='sortConfig' :sortMethods='sortMethods'/>
 					<component :is='filterOptions'/>
 					<div class='field'>
 						<div class='control'>
@@ -83,6 +83,7 @@ import {getNewId} from '@/data/articleLists'
 import {modal} from '@/composables/ModalManager'
 import {useSortMethods} from '@/composables/useSortMethods'
 import {useFilters} from '@/composables/useFilters'
+import SortOptions from '@/components/SortOptions.vue'
 
 library.add(faTimes)
 
@@ -123,7 +124,7 @@ export function resetTimelineData(dataOverride? : any) {
 }
 
 export default defineComponent({
-	components: {EndpointSelection},
+	components: {SortOptions, EndpointSelection},
 	props: {
 		timelines: {
 			type: Array as PropType<TimelineData[]>,
@@ -156,7 +157,7 @@ export default defineComponent({
 			method : 'Unsorted',
 			reversed : false,
 		})
-		const {sortOption} = useSortMethods(sortConfig, serviceSortMethods)
+		const {sortMethods} = useSortMethods(sortConfig, serviceSortMethods)
 
 		const serviceFitlers = computed(() => service.value?.filters ?? {})
 		const filters = computed(() => timelineData.value?.filters ?? {})
@@ -171,8 +172,9 @@ export default defineComponent({
 			validations,
 			valid,
 			resetTimelineData,
-			sortOption,
 			filterOptions,
+			sortMethods,
+			sortConfig,
 		}
 	},
 })
