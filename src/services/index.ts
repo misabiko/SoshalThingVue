@@ -126,7 +126,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 	}
 
 	async saveLocalStorage() {
-		console.log(`Saving local storage...`)
+		console.debug(`Saving local storage...`)
 
 		const rawStorage = localStorage.getItem(LOCALSTORAGE_TITLE)
 		if (!rawStorage)
@@ -153,7 +153,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 		const response = await fetch(url, opts)
 		const json = await response.json()
 
-		console.dir(json)
+		//console.dir(json)
 
 		if (json.soshalServices)
 			for (const [name, status] of Object.entries(json.soshalServices))
