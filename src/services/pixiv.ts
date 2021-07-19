@@ -2,7 +2,7 @@ import {HostPageService, PagedCallOpt, PagedEndpoint, Payload, Service} from '@/
 import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
 import PixivComponent from '@/components/Articles/PixivArticle.vue'
-import {Article, getImageFormat, ImageData, LazyMedia, MediaArticle, MediaLoadStatus, MediaType} from '@/data/articles'
+import {Article, getImageFormat, MediaData, LazyMedia, MediaArticle, MediaLoadStatus, MediaType} from '@/data/articles'
 import {h} from 'vue'
 
 export interface PixivArticle extends Article, MediaArticle {
@@ -216,7 +216,7 @@ type BookmarkResponse = {
 type ThumbData = {
 	id : string
 	title : string
-	thumbnail : ImageData
+	thumbnail : MediaData
 	bookmarked : boolean
 }
 

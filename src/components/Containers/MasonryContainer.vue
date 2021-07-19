@@ -5,7 +5,6 @@
 				:is='service.articleComponent'
 				v-for='a in column' :key='a.id'
 				:article='a'
-				:service='service'
 				:onArticleClick='onArticleClick'
 				:inheritedCompact='compactArticles'
 				@loading-full-media='$emit("loadingFullMedia", $event)'

@@ -26,31 +26,31 @@ export enum MediaLoadStatus {
 export type PlainMedia = {
 	type : MediaType
 	status : MediaLoadStatus.Plain
-	content : ImageData
+	content : MediaData
 }
 
 export type LazyMedia
 	= {
 	type : MediaType.Image
 	status : MediaLoadStatus.ThumbnailOnly
-	thumbnail : ImageData
+	thumbnail : MediaData
 }
 	| {
 	type : MediaType
 	status : MediaLoadStatus.ReadyToLoad
-	thumbnail : ImageData
-	content : ImageData
+	thumbnail : MediaData
+	content : MediaData
 }
 	| {
 	type : MediaType
 	status : MediaLoadStatus.Loading
-	thumbnail : ImageData
-	content : ImageData
+	thumbnail : MediaData
+	content : MediaData
 }
 	| {
 	type : MediaType
 	status : MediaLoadStatus.FullyLoaded
-	content : ImageData
+	content : MediaData
 }
 
 export type QueriedMedia
@@ -60,7 +60,7 @@ export type QueriedMedia
 	| {
 	type : MediaType
 	status : MediaLoadStatus.FullyLoaded
-	content : ImageData
+	content : MediaData
 }
 
 type MediaSize = { width : number, height : number }
@@ -73,10 +73,13 @@ export enum MediaFormat {
 	WEBM,
 }
 
-export interface ImageData {
+export interface MediaData {
 	url : string
 	size? : MediaSize
 	format : MediaFormat
+	autoplay? : boolean
+	loop? : boolean
+	mute? : boolean
 }
 
 export function getMediaType(format : MediaFormat) {

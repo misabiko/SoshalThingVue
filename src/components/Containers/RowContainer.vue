@@ -5,7 +5,6 @@
 			v-for='a in articles' :key='a.id'
 			:article='a'
 			:style='{width: (100 / columnCount) + "%"}'
-			:service='service'
 			:onArticleClick='onArticleClick'
 			:inheritedCompact='compactArticles'
 			@loading-full-media='$emit("loadingFullMedia", $event)'

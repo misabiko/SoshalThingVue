@@ -68,7 +68,7 @@
 					<div v-else-if='refArticle.media.length && refArticle.media[0].type === MediaType.Video'
 						 class='postMedia postVideo'>
 						<div class='is-hidden imgPlaceholder'/>
-						<video controls :autoplay='false' :loop='false' @click='onArticleClick(refArticle.id)'>
+						<video controls :autoplay='refArticle.media[0].content.autoplay' :loop='refArticle.media[0].content.loop' :muted='refArticle.media[0].content.mute' @click='onArticleClick(refArticle.id)'>
 							<source :src='refArticle.media[0].content.url' type='video/mp4'/>
 						</video>
 					</div>
@@ -154,7 +154,7 @@
 		<div v-else-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Video'
 			 class='postMedia postVideo'>
 			<div class='is-hidden imgPlaceholder'/>
-			<video controls :autoplay='false' :loop='false' @click='onArticleClick(article.id)'>
+			<video controls :autoplay='actualArticle.media[0].content.autoplay' :loop='actualArticle.media[0].content.loop' :muted='actualArticle.media[0].content.mute' @click='onArticleClick(article.id)'>
 				<source :src='actualArticle.media[0].content.url' type='video/mp4'/>
 			</video>
 		</div>
