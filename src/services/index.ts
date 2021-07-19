@@ -174,6 +174,8 @@ export abstract class Endpoint<CallOpt> {
 	articles : string[] = reactive([])
 	//calling = false
 
+	defaultRefreshIntervalMs = 90000
+
 	rateLimitInfo? : {
 		maxCalls : number
 		remainingCalls : number

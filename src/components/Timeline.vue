@@ -32,7 +32,8 @@
 						<FontAwesomeIcon icon='scroll' size='lg'/>
 					</span>
 				</button>
-				<button v-if='endpointPackage.type === EndpointPackageType.PagedEndpoint' @click='getRandomNewArticles()'>
+				<button v-if='endpointPackage.type === EndpointPackageType.PagedEndpoint'
+						@click='getRandomNewArticles()'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='magic' size='lg'/>
 					</span>
@@ -125,7 +126,7 @@ import {
 	computed,
 	defineComponent,
 	h,
-	onBeforeMount,
+	onBeforeMount, onBeforeUnmount,
 	PropType,
 	provide,
 	Ref,
@@ -157,6 +158,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import EndpointSelection from '@/components/EndpointSelection.vue'
 import {articleLists, saveLists} from '@/data/articleLists'
+import {useAutoRefreshing} from '@/composables/useAutoRefreshing'
 
 library.add(faEllipsisV, faArrowDown, faSyncAlt, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
 
@@ -167,17 +169,17 @@ enum EndpointPackageType {
 }
 
 type EndpointPackage = {
-	type: EndpointPackageType.NoEndpoint,
-	ready: false,
+	type : EndpointPackageType.NoEndpoint,
+	ready : false,
 } | {
-	type: EndpointPackageType.RefreshEndpoint,
-	ready: boolean,
+	type : EndpointPackageType.RefreshEndpoint,
+	ready : boolean,
 } | {
-	type: EndpointPackageType.PagedEndpoint,
-	ready: boolean,
-	endpoint: Readonly<Ref<PagedEndpoint>>,
-	remainingPages: Readonly<Ref<number[]>>,
-	newPage: Ref<undefined | number>,
+	type : EndpointPackageType.PagedEndpoint,
+	ready : boolean,
+	endpoint : Readonly<Ref<PagedEndpoint>>,
+	remainingPages : Readonly<Ref<number[]>>,
+	newPage : Ref<undefined | number>,
 }
 
 export default defineComponent({
@@ -199,7 +201,7 @@ export default defineComponent({
 		const endpoint = computed(() => props.timeline.endpointName === undefined ? undefined : service.value.endpoints[props.timeline.endpointName])
 
 		const modifiedTimelineData = ref<TimelineData>({
-			...props.timeline
+			...props.timeline,
 		})
 
 		const endpointPackage = computed<EndpointPackage>(() => {
@@ -211,7 +213,9 @@ export default defineComponent({
 			else if (endpoint.value instanceof PagedEndpoint)
 				return {
 					type: EndpointPackageType.PagedEndpoint,
-					get ready() {return endpoint.value?.ready ?? false},
+					get ready() {
+						return endpoint.value?.ready ?? false
+					},
 					endpoint: endpoint as unknown as Readonly<Ref<PagedEndpoint>>,
 					remainingPages,
 					newPage,
@@ -219,11 +223,13 @@ export default defineComponent({
 			else
 				return {
 					type: EndpointPackageType.RefreshEndpoint,
-					get ready() {return endpoint.value?.ready ?? false},
+					get ready() {
+						return endpoint.value?.ready ?? false
+					},
 				}
 		})
 
-		const getNewArticles = async function(callOpts : any = {pageNum: newPage.value ?? refreshPageNum.value}) {
+		const getNewArticles = async function(callOpts : any = {pageNum: newPage.value ?? refreshPageNum.value}, autoRefreshed = false) {
 			if (!endpoint.value?.ready) {
 				if (endpoint.value)
 					console.debug(`${endpoint.value.name} isn't ready.`)
@@ -252,8 +258,17 @@ export default defineComponent({
 					newPage.value = pages.filter(p => p > oldNewPage)[0] || pages[pages.length - 1]
 			}finally {
 				//endpoint.value.calling = false
+				if (!autoRefreshed)
+					resetInterval()
 			}
 		}
+
+		const {isRefreshing, resetInterval} = useAutoRefreshing(endpoint, () => getNewArticles({
+			fromTop: true,
+			pageNum: refreshPageNum,
+		}, true))
+
+		onBeforeUnmount(() => isRefreshing.value = false)
 
 		const getRandomNewArticles = () => {
 			const ePackage = endpointPackage.value
@@ -299,7 +314,12 @@ export default defineComponent({
 		})
 
 		function initEndpoint() {
-			if (endpoint.value && endpoint.value instanceof PagedEndpoint)
+			if (endpoint.value === undefined)
+				return
+
+			resetInterval()
+
+			if (endpoint.value instanceof PagedEndpoint)
 				newPage.value ??= endpoint.value.basePageNum
 		}
 
@@ -347,7 +367,10 @@ export default defineComponent({
 
 		const articles = computed(() => {
 				let unsorted = articleIds.value
-					.map(({serviceName, articleId}: {serviceName: string, articleId: string}) => Service.instances[serviceName].articles.value[articleId])
+					.map(({
+							  serviceName,
+							  articleId,
+						  } : { serviceName : string, articleId : string }) => Service.instances[serviceName].articles.value[articleId])
 					.filter(a => !!a)	//Rerender happens before all of articleIds is added to service.articles
 
 				for (const [method, opts] of Object.entries(filters.value))
