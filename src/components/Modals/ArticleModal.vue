@@ -6,7 +6,8 @@
 				<component
 					:is='service.articleComponent'
 					:article='article'
-					:on-article-click='() => {}'
+					:onArticleClick='() => {}'
+					:inheritedCompact='false'
 					@loading-full-media='$emit("loadingFullMedia", $event)'
 					@done-loading='$emit("doneLoading", $event)'
 				/>
