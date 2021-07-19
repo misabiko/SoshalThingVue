@@ -6,7 +6,8 @@
 				v-for='a in column' :key='a.id'
 				:article='a'
 				:service='service'
-				:on-article-click='onArticleClick'
+				:onArticleClick='onArticleClick'
+				:inheritedCompact='compactArticles'
 				@loading-full-media='$emit("loadingFullMedia", $event)'
 				@done-loading='$emit("doneLoading", $event)'
 				@expand='$emit("expand", $event)'
@@ -46,6 +47,10 @@ export default defineComponent({
 			type: Function as PropType<() => any>,
 			required: true,
 		},
+		compactArticles: {
+			type: Boolean,
+			default: true
+		}
 	},
 
 	setup(props) {

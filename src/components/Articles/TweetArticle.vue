@@ -110,6 +110,7 @@
 							<div class='dropdown-menu'>
 								<div class='dropdown-content'>
 									<div class='dropdown-item' @click='service.toggleHideArticle(article.id)'>Hide</div>
+									<div class='dropdown-item' @click='compact = !compact'>{{ compact ? 'Show full' : 'Show compact'}}</div>
 									<div class='dropdown-item' @click='service.logArticle(article.id)'>Log</div>
 									<div class='dropdown-item' @click='fetchLog'>Fetch Status V1</div>
 									<div class='dropdown-item' @click='$emit("expand", article.id)'>Expand</div>
@@ -192,6 +193,10 @@ export default defineComponent({
 			type: Object as PropType<TwitterArticle>,
 			required: true,
 		},
+		inheritedCompact: {
+			type: Boolean,
+			default: true,
+		}
 	},
 
 	setup(props) {
@@ -230,7 +235,16 @@ export default defineComponent({
 			modal.value = 'AddTimelineModal'
 		}
 
-		const compact = ref(false)
+		const localCompact = ref<undefined | boolean>()
+		const compact = computed({
+			get: () => localCompact.value ?? props.inheritedCompact,
+			set: v => {
+				if (v === props.inheritedCompact)
+					localCompact.value = undefined
+				else
+					localCompact.value = v
+			}
+		})
 
 		function imageFormatClass(article : TweetArticle, index : number) : string {
 			const media = article.media[index]

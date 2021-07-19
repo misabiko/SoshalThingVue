@@ -73,6 +73,8 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 							method: this.defaultSortMethod,
 							reversed: false,
 						},
+						autoRefresh: false,
+						compactArticles: false,
 					},
 				]
 			case PixivUserPage:
@@ -93,6 +95,8 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 							method: this.defaultSortMethod,
 							reversed: false,
 						},
+						autoRefresh: false,
+						compactArticles: false,
 					},
 				]
 			case PixivBookmarkPage:
@@ -113,6 +117,8 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 							method: this.defaultSortMethod,
 							reversed: false,
 						},
+						autoRefresh: false,
+						compactArticles: false,
 					},
 				]
 			default: return []

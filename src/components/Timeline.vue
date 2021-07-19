@@ -72,6 +72,12 @@
 						</button>
 					</div>
 				</div>
+				<div class='control'>
+					<label class='checkbox'>
+						<input type='checkbox' v-model='autoRefreshEnabled'/>
+						Auto Refresh
+					</label>
+				</div>
 			</div>
 			<div class='box'>
 				<div class='field'>
@@ -103,6 +109,7 @@
 			:is='containers[timeline.container]'
 			:serviceName='service.name'
 			:articles='articles'
+			:compactArticles='compactArticles'
 			:columnCount='Math.min(articles.length, columnCount)'
 			:rightToLeft='rightToLeft'
 			:onArticleClick='onArticleClicks[onArticleClick]'
@@ -258,7 +265,7 @@ export default defineComponent({
 					newPage.value = pages.filter(p => p > oldNewPage)[0] || pages[pages.length - 1]
 			}finally {
 				//endpoint.value.calling = false
-				if (!autoRefreshed)
+				if (autoRefreshEnabled.value && !autoRefreshed)
 					resetInterval()
 			}
 		}
@@ -317,7 +324,8 @@ export default defineComponent({
 			if (endpoint.value === undefined)
 				return
 
-			resetInterval()
+			if (autoRefreshEnabled.value)
+				resetInterval()
 
 			if (endpoint.value instanceof PagedEndpoint)
 				newPage.value ??= endpoint.value.basePageNum
@@ -390,15 +398,30 @@ export default defineComponent({
 
 		const filteredArticleIds = computed(() => articles.value.map(a => a.id))
 
-		initEndpoint()
-
 		onBeforeMount(() => {
+			initEndpoint()
+
 			if (!endpoint.value?.rateLimitInfo || endpoint.value.rateLimitInfo.remainingCalls > 100)
 				getNewArticles()
 		})
 
 		const showOptions = ref(false)
 
+		const autoRefreshEnabled = computed({
+			get: () => modifiedTimelineData.value.autoRefresh,
+			set: val => {
+				modifiedTimelineData.value.autoRefresh = val
+				emit('changeTimeline', modifiedTimelineData.value)
+				isRefreshing.value = autoRefreshEnabled.value
+			},
+		})
+		const compactArticles = computed({
+			get: () => modifiedTimelineData.value.compactArticles,
+			set: val => {
+				modifiedTimelineData.value.compactArticles = val
+				emit('changeTimeline', modifiedTimelineData.value)
+			},
+		})
 		const columnCount = computed({
 			get: () => modifiedTimelineData.value.columnCount ?? 2,
 			set: val => {
@@ -567,10 +590,22 @@ export default defineComponent({
 				h('label', {class: 'checkbox'}, [
 					h('input', {
 							type: 'checkbox',
+							checked: rightToLeft.value,
 							onInput: (e : InputEvent) => rightToLeft.value = (e.target as HTMLInputElement).checked,
 						},
 					),
 					'Right to left',
+				]),
+			),
+			h('div', {class: 'control'},
+				h('label', {class: 'checkbox'}, [
+					h('input', {
+							type: 'checkbox',
+							checked: compactArticles.value,
+							onInput: (e : InputEvent) => compactArticles.value = (e.target as HTMLInputElement).checked,
+						},
+					),
+					'Compact articles',
 				]),
 			),
 			h('label', {class: 'label'}, 'Width'),
@@ -608,6 +643,8 @@ export default defineComponent({
 			containers,
 			service,
 			articles,
+			autoRefreshEnabled,
+			compactArticles,
 			columnCount,
 			rightToLeft,
 			size,

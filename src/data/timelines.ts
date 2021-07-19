@@ -13,4 +13,6 @@ export interface TimelineData {
 	rtl? : boolean
 	size? : number
 	columnCount? : number
+	autoRefresh : boolean
+	compactArticles : boolean
 }
