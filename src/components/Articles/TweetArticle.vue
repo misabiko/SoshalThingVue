@@ -6,7 +6,7 @@
 				target='_blank'
 				rel='noopener noreferrer'
 				@click.left.prevent='addUserTimeline(article.author)'
-			>{{ article.author.name}} retweeted</a>
+			>{{ article.author.name }} retweeted</a>
 		</div>
 		<div class='media'>
 			<figure class='media-left'>
@@ -25,7 +25,7 @@
 							@click.left.prevent='addUserTimeline(actualArticle.author)'
 						>
 							<strong>{{ actualArticle.author.name }}</strong>
-							<small>@{{actualArticle.author.handle}}</small>
+							<small>@{{ actualArticle.author.handle }}</small>
 						</a>
 						<span class='timestamp'>
 							<small :title='actualArticle.creationDate'>{{ timestamp }}</small>
@@ -33,7 +33,46 @@
 					</div>
 					<p class='articleParagraph'>{{ actualArticle.text }}</p>
 				</div>
-				<!--			extra-->
+				<div v-if='article.type === TwitterArticleType.Quote' class='quotedPost'>
+					<div class='articleHeader'>
+						<a
+							class='names'
+							:href='service.getUserURL(refArticle.author.handle)'
+							target='_blank'
+							rel='noopener noreferrer'
+							@click.left.prevent='addUserTimeline(refArticle.author)'
+						>
+							<strong>{{ refArticle.author.name }}</strong>
+							<small>@{{ refArticle.author.handle }}</small>
+						</a>
+						<span class='timestamp'>
+							<small :title='refArticle.creationDate'>{{ timestamp }}</small>
+						</span>
+					</div>
+					<p class='refArticleParagraph'>{{ refArticle.text }}</p>
+					<div v-if='refArticle.media.length && refArticle.media[0].type === MediaType.Image'
+						 class='postMedia postImages' :class='{postImagesCompact: compact}'>
+						<div
+							class='mediaHolder'
+							v-for='(mediaData, i) in refArticle.media'
+							:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(refArticle, i), refArticle.media.length === 3 && i === 2 ? 'thirdImage' : '']"
+						>
+							<div class='is-hidden imgPlaceholder'/>
+							<img
+								:alt='refArticle.id'
+								:src='mediaData.status === MediaLoadStatus.ThumbnailOnly ? mediaData.thumbnail.url : mediaData.content.url'
+								@click='onArticleClick(refArticle.id)'
+							/>
+						</div>
+					</div>
+					<div v-else-if='refArticle.media.length && refArticle.media[0].type === MediaType.Video'
+						 class='postMedia postVideo'>
+						<div class='is-hidden imgPlaceholder'/>
+						<video controls :autoplay='false' :loop='false' @click='onArticleClick(refArticle.id)'>
+							<source :src='refArticle.media[0].content.url' type='video/mp4'/>
+						</video>
+					</div>
+				</div>
 				<nav class='level is-mobile'>
 					<div class='level-left'>
 						<a
@@ -44,7 +83,7 @@
 							<span class='icon'>
 								<FontAwesomeIcon icon='retweet'/>
 							</span>
-							<span v-if='actualArticle.repostCount'>{{actualArticle.repostCount}}</span>
+							<span v-if='actualArticle.repostCount'>{{ actualArticle.repostCount }}</span>
 						</a>
 						<a
 							class='level-item articleButton likeButton'
@@ -54,7 +93,7 @@
 							<span class='icon'>
 								<FontAwesomeIcon :icon='[actualArticle.liked ? "fas" : "far", "heart"]'/>
 							</span>
-							<span v-if='actualArticle.likeCount'>{{actualArticle.likeCount}}</span>
+							<span v-if='actualArticle.likeCount'>{{ actualArticle.likeCount }}</span>
 						</a>
 						<div class='dropdown' :class='{"is-active": showDropdown}'>
 							<div class='dropdown-trigger'>
@@ -96,11 +135,12 @@
 				</nav>
 			</div>
 		</div>
-		<div v-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Image' class='postMedia postImages' :class='{postImagesCompact: compact}'>
+		<div v-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Image'
+			 class='postMedia postImages' :class='{postImagesCompact: compact}'>
 			<div
 				class='mediaHolder'
 				v-for='(mediaData, i) in actualArticle.media'
-				:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(i), actualArticle.media.length === 3 && i === 2 ? 'thirdImage' : '']"
+				:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(actualArticle, i), actualArticle.media.length === 3 && i === 2 ? 'thirdImage' : '']"
 			>
 				<div class='is-hidden imgPlaceholder'/>
 				<img
@@ -110,7 +150,8 @@
 				/>
 			</div>
 		</div>
-		<div v-else-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Video' class='postMedia postVideo'>
+		<div v-else-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Video'
+			 class='postMedia postVideo'>
 			<div class='is-hidden imgPlaceholder'/>
 			<video controls :autoplay='false' :loop='false' @click='onArticleClick(article.id)'>
 				<source :src='actualArticle.media[0].content.url' type='video/mp4'/>
@@ -157,7 +198,8 @@ export default defineComponent({
 		const {article} = toRefs(props)
 
 		const service = computed(() => Service.instances.Twitter as TwitterService)
-		const actualArticle = computed<TweetArticle>(() => service.value.actualTweet(article.value.id))
+		const actualArticle = computed<TweetArticle>(() => service.value.actualTweet(article.value.id, true))
+		const refArticle = computed<TweetArticle>(() => service.value.actualTweet(article.value.id))
 
 		function addUserTimeline(user : TwitterUser) {
 			resetTimelineData({
@@ -171,27 +213,27 @@ export default defineComponent({
 					Hidden: {
 						enabled: true,
 						inverted: false,
-						config: {}
+						config: {},
 					},
 					HasMedia: {
 						enabled: false,
 						inverted: false,
-						config: {}
+						config: {},
 					},
 					Retweet: {
 						enabled: false,
 						inverted: true,
 						config: {},
-					}
-				}
+					},
+				},
 			})
 			modal.value = 'AddTimelineModal'
 		}
 
 		const compact = ref(false)
 
-		function imageFormatClass(index : number) : string {
-			const media = actualArticle.value.media[index]
+		function imageFormatClass(article : TweetArticle, index : number) : string {
+			const media = article.media[index]
 			const size = media.status == MediaLoadStatus.ThumbnailOnly ?
 				media.thumbnail.size :
 				media.content.size
@@ -224,8 +266,21 @@ export default defineComponent({
 				return `${monthAbbrevs[actualDate.getMonth()]} ${actualDate.getDate()}`
 		})
 
-		return {service, addUserTimeline, TwitterArticleType, MediaLoadStatus, MediaType, actualArticle, compact, imageFormatClass, showDropdown, fetchLog, timestamp}
-	}
+		return {
+			service,
+			addUserTimeline,
+			TwitterArticleType,
+			MediaLoadStatus,
+			MediaType,
+			actualArticle,
+			refArticle,
+			compact,
+			imageFormatClass,
+			showDropdown,
+			fetchLog,
+			timestamp,
+		}
+	},
 })
 </script>
 
@@ -416,4 +471,29 @@ $bubble-r: .5 * $bubble-d
 
 		&:hover
 			text-decoration: underline
+
+.quotedPost
+	border: 2px solid $scheme-main-ter
+	border-radius: 6px
+	padding: 16px
+
+	.names
+		text-overflow: ellipsis
+		white-space: nowrap
+		overflow: hidden
+		display: inline-block
+		max-width: 300px
+
+		strong
+			margin-right: 0.5rem
+			color: $white-ter
+
+		&:hover > *
+			text-decoration: underline
+
+	span *
+		vertical-align: middle
+
+	p
+		white-space: pre-line
 </style>
