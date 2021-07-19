@@ -21,7 +21,7 @@
 	<TimelineManager
 		v-if='modal === "TimelineManager"'
 		:timelines='timelines'
-		@changeTimelines='$event.length && (timelines = initTimelineDatas($event))'
+		@changeTimelines='$event.length && (timelines = initTimelineDatas($event)) && updateLocalStorage()'
 	/>
 </template>
 
