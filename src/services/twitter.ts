@@ -1,4 +1,4 @@
-import {Endpoint, Payload, Service} from '@/services/index'
+import {Endpoint, Payload, Service, ServiceLocalStorage} from '@/services/index'
 import {Article, LazyMedia, MediaArticle, PlainMedia} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
@@ -265,6 +265,15 @@ export class TwitterService extends Service<TwitterArticle> {
 				},
 			},
 		}, TweetComponent, true)
+	}
+
+	loadLocalStorage(storage : ServiceLocalStorage<TwitterArticle>) : void {
+		for (const a of Object.values(storage.articles))
+			a.creationDate = new Date(a.creationDate)
+
+		//TODO Remove ts=ignore
+		// @ts-ignore
+		this.articles.value = storage.articles
 	}
 
 	getAPIArticleData(id : string) : Promise<any> {

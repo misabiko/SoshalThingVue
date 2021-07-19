@@ -9,8 +9,8 @@ export interface Payload<ArticleType = Article> {
 	newArticles : string[]
 }
 
-export interface ServiceLocalStorage {
-	articles : { [id : string] : Article }
+export interface ServiceLocalStorage<ArticleType extends Article = Article> {
+	articles : { [id : string] : ArticleType }
 	//endpoints : any[]
 }
 

@@ -28,7 +28,7 @@
 							<small>@{{actualArticle.author.handle}}</small>
 						</a>
 						<span class='timestamp'>
-							<small title='long time!'>short time!</small>
+							<small :title='actualArticle.creationDate'>{{ timestamp }}</small>
 						</span>
 					</div>
 					<p class='articleParagraph'>{{ actualArticle.text }}</p>
@@ -139,6 +139,8 @@ import {Service} from '@/services'
 
 library.add(faRetweet, fasHeart, farHeart, faEllipsisH)
 
+const monthAbbrevs = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
 export default defineComponent({
 	props: {
 		onArticleClick: {
@@ -205,7 +207,24 @@ export default defineComponent({
 			console.dir(await service.value.fetchV1Status(article.value.id))
 		}
 
-		return {service, addUserTimeline, TwitterArticleType, MediaLoadStatus, MediaType, actualArticle, compact, imageFormatClass, showDropdown, fetchLog}
+		const timestamp = computed(() => {
+			const actualDate = actualArticle.value.creationDate
+			const timeSince = Date.now() - actualDate.getTime()
+			if (timeSince < 1000)
+				return 'just now'
+			else if (timeSince < 60000)
+				return Math.floor(timeSince / 1000) + 's'
+			else if (timeSince < 3600000)
+				return Math.floor(timeSince / 60000) + 'm'
+			else if (timeSince < 86400000)
+				return Math.floor(timeSince / (3600000)) + 'h'
+			else if (timeSince < 604800000)
+				return Math.floor(timeSince / (86400000)) + 'd'
+			else
+				return `${monthAbbrevs[actualDate.getMonth()]} ${actualDate.getDate()}`
+		})
+
+		return {service, addUserTimeline, TwitterArticleType, MediaLoadStatus, MediaType, actualArticle, compact, imageFormatClass, showDropdown, fetchLog, timestamp}
 	}
 })
 </script>
