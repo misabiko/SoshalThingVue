@@ -24,6 +24,11 @@
 						<FontAwesomeIcon icon='list' size='2x'/>
 					</span>
 				</button>
+				<button @click='modal = "TimelineManager"'>
+					<span class='icon'>
+						<FontAwesomeIcon icon='upload' size='2x'/>
+					</span>
+				</button>
 			</div>
 			<div>
 				<a href='https://github.com/misabiko/SoshalThing'>
@@ -41,13 +46,13 @@
 <script lang="ts">
 import {defineComponent, ref} from 'vue'
 import {library} from '@fortawesome/fontawesome-svg-core'
-import {faAngleDoubleLeft, faAngleDoubleRight, faList, faPlus} from '@fortawesome/free-solid-svg-icons'
+import {faAngleDoubleLeft, faAngleDoubleRight, faList, faPlus, faUpload} from '@fortawesome/free-solid-svg-icons'
 import {Service} from '@/services'
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
 import SidebarEndpointMenu from '@/components/SidebarEndpointMenu.vue'
 import {modal} from '@/composables/ModalManager'
 
-library.add(faAngleDoubleLeft, faAngleDoubleRight, faPlus, faGithub, faList)
+library.add(faAngleDoubleLeft, faAngleDoubleRight, faPlus, faGithub, faList, faUpload)
 
 export default defineComponent({
 	components: {SidebarEndpointMenu},

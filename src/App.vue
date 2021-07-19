@@ -18,6 +18,11 @@
 	<ArticleListManager
 		v-if='modal === "ArticleListManager"'
 	/>
+	<TimelineManager
+		v-if='modal === "TimelineManager"'
+		:timelines='timelines'
+		@changeTimelines='$event.length && (timelines = initTimelineDatas($event))'
+	/>
 </template>
 
 <script lang='ts'>
@@ -29,14 +34,19 @@ import {Service} from '@/services'
 import AddTimelineModal from '@/components/Modals/AddTimelineModal.vue'
 import ArticleListManager from '@/components/Modals/ArticleListManager.vue'
 import {modal} from '@/composables/ModalManager'
+import TimelineManager from '@/components/Modals/TimelineManager.vue'
 
 export const LOCALSTORAGE_TIMELINE_TITLE = 'SoshalThing Timelines'
 
 export default defineComponent({
-	components: {ArticleListManager, AddTimelineModal, Timeline, Sidebar},
+	components: {ArticleListManager, AddTimelineModal, TimelineManager, Timeline, Sidebar},
 	setup() {
-		const timelineStorage : TimelineData[] = JSON.parse(localStorage.getItem(LOCALSTORAGE_TIMELINE_TITLE) || '[]')
-			.map((t : TimelineData) => {
+		const timelineStorage : TimelineData[] = initTimelineDatas(JSON.parse(localStorage.getItem(LOCALSTORAGE_TIMELINE_TITLE) || '[]'))
+
+		const timelines = ref<TimelineData[]>(timelineStorage)
+
+		function initTimelineDatas(timelineDatas : TimelineData[]) : TimelineData[] {
+			return timelineDatas.map((t : TimelineData) => {
 				const copy = {...t}
 				if (t.endpointOptions) {
 					const service = Service.instances[t.serviceName]
@@ -47,8 +57,7 @@ export default defineComponent({
 				delete copy.endpointOptions
 				return copy
 			})
-
-		const timelines = ref<TimelineData[]>(timelineStorage)
+		}
 
 		function updateLocalStorage() {
 			localStorage.setItem(LOCALSTORAGE_TIMELINE_TITLE, JSON.stringify(timelines.value.map(t => {
@@ -116,7 +125,17 @@ export default defineComponent({
 			updateLocalStorage()
 		}
 
-		return {timelines, showAddTimeline, showArticleListManager, modal, addTimeline, changeTimelineData, deleteTimeline, updateLocalStorage}
+		return {
+			timelines,
+			showAddTimeline,
+			showArticleListManager,
+			modal,
+			addTimeline,
+			changeTimelineData,
+			deleteTimeline,
+			updateLocalStorage,
+			initTimelineDatas,
+		}
 	},
 })
 </script>
