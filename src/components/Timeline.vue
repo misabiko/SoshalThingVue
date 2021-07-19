@@ -22,7 +22,7 @@
 				</div>
 			</div>
 			<div class='timelineButtons'>
-				<button @click='shuffle(articleIds), sortMethod = "Unsorted"'>
+				<button @click='shuffle(articleIds), sortConfig.method = "Unsorted"'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='random' size='lg'/>
 					</span>
@@ -599,6 +599,7 @@ export default defineComponent({
 			newPage,
 			refreshPageNum,
 			articleLists,
+			sortConfig,
 		}
 	},
 })
