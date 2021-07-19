@@ -162,10 +162,32 @@ export class TwitterService extends Service<TwitterArticle> {
 					return null
 				},
 			},
+			[SearchV1Endpoint.name]: {
+				name: 'Search V1 Endpoint',
+				factory(opts : { query : string }) {
+					return new SearchV1Endpoint(opts)
+				},
+				optionComponent(props : any, {emit} : { emit : any }) {
+					return h('div', {class: 'field'}, [
+						h('label', {class: 'field-label'}, 'Query'),
+						h('div', {class: 'control'},
+							h('input', {
+								class: 'input',
+								type: 'text',
+								value: props.endpointOptions.query,
+								onInput: (e : InputEvent) => {
+									props.endpointOptions.query = (e.target as HTMLInputElement).value
+									emit('changeOptions', props.endpointOptions)
+								},
+							}),
+						),
+					])
+				},
+			},
 			[SearchEndpoint.name]: {
 				name: 'Search V2 Endpoint',
-				factory({query} : { query : string }) {
-					return new SearchEndpoint(query)
+				factory(opts : { query : string }) {
+					return new SearchEndpoint(opts)
 				},
 				optionComponent(props : any, {emit} : { emit : any }) {
 					return h('div', {class: 'field'}, [
@@ -516,8 +538,12 @@ class SearchEndpoint extends Endpoint<TwitterCallOpt> {
 		secUntilNextReset: Date.now() / 1000 + 15 * 60,
 	})
 
-	constructor(readonly query : string) {
-		super('Search ' + query)
+	readonly query : string
+
+	constructor(opts : {query : string}) {
+		super('Search V2 ' + opts.query)
+
+		this.query = opts.query
 	}
 
 	async call(options : TwitterCallOpt) : Promise<Payload> {
@@ -561,8 +587,12 @@ class SearchV1Endpoint extends Endpoint<TwitterCallOpt> {
 		secUntilNextReset: Date.now() / 1000 + 15 * 60,
 	})
 
-	constructor(readonly query : string) {
-		super('Search V1 ' + query)
+	readonly query : string
+
+	constructor(opts : {query : string}) {
+		super('Search V1 ' + opts.query)
+
+		this.query = opts.query
 	}
 
 	async call(options : TwitterCallOpt) : Promise<Payload> {
