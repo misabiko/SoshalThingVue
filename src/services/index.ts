@@ -164,6 +164,10 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	loadStatus(status : any) {
 	}
+
+	getMedias(id : string) {
+		return (this.articles.value[id] as MediaArticle).media
+	}
 }
 
 export interface HostPageService {

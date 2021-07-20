@@ -56,11 +56,12 @@ export default defineComponent({
 		onBeforeUpdate(props.updateQueries)
 		onBeforeUpdate(props.updateLoadings)
 
-		const columns = computed(() => arrangeColumns(Math.min(props.columnCount, props.articles.length), props.articles, props.rightToLeft))
+		const service = computed(() => Service.instances[props.serviceName])
+		const columns = computed(() => arrangeColumns(Math.min(props.columnCount, props.articles.length), service.value, props.articles, props.rightToLeft))
 
 		return {
 			columns,
-			service: computed(() => Service.instances[props.serviceName])
+			service,
 		}
 	},
 })
@@ -72,8 +73,8 @@ function getColumnHeight(column : [number, RatioedArticle[]]) {
 		return 0
 }
 
-function arrangeColumns(columnCount : number, articles : MediaArticle[], rightToLeft: boolean) {
-	const ratioedArticles : RatioedArticle[] = articles.map((a : MediaArticle) => [a, getRelativeHeight(a.media)])
+function arrangeColumns(columnCount : number, service: Service, articles : MediaArticle[], rightToLeft: boolean) {
+	const ratioedArticles : RatioedArticle[] = articles.map((a : MediaArticle) => [a, getRelativeHeight(service.getMedias(a.id))])
 
 	const cols : [number, RatioedArticle[]][] = []
 	for (let i = 0; i < columnCount; i++)

@@ -413,6 +413,17 @@ export class TwitterService extends Service<TwitterArticle> {
 
 		return response
 	}
+
+	getMedias(id : string) {
+		const actualArticle = this.actualTweet(id)
+		if (actualArticle.id !== id)
+			return [
+				...((this.articles.value[id] as TweetArticle).media ?? []),
+				...(actualArticle.media ?? [])
+			]
+		else
+			return ((this.articles.value[id] as TweetArticle).media ?? [])
+	}
 }
 
 interface TwitterCallOpt {
