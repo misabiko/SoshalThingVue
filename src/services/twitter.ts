@@ -675,7 +675,7 @@ class LikesV1Endpoint extends Endpoint<TwitterCallOpt> {
 		if (options.fromEnd && this.articles.length)
 			params.set('max_id', this.articles[this.articles.length - 1])
 
-		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/statuses/user_timeline?${params.toString()}`)
+		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/favorites/list?${params.toString()}`)
 
 		this.rateLimitInfo.remainingCalls--
 		parseRateLimits(this, response)
