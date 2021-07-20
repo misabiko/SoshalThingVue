@@ -95,6 +95,15 @@
 							</span>
 							<span v-if='actualArticle.likeCount'>{{ actualArticle.likeCount }}</span>
 						</a>
+						<a
+							class='level-item articleButton'
+							v-if='(actualArticle.media && actualArticle.media.length) || (refArticle.media && refArticle.media.length)'
+							@click='compact = !compact'
+						>
+							<span class='icon'>
+								<FontAwesomeIcon :icon='compact ? "expand" : "compress"'/>
+							</span>
+						</a>
 						<div class='dropdown' :class='{"is-active": showDropdown}'>
 							<div class='dropdown-trigger'>
 								<a class='level-item articleButton articleMenuButton'
@@ -162,7 +171,7 @@
 </template>
 
 <script lang='ts'>
-import {computed, defineComponent, PropType, ref, toRaw, toRefs} from 'vue'
+import {computed, defineComponent, PropType, ref, toRaw, toRefs, watch} from 'vue'
 import {
 	TwitterArticle,
 	TwitterService,
@@ -172,14 +181,14 @@ import {
 	TweetArticle, UserTimelineV1Endpoint, TwitterUser,
 } from '@/services/twitter'
 import {library} from '@fortawesome/fontawesome-svg-core'
-import {faEllipsisH, faHeart as fasHeart, faRetweet} from '@fortawesome/free-solid-svg-icons'
+import {faCompress, faEllipsisH, faExpand, faHeart as fasHeart, faRetweet} from '@fortawesome/free-solid-svg-icons'
 import {faHeart as farHeart} from '@fortawesome/free-regular-svg-icons'
 import {MediaLoadStatus, MediaType} from '@/data/articles'
 import {resetTimelineData} from '@/components/Modals/AddTimelineModal.vue'
 import {modal} from '@/composables/ModalManager'
 import {Service} from '@/services'
 
-library.add(faRetweet, fasHeart, farHeart, faEllipsisH)
+library.add(faRetweet, fasHeart, farHeart, faEllipsisH, faExpand, faCompress)
 
 const monthAbbrevs = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -244,6 +253,11 @@ export default defineComponent({
 				else
 					localCompact.value = v
 			}
+		})
+
+		watch(() => props.inheritedCompact, (val, oldVal) => {
+			if (val != oldVal && val === localCompact.value)
+				localCompact.value = undefined
 		})
 
 		function imageFormatClass(article : TweetArticle, index : number) : string {
