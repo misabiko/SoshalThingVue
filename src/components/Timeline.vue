@@ -94,7 +94,7 @@
 				</div>
 			</div>
 			<div class='box'>
-				<SortOptions :sortConfig='sortConfig' :sortMethods='sortMethods'/>
+				<SortOptions :sortConfig='sortConfig' :sortMethods='sortMethods' :articleList='timeline.articleList'/>
 			</div>
 			<template v-for='option in options'>
 				<div v-if='option' class='box'>
