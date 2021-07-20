@@ -61,14 +61,14 @@
 							<img
 								:alt='refArticle.id'
 								:src='mediaData.status === MediaLoadStatus.ThumbnailOnly ? mediaData.thumbnail.url : mediaData.content.url'
-								@click='onArticleClick(refArticle.id)'
+								@click='onArticleClick(article.id)'
 							/>
 						</div>
 					</div>
 					<div v-else-if='refArticle.media.length && refArticle.media[0].type === MediaType.Video'
 						 class='postMedia postVideo'>
 						<div class='is-hidden imgPlaceholder'/>
-						<video controls :autoplay='refArticle.media[0].content.autoplay' :loop='refArticle.media[0].content.loop' :muted='refArticle.media[0].content.mute' @click='onArticleClick(refArticle.id)'>
+						<video controls :autoplay='refArticle.media[0].content.autoplay' :loop='refArticle.media[0].content.loop' :muted='refArticle.media[0].content.mute' @click='onArticleClick(article.id)'>
 							<source :src='refArticle.media[0].content.url' type='video/mp4'/>
 						</video>
 					</div>
