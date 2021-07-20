@@ -88,7 +88,7 @@ export class TwitterService extends Service<TwitterArticle> {
 			},
 		},
 		Liked: {
-			filter: (inverted) => a => (a.type !== TwitterArticleType.Retweet && (a as TweetArticle).liked) != inverted,
+			filter: (inverted) => a => this.actualTweet(a, true).liked != inverted,
 			option: () => null,
 			defaultConfig: {
 				enabled: true,
@@ -97,7 +97,7 @@ export class TwitterService extends Service<TwitterArticle> {
 			},
 		},
 		Retweeted: {
-			filter: (inverted) => a => (a.type !== TwitterArticleType.Retweet && (a as TweetArticle).reposted) != inverted,
+			filter: (inverted) => a =>this.actualTweet(a, true).reposted != inverted,
 			option: () => null,
 			defaultConfig: {
 				enabled: true,
