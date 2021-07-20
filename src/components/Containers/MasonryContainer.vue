@@ -89,7 +89,7 @@ function arrangeColumns(columnCount : number, articles : MediaArticle[], rightTo
 	return cols.map(column => column[1].map((ratioed : RatioedArticle) => ratioed[0]))
 }
 
-function getRelativeHeight(medias : PlainMedia[] | LazyMedia[] | QueriedMedia[]) : number {
+function getRelativeHeight(medias : (PlainMedia | LazyMedia | QueriedMedia)[]) : number {
 	let sum = 1
 	for (const media of (medias ?? []))
 		switch (media.status) {

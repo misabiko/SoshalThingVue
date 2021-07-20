@@ -4,6 +4,7 @@ import {h} from 'vue'
 export abstract class PixivPage extends PageInfo {}
 
 export class PixivFollowPage extends PixivPage {
+	readonly r18 : boolean
 	pageNum : number
 	lastPage : number
 	csrfToken : string
@@ -15,6 +16,8 @@ export class PixivFollowPage extends PixivPage {
 			default: `#js-mount-point-latest-following, nav.column-order-menu, nav.column-menu.folder-menu, footer._classic-footer, .ad-footer {display: none;} #wrapper, .layout-body, #wrapper #favviewer {width: 100%; height: 100%}`,
 			fullscreen: `nav.column-menu, h1.column-title, div.extaraNavi {display: none;} #wrapper #favviewer {height: 93vh}`,
 		})
+
+		this.r18 = window.location.pathname.split('/')[1] === 'bookmark_new_illust_r18.php'
 
 		const topPaginator = document.querySelector('nav.column-order-menu')
 		if (!topPaginator)
@@ -76,8 +79,6 @@ export class PixivUserPage extends PixivPage {
 	}
 
 	inject() {
-		console.log((document.body as any).innerHtml)
-
 		const nav = document.getElementsByTagName('nav')[0]
 		this.activatorClassNames = nav.lastElementChild?.className || ''
 
@@ -172,8 +173,8 @@ export class PixivBookmarkPage extends PixivPage {
 export default [
 	{
 		pageInfo: PixivFollowPage,
-		urlRegex: /https:\/\/.*pixiv\.net\/bookmark_new_illust\.php/,
-		urlMatch: "https://*pixiv.net/bookmark_new_illust.php*",
+		urlRegex: /https:\/\/.*pixiv\.net\/bookmark_new_illust.*\.php/,
+		urlMatch: "https://*pixiv.net/bookmark_new_illust*.php*",
 	},
 	{
 		pageInfo: PixivUserPage,

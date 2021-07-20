@@ -2,12 +2,21 @@ import {HostPageService, PagedCallOpt, PagedEndpoint, Payload, Service} from '@/
 import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
 import PixivComponent from '@/components/Articles/PixivArticle.vue'
-import {Article, getImageFormat, MediaData, LazyMedia, MediaArticle, MediaLoadStatus, MediaType} from '@/data/articles'
+import {
+	Article,
+	getImageFormat,
+	MediaData,
+	LazyMedia,
+	MediaArticle,
+	MediaLoadStatus,
+	MediaType,
+	QueriedMedia,
+} from '@/data/articles'
 import {h} from 'vue'
 
 export interface PixivArticle extends Article, MediaArticle {
 	title : string
-	media : [LazyMedia]
+	media : (LazyMedia | QueriedMedia)[]
 	liked : boolean
 	bookmarked : boolean
 }
@@ -46,7 +55,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 			this.pageInfo = pageInfoObj
 
 		if (this.pageInfo instanceof PixivFollowPage) {
-			this.addEndpoint(new FollowPageEndpoint(this.pageInfo))
+			this.addEndpoint(new FollowPageEndpoint({pageInfo: this.pageInfo, r18: this.pageInfo.r18}))
 			this.csrfToken = this.pageInfo.csrfToken
 		}
 		if (this.pageInfo instanceof PixivUserPage)
@@ -59,7 +68,10 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 		let endpointName
 		switch (this.pageInfo?.constructor) {
 			case PixivFollowPage:
-				endpointName = JSON.stringify({endpointType: FollowPageEndpoint.name})
+				endpointName = JSON.stringify({
+					endpointType: FollowPageEndpoint.name,
+					r18: (this.pageInfo as PixivFollowPage).r18,
+				})
 				return [
 					{
 						title: 'Following',
@@ -102,7 +114,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 			case PixivBookmarkPage:
 				endpointName = JSON.stringify({
 					endpointType: BookmarkPageEndpoint.name,
-					priv: (this.pageInfo as PixivBookmarkPage).priv
+					priv: (this.pageInfo as PixivBookmarkPage).priv,
 				})
 				return [
 					{
@@ -121,7 +133,8 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						compactArticles: false,
 					},
 				]
-			default: return []
+			default:
+				return []
 		}
 	}
 
@@ -164,7 +177,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 		this.articles.value[id].liked = true
 	}
 
-	async bookmark(id : string, priv: boolean) {
+	async bookmark(id : string, priv : boolean) {
 		if (!(this.pageInfo instanceof PixivFollowPage))
 			return
 
@@ -242,12 +255,21 @@ interface MountPointData {
 class FollowPageEndpoint extends PagedEndpoint {
 	static defaultLastPage = 100
 
-	constructor(readonly pageInfo : PixivFollowPage) {
-		super('Following', pageInfo.pageNum, pageInfo.lastPage)
+	readonly pageInfo : PixivFollowPage
+	readonly r18 : boolean
+
+	constructor(opts : { pageInfo : PixivFollowPage, r18 : boolean }) {
+		super('Following', opts.pageInfo.pageNum, opts.pageInfo.lastPage)
+
+		this.pageInfo = opts.pageInfo
+		this.r18 = opts.r18
 	}
 
 	getKeyOptions() {
-		return {endpointType: this.constructor.name}
+		return {
+			endpointType: this.constructor.name,
+			r18: this.r18,
+		}
 	}
 
 	async call(options : PagedCallOpt) {
@@ -271,7 +293,7 @@ class FollowPageEndpoint extends PagedEndpoint {
 	}
 
 	private async loadPageArticles(pageNum : number) {
-		let url = 'https://www.pixiv.net/bookmark_new_illust.php'
+		let url = this.r18 ? 'https://www.pixiv.net/bookmark_new_illust_r18.php' : 'https://www.pixiv.net/bookmark_new_illust.php'
 		if (pageNum)
 			url += '?p=' + (pageNum + 1)
 
@@ -307,20 +329,23 @@ class FollowPageEndpoint extends PagedEndpoint {
 				id: thumb.illustId,
 				title: thumb.illustTitle,
 				index: pageNum * 20 + i,
-				media: [{
-					type: MediaType.Image,
-					status: MediaLoadStatus.ReadyToLoad,
-					thumbnail: {
-						url: thumb.url,
-						size: {width: thumb.width, height: thumb.height},
-						format: getImageFormat(thumb.url),
+				media: [
+					{
+						type: MediaType.Image,
+						status: MediaLoadStatus.ReadyToLoad,
+						thumbnail: {
+							url: thumb.url,
+							size: {width: thumb.width, height: thumb.height},
+							format: getImageFormat(thumb.url),
+						},
+						content: {
+							url: fullImageUrlSplit.join('/'),
+							size: {width: thumb.width, height: thumb.height},
+							format: getImageFormat(thumb.url),
+						},
 					},
-					content: {
-						url: fullImageUrlSplit.join('/'),
-						size: {width: thumb.width, height: thumb.height},
-						format: getImageFormat(thumb.url),
-					},
-				}],
+
+				],
 				hidden: false,
 				queried: false,
 				liked: false,
@@ -332,43 +357,15 @@ class FollowPageEndpoint extends PagedEndpoint {
 		console.log(`Loading ${articles.length} new articles with ${newArticles.length} in timeline.`)
 		return {articles, newArticles}
 	}
-
-	private static parseThumb(thumb : HTMLDivElement) : ThumbData {
-		const id = thumb.querySelector('.thumbnail-menu > div:first-child')?.getAttribute('data-id')
-		if (!id)
-			throw "Couldn't find id"
-
-		const title = thumb.querySelector('figcaption a')?.textContent
-		if (!title)
-			throw "Couldn't find title for " + id
-
-		const image = (thumb.querySelector('a > .lazyloaded') as HTMLDivElement)
-		const imageUrl = image.style.backgroundImage.slice(5, -2)
-
-		const svg = thumb.querySelector('svg')
-		if (!svg)
-			throw "Couldn't find svg in thumb"
-
-		return {
-			id,
-			title,
-			thumbnail: {
-				url: imageUrl,
-				size: {width: parseInt(image.style.width), height: parseInt(image.style.height)},
-				format: getImageFormat(imageUrl),
-			},
-			bookmarked: getComputedStyle(svg).color === "rgb(255, 64, 96)"
-		}
-	}
 }
 
 class UserPageEndpoint extends PagedEndpoint {
 	static defaultLastPage = 100
 
-	readonly userId: string
+	readonly userId : string
 	readonly pageInfo? : PixivUserPage
 
-	constructor(opts : {pageInfo? : PixivUserPage, userId : string}) {
+	constructor(opts : { pageInfo? : PixivUserPage, userId : string }) {
 		super('User ' + opts.userId, opts.pageInfo?.pageNum, opts.pageInfo?.lastPage)
 
 		this.userId = opts.userId
@@ -431,7 +428,7 @@ class UserPageEndpoint extends PagedEndpoint {
 				hidden: false,
 				queried: false,
 				liked: false,
-				bookmarked: thumb.bookmarked
+				bookmarked: thumb.bookmarked,
 			})
 			newArticles.push(thumb.id)
 		}
@@ -469,13 +466,13 @@ class UserPageEndpoint extends PagedEndpoint {
 				size: {width: 1, height: 1},
 				format: getImageFormat(img.src),
 			},
-			bookmarked: getComputedStyle(svg).color === "rgb(255, 64, 96)"
+			bookmarked: getComputedStyle(svg).color === "rgb(255, 64, 96)",
 		}
 	}
 }
 
 class BookmarkPageEndpoint extends PagedEndpoint {
-	priv: boolean
+	priv : boolean
 
 	constructor(readonly pageInfo : PixivBookmarkPage) {
 		super('Bookmark', pageInfo.pageNum, pageInfo.lastPage)
@@ -510,7 +507,7 @@ class BookmarkPageEndpoint extends PagedEndpoint {
 		return BookmarkPageEndpoint.parsePageArticles(document, pageNum)
 	}
 
-	private static async loadPageArticles(pageNum : number, priv: boolean) {
+	private static async loadPageArticles(pageNum : number, priv : boolean) {
 		let url = new URL('https://www.pixiv.net/bookmark.php?rest=hide&order=desc')
 
 		if (pageNum)
@@ -583,10 +580,13 @@ class BookmarkPageEndpoint extends PagedEndpoint {
 			title,
 			thumbnail: {
 				url: src,
-				size: {width: img.naturalWidth || img.clientWidth || 1, height: img.naturalWidth || img.clientWidth || 1},
+				size: {
+					width: img.naturalWidth || img.clientWidth || 1,
+					height: img.naturalWidth || img.clientWidth || 1,
+				},
 				format: getImageFormat(src),
 			},
-			bookmarked: true
+			bookmarked: true,
 		}
 	}
 }

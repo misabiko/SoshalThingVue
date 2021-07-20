@@ -6,7 +6,7 @@ export interface Article {
 }
 
 export interface MediaArticle extends Article {
-	media : PlainMedia[] | QueriedMedia[] | LazyMedia[]
+	media : (PlainMedia | QueriedMedia | LazyMedia)[]
 }
 
 export enum MediaType {
