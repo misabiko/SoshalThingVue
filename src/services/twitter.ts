@@ -97,7 +97,7 @@ export class TwitterService extends Service<TwitterArticle> {
 			},
 		},
 		Retweeted: {
-			filter: (inverted) => a =>this.actualTweet(a, true).reposted != inverted,
+			filter: (inverted) => a => this.actualTweet(a, true).reposted != inverted,
 			option: () => null,
 			defaultConfig: {
 				enabled: true,
@@ -349,17 +349,36 @@ export class TwitterService extends Service<TwitterArticle> {
 
 	actualTweet(a : string | TwitterArticle, includeQuote = false) : TweetArticle {
 		const article = (typeof a === 'object') ? a : this.articles.value[a]
+		let actualTweet : TweetArticle
 		switch (article.type) {
 			case TwitterArticleType.Tweet:
-				return article as TweetArticle
+				actualTweet = article as TweetArticle
+				break
 			case TwitterArticleType.Retweet:
-				return (this.articles.value)[(article as RetweetArticle).retweetedId] as TweetArticle
+				actualTweet = (this.articles.value)[(article as RetweetArticle).retweetedId] as TweetArticle
+				break
 			case TwitterArticleType.Quote:
 				if (includeQuote)
-					return article as TweetArticle
+					actualTweet = article as TweetArticle
 				else
-					return (this.articles.value)[(article as QuoteArticle).quotedId] as TweetArticle
+					actualTweet = (this.articles.value)[(article as QuoteArticle).quotedId] as TweetArticle
+				break
 		}
+
+		if (!actualTweet) {
+			console.warn(article.id + "doesn't return an actual article", article)
+			switch (article.type) {
+				case TwitterArticleType.Retweet:
+					this.fetchV1Status((article as RetweetArticle).retweetedId).then()
+					break
+				case TwitterArticleType.Quote:
+					if (!includeQuote)
+						this.fetchV1Status((article as QuoteArticle).quotedId).then()
+					break
+			}
+			return article as TweetArticle
+		}else
+			return actualTweet
 	}
 
 	optionComponent = () => {
@@ -560,7 +579,7 @@ class SearchEndpoint extends Endpoint<TwitterCallOpt> {
 
 	readonly query : string
 
-	constructor(opts : {query : string}) {
+	constructor(opts : { query : string }) {
 		super('Search V2 ' + opts.query)
 
 		this.query = opts.query
@@ -609,7 +628,7 @@ class SearchV1Endpoint extends Endpoint<TwitterCallOpt> {
 
 	readonly query : string
 
-	constructor(opts : {query : string}) {
+	constructor(opts : { query : string }) {
 		super('Search V1 ' + opts.query)
 
 		this.query = opts.query
