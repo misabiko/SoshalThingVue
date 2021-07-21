@@ -2,7 +2,7 @@
 	<div class='timeline' :class='{ mainTimeline }' :style='size > 1 ? {width: (size * 500) + "px"} : {}'>
 		<div class='timelineHeader'>
 			<div class='timelineLeftHeader'>
-				<strong>{{ timeline.title }}</strong>
+				<strong @click='scrollTop'>{{ timeline.title }}</strong>
 				<div class='timelineButtons' v-if='mainTimeline'>
 					<button @click='$emit("showSidebar")'>
 						<span class='icon'>
@@ -631,6 +631,13 @@ export default defineComponent({
 			}
 		}
 
+		function scrollTop() {
+			containerEl.value?.$el?.scrollTo({
+				top: 0,
+				behavior: 'smooth'
+			})
+		}
+
 		return {
 			shuffle,
 			articleIds,
@@ -661,6 +668,7 @@ export default defineComponent({
 			articleLists,
 			sortConfig,
 			sortMethods,
+			scrollTop,
 		}
 	},
 })
