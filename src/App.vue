@@ -48,8 +48,12 @@ export default defineComponent({
 		function initTimelineDatas(timelineDatas : TimelineData[]) : TimelineData[] {
 			return timelineDatas.map((t : TimelineData) => {
 				const copy = {...t}
+
+				const service = Service.instances[t.serviceName]
+				if (t.endpointName && !service.endpoints[t.endpointName])
+					t.endpointOptions ??= JSON.parse(t.endpointName)
+
 				if (t.endpointOptions) {
-					const service = Service.instances[t.serviceName]
 					service.addEndpoint(service.endpointTypes[t.endpointOptions.endpointType].factory(t.endpointOptions))
 					copy.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
 				}
@@ -62,10 +66,8 @@ export default defineComponent({
 		function updateLocalStorage() {
 			localStorage.setItem(LOCALSTORAGE_TIMELINE_TITLE, JSON.stringify(timelines.value.map(t => {
 				const copy : TimelineData = {...t}
-				if (copy.endpointName !== undefined) {
-					const service = Service.instances[copy.serviceName]
-					copy.endpointOptions = service.endpoints[copy.endpointName].getKeyOptions()
-				}
+				if (copy.endpointName !== undefined)
+					copy.endpointOptions = JSON.parse(copy.endpointName)
 
 				delete copy.endpointName
 				return copy
