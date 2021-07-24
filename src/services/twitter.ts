@@ -369,7 +369,7 @@ class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 
 	getKeyOptions() {
 		return {
-			endpointType: this.constructor.name,
+			...super.getKeyOptions(),
 			userId: this.userId,
 		}
 	}
@@ -434,7 +434,7 @@ export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
 
 	getKeyOptions() {
 		return {
-			endpointType: this.constructor.name,
+			...super.getKeyOptions(),
 			userId: this.userId,
 		}
 	}
@@ -481,10 +481,6 @@ class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 				this.articles.push(id)
 
 		return payload
-	}
-
-	getKeyOptions() {
-		return {endpointType: this.constructor.name}
 	}
 }
 
@@ -555,7 +551,7 @@ class SearchEndpoint extends Endpoint<TwitterCallOpt> {
 
 	getKeyOptions() {
 		return {
-			endpointType: this.constructor.name,
+			...super.getKeyOptions(),
 			query: this.query,
 		}
 	}
@@ -626,7 +622,7 @@ class SearchV1Endpoint extends Endpoint<TwitterCallOpt> {
 
 	getKeyOptions() {
 		return {
-			endpointType: this.constructor.name,
+			...super.getKeyOptions(),
 			query: this.query,
 		}
 	}
@@ -712,7 +708,7 @@ class LikesV1Endpoint extends Endpoint<TwitterCallOpt> {
 
 	getKeyOptions() {
 		return {
-			endpointType: this.constructor.name,
+			...super.getKeyOptions(),
 			userId: this.userId,
 			handle: this.handle,
 		}
@@ -809,7 +805,7 @@ class ListV1Endpoint extends Endpoint<ListCallOpt> {
 
 	getKeyOptions() {
 		return {
-			endpointType: this.constructor.name,
+			...super.getKeyOptions(),
 			listId: this.listId,
 			slug: this.slug,
 			ownerId: this.ownerId,

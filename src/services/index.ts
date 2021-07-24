@@ -216,7 +216,11 @@ export abstract class Endpoint<CallOpt> {
 		return true//!this.calling
 	}
 
-	abstract getKeyOptions() : { endpointType : string } & any
+	getKeyOptions() : { endpointType : string } & any {
+		return {
+			endpointType: (this.constructor as any).typeInfo(null).typeName
+		}
+	}
 
 	serialize() : any {
 	}

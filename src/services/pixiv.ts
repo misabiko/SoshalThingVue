@@ -244,7 +244,7 @@ class FollowPageEndpoint extends PagedEndpoint {
 
 	getKeyOptions() {
 		return {
-			endpointType: this.constructor.name,
+			...super.getKeyOptions(),
 			r18: this.r18,
 		}
 	}
@@ -375,7 +375,7 @@ class UserPageEndpoint extends PagedEndpoint {
 
 	getKeyOptions() {
 		return {
-			endpointType: this.constructor.name,
+			...super.getKeyOptions(),
 			userId: this.userId,
 		}
 	}
@@ -483,7 +483,7 @@ class BookmarkPageEndpoint extends PagedEndpoint {
 
 	getKeyOptions() {
 		return {
-			endpointType: this.constructor.name,
+			...super.getKeyOptions(),
 			priv: this.priv,
 		}
 	}
