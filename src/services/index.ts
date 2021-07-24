@@ -32,6 +32,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 	articles = ref<{ [id : string] : ArticleType }>({})
 	readonly articleComponent : Component
 
+	readonly endpointTypes : {[endpointType : string] : EndpointTypeInfo}
 	endpoints : { [name : string] : Endpoint<any> } = {}
 
 	defaultSortMethod = 'Unsorted'
@@ -42,10 +43,14 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	protected constructor(
 		public name : string,
-		readonly endpointTypes : { [className : string] : { name : string, factory : Function, optionComponent : Function } },	//TODO Move to static properties
+		endpointTypes : EndpointTypeInfoGetter[],
 		articleComponentRaw : Component,
 		readonly hasMedia : boolean,	//TODO Check programatically
 	) {
+		this.endpointTypes = Object.fromEntries(endpointTypes.map(typeInfo => {
+			const gottenTypeInfo = typeInfo(this)
+			return [gottenTypeInfo.typeName, gottenTypeInfo]
+		}))
 		this.articleComponent = markRaw(articleComponentRaw)
 	}
 
@@ -173,6 +178,15 @@ export abstract class Service<ArticleType extends Article = Article> {
 export interface HostPageService {
 	pageInfo? : PageInfo
 }
+
+export interface EndpointTypeInfo {
+	typeName : string
+	name : string
+	factory : Function
+	optionComponent : Function
+}
+
+export type EndpointTypeInfoGetter = (service: Service) => EndpointTypeInfo
 
 export abstract class Endpoint<CallOpt> {
 	articles : string[] = reactive([])

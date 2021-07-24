@@ -1,4 +1,4 @@
-import {HostPageService, PagedCallOpt, PagedEndpoint, Payload, Service} from '@/services'
+import {EndpointTypeInfoGetter, HostPageService, PagedCallOpt, PagedEndpoint, Payload, Service} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
 import PixivComponent from '@/components/Articles/PixivArticle.vue'
@@ -26,30 +26,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 	csrfToken? : string
 
 	constructor(pageInfoObj? : PageInfo) {
-		super('Pixiv', {
-			[UserPageEndpoint.name]: {
-				name: 'User Page Endpoint',
-				factory(opts : { userId : string }) {
-					return new UserPageEndpoint(opts)
-				},
-				optionComponent(props : any, {emit} : { emit : any }) {
-					return h('div', {class: 'field'}, [
-						h('label', {class: 'field-label'}, 'User Id'),
-						h('div', {class: 'control'},
-							h('input', {
-								class: 'input',
-								type: 'text',
-								value: props.endpointOptions.userId,
-								onInput: (e : InputEvent) => {
-									props.endpointOptions.userId = (e.target as HTMLInputElement).value
-									emit('changeOptions', props.endpointOptions)
-								},
-							}),
-						),
-					])
-				},
-			},
-		}, PixivComponent, true)
+		super('Pixiv', [UserPageEndpoint.typeInfo], PixivComponent, true)
 
 		if (pageInfoObj instanceof PixivPage)
 			this.pageInfo = pageInfoObj
@@ -360,6 +337,30 @@ class FollowPageEndpoint extends PagedEndpoint {
 }
 
 class UserPageEndpoint extends PagedEndpoint {
+	static typeInfo : EndpointTypeInfoGetter = () => ({
+		typeName: 'UserPageEndpoint',
+		name: 'User Page Endpoint',
+		factory(opts : { userId : string }) {
+			return new UserPageEndpoint(opts)
+		},
+		optionComponent(props : any, {emit} : { emit : any }) {
+			return h('div', {class: 'field'}, [
+				h('label', {class: 'field-label'}, 'User Id'),
+				h('div', {class: 'control'},
+					h('input', {
+						class: 'input',
+						type: 'text',
+						value: props.endpointOptions.userId,
+						onInput: (e : InputEvent) => {
+							props.endpointOptions.userId = (e.target as HTMLInputElement).value
+							emit('changeOptions', props.endpointOptions)
+						},
+					}),
+				),
+			])
+		},
+	})
+
 	static defaultLastPage = 100
 
 	readonly userId : string

@@ -9,7 +9,7 @@ import {TimelineData} from '@/data/timelines'
 
 class MockService extends Service {
 	constructor() {
-		super('MockService', {}, TweetArticle, false)
+		super('MockService', [], TweetArticle, false)
 	}
 
 	getAPIArticleData(id : string) : Promise<any> {

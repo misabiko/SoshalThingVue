@@ -1,4 +1,11 @@
-import {Endpoint, Payload, Service, ServiceLocalStorage} from '@/services/index'
+import {
+	Endpoint,
+	EndpointTypeInfo,
+	EndpointTypeInfoGetter,
+	Payload,
+	Service,
+	ServiceLocalStorage,
+} from '@/services/index'
 import {Article, LazyMedia, MediaArticle, PlainMedia} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
@@ -108,163 +115,15 @@ export class TwitterService extends Service<TwitterArticle> {
 	}
 
 	constructor() {
-		super('Twitter', {
-			[UserTimelineEndpoint.name]: {
-				name: 'User Timeline V2 Endpoint',
-				factory({userId} : { userId : string }) {
-					return new UserTimelineEndpoint(userId)
-				},
-				optionComponent(props : any, {emit} : { emit : any }) {
-					return h('div', {class: 'field'}, [
-						h('label', {class: 'field-label'}, 'User Id'),
-						h('div', {class: 'control'},
-							h('input', {
-								class: 'input',
-								type: 'text',
-								value: props.endpointOptions.userId,
-								onInput: (e : InputEvent) => {
-									props.endpointOptions.userId = (e.target as HTMLInputElement).value
-									emit('changeOptions', props.endpointOptions)
-								},
-							}),
-						),
-					])
-				},
-			},
-			[UserTimelineV1Endpoint.name]: {
-				name: 'User Timeline V1 Endpoint',
-				factory({userId} : { userId : string }) {
-					return new UserTimelineV1Endpoint(userId)
-				},
-				optionComponent(props : any, {emit} : { emit : any }) {
-					return h('div', {class: 'field'}, [
-						h('label', {class: 'field-label'}, 'User Id'),
-						h('div', {class: 'control'},
-							h('input', {
-								class: 'input',
-								type: 'text',
-								value: props.endpointOptions.userId,
-								onInput: (e : InputEvent) => {
-									props.endpointOptions.userId = (e.target as HTMLInputElement).value
-									emit('changeOptions', props.endpointOptions)
-								},
-							}),
-						),
-					])
-				},
-			},
-			[HomeTimelineEndpoint.name]: {
-				name: 'Home Timeline V1 Endpoint',
-				factory() {
-					return new HomeTimelineEndpoint()
-				},
-				optionComponent() {
-					return null
-				},
-			},
-			[SearchV1Endpoint.name]: {
-				name: 'Search V1 Endpoint',
-				factory(opts : { query : string }) {
-					return new SearchV1Endpoint(opts)
-				},
-				optionComponent(props : any, {emit} : { emit : any }) {
-					return h('div', {class: 'field'}, [
-						h('label', {class: 'field-label'}, 'Query'),
-						h('div', {class: 'control'},
-							h('input', {
-								class: 'input',
-								type: 'text',
-								value: props.endpointOptions.query,
-								onInput: (e : InputEvent) => {
-									props.endpointOptions.query = (e.target as HTMLInputElement).value
-									emit('changeOptions', props.endpointOptions)
-								},
-							}),
-						),
-					])
-				},
-			},
-			[SearchEndpoint.name]: {
-				name: 'Search V2 Endpoint',
-				factory(opts : { query : string }) {
-					return new SearchEndpoint(opts)
-				},
-				optionComponent(props : any, {emit} : { emit : any }) {
-					return h('div', {class: 'field'}, [
-						h('label', {class: 'field-label'}, 'Query'),
-						h('div', {class: 'control'},
-							h('input', {
-								class: 'input',
-								type: 'text',
-								value: props.endpointOptions.query,
-								onInput: (e : InputEvent) => {
-									props.endpointOptions.query = (e.target as HTMLInputElement).value
-									emit('changeOptions', props.endpointOptions)
-								},
-							}),
-						),
-					])
-				},
-			},
-			[LikesV1Endpoint.name]: {
-				name: 'Likes V1 Endpoint',
-				factory(opts : { userId? : string, handle? : string }) {
-					return new LikesV1Endpoint(opts)
-				},
-				optionComponent(props : any, {emit} : { emit : any }) {
-					return h('div', {class: 'field'}, [
-						h('label', {class: 'field-label'}, 'User Id'),
-						h('div', {class: 'control'},
-							h('input', {
-								class: 'input',
-								type: 'text',
-								value: props.endpointOptions.userId,
-								onInput: (e : InputEvent) => {
-									props.endpointOptions.userId = (e.target as HTMLInputElement).value
-									emit('changeOptions', props.endpointOptions)
-								},
-							}),
-						),
-						h('label', {class: 'field-label'}, 'Handle'),
-						h('div', {class: 'control'},
-							h('input', {
-								class: 'input',
-								type: 'text',
-								value: props.endpointOptions.handle,
-								onInput: (e : InputEvent) => {
-									props.endpointOptions.handle = (e.target as HTMLInputElement).value
-									emit('changeOptions', props.endpointOptions)
-								},
-							}),
-						),
-					])
-				},
-			},
-			[ListV1Endpoint.name]: {
-				name: 'List V1 Endpoint',
-				factory(opts : { listId? : string, slug? : string, ownerId? : string, ownerHandle? : string }) {
-					return new ListV1Endpoint(opts)
-				},
-				optionComponent(props : any, {emit} : { emit : any }) {
-					return h('div', {class: 'field'},
-						[['List Id', 'listId'], ['Slug', 'slug'], ['Owner Id', 'ownerId'], ['Owner Handle', 'ownerHandle']]
-							.flatMap(([label, field]) => [
-								h('label', {class: 'field-label'}, label),
-								h('div', {class: 'control'},
-									h('input', {
-										class: 'input',
-										type: 'text',
-										value: props.endpointOptions[field],
-										onInput: (e : InputEvent) => {
-											props.endpointOptions[field] = (e.target as HTMLInputElement).value
-											emit('changeOptions', props.endpointOptions)
-										},
-									}),
-								)]),
-					)
-				},
-			},
-		}, TweetComponent, true)
+		super('Twitter', [
+			UserTimelineEndpoint.typeInfo,
+			UserTimelineV1Endpoint.typeInfo,
+			HomeTimelineEndpoint.typeInfo,
+			SearchV1Endpoint.typeInfo,
+			SearchEndpoint.typeInfo,
+			LikesV1Endpoint.typeInfo,
+			ListV1Endpoint.typeInfo,
+		], TweetComponent, true)
 	}
 
 	loadLocalStorage(storage : ServiceLocalStorage<TwitterArticle>) : void {
@@ -438,7 +297,7 @@ export class TwitterService extends Service<TwitterArticle> {
 		if (actualArticle.id !== id)
 			return [
 				...((this.articles.value[id] as TweetArticle).media ?? []),
-				...(actualArticle.media ?? [])
+				...(actualArticle.media ?? []),
 			]
 		else
 			return ((this.articles.value[id] as TweetArticle).media ?? [])
@@ -450,6 +309,30 @@ interface TwitterCallOpt {
 }
 
 class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
+	static typeInfo : EndpointTypeInfoGetter = () => ({
+		typeName: 'UserTimelineEndpoint',
+		name: 'User Timeline V2 Endpoint',
+		factory({userId} : { userId : string }) {
+			return new UserTimelineEndpoint(userId)
+		},
+		optionComponent(props : any, {emit} : { emit : any }) {
+			return h('div', {class: 'field'}, [
+				h('label', {class: 'field-label'}, 'User Id'),
+				h('div', {class: 'control'},
+					h('input', {
+						class: 'input',
+						type: 'text',
+						value: props.endpointOptions.userId,
+						onInput: (e : InputEvent) => {
+							props.endpointOptions.userId = (e.target as HTMLInputElement).value
+							emit('changeOptions', props.endpointOptions)
+						},
+					}),
+				),
+			])
+		},
+	})
+
 	rateLimitInfo = reactive({
 		maxCalls: 900,
 		remainingCalls: 900,
@@ -493,6 +376,30 @@ class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 }
 
 export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
+	static typeInfo : EndpointTypeInfoGetter = () => ({
+		typeName: 'UserTimelineV1Endpoint',
+		name: 'User Timeline V1 Endpoint',
+		factory({userId} : { userId : string }) {
+			return new UserTimelineV1Endpoint(userId)
+		},
+		optionComponent(props : any, {emit} : { emit : any }) {
+			return h('div', {class: 'field'}, [
+				h('label', {class: 'field-label'}, 'User Id'),
+				h('div', {class: 'control'},
+					h('input', {
+						class: 'input',
+						type: 'text',
+						value: props.endpointOptions.userId,
+						onInput: (e : InputEvent) => {
+							props.endpointOptions.userId = (e.target as HTMLInputElement).value
+							emit('changeOptions', props.endpointOptions)
+						},
+					}),
+				),
+			])
+		},
+	})
+
 	rateLimitInfo = reactive({
 		maxCalls: 900,
 		remainingCalls: 900,
@@ -534,6 +441,17 @@ export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
 }
 
 class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
+	static typeInfo : EndpointTypeInfoGetter = () => ({
+		typeName: 'HomeTimelineEndpoint',
+		name: 'Home Timeline V1 Endpoint',
+		factory() {
+			return new HomeTimelineEndpoint()
+		},
+		optionComponent() {
+			return null
+		},
+	})
+
 	rateLimitInfo = reactive({
 		maxCalls: 15,
 		remainingCalls: 15,
@@ -571,6 +489,30 @@ class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 }
 
 class SearchEndpoint extends Endpoint<TwitterCallOpt> {
+	static typeInfo : EndpointTypeInfoGetter = () => ({
+		typeName: 'SearchEndpoint',
+		name: 'Search V2 Endpoint',
+		factory(opts : { query : string }) {
+			return new SearchEndpoint(opts)
+		},
+		optionComponent(props : any, {emit} : { emit : any }) {
+			return h('div', {class: 'field'}, [
+				h('label', {class: 'field-label'}, 'Query'),
+				h('div', {class: 'control'},
+					h('input', {
+						class: 'input',
+						type: 'text',
+						value: props.endpointOptions.query,
+						onInput: (e : InputEvent) => {
+							props.endpointOptions.query = (e.target as HTMLInputElement).value
+							emit('changeOptions', props.endpointOptions)
+						},
+					}),
+				),
+			])
+		},
+	})
+
 	rateLimitInfo = reactive({
 		maxCalls: 180,
 		remainingCalls: 180,
@@ -620,6 +562,30 @@ class SearchEndpoint extends Endpoint<TwitterCallOpt> {
 }
 
 class SearchV1Endpoint extends Endpoint<TwitterCallOpt> {
+	static typeInfo : EndpointTypeInfoGetter = () => ({
+		typeName: 'SearchV1Endpoint',
+		name: 'Search V1 Endpoint',
+		factory(opts : { query : string }) {
+			return new SearchV1Endpoint(opts)
+		},
+		optionComponent(props : any, {emit} : { emit : any }) {
+			return h('div', {class: 'field'}, [
+				h('label', {class: 'field-label'}, 'Query'),
+				h('div', {class: 'control'},
+					h('input', {
+						class: 'input',
+						type: 'text',
+						value: props.endpointOptions.query,
+						onInput: (e : InputEvent) => {
+							props.endpointOptions.query = (e.target as HTMLInputElement).value
+							emit('changeOptions', props.endpointOptions)
+						},
+					}),
+				),
+			])
+		},
+	})
+
 	rateLimitInfo = reactive({
 		maxCalls: 180,
 		remainingCalls: 180,
@@ -667,6 +633,42 @@ class SearchV1Endpoint extends Endpoint<TwitterCallOpt> {
 }
 
 class LikesV1Endpoint extends Endpoint<TwitterCallOpt> {
+	static typeInfo : EndpointTypeInfoGetter = () => ({
+		typeName: 'LikesV1Endpoint',
+		name: 'Likes V1 Endpoint',
+		factory(opts : { userId? : string, handle? : string }) {
+			return new LikesV1Endpoint(opts)
+		},
+		optionComponent(props : any, {emit} : { emit : any }) {
+			return h('div', {class: 'field'}, [
+				h('label', {class: 'field-label'}, 'User Id'),
+				h('div', {class: 'control'},
+					h('input', {
+						class: 'input',
+						type: 'text',
+						value: props.endpointOptions.userId,
+						onInput: (e : InputEvent) => {
+							props.endpointOptions.userId = (e.target as HTMLInputElement).value
+							emit('changeOptions', props.endpointOptions)
+						},
+					}),
+				),
+				h('label', {class: 'field-label'}, 'Handle'),
+				h('div', {class: 'control'},
+					h('input', {
+						class: 'input',
+						type: 'text',
+						value: props.endpointOptions.handle,
+						onInput: (e : InputEvent) => {
+							props.endpointOptions.handle = (e.target as HTMLInputElement).value
+							emit('changeOptions', props.endpointOptions)
+						},
+					}),
+				),
+			])
+		},
+	})
+
 	readonly userId? : string
 	readonly handle? : string
 
@@ -722,6 +724,32 @@ interface ListCallOpt extends TwitterCallOpt {
 }
 
 class ListV1Endpoint extends Endpoint<ListCallOpt> {
+	static typeInfo : EndpointTypeInfoGetter = () => ({
+		typeName: 'ListV1Endpoint',
+		name: 'List V1 Endpoint',
+		factory(opts : { listId? : string, slug? : string, ownerId? : string, ownerHandle? : string }) {
+			return new ListV1Endpoint(opts)
+		},
+		optionComponent(props : any, {emit} : { emit : any }) {
+			return h('div', {class: 'field'},
+				[['List Id', 'listId'], ['Slug', 'slug'], ['Owner Id', 'ownerId'], ['Owner Handle', 'ownerHandle']]
+					.flatMap(([label, field]) => [
+						h('label', {class: 'field-label'}, label),
+						h('div', {class: 'control'},
+							h('input', {
+								class: 'input',
+								type: 'text',
+								value: props.endpointOptions[field],
+								onInput: (e : InputEvent) => {
+									props.endpointOptions[field] = (e.target as HTMLInputElement).value
+									emit('changeOptions', props.endpointOptions)
+								},
+							}),
+						)]),
+			)
+		},
+	})
+
 	readonly listId? : string
 	readonly slug? : string
 	readonly ownerId? : string
