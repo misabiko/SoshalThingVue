@@ -54,8 +54,12 @@ export default defineComponent({
 					t.endpointOptions ??= JSON.parse(t.endpointName)
 
 				if (t.endpointOptions) {
-					service.addEndpoint(service.endpointTypes[t.endpointOptions.endpointType].factory(t.endpointOptions))
-					copy.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
+					if (!service.endpointTypes.hasOwnProperty(t.endpointOptions.endpointType)) {
+						console.error(`"${service.name}" doesn't have endpoint type "${t.endpointOptions.endpointType}" from timeline "${t.title}"`)
+					}else {
+						service.addEndpoint(service.endpointTypes[t.endpointOptions.endpointType].factory(t.endpointOptions))
+						copy.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
+					}
 				}
 
 				delete copy.endpointOptions
