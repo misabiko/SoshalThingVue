@@ -56,24 +56,55 @@ describe('Twitter', () => {
 
 	describe('TweetArticle', () => {
 		it('renders the timestamp', () => {
-			const nowTweet : TweetArticle = {
-				...baseTweet,
-				creationDate: new Date(),
-			}
-			service.updateArticle(nowTweet)
-
-			const wrapper = mount(TweetArticleComponent, {
-				props: {
-					onArticleClick: () => {},
-					article: nowTweet,
+			const tweets : {[timestamp : string]: TweetArticle } = {
+				'just now': {
+					...baseTweet,
+					id: 'timestamptjust now',
+					creationDate: new Date(),
 				},
-				global: {
-					components: {FontAwesomeIcon}
-				}
-			})
+				'1s': {
+					...baseTweet,
+					id: 'timestampt1s',
+					creationDate: new Date(Date.now() - 1000),
+				},
+				'1m': {
+					...baseTweet,
+					id: 'timestampt1m',
+					creationDate: new Date(Date.now() - 60 * 1000),
+				},
+				'1h': {
+					...baseTweet,
+					id: 'timestampt1h',
+					creationDate: new Date(Date.now() - 60 * 60 * 1000),
+				},
+				'1d': {
+					...baseTweet,
+					id: 'timestampt1d',
+					creationDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
+				},
+				'Jan 1': {
+					...baseTweet,
+					id: 'timestamptJan 1',
+					creationDate: new Date('01 Jan 2021'),
+				},
+			}
 
-			const timestamp = wrapper.get('.timestamp > small')
-			expect(timestamp.text()).to.be.equal('just now')
+			for (const [timestampStr, article] of Object.entries(tweets)) {
+				service.updateArticle(article)
+
+				const wrapper = mount(TweetArticleComponent, {
+					props: {
+						onArticleClick: () => {},
+						article,
+					},
+					global: {
+						components: {FontAwesomeIcon},
+					},
+				})
+
+				const timestamp = wrapper.get('.timestamp > small')
+				expect(timestamp.text()).to.be.equal(timestampStr)
+			}
 		})
 	})
 })
