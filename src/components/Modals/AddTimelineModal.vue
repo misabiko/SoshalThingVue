@@ -48,13 +48,13 @@
 					<div class='field'>
 						<label class='label'>Column Count</label>
 						<div class='control'>
-							<input type='number' min='1' v-model='timelineData.columnCount'/>
+							<input type='number' min='1' v-model.number='timelineData.columnCount'/>
 						</div>
 					</div>
 					<div class='field'>
 						<label class='label'>Width</label>
 						<div class='control'>
-							<input type='number' min='1' v-model='timelineData.size'/>
+							<input type='number' min='1' v-model.number='timelineData.size'/>
 						</div>
 					</div>
 				</div>

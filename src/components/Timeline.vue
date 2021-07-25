@@ -44,7 +44,12 @@
 							<FontAwesomeIcon icon='sync-alt' size='lg'/>
 						</span>
 					</button>
-					<button @click='getNewArticles({fromEnd: true, pageNum: newPage})'>
+					<button v-if='articleSection.enabled && articleSection.start > 0' @click='expandSectionTop()'>
+						<span class='icon'>
+							<FontAwesomeIcon icon='arrow-up' size='lg'/>
+						</span>
+					</button>
+					<button @click='expandSectionBottom()'>
 						<span class='icon'>
 							<FontAwesomeIcon icon='arrow-down' size='lg'/>
 						</span>
@@ -106,13 +111,19 @@
 					<div class='field'>
 						<label class='label'>Start</label>
 						<div class='control'>
-							<input class='input' type='number' v-model='articleSection.start' min='1' :max='articleSection.end'>
+							<input class='input' type='number' v-model.number='articleSection.start' min='1' :max='articleSection.end'>
 						</div>
 					</div>
 					<div class='field'>
 						<label class='label'>End</label>
 						<div class='control'>
-							<input class='input' type='number' v-model='articleSection.end' :min='articleSection.start'>
+							<input class='input' type='number' v-model.number='articleSection.end' :min='articleSection.start'>
+						</div>
+					</div>
+					<div class='field'>
+						<label class='label'>Expand step</label>
+						<div class='control'>
+							<input class='input' type='number' v-model.number='articleSection.expandStep' min='1'>
 						</div>
 					</div>
 				</template>
@@ -184,7 +195,7 @@ import RowContainer from '@/components/Containers/RowContainer.vue'
 import MasonryContainer from '@/components/Containers/MasonryContainer.vue'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {
-	faArrowDown,
+	faArrowDown, faArrowUp,
 	faEllipsisV,
 	faEyeSlash,
 	faMagic,
@@ -199,7 +210,7 @@ import {useAutoRefreshing} from '@/composables/useAutoRefreshing'
 import SortOptions from '@/components/SortOptions.vue'
 import FilterOptions from '@/components/FilterOptions.vue'
 
-library.add(faEllipsisV, faArrowDown, faSyncAlt, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
+library.add(faEllipsisV, faArrowUp, faArrowDown, faSyncAlt, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
 
 enum EndpointPackageType {
 	NoEndpoint,
@@ -386,7 +397,28 @@ export default defineComponent({
 			enabled: true,
 			start: 0,
 			end: 30,
+			expandStep: 50,
 		})
+
+		function expandSectionTop() {
+			if (!articleSection.value.enabled)
+				getNewArticles({pageNum: refreshPageNum})
+			else {
+				articleSection.value.start = Math.max(0, articleSection.value.start - articleSection.value.expandStep)
+				if (articleSection.value.start == 0)
+					getNewArticles({pageNum: refreshPageNum})
+			}
+		}
+
+		function expandSectionBottom() {
+			if (!articleSection.value.enabled)
+				getNewArticles({fromEnd: true, pageNum: newPage})
+			else {
+				articleSection.value.end += articleSection.value.expandStep
+				if (articleSection.value.end > articleIds.value.length)
+					getNewArticles({fromEnd: true, pageNum: newPage})
+			}
+		}
 
 		const sortConfig = computed(() => props.timeline.sortConfig)
 
@@ -668,6 +700,8 @@ export default defineComponent({
 			filterMethods,
 			filters,
 			articleSection,
+			expandSectionTop,
+			expandSectionBottom,
 		}
 	},
 })
