@@ -96,6 +96,9 @@
 			<div class='box'>
 				<SortOptions :sortConfig='sortConfig' :sortMethods='sortMethods' :articleList='timeline.articleList'/>
 			</div>
+			<div class='box'>
+				<FilterOptions :filterMethods='filterMethods' :filters='filters'/>
+			</div>
 			<template v-for='option in options'>
 				<div v-if='option' class='box'>
 					<component :is='option'></component>
@@ -170,6 +173,7 @@ import EndpointSelection from '@/components/EndpointSelection.vue'
 import {articleLists, saveLists} from '@/data/articleLists'
 import {useAutoRefreshing} from '@/composables/useAutoRefreshing'
 import SortOptions from '@/components/SortOptions.vue'
+import FilterOptions from '@/components/FilterOptions.vue'
 
 library.add(faEllipsisV, faArrowDown, faSyncAlt, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
 
@@ -203,7 +207,7 @@ export default defineComponent({
 		viewMode: String,
 		viewModes: Array as PropType<string[]>,
 	},
-	components: {SortOptions, EndpointSelection, Modal},
+	components: {SortOptions, FilterOptions, EndpointSelection, Modal},
 	setup(props, {emit}) {
 		const {viewMode} = toRefs(props)
 		const options : (() => VNode | VNode[] | undefined)[] = []
@@ -370,8 +374,7 @@ export default defineComponent({
 		watch(filters, () => emit('saveTimeline'), {deep: true})
 
 		const serviceFilters = computed(() => service.value.filters)
-		const {filterMethods, filterOptions} = useFilters(filters, serviceFilters)
-		options.push(filterOptions)
+		const {filterMethods} = useFilters(filters, serviceFilters)
 
 		const articles = computed(() => {
 				let unsorted = articleIds.value
@@ -669,6 +672,8 @@ export default defineComponent({
 			sortConfig,
 			sortMethods,
 			scrollTop,
+			filterMethods,
+			filters,
 		}
 	},
 })

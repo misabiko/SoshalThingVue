@@ -38,7 +38,7 @@
 						</div>
 					</div>
 					<SortOptions :sortConfig='sortConfig' :sortMethods='sortMethods'/>
-					<component :is='filterOptions'/>
+					<FilterOptions :filterMethods='filterMethods' :filters='filters'/>
 					<div class='field'>
 						<div class='control'>
 							<input type='checkbox' v-model='timelineData.rtl'/>
@@ -84,6 +84,7 @@ import {modal} from '@/composables/ModalManager'
 import {useSortMethods} from '@/composables/useSortMethods'
 import {useFilters} from '@/composables/useFilters'
 import SortOptions from '@/components/SortOptions.vue'
+import FilterOptions from '@/components/FilterOptions.vue'
 
 library.add(faTimes)
 
@@ -124,7 +125,7 @@ export function resetTimelineData(dataOverride? : any) {
 }
 
 export default defineComponent({
-	components: {SortOptions, EndpointSelection},
+	components: {SortOptions, FilterOptions, EndpointSelection},
 	props: {
 		timelines: {
 			type: Array as PropType<TimelineData[]>,
@@ -161,7 +162,7 @@ export default defineComponent({
 
 		const serviceFitlers = computed(() => service.value?.filters ?? {})
 		const filters = computed(() => timelineData.value?.filters ?? {})
-		const {filterOptions} = useFilters(filters, serviceFitlers)
+		const {filterMethods} = useFilters(filters, serviceFitlers)
 
 		return {
 			modal,
@@ -172,7 +173,8 @@ export default defineComponent({
 			validations,
 			valid,
 			resetTimelineData,
-			filterOptions,
+			filters,
+			filterMethods,
 			sortMethods,
 			sortConfig,
 		}
