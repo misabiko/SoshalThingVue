@@ -1,6 +1,7 @@
 export interface Article {
 	id : string
 	index : number	//TODO Remove index from base Article
+	read : boolean
 	hidden : boolean
 	queried : boolean
 }

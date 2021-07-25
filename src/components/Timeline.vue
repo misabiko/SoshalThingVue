@@ -541,12 +541,13 @@ export default defineComponent({
 		}
 
 		const onArticleClicks : { [method : string] : (id : string) => void } = {
+			MarkAsRead: (id : string) => service.value.toggleReadArticle(id),
 			Hide: (id : string) => service.value.toggleHideArticle(id),
 			Log: (id : string) => console.dir(service.value.articles.value[id]),
 			Expand: (id : string) => modalArticle.value = id,
 		}
 
-		const onArticleClick = ref('Hide')
+		const onArticleClick = ref('MarkAsRead')
 
 		provide('service', service)
 

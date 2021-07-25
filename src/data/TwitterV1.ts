@@ -379,6 +379,7 @@ function parseTweet(tweet: TwitterV1Tweet) : TweetArticle {
 		reposted: tweet.retweeted,
 		repostCount: tweet.retweet_count,
 		index: 0,
+		read: false,
 		hidden: false,
 		queried: true
 	}
@@ -397,6 +398,7 @@ function parseRetweet(tweet: TwitterV1Tweet) {
 		creationDate: new Date(tweet.created_at),
 		author: parseUser(tweet.user),
 		index: 0,
+		read: false,
 		hidden: false,
 		queried: true,
 	}
@@ -427,6 +429,7 @@ function parseQuote(tweet: TwitterV1Tweet) {
 		reposted: tweet.retweeted,
 		repostCount: tweet.retweet_count,
 		index: 0,
+		read: false,
 		hidden: false,
 		queried: true,
 	}

@@ -22,6 +22,7 @@ describe('Twitter', () => {
 			avatarURL: 'https://pbs.twimg.com/profile_images/1351332299468632065/3e1qrbOZ_bigger.jpg'
 		},
 		queried: true,
+		read: false,
 		hidden: false,
 		index: 0,
 	}

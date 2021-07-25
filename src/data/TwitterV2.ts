@@ -142,6 +142,7 @@ function parseTweet(tweet : APITweetData, author : APIUserData, mediaData : APIM
 		likeCount: tweet.public_metrics.like_count,
 		reposted: false,
 		repostCount: tweet.public_metrics.retweet_count,
+		read: false,
 		hidden: false,
 		queried: false,
 	}
@@ -165,6 +166,7 @@ function parseRetweet(retweet : APITweetData, author : APIUserData, retweetedTwe
 			avatarURL: author.profile_image_url,
 		},
 		index: 0,
+		read: false,
 		hidden: false,
 		queried: false,
 	}

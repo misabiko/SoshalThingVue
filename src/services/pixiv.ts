@@ -341,6 +341,7 @@ class FollowPageEndpoint extends PagedEndpoint {
 					},
 
 				],
+				read: false,
 				hidden: false,
 				queried: false,
 				liked: false,
@@ -444,6 +445,7 @@ class UserPageEndpoint extends PagedEndpoint {
 					status: MediaLoadStatus.ThumbnailOnly,
 					thumbnail: thumb.thumbnail,
 				}],
+				read: false,
 				hidden: false,
 				queried: false,
 				liked: false,
@@ -565,6 +567,7 @@ class BookmarkPageEndpoint extends PagedEndpoint {
 						format: getImageFormat(thumb.thumbnail.url),
 					},
 				}],
+				read: false,
 				hidden: false,
 				queried: false,
 				liked: false,

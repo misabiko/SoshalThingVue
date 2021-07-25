@@ -32,7 +32,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 	articles = ref<{ [id : string] : ArticleType }>({})
 	readonly articleComponent : Component
 
-	readonly endpointTypes : {[endpointType : string] : EndpointTypeInfo}
+	readonly endpointTypes : { [endpointType : string] : EndpointTypeInfo }
 	endpoints : { [name : string] : Endpoint<any> } = {}
 
 	defaultSortMethod = 'Unsorted'
@@ -86,6 +86,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 			// @ts-ignore
 			this.articles.value[newArticle.id] = {
 				...newArticle,
+				read: oldArticle.read,
 				hidden: oldArticle.hidden,
 				queried: oldArticle.queried || newArticle.queried,
 			}
@@ -94,6 +95,11 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	toggleHideArticle(id : string) {
 		this.articles.value[id].hidden = !this.articles.value[id].hidden
+		this.saveLocalStorage()
+	}
+
+	toggleReadArticle(id : string) {
+		this.articles.value[id].read = !this.articles.value[id].read
 		this.saveLocalStorage()
 	}
 
@@ -186,7 +192,7 @@ export interface EndpointTypeInfo {
 	optionComponent : Function
 }
 
-export type EndpointTypeInfoGetter = (service: Service) => EndpointTypeInfo
+export type EndpointTypeInfoGetter = (service : Service) => EndpointTypeInfo
 
 export abstract class Endpoint<CallOpt> {
 	articles : string[] = reactive([])
@@ -218,7 +224,7 @@ export abstract class Endpoint<CallOpt> {
 
 	getKeyOptions() : { endpointType : string } & any {
 		return {
-			endpointType: (this.constructor as any).typeInfo(null).typeName
+			endpointType: (this.constructor as any).typeInfo(null).typeName,
 		}
 	}
 

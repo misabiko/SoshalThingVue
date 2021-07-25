@@ -58,12 +58,26 @@ export const defaultDefaultFilters : FilterConfigs = {
 		inverted: false,
 		config: {},
 	},
+	Read: {
+		enabled: true,
+		inverted: false,
+		config: {},
+	},
 }
 
 export function useFilters<ArticleType extends Article>(filters : Readonly<Ref<FilterConfigs>>, additionalFiters : Readonly<Ref<Filters<ArticleType>>>) {
 	const filterMethods = ref<Filters<ArticleType>>({
 		Hidden: {
 			filter: (inverted) => a => !a.hidden != inverted,
+			option: () => null,
+			defaultConfig: {
+				enabled: true,
+				inverted: false,
+				config: {},
+			},
+		},
+		Read: {
+			filter: (inverted) => a => !a.read != inverted,
 			option: () => null,
 			defaultConfig: {
 				enabled: true,

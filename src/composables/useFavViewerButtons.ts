@@ -87,16 +87,20 @@ export function useFavViewerButtons(service : Ref<MediaService>, article : Ref<M
 				h('div', {class: 'dropdown-content'}, [
 					h('div', {
 						class: 'dropdown-item',
+						onClick: () => service.value.toggleReadArticle(article.value.id),
+					}, 'Mark as read'),
+					h('div', {
+						class: 'dropdown-item',
 						onClick: () => service.value.toggleHideArticle(article.value.id),
-					}, ['Hide']),
+					}, 'Hide'),
 					h('div', {
 						class: 'dropdown-item',
 						onClick: () => console.dir(toRaw(article.value)),
-					}, ['Log']),
+					}, 'Log'),
 					h('div', {
 						class: 'dropdown-item',
 						onClick: async () => console.dir(await service.value.getAPIArticleData(article.value.id)),
-					}, ['Get API Data']),
+					}, 'Get API Data'),
 				]),
 			]),
 		]))

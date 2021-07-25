@@ -118,6 +118,7 @@
 							</div>
 							<div class='dropdown-menu'>
 								<div class='dropdown-content'>
+									<div class='dropdown-item' @click='service.toggleReadArticle(article.id)'>Mark as read</div>
 									<div class='dropdown-item' @click='service.toggleHideArticle(article.id)'>Hide</div>
 									<div class='dropdown-item' @click='compact = !compact'>{{ compact ? 'Show full' : 'Show compact'}}</div>
 									<div class='dropdown-item' @click='service.logArticle(article.id)'>Log</div>
