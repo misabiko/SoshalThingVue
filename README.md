@@ -1,7 +1,7 @@
 # SoshalThing
 
-[![CI@main](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml)
-[![CI@develop](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml)
+[![CI@main](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml/badge.svg?branch=main "CI@main")](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml)
+[![CI@develop](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml/badge.svg?branch=develop "CI@develop")](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml)
 
 Load feeds from various services in a Tweetdeck-style timeline app.
 
