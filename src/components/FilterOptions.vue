@@ -27,6 +27,9 @@
 			<button class='button' @click='filter.inverted = !filter.inverted'>
 				{{ filter.inverted ? 'Inverted' : 'Normal' }}
 			</button>
+			<button class='button' @click='delete filters[methodName]'>
+				Remove
+			</button>
 		</div>
 		<component v-if='filter.option' :is='filter.option(filters)'/>
 	</div>
