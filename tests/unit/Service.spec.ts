@@ -7,7 +7,7 @@ import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import App from '@/App.vue'
 import {TimelineData} from '@/data/timelines'
 
-class MockService extends Service {
+export class MockService extends Service {
 	constructor() {
 		super('MockService', [MockEndpoint.typeInfo], TweetArticle, false)
 	}

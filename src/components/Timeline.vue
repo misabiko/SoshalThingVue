@@ -55,7 +55,7 @@
 						</span>
 					</button>
 				</template>
-				<button @click='showOptions = !showOptions'>
+				<button class='showOptions' @click='showOptions = !showOptions'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='ellipsis-v' size='lg'/>
 					</span>
@@ -632,6 +632,7 @@ export default defineComponent({
 			h('div', {class: 'control'},
 				h('label', {class: 'checkbox'}, [
 					h('input', {
+							class: 'compactArticles',
 							type: 'checkbox',
 							checked: compactArticles.value,
 							onInput: (e : InputEvent) => compactArticles.value = (e.target as HTMLInputElement).checked,
@@ -693,6 +694,8 @@ export default defineComponent({
 			modalArticle,
 			showOptions,
 			options,
+			updateQueries: undefined,
+			updateLoadings: undefined,
 			...mediaServiceReturns,
 			modifiedTimelineData,
 			newPage,

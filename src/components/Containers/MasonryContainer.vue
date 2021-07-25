@@ -40,11 +40,9 @@ export default defineComponent({
 		},
 		updateQueries: {
 			type: Function as PropType<() => any>,
-			required: true,
 		},
 		updateLoadings: {
 			type: Function as PropType<() => any>,
-			required: true,
 		},
 		compactArticles: {
 			type: Boolean,
@@ -53,8 +51,10 @@ export default defineComponent({
 	},
 
 	setup(props) {
-		onBeforeUpdate(props.updateQueries)
-		onBeforeUpdate(props.updateLoadings)
+		if (props.updateQueries)
+			onBeforeUpdate(props.updateQueries)
+		if (props.updateLoadings)
+			onBeforeUpdate(props.updateLoadings)
 
 		const service = computed(() => Service.instances[props.serviceName])
 		const columns = computed(() => arrangeColumns(Math.min(props.columnCount, props.articles.length), service.value, props.articles, props.rightToLeft))
