@@ -1,5 +1,5 @@
 <template>
-	<article class='article' :class='{hiddenArticle: article.hidden}' :articleId='article.id'>
+	<article class='article' :class='{hiddenArticle: filtered}' :articleId='article.id'>
 		<component :is='medias'></component>
 		<component :is='holderBoxes'></component>
 	</article>
@@ -29,6 +29,7 @@ export default defineComponent({
 			type: Object as PropType<PixivArticle>,
 			required: true,
 		},
+		filtered: Boolean,
 	},
 
 	setup(props) {

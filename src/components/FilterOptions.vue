@@ -1,5 +1,11 @@
 <template>
 	<h4>Filters</h4>
+	<div class='field'>
+		<label class='checkbox'>
+			<input type='checkbox' :checked='showFiltered' @input='$emit("setShowFiltered", $event.target.checked)'>
+			Show filtered articles
+		</label>
+	</div>
 	<div class='field has-addons'>
 		<div class='control'>
 			<div class='select'>
@@ -50,6 +56,7 @@ export default defineComponent({
 			type: Object as PropType<FilterConfigs>,
 			required: true,
 		},
+		showFiltered: Boolean,
 	},
 
 	setup(props) {

@@ -134,7 +134,12 @@
 				<SortOptions :sortConfig='sortConfig' :sortMethods='sortMethods' :articleList='timeline.articleList'/>
 			</div>
 			<div class='box'>
-				<FilterOptions :filterMethods='filterMethods' :filters='filters'/>
+				<FilterOptions
+					:filterMethods='filterMethods'
+					:filters='filters'
+					:showFiltered='showFilteredArticles'
+					@setShowFiltered='showFilteredArticles = $event'
+				/>
 			</div>
 			<template v-for='option in options'>
 				<div v-if='option' class='box'>

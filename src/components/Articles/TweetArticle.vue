@@ -31,9 +31,9 @@
 							<small :title='actualArticle.creationDate'>{{ timestamp }}</small>
 						</span>
 					</div>
-					<p class='articleParagraph'>{{ actualArticle.text }}</p>
+					<p v-if='!filtered' class='articleParagraph'>{{ actualArticle.text }}</p>
 				</div>
-				<div v-if='article.type === TwitterArticleType.Quote' class='quotedPost'>
+				<div v-if='!filtered && article.type === TwitterArticleType.Quote' class='quotedPost'>
 					<div class='articleHeader'>
 						<a
 							class='names'
@@ -68,7 +68,9 @@
 					<div v-else-if='refArticle.media.length && refArticle.media[0].type === MediaType.Video'
 						 class='postMedia postVideo'>
 						<div class='is-hidden imgPlaceholder'/>
-						<video controls :autoplay='refArticle.media[0].content.autoplay' :loop='refArticle.media[0].content.loop' :muted='refArticle.media[0].content.mute' @click='onArticleClick(article.id)'>
+						<video controls :autoplay='refArticle.media[0].content.autoplay'
+							   :loop='refArticle.media[0].content.loop' :muted='refArticle.media[0].content.mute'
+							   @click='onArticleClick(article.id)'>
 							<source :src='refArticle.media[0].content.url' type='video/mp4'/>
 						</video>
 					</div>
@@ -78,7 +80,7 @@
 						<a
 							class='level-item articleButton repostButton'
 							:class='{repostedPostButton: actualArticle.reposted}'
-							@click='actualArticle.reposted || service.retweet(actualArticle.id)'
+							@click='filtered || actualArticle.reposted || service.retweet(actualArticle.id)'
 						>
 							<span class='icon'>
 								<FontAwesomeIcon icon='retweet'/>
@@ -88,7 +90,7 @@
 						<a
 							class='level-item articleButton likeButton'
 							:class='{likedPostButton: actualArticle.liked}'
-							@click='service.like(actualArticle.id)'
+							@click='filtered || service.like(actualArticle.id)'
 						>
 							<span class='icon'>
 								<FontAwesomeIcon :icon='[actualArticle.liked ? "fas" : "far", "heart"]'/>
@@ -97,7 +99,7 @@
 						</a>
 						<a
 							class='level-item articleButton'
-							v-if='(actualArticle.media && actualArticle.media.length) || (refArticle.media && refArticle.media.length)'
+							v-if='!filtered && ((actualArticle.media && actualArticle.media.length) || (refArticle.media && refArticle.media.length))'
 							@click='compact = !compact'
 						>
 							<span class='icon'>
@@ -118,9 +120,13 @@
 							</div>
 							<div class='dropdown-menu'>
 								<div class='dropdown-content'>
-									<div class='dropdown-item' @click='service.toggleReadArticle(article.id)'>Mark as read</div>
+									<div class='dropdown-item' @click='service.toggleReadArticle(article.id)'>Mark as
+										read
+									</div>
 									<div class='dropdown-item' @click='service.toggleHideArticle(article.id)'>Hide</div>
-									<div class='dropdown-item' @click='compact = !compact'>{{ compact ? 'Show full' : 'Show compact'}}</div>
+									<div class='dropdown-item' @click='compact = !compact'>
+										{{ compact ? 'Show full' : 'Show compact' }}
+									</div>
 									<div class='dropdown-item' @click='service.logArticle(article.id)'>Log</div>
 									<div class='dropdown-item' @click='fetchLog'>Fetch Status V1</div>
 									<div class='dropdown-item' @click='$emit("expand", article.id)'>Expand</div>
@@ -146,28 +152,32 @@
 				</nav>
 			</div>
 		</div>
-		<div v-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Image'
-			 class='postMedia postImages' :class='{postImagesCompact: compact}'>
-			<div
-				class='mediaHolder'
-				v-for='(mediaData, i) in actualArticle.media'
-				:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(actualArticle, i), actualArticle.media.length === 3 && i === 2 ? 'thirdImage' : '']"
-			>
-				<div class='is-hidden imgPlaceholder'/>
-				<img
-					:alt='actualArticle.id'
-					:src='mediaData.status === MediaLoadStatus.ThumbnailOnly ? mediaData.thumbnail.url : mediaData.content.url'
-					@click='onArticleClick(article.id)'
-				/>
+		<template v-if='!filtered'>
+			<div v-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Image'
+				 class='postMedia postImages' :class='{postImagesCompact: compact}'>
+				<div
+					class='mediaHolder'
+					v-for='(mediaData, i) in actualArticle.media'
+					:class="[compact ? 'mediaHolderCompact' : '', imageFormatClass(actualArticle, i), actualArticle.media.length === 3 && i === 2 ? 'thirdImage' : '']"
+				>
+					<div class='is-hidden imgPlaceholder'/>
+					<img
+						:alt='actualArticle.id'
+						:src='mediaData.status === MediaLoadStatus.ThumbnailOnly ? mediaData.thumbnail.url : mediaData.content.url'
+						@click='onArticleClick(article.id)'
+					/>
+				</div>
 			</div>
-		</div>
-		<div v-else-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Video'
-			 class='postMedia postVideo'>
-			<div class='is-hidden imgPlaceholder'/>
-			<video controls :autoplay='actualArticle.media[0].content.autoplay' :loop='actualArticle.media[0].content.loop' :muted='actualArticle.media[0].content.mute' @click='onArticleClick(article.id)'>
-				<source :src='actualArticle.media[0].content.url' type='video/mp4'/>
-			</video>
-		</div>
+			<div v-else-if='actualArticle.media.length && actualArticle.media[0].type === MediaType.Video'
+				 class='postMedia postVideo'>
+				<div class='is-hidden imgPlaceholder'/>
+				<video controls :autoplay='actualArticle.media[0].content.autoplay'
+					   :loop='actualArticle.media[0].content.loop' :muted='actualArticle.media[0].content.mute'
+					   @click='onArticleClick(article.id)'>
+					<source :src='actualArticle.media[0].content.url' type='video/mp4'/>
+				</video>
+			</div>
+		</template>
 	</article>
 </template>
 
@@ -206,7 +216,8 @@ export default defineComponent({
 		inheritedCompact: {
 			type: Boolean,
 			default: true,
-		}
+		},
+		filtered: Boolean,
 	},
 
 	setup(props) {
@@ -253,7 +264,7 @@ export default defineComponent({
 					localCompact.value = undefined
 				else
 					localCompact.value = v
-			}
+			},
 		})
 
 		watch(() => props.inheritedCompact, (val, oldVal) => {
