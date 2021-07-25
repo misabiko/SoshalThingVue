@@ -399,6 +399,10 @@ export default defineComponent({
 			end: 30,
 			expandStep: 50,
 		})
+		watch(articleSection, newVal => {
+			modifiedTimelineData.value.articleSection = newVal
+			emit('changeTimeline', modifiedTimelineData.value)
+		}, {deep: true})
 
 		function expandSectionTop() {
 			if (!articleSection.value.enabled)

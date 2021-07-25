@@ -60,7 +60,13 @@ describe('Services', () => {
 				reversed: false
 			},
 			autoRefresh: true,
-			compactArticles: false
+			compactArticles: false,
+			articleSection: {
+				enabled: true,
+				start: 0,
+				end: 30,
+				expandStep: 50,
+			},
 		}
 
 		it('uses options as endpoint name', () => {

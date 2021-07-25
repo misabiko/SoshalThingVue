@@ -64,6 +64,12 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						},
 						autoRefresh: false,
 						compactArticles: false,
+						articleSection: {
+							enabled: true,
+							start: 0,
+							end: 100,
+							expandStep: 50,
+						},
 					},
 				]
 			case PixivUserPage:
@@ -86,6 +92,12 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						},
 						autoRefresh: false,
 						compactArticles: false,
+						articleSection: {
+							enabled: true,
+							start: 0,
+							end: 100,
+							expandStep: 50,
+						},
 					},
 				]
 			case PixivBookmarkPage:
@@ -108,6 +120,12 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 						},
 						autoRefresh: false,
 						compactArticles: false,
+						articleSection: {
+							enabled: true,
+							start: 0,
+							end: 100,
+							expandStep: 50,
+						},
 					},
 				]
 			default:

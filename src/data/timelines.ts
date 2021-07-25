@@ -15,4 +15,10 @@ export interface TimelineData {
 	columnCount? : number
 	autoRefresh : boolean
 	compactArticles : boolean
+	articleSection : {
+		enabled : boolean
+		start : number
+		end : number
+		expandStep : number
+	}
 }

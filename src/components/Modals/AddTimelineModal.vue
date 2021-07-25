@@ -111,6 +111,12 @@ export function resetTimelineData(dataOverride? : any) {
 			method: service.defaultSortMethod,
 			reversed: false,
 		},
+		articleSection: {
+			enabled: true,
+			start: 0,
+			end: 30,
+			expandStep: 50,
+		},
 		...dataOverride,
 	}
 
@@ -155,8 +161,8 @@ export default defineComponent({
 
 		const serviceSortMethods = computed(() => service.value?.sortMethods ?? {})
 		const sortConfig = computed(() => timelineData.value?.sortConfig ?? {
-			method : 'Unsorted',
-			reversed : false,
+			method: 'Unsorted',
+			reversed: false,
 		})
 		const {sortMethods} = useSortMethods(sortConfig, serviceSortMethods)
 
