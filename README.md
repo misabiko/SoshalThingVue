@@ -1,5 +1,8 @@
 # SoshalThing
 
+[![CI@main](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml/badge.svg?branch=main "CI@main")](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml)
+[![CI@develop](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml/badge.svg?branch=develop "CI@develop")](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml)
+
 Load feeds from various services in a Tweetdeck-style timeline app.
 
 Most tasks are hosted on the [SoshalThingVue3 project](https://github.com/misabiko/SoshalThing/projects/4).

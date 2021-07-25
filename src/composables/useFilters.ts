@@ -12,7 +12,7 @@ export type Filters<ArticleType extends Article> = {
 type FilterConfig = {
 	enabled : boolean,
 	inverted : boolean,
-	config : any,
+	config? : any,
 }
 
 export type FilterConfigs = {
@@ -92,44 +92,5 @@ export function useFilters<ArticleType extends Article>(filters : Readonly<Ref<F
 		...additionalFiters.value,
 	})
 
-	const newFilter = ref('Hidden')
-
-	const filterOptions = () => [
-		h('h4', 'Filters'),
-		h('div', {class: 'field has-addons'}, [
-			h('div', {class: 'control'},
-				h('div', {class: 'select'},
-					h('select', {
-						onInput: (e : InputEvent) => newFilter.value = (e.target as HTMLInputElement).value,
-					}, Object.keys(filterMethods.value)
-						.filter(method => !Object.keys(filters.value).includes(method))
-						.map(method => h('option', {value: method}, method))),
-				),
-			),
-			h('div', {class: 'control'},
-				h('button', {
-					class: 'button',
-					onClick: () => filters.value[newFilter.value] = filterMethods.value[newFilter.value].defaultConfig,
-				}, 'Add Filter'),
-			),
-		]),
-		...Object.entries(filters.value).map(([method, opts]) => h('div', {class: 'field'},
-			[
-				h('label', {class: 'label'}, method),
-				h('div', {class: 'control has-addons'}, [
-					h('button', {
-						class: 'button',
-						onClick: () => filters.value[method].enabled = !filters.value[method].enabled,
-					}, filters.value[method].enabled ? 'On' : 'Off'),
-					h('button', {
-						class: 'button',
-						onClick: () => filters.value[method].inverted = !filters.value[method].inverted,
-					}, filters.value[method].inverted ? 'Inverted' : 'Normal'),
-				]),
-				filterMethods.value[method].option(filters),
-			])),
-	]
-
-
-	return {filterMethods, filterOptions}
+	return {filterMethods}
 }

@@ -296,6 +296,7 @@ function parseEntities(tweet : TwitterV1Tweet) {
 
 	if (tweet.extended_entities) {
 		for (const entitiesMedia of (tweet.extended_entities.media ?? [])) {
+			let variant
 			switch (entitiesMedia.type) {
 				case 'photo':
 					media.push({
@@ -309,8 +310,7 @@ function parseEntities(tweet : TwitterV1Tweet) {
 					})
 					break
 				case 'video':
-				case 'animated_gif':
-					const variant = entitiesMedia.video_info?.variants.find(v => v.content_type === 'video/mp4')
+					variant = entitiesMedia.video_info?.variants.find(v => v.content_type === 'video/mp4')
 					if (variant) {
 						media.push({
 							type: MediaType.Video,
@@ -319,6 +319,22 @@ function parseEntities(tweet : TwitterV1Tweet) {
 								url: variant.url,
 								size: {width: entitiesMedia.sizes.large.w, height: entitiesMedia.sizes.large.h},
 								format: MediaFormat.MP4,
+							}
+						})
+					}
+					break
+				case 'animated_gif':
+					variant = entitiesMedia.video_info?.variants.find(v => v.content_type === 'video/mp4')
+					if (variant) {
+						media.push({
+							type: MediaType.Video,
+							status: MediaLoadStatus.Plain,
+							content: {
+								url: variant.url,
+								size: {width: entitiesMedia.sizes.large.w, height: entitiesMedia.sizes.large.h},
+								format: MediaFormat.MP4,
+								autoplay: true,
+								loop: true,
 							}
 						})
 					}

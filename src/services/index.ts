@@ -9,8 +9,8 @@ export interface Payload<ArticleType = Article> {
 	newArticles : string[]
 }
 
-export interface ServiceLocalStorage {
-	articles : { [id : string] : Article }
+export interface ServiceLocalStorage<ArticleType extends Article = Article> {
+	articles : { [id : string] : ArticleType }
 	//endpoints : any[]
 }
 
@@ -32,6 +32,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 	articles = ref<{ [id : string] : ArticleType }>({})
 	readonly articleComponent : Component
 
+	readonly endpointTypes : {[endpointType : string] : EndpointTypeInfo}
 	endpoints : { [name : string] : Endpoint<any> } = {}
 
 	defaultSortMethod = 'Unsorted'
@@ -42,10 +43,14 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	protected constructor(
 		public name : string,
-		readonly endpointTypes : { [className : string] : { name : string, factory : Function, optionComponent : Function } },	//TODO Move to static properties
+		endpointTypes : EndpointTypeInfoGetter[],
 		articleComponentRaw : Component,
 		readonly hasMedia : boolean,	//TODO Check programatically
 	) {
+		this.endpointTypes = Object.fromEntries(endpointTypes.map(typeInfo => {
+			const gottenTypeInfo = typeInfo(this)
+			return [gottenTypeInfo.typeName, gottenTypeInfo]
+		}))
 		this.articleComponent = markRaw(articleComponentRaw)
 	}
 
@@ -126,7 +131,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 	}
 
 	async saveLocalStorage() {
-		console.log(`Saving local storage...`)
+		console.debug(`Saving local storage...`)
 
 		const rawStorage = localStorage.getItem(LOCALSTORAGE_TITLE)
 		if (!rawStorage)
@@ -153,7 +158,7 @@ export abstract class Service<ArticleType extends Article = Article> {
 		const response = await fetch(url, opts)
 		const json = await response.json()
 
-		console.dir(json)
+		//console.dir(json)
 
 		if (json.soshalServices)
 			for (const [name, status] of Object.entries(json.soshalServices))
@@ -164,15 +169,30 @@ export abstract class Service<ArticleType extends Article = Article> {
 
 	loadStatus(status : any) {
 	}
+
+	getMedias(id : string) {
+		return (this.articles.value[id] as MediaArticle).media
+	}
 }
 
 export interface HostPageService {
 	pageInfo? : PageInfo
 }
 
+export interface EndpointTypeInfo {
+	typeName : string
+	name : string
+	factory : Function
+	optionComponent : Function
+}
+
+export type EndpointTypeInfoGetter = (service: Service) => EndpointTypeInfo
+
 export abstract class Endpoint<CallOpt> {
 	articles : string[] = reactive([])
 	//calling = false
+
+	defaultRefreshIntervalMs = 90000
 
 	rateLimitInfo? : {
 		maxCalls : number
@@ -196,7 +216,11 @@ export abstract class Endpoint<CallOpt> {
 		return true//!this.calling
 	}
 
-	abstract getKeyOptions() : { endpointType : string } & any
+	getKeyOptions() : { endpointType : string } & any {
+		return {
+			endpointType: (this.constructor as any).typeInfo(null).typeName
+		}
+	}
 
 	serialize() : any {
 	}
@@ -207,7 +231,11 @@ export abstract class Endpoint<CallOpt> {
 
 export type WrappedPayload = { payload : Payload, basePageNum : number, lastPage : number }
 
-export abstract class PagedEndpoint<CallOpt extends { pageNum : number } = { pageNum : number }> extends Endpoint<CallOpt> {
+export interface PagedCallOpt {
+	pageNum : number
+}
+
+export abstract class PagedEndpoint<CallOpt extends PagedCallOpt = PagedCallOpt> extends Endpoint<CallOpt> {
 	loadedPages = ref<{ [page : number] : string[] }>({})
 
 	protected constructor(name : string, public basePageNum = 0, public lastPage? : number) {

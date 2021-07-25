@@ -78,12 +78,13 @@ function packUserscript() {
 		matches += `\n// @match        ${url}`
 
 	const favCSS = fs.readFileSync('dist/favviewer.css')
+	const packageJson = JSON.parse(fs.readFileSync('./package.json'))
 
 	const rawHeader = `// ==UserScript==
 // @name         SoshalThing
-// @version      0.0.1
+// @version      ${packageJson.version}
 // @description  Injects timelines into a various websites
-// @author       misabiko
+// @author       ${packageJson.author.name}
 // @require      https://unpkg.com/vue${matches}
 // ==/UserScript==
 

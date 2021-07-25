@@ -5,8 +5,8 @@
 				:is='service.articleComponent'
 				v-for='a in column' :key='a.id'
 				:article='a'
-				:service='service'
-				:on-article-click='onArticleClick'
+				:onArticleClick='onArticleClick'
+				:inheritedCompact='compactArticles'
 				@loading-full-media='$emit("loadingFullMedia", $event)'
 				@done-loading='$emit("doneLoading", $event)'
 				@expand='$emit("expand", $event)'
@@ -46,17 +46,22 @@ export default defineComponent({
 			type: Function as PropType<() => any>,
 			required: true,
 		},
+		compactArticles: {
+			type: Boolean,
+			default: true
+		}
 	},
 
 	setup(props) {
 		onBeforeUpdate(props.updateQueries)
 		onBeforeUpdate(props.updateLoadings)
 
-		const columns = computed(() => arrangeColumns(Math.min(props.columnCount, props.articles.length), props.articles, props.rightToLeft))
+		const service = computed(() => Service.instances[props.serviceName])
+		const columns = computed(() => arrangeColumns(Math.min(props.columnCount, props.articles.length), service.value, props.articles, props.rightToLeft))
 
 		return {
 			columns,
-			service: computed(() => Service.instances[props.serviceName])
+			service,
 		}
 	},
 })
@@ -68,8 +73,8 @@ function getColumnHeight(column : [number, RatioedArticle[]]) {
 		return 0
 }
 
-function arrangeColumns(columnCount : number, articles : MediaArticle[], rightToLeft: boolean) {
-	const ratioedArticles : RatioedArticle[] = articles.map((a : MediaArticle) => [a, getRelativeHeight(a.media)])
+function arrangeColumns(columnCount : number, service: Service, articles : MediaArticle[], rightToLeft: boolean) {
+	const ratioedArticles : RatioedArticle[] = articles.map((a : MediaArticle) => [a, getRelativeHeight(service.getMedias(a.id))])
 
 	const cols : [number, RatioedArticle[]][] = []
 	for (let i = 0; i < columnCount; i++)
@@ -85,7 +90,7 @@ function arrangeColumns(columnCount : number, articles : MediaArticle[], rightTo
 	return cols.map(column => column[1].map((ratioed : RatioedArticle) => ratioed[0]))
 }
 
-function getRelativeHeight(medias : PlainMedia[] | LazyMedia[] | QueriedMedia[]) : number {
+function getRelativeHeight(medias : (PlainMedia | LazyMedia | QueriedMedia)[]) : number {
 	let sum = 1
 	for (const media of (medias ?? []))
 		switch (media.status) {

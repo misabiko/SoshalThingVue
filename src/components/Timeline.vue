@@ -2,7 +2,7 @@
 	<div class='timeline' :class='{ mainTimeline }' :style='size > 1 ? {width: (size * 500) + "px"} : {}'>
 		<div class='timelineHeader'>
 			<div class='timelineLeftHeader'>
-				<strong>{{ timeline.title }}</strong>
+				<strong @click='scrollTop'>{{ timeline.title }}</strong>
 				<div class='timelineButtons' v-if='mainTimeline'>
 					<button @click='$emit("showSidebar")'>
 						<span class='icon'>
@@ -22,7 +22,7 @@
 				</div>
 			</div>
 			<div class='timelineButtons'>
-				<button @click='shuffle(articleIds), sortMethod = "Unsorted"'>
+				<button @click='shuffle(articleIds), sortConfig.method = "Unsorted"'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='random' size='lg'/>
 					</span>
@@ -32,7 +32,8 @@
 						<FontAwesomeIcon icon='scroll' size='lg'/>
 					</span>
 				</button>
-				<button v-if='endpointPackage.type === EndpointPackageType.PagedEndpoint' @click='getRandomNewArticles()'>
+				<button v-if='endpointPackage.type === EndpointPackageType.PagedEndpoint'
+						@click='getRandomNewArticles()'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='magic' size='lg'/>
 					</span>
@@ -71,6 +72,12 @@
 						</button>
 					</div>
 				</div>
+				<div class='control'>
+					<label class='checkbox'>
+						<input type='checkbox' v-model='autoRefreshEnabled'/>
+						Auto Refresh
+					</label>
+				</div>
 			</div>
 			<div class='box'>
 				<div class='field'>
@@ -85,6 +92,12 @@
 						</div>
 					</div>
 				</div>
+			</div>
+			<div class='box'>
+				<SortOptions :sortConfig='sortConfig' :sortMethods='sortMethods' :articleList='timeline.articleList'/>
+			</div>
+			<div class='box'>
+				<FilterOptions :filterMethods='filterMethods' :filters='filters'/>
 			</div>
 			<template v-for='option in options'>
 				<div v-if='option' class='box'>
@@ -102,6 +115,7 @@
 			:is='containers[timeline.container]'
 			:serviceName='service.name'
 			:articles='articles'
+			:compactArticles='compactArticles'
 			:columnCount='Math.min(articles.length, columnCount)'
 			:rightToLeft='rightToLeft'
 			:onArticleClick='onArticleClicks[onArticleClick]'
@@ -125,7 +139,7 @@ import {
 	computed,
 	defineComponent,
 	h,
-	onBeforeMount,
+	onBeforeMount, onBeforeUnmount,
 	PropType,
 	provide,
 	Ref,
@@ -157,6 +171,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import EndpointSelection from '@/components/EndpointSelection.vue'
 import {articleLists, saveLists} from '@/data/articleLists'
+import {useAutoRefreshing} from '@/composables/useAutoRefreshing'
+import SortOptions from '@/components/SortOptions.vue'
+import FilterOptions from '@/components/FilterOptions.vue'
 
 library.add(faEllipsisV, faArrowDown, faSyncAlt, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
 
@@ -167,17 +184,17 @@ enum EndpointPackageType {
 }
 
 type EndpointPackage = {
-	type: EndpointPackageType.NoEndpoint,
-	ready: false,
+	type : EndpointPackageType.NoEndpoint,
+	ready : false,
 } | {
-	type: EndpointPackageType.RefreshEndpoint,
-	ready: boolean,
+	type : EndpointPackageType.RefreshEndpoint,
+	ready : boolean,
 } | {
-	type: EndpointPackageType.PagedEndpoint,
-	ready: boolean,
-	endpoint: Readonly<Ref<PagedEndpoint>>,
-	remainingPages: Readonly<Ref<number[]>>,
-	newPage: Ref<undefined | number>,
+	type : EndpointPackageType.PagedEndpoint,
+	ready : boolean,
+	endpoint : Readonly<Ref<PagedEndpoint>>,
+	remainingPages : Readonly<Ref<number[]>>,
+	newPage : Ref<undefined | number>,
 }
 
 export default defineComponent({
@@ -190,7 +207,7 @@ export default defineComponent({
 		viewMode: String,
 		viewModes: Array as PropType<string[]>,
 	},
-	components: {EndpointSelection, Modal},
+	components: {SortOptions, FilterOptions, EndpointSelection, Modal},
 	setup(props, {emit}) {
 		const {viewMode} = toRefs(props)
 		const options : (() => VNode | VNode[] | undefined)[] = []
@@ -199,7 +216,7 @@ export default defineComponent({
 		const endpoint = computed(() => props.timeline.endpointName === undefined ? undefined : service.value.endpoints[props.timeline.endpointName])
 
 		const modifiedTimelineData = ref<TimelineData>({
-			...props.timeline
+			...props.timeline,
 		})
 
 		const endpointPackage = computed<EndpointPackage>(() => {
@@ -211,7 +228,9 @@ export default defineComponent({
 			else if (endpoint.value instanceof PagedEndpoint)
 				return {
 					type: EndpointPackageType.PagedEndpoint,
-					get ready() {return endpoint.value?.ready ?? false},
+					get ready() {
+						return endpoint.value?.ready ?? false
+					},
 					endpoint: endpoint as unknown as Readonly<Ref<PagedEndpoint>>,
 					remainingPages,
 					newPage,
@@ -219,11 +238,13 @@ export default defineComponent({
 			else
 				return {
 					type: EndpointPackageType.RefreshEndpoint,
-					get ready() {return endpoint.value?.ready ?? false},
+					get ready() {
+						return endpoint.value?.ready ?? false
+					},
 				}
 		})
 
-		const getNewArticles = async function(callOpts : any = {pageNum: newPage.value ?? refreshPageNum.value}) {
+		const getNewArticles = async function(callOpts : any = {pageNum: newPage.value ?? refreshPageNum.value}, autoRefreshed = false) {
 			if (!endpoint.value?.ready) {
 				if (endpoint.value)
 					console.debug(`${endpoint.value.name} isn't ready.`)
@@ -252,8 +273,17 @@ export default defineComponent({
 					newPage.value = pages.filter(p => p > oldNewPage)[0] || pages[pages.length - 1]
 			}finally {
 				//endpoint.value.calling = false
+				if (autoRefreshEnabled.value && !autoRefreshed)
+					resetInterval()
 			}
 		}
+
+		const {isRefreshing, resetInterval} = useAutoRefreshing(endpoint, () => getNewArticles({
+			fromTop: true,
+			pageNum: refreshPageNum,
+		}, true))
+
+		onBeforeUnmount(() => isRefreshing.value = false)
 
 		const getRandomNewArticles = () => {
 			const ePackage = endpointPackage.value
@@ -299,7 +329,13 @@ export default defineComponent({
 		})
 
 		function initEndpoint() {
-			if (endpoint.value && endpoint.value instanceof PagedEndpoint)
+			if (endpoint.value === undefined)
+				return
+
+			if (autoRefreshEnabled.value)
+				resetInterval()
+
+			if (endpoint.value instanceof PagedEndpoint)
 				newPage.value ??= endpoint.value.basePageNum
 		}
 
@@ -331,23 +367,21 @@ export default defineComponent({
 		watch(sortConfig, () => emit('saveTimeline'))
 
 		const serviceSortMethods = computed(() => service.value.sortMethods)
-		const {
-			sortMethods,
-			sortOption,
-		} = useSortMethods(sortConfig, serviceSortMethods)
-		options.push(sortOption)
+		const {sortMethods} = useSortMethods(sortConfig, serviceSortMethods)
 
 		const filters = computed(() => props.timeline.filters)
 
 		watch(filters, () => emit('saveTimeline'), {deep: true})
 
 		const serviceFilters = computed(() => service.value.filters)
-		const {filterMethods, filterOptions} = useFilters(filters, serviceFilters)
-		options.push(filterOptions)
+		const {filterMethods} = useFilters(filters, serviceFilters)
 
 		const articles = computed(() => {
 				let unsorted = articleIds.value
-					.map(({serviceName, articleId}: {serviceName: string, articleId: string}) => Service.instances[serviceName].articles.value[articleId])
+					.map(({
+							  serviceName,
+							  articleId,
+						  } : { serviceName : string, articleId : string }) => Service.instances[serviceName].articles.value[articleId])
 					.filter(a => !!a)	//Rerender happens before all of articleIds is added to service.articles
 
 				for (const [method, opts] of Object.entries(filters.value))
@@ -367,15 +401,30 @@ export default defineComponent({
 
 		const filteredArticleIds = computed(() => articles.value.map(a => a.id))
 
-		initEndpoint()
-
 		onBeforeMount(() => {
+			initEndpoint()
+
 			if (!endpoint.value?.rateLimitInfo || endpoint.value.rateLimitInfo.remainingCalls > 100)
 				getNewArticles()
 		})
 
 		const showOptions = ref(false)
 
+		const autoRefreshEnabled = computed({
+			get: () => modifiedTimelineData.value.autoRefresh,
+			set: val => {
+				modifiedTimelineData.value.autoRefresh = val
+				emit('changeTimeline', modifiedTimelineData.value)
+				isRefreshing.value = autoRefreshEnabled.value
+			},
+		})
+		const compactArticles = computed({
+			get: () => modifiedTimelineData.value.compactArticles,
+			set: val => {
+				modifiedTimelineData.value.compactArticles = val
+				emit('changeTimeline', modifiedTimelineData.value)
+			},
+		})
 		const columnCount = computed({
 			get: () => modifiedTimelineData.value.columnCount ?? 2,
 			set: val => {
@@ -544,10 +593,22 @@ export default defineComponent({
 				h('label', {class: 'checkbox'}, [
 					h('input', {
 							type: 'checkbox',
+							checked: rightToLeft.value,
 							onInput: (e : InputEvent) => rightToLeft.value = (e.target as HTMLInputElement).checked,
 						},
 					),
 					'Right to left',
+				]),
+			),
+			h('div', {class: 'control'},
+				h('label', {class: 'checkbox'}, [
+					h('input', {
+							type: 'checkbox',
+							checked: compactArticles.value,
+							onInput: (e : InputEvent) => compactArticles.value = (e.target as HTMLInputElement).checked,
+						},
+					),
+					'Compact articles',
 				]),
 			),
 			h('label', {class: 'label'}, 'Width'),
@@ -573,6 +634,13 @@ export default defineComponent({
 			}
 		}
 
+		function scrollTop() {
+			containerEl.value?.$el?.scrollTo({
+				top: 0,
+				behavior: 'smooth'
+			})
+		}
+
 		return {
 			shuffle,
 			articleIds,
@@ -585,6 +653,8 @@ export default defineComponent({
 			containers,
 			service,
 			articles,
+			autoRefreshEnabled,
+			compactArticles,
 			columnCount,
 			rightToLeft,
 			size,
@@ -599,6 +669,11 @@ export default defineComponent({
 			newPage,
 			refreshPageNum,
 			articleLists,
+			sortConfig,
+			sortMethods,
+			scrollTop,
+			filterMethods,
+			filters,
 		}
 	},
 })
@@ -657,11 +732,16 @@ export default defineComponent({
 	background-color: $scheme-main-ter
 	padding: 1rem
 	display: flex
-	flex-flow: row wrap
+	flex-direction: column
 	align-items: flex-start
+	overflow-x: hidden
+	overflow-y: scroll
 
 	& input[type="number"]
 		width: 200px
+
+	& > .box
+		max-width: 100%
 
 .articlesContainer
 	overflow-y: scroll
