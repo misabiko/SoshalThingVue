@@ -94,6 +94,30 @@
 				</div>
 			</div>
 			<div class='box'>
+				<div class='field'>
+					<div class='control'>
+						<label class='checkbox'>
+							<input type='checkbox' v-model='articleSection.enabled'>
+							Use sections
+						</label>
+					</div>
+				</div>
+				<template v-if='articleSection.enabled'>
+					<div class='field'>
+						<label class='label'>Start</label>
+						<div class='control'>
+							<input class='input' type='number' v-model='articleSection.start' min='1' :max='articleSection.end'>
+						</div>
+					</div>
+					<div class='field'>
+						<label class='label'>End</label>
+						<div class='control'>
+							<input class='input' type='number' v-model='articleSection.end' :min='articleSection.start'>
+						</div>
+					</div>
+				</template>
+			</div>
+			<div class='box'>
 				<SortOptions :sortConfig='sortConfig' :sortMethods='sortMethods' :articleList='timeline.articleList'/>
 			</div>
 			<div class='box'>
@@ -341,7 +365,7 @@ export default defineComponent({
 
 		watch(
 			endpoint,
-			(newEndpoint, oldEndpoint) => {
+			() => {
 				console.debug('Changing endpoint options!')
 
 				articleLists.value[props.timeline.articleList] = []
@@ -358,9 +382,11 @@ export default defineComponent({
 			return articleLists.value[props.timeline.articleList]
 		})
 
-		const sectionArticles = ref(false)
-		const firstArticle = ref(0)
-		const lastArticle = ref(30)
+		const articleSection = ref({
+			enabled: true,
+			start: 0,
+			end: 30,
+		})
 
 		const sortConfig = computed(() => props.timeline.sortConfig)
 
@@ -392,8 +418,8 @@ export default defineComponent({
 				if (sortConfig.value.reversed)
 					sorted = sorted.reverse()
 
-				if (sectionArticles.value)
-					return sorted.slice(firstArticle.value, lastArticle.value)
+				if (articleSection.value.enabled)
+					return sorted.slice(articleSection.value.start, articleSection.value.end)
 				else
 					return sorted
 			},
@@ -499,39 +525,6 @@ export default defineComponent({
 				)),
 			]),
 		])
-
-		options.push(() => {
-			const option = []
-			if (sectionArticles.value)
-				option.push(
-					h('input', {
-						class: 'input',
-						type: 'number',
-						value: firstArticle.value,
-						onInput: (e : InputEvent) => firstArticle.value = parseInt((e.target as HTMLInputElement).value),
-						min: 1,
-						max: lastArticle.value,
-					}),
-					h('input', {
-						class: 'input',
-						type: 'number',
-						value: lastArticle.value,
-						onInput: (e : InputEvent) => lastArticle.value = parseInt((e.target as HTMLInputElement).value),
-						min: firstArticle.value,
-					}),
-				)
-
-			option.push(h('label', {class: 'checkbox'}, [
-				h('input', {
-					type: 'checkbox',
-					checked: sectionArticles.value,
-					onInput: (e : InputEvent) => sectionArticles.value = (e.target as HTMLInputElement).checked,
-				}),
-				'Section Articles',
-			]))
-
-			return option
-		})
 
 		if (viewMode?.value)
 			options.push(() => {
@@ -674,6 +667,7 @@ export default defineComponent({
 			scrollTop,
 			filterMethods,
 			filters,
+			articleSection,
 		}
 	},
 })
