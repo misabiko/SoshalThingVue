@@ -2,11 +2,12 @@
 	<div class='rowContainer' ref='root' :style='{direction: rightToLeft ? "rtl" : "ltr"}'>
 		<component
 			:is='service.articleComponent'
-			v-for='a in articles' :key='a.id'
-			:article='a'
+			v-for='a in articles' :key='a.article.id'
+			:article='a.article'
 			:style='{width: (100 / columnCount) + "%"}'
 			:onArticleClick='onArticleClick'
 			:inheritedCompact='compactArticles'
+			:filtered='a.filtered'
 			@loading-full-media='$emit("loadingFullMedia", $event)'
 			@done-loading='$emit("doneLoading", $event)'
 			@expand='$emit("expand", $event)'
@@ -16,7 +17,7 @@
 
 <script lang='ts'>
 import {computed, defineComponent, onBeforeUpdate, PropType} from 'vue'
-import {Article} from '@/data/articles'
+import {Article, ArticlePacket} from '@/data/articles'
 import {Service} from '@/services'
 
 export default defineComponent({
@@ -32,7 +33,7 @@ export default defineComponent({
 		rightToLeft: Boolean,
 		onArticleClick: Function,
 		articles: {
-			type: Array as PropType<Article[]>,
+			type: Array as PropType<ArticlePacket[]>,
 			required: true,
 		},
 		updateQueries: {

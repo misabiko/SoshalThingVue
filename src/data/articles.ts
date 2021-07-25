@@ -6,6 +6,11 @@ export interface Article {
 	queried : boolean
 }
 
+export interface ArticlePacket<ArticleType extends Article = Article> {
+	article : ArticleType,
+	filtered : boolean,
+}
+
 export interface MediaArticle extends Article {
 	media : (PlainMedia | QueriedMedia | LazyMedia)[]
 }

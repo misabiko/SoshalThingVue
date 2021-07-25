@@ -111,13 +111,15 @@
 					<div class='field'>
 						<label class='label'>Start</label>
 						<div class='control'>
-							<input class='input' type='number' v-model.number='articleSection.start' min='1' :max='articleSection.end'>
+							<input class='input' type='number' v-model.number='articleSection.start' min='1'
+								   :max='articleSection.end'>
 						</div>
 					</div>
 					<div class='field'>
 						<label class='label'>End</label>
 						<div class='control'>
-							<input class='input' type='number' v-model.number='articleSection.end' :min='articleSection.start'>
+							<input class='input' type='number' v-model.number='articleSection.end'
+								   :min='articleSection.start'>
 						</div>
 					</div>
 					<div class='field'>
@@ -431,6 +433,13 @@ export default defineComponent({
 		const serviceSortMethods = computed(() => service.value.sortMethods)
 		const {sortMethods} = useSortMethods(sortConfig, serviceSortMethods)
 
+		const showFilteredArticles = computed({
+			get: () => modifiedTimelineData.value.showFiltered ?? false,
+			set: val => {
+				modifiedTimelineData.value.showFiltered = val
+				emit('changeTimeline', modifiedTimelineData.value)
+			},
+		})
 		const filters = computed(() => props.timeline.filters)
 
 		watch(filters, () => emit('saveTimeline'), {deep: true})
@@ -443,12 +452,22 @@ export default defineComponent({
 					.map(({
 							  serviceName,
 							  articleId,
-						  } : { serviceName : string, articleId : string }) => Service.instances[serviceName].articles.value[articleId])
-					.filter(a => !!a)	//Rerender happens before all of articleIds is added to service.articles
+						  } : { serviceName : string, articleId : string }) => ({
+						article: Service.instances[serviceName].articles.value[articleId],
+						filtered: false,
+					}))
+					.filter(a => !!a.article)	//Rerender happens before all of articleIds is added to service.articles
 
 				for (const [method, opts] of Object.entries(filters.value))
-					if (opts.enabled)
-						unsorted = unsorted.filter(filterMethods.value[method].filter(opts.inverted, opts.config))
+					if (opts.enabled) {
+						if (showFilteredArticles.value)
+							unsorted = unsorted.map(({article}) => ({
+								article,
+								filtered: !filterMethods.value[method].filter(opts.inverted, opts.config)(article),
+							}))
+						else
+							unsorted = unsorted.filter(({article}) => filterMethods.value[method].filter(opts.inverted, opts.config)(article))
+					}
 
 				let sorted = sortMethods.value[sortConfig.value.method](unsorted)
 				if (sortConfig.value.reversed)
@@ -461,7 +480,7 @@ export default defineComponent({
 			},
 		)
 
-		const filteredArticleIds = computed(() => articles.value.map(a => a.id))
+		const filteredArticleIds = computed(() => articles.value.map(a => a.article.id))
 
 		onBeforeMount(() => {
 			initEndpoint()
@@ -668,7 +687,7 @@ export default defineComponent({
 		function scrollTop() {
 			containerEl.value?.$el?.scrollTo({
 				top: 0,
-				behavior: 'smooth'
+				behavior: 'smooth',
 			})
 		}
 
@@ -707,6 +726,7 @@ export default defineComponent({
 			scrollTop,
 			filterMethods,
 			filters,
+			showFilteredArticles,
 			articleSection,
 			expandSectionTop,
 			expandSectionBottom,

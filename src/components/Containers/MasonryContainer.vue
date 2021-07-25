@@ -3,10 +3,11 @@
 		<div class='masonryColumn' v-for='(column, colI) in columns' :key='colI'>
 			<component
 				:is='service.articleComponent'
-				v-for='a in column' :key='a.id'
-				:article='a'
+				v-for='a in column' :key='a.article.id'
+				:article='a.article'
 				:onArticleClick='onArticleClick'
 				:inheritedCompact='compactArticles'
+				:filtered='a.filtered'
 				@loading-full-media='$emit("loadingFullMedia", $event)'
 				@done-loading='$emit("doneLoading", $event)'
 				@expand='$emit("expand", $event)'
@@ -17,10 +18,10 @@
 
 <script lang='ts'>
 import {computed, defineComponent, onBeforeUpdate, PropType} from 'vue'
-import {LazyMedia, PlainMedia, MediaArticle, MediaLoadStatus, QueriedMedia} from '@/data/articles'
+import {LazyMedia, PlainMedia, MediaArticle, MediaLoadStatus, QueriedMedia, ArticlePacket} from '@/data/articles'
 import {MediaService, Service} from '@/services'
 
-type RatioedArticle = [MediaArticle, number]
+type RatioedArticle = [ArticlePacket<MediaArticle>, number]
 
 export default defineComponent({
 	props: {
@@ -35,7 +36,7 @@ export default defineComponent({
 		rightToLeft: Boolean,
 		onArticleClick: Function,
 		articles: {
-			type: Array as PropType<MediaArticle[]>,
+			type: Array as PropType<ArticlePacket<MediaArticle>[]>,
 			required: true,
 		},
 		updateQueries: {
@@ -73,8 +74,8 @@ function getColumnHeight(column : [number, RatioedArticle[]]) {
 		return 0
 }
 
-function arrangeColumns(columnCount : number, service: Service, articles : MediaArticle[], rightToLeft: boolean) {
-	const ratioedArticles : RatioedArticle[] = articles.map((a : MediaArticle) => [a, getRelativeHeight(service.getMedias(a.id))])
+function arrangeColumns(columnCount : number, service: Service, articles : ArticlePacket<MediaArticle>[], rightToLeft: boolean) {
+	const ratioedArticles : RatioedArticle[] = articles.map((a : ArticlePacket<MediaArticle>) => [a, getRelativeHeight(service.getMedias(a.article.id))])
 
 	const cols : [number, RatioedArticle[]][] = []
 	for (let i = 0; i < columnCount; i++)

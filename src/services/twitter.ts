@@ -64,12 +64,12 @@ export class TwitterService extends Service<TwitterArticle> {
 
 	sortMethods : SortMethods<TwitterArticle> = {
 		RefId: (articles) => articles.sort(
-			(a, b) => parseInt(this.actualTweet(b, true).id) - parseInt(this.actualTweet(a, true).id),
+			(a, b) => parseInt(this.actualTweet(b.article, true).id) - parseInt(this.actualTweet(a.article, true).id),
 		),
 		Likes: (articles) => articles.sort(
-			(a, b) => (this.actualTweet(b, true).likeCount ?? 0) - (this.actualTweet(a, true).likeCount ?? 0)),
+			(a, b) => (this.actualTweet(b.article, true).likeCount ?? 0) - (this.actualTweet(a.article, true).likeCount ?? 0)),
 		Retweets: (articles) => articles.sort(
-			(a, b) => (this.actualTweet(b, true).repostCount ?? 0) - (this.actualTweet(a, true).repostCount ?? 0),
+			(a, b) => (this.actualTweet(b.article, true).repostCount ?? 0) - (this.actualTweet(a.article, true).repostCount ?? 0),
 		),
 	}
 

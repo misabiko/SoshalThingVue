@@ -9,6 +9,7 @@ export interface TimelineData {
 	endpointOptions? : any
 	container : string
 	filters : FilterConfigs
+	showFiltered? : boolean
 	sortConfig : SortConfig
 	rtl? : boolean
 	size? : number

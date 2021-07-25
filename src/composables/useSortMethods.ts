@@ -1,7 +1,7 @@
-import {Article} from '@/data/articles'
+import {Article, ArticlePacket} from '@/data/articles'
 import {h, Ref, ref} from 'vue'
 
-export type SortMethods<ArticleType extends Article> = { [method : string] : (array : ArticleType[]) => ArticleType[] }
+export type SortMethods<ArticleType extends Article> = { [method : string] : (array : ArticlePacket<ArticleType>[]) => ArticlePacket<ArticleType>[] }
 
 export type SortConfig = {
 	method : string
@@ -10,8 +10,8 @@ export type SortConfig = {
 
 export function useSortMethods<ArticleType extends Article>(sortConfig : Readonly<Ref<SortConfig>>, additionalMethods : Readonly<Ref<SortMethods<ArticleType>>>) {
 	const sortMethods = ref<SortMethods<ArticleType>>({
-		Unsorted: (articles : ArticleType[]) => articles,
-		Id: (articles : ArticleType[]) => articles.sort((a : ArticleType, b : ArticleType) => parseInt(b.id) - parseInt(a.id)),
+		Unsorted: (articles) => articles,
+		Id: (articles) => articles.sort((a, b) => parseInt(b.article.id) - parseInt(a.article.id)),
 		...additionalMethods.value,
 	})
 

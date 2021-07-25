@@ -2,10 +2,11 @@
 	<div class='columnContainer' ref='root'>
 		<component
 			:is='service.articleComponent'
-			v-for='a in articles' :key='a.id'
-			:article='a'
+			v-for='a in articles' :key='a.article.id'
+			:article='a.article'
 			:onArticleClick='onArticleClick'
 			:inheritedCompact='compactArticles'
+			:filtered='a.filtered'
 			@loading-full-media='$emit("loadingFullMedia", $event)'
 			@done-loading='$emit("doneLoading", $event)'
 			@expand='$emit("expand", $event)'
@@ -15,7 +16,7 @@
 
 <script lang='ts'>
 import {defineComponent, onBeforeUpdate, PropType, markRaw, ref, computed} from 'vue'
-import {Article} from '@/data/articles'
+import {Article, ArticlePacket} from '@/data/articles'
 import {Service} from '@/services'
 
 export default defineComponent({
@@ -26,7 +27,7 @@ export default defineComponent({
 		},
 		onArticleClick: Function,
 		articles: {
-			type: Array as PropType<Article[]>,
+			type: Array as PropType<ArticlePacket[]>,
 			default: []
 		},
 		updateQueries: {
