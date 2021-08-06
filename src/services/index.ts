@@ -1,4 +1,4 @@
-import {Component, computed, markRaw, reactive, ref, toRaw} from 'vue'
+import {Component, computed, markRaw, Ref, ref, toRaw} from 'vue'
 import {Article, MediaArticle} from '@/data/articles'
 import {TimelineData} from '@/data/timelines'
 import {PageInfo} from '@/hostpages/pageinfo'
@@ -194,28 +194,31 @@ export interface EndpointTypeInfo {
 
 export type EndpointTypeInfoGetter = (service : Service) => EndpointTypeInfo
 
+export type RateLimitInfo = {
+	maxCalls : number
+	remainingCalls : number
+	secUntilNextReset : number
+}
+
 export abstract class Endpoint<CallOpt> {
-	articles : string[] = reactive([])
+	articles = ref<string[]>([])
 	//calling = false
 
 	defaultRefreshIntervalMs = 90000
 
-	rateLimitInfo? : {
-		maxCalls : number
-		remainingCalls : number
-		secUntilNextReset : number
-	}
+	readonly rateLimitInfo : Ref<RateLimitInfo | undefined>
 
-	protected constructor(readonly name : string) {
+	protected constructor(readonly name : string, rateLimitInfo? : RateLimitInfo) {
+		this.rateLimitInfo = ref(rateLimitInfo)
 	}
 
 	abstract call(options : CallOpt) : Promise<Payload>
 
 	get ready() {
-		if (this.rateLimitInfo) {
-			if (this.rateLimitInfo.secUntilNextReset * 1000 < Date.now())
-				this.rateLimitInfo.remainingCalls = this.rateLimitInfo.maxCalls
-			else if (!this.rateLimitInfo.remainingCalls)
+		if (this.rateLimitInfo.value) {
+			if (this.rateLimitInfo.value.secUntilNextReset * 1000 < Date.now())
+				this.rateLimitInfo.value.remainingCalls = this.rateLimitInfo.value.maxCalls
+			else if (!this.rateLimitInfo.value.remainingCalls)
 				return false
 		}
 
@@ -252,8 +255,8 @@ export abstract class PagedEndpoint<CallOpt extends PagedCallOpt = PagedCallOpt>
 		this.loadedPages.value[options.pageNum] ??= []
 
 		for (const id of wrappedPayload.payload.newArticles)
-			if (!this.articles.includes(id)) {
-				this.articles.push(id)
+			if (!this.articles.value.includes(id)) {
+				this.articles.value.push(id)
 				this.loadedPages.value[options.pageNum].push(id)
 			}
 		this.basePageNum = wrappedPayload.basePageNum

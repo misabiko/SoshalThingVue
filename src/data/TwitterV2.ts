@@ -239,10 +239,10 @@ export function parseResponse(response : TwitterAPIPayload) {
 }
 
 export function parseRateLimits(endpoint : Endpoint<any>, response : TwitterLitePayload) {
-	if (!endpoint.rateLimitInfo)
+	if (!endpoint.rateLimitInfo.value)
 		return
 
-	endpoint.rateLimitInfo.maxCalls = parseInt(response._headers['x-rate-limit-limit'])
-	endpoint.rateLimitInfo.remainingCalls = parseInt(response._headers['x-rate-limit-remaining'])
-	endpoint.rateLimitInfo.secUntilNextReset = parseInt(response._headers['x-rate-limit-reset'])
+	endpoint.rateLimitInfo.value.maxCalls = parseInt(response._headers['x-rate-limit-limit'])
+	endpoint.rateLimitInfo.value.remainingCalls = parseInt(response._headers['x-rate-limit-remaining'])
+	endpoint.rateLimitInfo.value.secUntilNextReset = parseInt(response._headers['x-rate-limit-reset'])
 }

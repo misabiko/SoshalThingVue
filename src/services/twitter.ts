@@ -1,7 +1,7 @@
 import {
 	Endpoint,
 	EndpointTypeInfoGetter,
-	Payload,
+	Payload, RateLimitInfo,
 	Service,
 	ServiceLocalStorage,
 } from '@/services/index'
@@ -9,7 +9,7 @@ import {Article, LazyMedia, MediaArticle, PlainMedia} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {Filters} from '@/composables/useFilters'
-import {h, reactive, ref, Ref, toRaw} from 'vue'
+import {h, ref, Ref, toRaw} from 'vue'
 import {parseRateLimits, parseResponse, TwitterAPIPayload, TwitterAuth} from '@/data/TwitterV2'
 import {
 	TwitterV1APIPayload,
@@ -330,6 +330,8 @@ interface TwitterCallOpt {
 }
 
 class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
+	rateLimitInfo! : Ref<RateLimitInfo>
+
 	static typeInfo : EndpointTypeInfoGetter = () => ({
 		typeName: 'UserTimelineEndpoint',
 		name: 'User Timeline V2 Endpoint',
@@ -354,14 +356,12 @@ class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 		},
 	})
 
-	rateLimitInfo = reactive({
-		maxCalls: 900,
-		remainingCalls: 900,
-		secUntilNextReset: Date.now() / 1000 + 15 * 60,
-	})
-
 	constructor(readonly userId : string) {
-		super('User Timeline ' + userId)
+		super('User Timeline ' + userId, {
+			maxCalls: 900,
+			remainingCalls: 900,
+			secUntilNextReset: Date.now() / 1000 + 15 * 60,
+		})
 	}
 
 	async call(options : TwitterCallOpt) : Promise<Payload> {
@@ -371,19 +371,19 @@ class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 		params.set('media.fields', 'width,height,preview_image_url,url')
 		params.set('expansions', 'author_id,referenced_tweets.id,referenced_tweets.id.author_id,attachments.media_keys')
 		params.set('max_results', '100')
-		if (options.fromEnd && this.articles.length)
-			params.set('until_id', this.articles[this.articles.length - 1])
+		if (options.fromEnd && this.articles.value.length)
+			params.set('until_id', this.articles.value[this.articles.value.length - 1])
 
 		const response : TwitterAPIPayload = await Service.fetchProxy(`/twitter/users/${this.userId}?${params.toString()}`)
 
 		const payload = parseResponse(response)
 
-		this.rateLimitInfo.remainingCalls--
+		this.rateLimitInfo.value.remainingCalls--
 		parseRateLimits(this, response)
 
 		for (const id of payload.newArticles)
-			if (!this.articles.includes(id))
-				this.articles.push(id)
+			if (!this.articles.value.includes(id))
+				this.articles.value.push(id)
 
 		return payload
 	}
@@ -397,6 +397,8 @@ class UserTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 }
 
 export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
+	rateLimitInfo! : Ref<RateLimitInfo>
+
 	static typeInfo : EndpointTypeInfoGetter = () => ({
 		typeName: 'UserTimelineV1Endpoint',
 		name: 'User Timeline V1 Endpoint',
@@ -421,14 +423,13 @@ export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
 		},
 	})
 
-	rateLimitInfo = reactive({
-		maxCalls: 900,
-		remainingCalls: 900,
-		secUntilNextReset: Date.now() / 1000 + 15 * 60,
-	})
 
 	constructor(readonly userId : string) {
-		super('User Timeline V1 ' + userId)
+		super('User Timeline V1 ' + userId, {
+			maxCalls: 900,
+			remainingCalls: 900,
+			secUntilNextReset: Date.now() / 1000 + 15 * 60,
+		})
 	}
 
 	async call(options : TwitterCallOpt) : Promise<Payload> {
@@ -436,19 +437,19 @@ export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
 		params.set('tweet_mode', 'extended')
 		params.set('user_id', this.userId)
 		params.set('count', '200')
-		if (options.fromEnd && this.articles.length)
-			params.set('max_id', this.articles[this.articles.length - 1])
+		if (options.fromEnd && this.articles.value.length)
+			params.set('max_id', this.articles.value[this.articles.value.length - 1])
 
 		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/statuses/user_timeline?${params.toString()}`)
 
-		this.rateLimitInfo.remainingCalls--
+		this.rateLimitInfo.value.remainingCalls--
 		parseRateLimits(this, response)
 
 		const payload = parseV1Response(response)
 
 		for (const id of payload.newArticles)
-			if (!this.articles.includes(id))
-				this.articles.push(id)
+			if (!this.articles.value.includes(id))
+				this.articles.value.push(id)
 
 		return payload
 	}
@@ -462,6 +463,8 @@ export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
 }
 
 class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
+	rateLimitInfo! : Ref<RateLimitInfo>
+
 	static typeInfo : EndpointTypeInfoGetter = (service : Service) => {
 		const twitterService = service as TwitterService
 		return {
@@ -476,16 +479,14 @@ class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 		}
 	}
 
-	rateLimitInfo = reactive({
-		maxCalls: 15,
-		remainingCalls: 15,
-		secUntilNextReset: Date.now() / 1000 + 15 * 60,
-	})
-
 	readonly authMode : Ref<AuthMode>
 
 	constructor(opts: {authMode: Ref<AuthMode>}) {
-		super('Home Timeline')
+		super('Home Timeline', {
+			maxCalls: 15,
+			remainingCalls: 15,
+			secUntilNextReset: Date.now() / 1000 + 15 * 60,
+		})
 
 		this.authMode = opts.authMode
 	}
@@ -494,19 +495,19 @@ class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 		const params = new URLSearchParams()
 		params.set('count', '200')
 		params.set('tweet_mode', 'extended')
-		if (options.fromEnd && this.articles.length)
-			params.set('max_id', this.articles[this.articles.length - 1])
+		if (options.fromEnd && this.articles.value.length)
+			params.set('max_id', this.articles.value[this.articles.value.length - 1])
 
 		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/statuses/home_timeline?${params.toString()}`)
 
-		this.rateLimitInfo.remainingCalls--
+		this.rateLimitInfo.value.remainingCalls--
 		parseRateLimits(this, response)
 
 		const payload = parseV1Response(response)
 
 		for (const id of payload.newArticles)
-			if (!this.articles.includes(id))
-				this.articles.push(id)
+			if (!this.articles.value.includes(id))
+				this.articles.value.push(id)
 
 		return payload
 	}
@@ -517,6 +518,8 @@ class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 }
 
 class SearchEndpoint extends Endpoint<TwitterCallOpt> {
+	rateLimitInfo! : Ref<RateLimitInfo>
+
 	static typeInfo : EndpointTypeInfoGetter = () => ({
 		typeName: 'SearchEndpoint',
 		name: 'Search V2 Endpoint',
@@ -541,16 +544,14 @@ class SearchEndpoint extends Endpoint<TwitterCallOpt> {
 		},
 	})
 
-	rateLimitInfo = reactive({
-		maxCalls: 180,
-		remainingCalls: 180,
-		secUntilNextReset: Date.now() / 1000 + 15 * 60,
-	})
-
 	readonly query : string
 
 	constructor(opts : { query : string }) {
-		super('Search V2 ' + opts.query)
+		super('Search V2 ' + opts.query, {
+			maxCalls: 180,
+			remainingCalls: 180,
+			secUntilNextReset: Date.now() / 1000 + 15 * 60,
+		})
 
 		this.query = opts.query
 	}
@@ -563,20 +564,20 @@ class SearchEndpoint extends Endpoint<TwitterCallOpt> {
 		params.set('user.fields', 'name,username,profile_image_url')
 		params.set('media.fields', 'width,height,preview_image_url,url')
 		params.set('expansions', 'author_id,referenced_tweets.id,referenced_tweets.id.author_id,attachments.media_keys')
-		if (options.fromEnd && this.articles.length)
-			params.set('until_id', this.articles[this.articles.length - 1])
+		if (options.fromEnd && this.articles.value.length)
+			params.set('until_id', this.articles.value[this.articles.value.length - 1])
 
 		const response : TwitterAPIPayload = await Service.fetchProxy(`/twitter/search?${params.toString()}`)
 			.catch(e => console.error('Failed to parse search response', e))
 
-		this.rateLimitInfo.remainingCalls--
+		this.rateLimitInfo.value.remainingCalls--
 		parseRateLimits(this, response)
 
 		const payload = parseResponse(response)
 
 		for (const id of payload.newArticles)
-			if (!this.articles.includes(id))
-				this.articles.push(id)
+			if (!this.articles.value.includes(id))
+				this.articles.value.push(id)
 
 		return payload
 	}
@@ -590,6 +591,8 @@ class SearchEndpoint extends Endpoint<TwitterCallOpt> {
 }
 
 class SearchV1Endpoint extends Endpoint<TwitterCallOpt> {
+	rateLimitInfo! : Ref<RateLimitInfo>
+
 	static typeInfo : EndpointTypeInfoGetter = () => ({
 		typeName: 'SearchV1Endpoint',
 		name: 'Search V1 Endpoint',
@@ -614,16 +617,14 @@ class SearchV1Endpoint extends Endpoint<TwitterCallOpt> {
 		},
 	})
 
-	rateLimitInfo = reactive({
-		maxCalls: 180,
-		remainingCalls: 180,
-		secUntilNextReset: Date.now() / 1000 + 15 * 60,
-	})
-
 	readonly query : string
 
 	constructor(opts : { query : string }) {
-		super('Search V1 ' + opts.query)
+		super('Search V1 ' + opts.query, {
+			maxCalls: 180,
+			remainingCalls: 180,
+			secUntilNextReset: Date.now() / 1000 + 15 * 60,
+		})
 
 		this.query = opts.query
 	}
@@ -635,19 +636,19 @@ class SearchV1Endpoint extends Endpoint<TwitterCallOpt> {
 		params.set('q', this.query)
 
 		params.set('count', '100')
-		if (options.fromEnd && this.articles.length)
-			params.set('max_id', this.articles[this.articles.length - 1])
+		if (options.fromEnd && this.articles.value.length)
+			params.set('max_id', this.articles.value[this.articles.value.length - 1])
 
 		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/search/tweets?${params.toString()}`)
 
-		this.rateLimitInfo.remainingCalls--
+		this.rateLimitInfo.value.remainingCalls--
 		parseRateLimits(this, response)
 
 		const payload = parseV1Response(response)
 
 		for (const id of payload.newArticles)
-			if (!this.articles.includes(id))
-				this.articles.push(id)
+			if (!this.articles.value.includes(id))
+				this.articles.value.push(id)
 
 		return payload
 	}
@@ -661,6 +662,8 @@ class SearchV1Endpoint extends Endpoint<TwitterCallOpt> {
 }
 
 class LikesV1Endpoint extends Endpoint<TwitterCallOpt> {
+	rateLimitInfo! : Ref<RateLimitInfo>
+
 	static typeInfo : EndpointTypeInfoGetter = () => ({
 		typeName: 'LikesV1Endpoint',
 		name: 'Likes V1 Endpoint',
@@ -700,14 +703,12 @@ class LikesV1Endpoint extends Endpoint<TwitterCallOpt> {
 	readonly userId? : string
 	readonly handle? : string
 
-	rateLimitInfo = reactive({
-		maxCalls: 75,
-		remainingCalls: 75,
-		secUntilNextReset: Date.now() / 1000 + 15 * 60,
-	})
-
 	constructor({userId, handle} : { userId? : string, handle? : string }) {
-		super('Likes ' + (handle || userId))
+		super('Likes ' + (handle || userId), {
+			maxCalls: 75,
+			remainingCalls: 75,
+			secUntilNextReset: Date.now() / 1000 + 15 * 60,
+		})
 
 		this.userId = userId
 		this.handle = handle
@@ -721,19 +722,19 @@ class LikesV1Endpoint extends Endpoint<TwitterCallOpt> {
 		else if (this.userId)
 			params.set('user_id', this.userId)
 		params.set('count', '200')
-		if (options.fromEnd && this.articles.length)
-			params.set('max_id', this.articles[this.articles.length - 1])
+		if (options.fromEnd && this.articles.value.length)
+			params.set('max_id', this.articles.value[this.articles.value.length - 1])
 
 		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/favorites/list?${params.toString()}`)
 
-		this.rateLimitInfo.remainingCalls--
+		this.rateLimitInfo.value.remainingCalls--
 		parseRateLimits(this, response)
 
 		const payload = parseV1Response(response)
 
 		for (const id of payload.newArticles)
-			if (!this.articles.includes(id))
-				this.articles.push(id)
+			if (!this.articles.value.includes(id))
+				this.articles.value.push(id)
 
 		return payload
 	}
@@ -752,6 +753,8 @@ interface ListCallOpt extends TwitterCallOpt {
 }
 
 class ListV1Endpoint extends Endpoint<ListCallOpt> {
+	rateLimitInfo! : Ref<RateLimitInfo>
+
 	static typeInfo : EndpointTypeInfoGetter = () => ({
 		typeName: 'ListV1Endpoint',
 		name: 'List V1 Endpoint',
@@ -783,19 +786,17 @@ class ListV1Endpoint extends Endpoint<ListCallOpt> {
 	readonly ownerId? : string
 	readonly ownerHandle? : string
 
-	rateLimitInfo = reactive({
-		maxCalls: 900,
-		remainingCalls: 900,
-		secUntilNextReset: Date.now() / 1000 + 15 * 60,
-	})
-
 	constructor({
 					listId,
 					slug,
 					ownerId,
 					ownerHandle,
 				} : { listId? : string, slug? : string, ownerId? : string, ownerHandle? : string }) {
-		super('List ' + (listId || slug))
+		super('List ' + (listId || slug), {
+			maxCalls: 900,
+			remainingCalls: 900,
+			secUntilNextReset: Date.now() / 1000 + 15 * 60,
+		})
 
 		this.listId = listId
 		this.slug = slug
@@ -818,19 +819,19 @@ class ListV1Endpoint extends Endpoint<ListCallOpt> {
 		}
 		params.set('count', '200')
 		params.set('include_rts', options.includeRetweets ? 'true' : 'false')
-		if (options.fromEnd && this.articles.length)
-			params.set('max_id', this.articles[this.articles.length - 1])
+		if (options.fromEnd && this.articles.value.length)
+			params.set('max_id', this.articles.value[this.articles.value.length - 1])
 
 		const response : TwitterV1APIPayload = await Service.fetchProxy(`/twitter/v1/lists/statuses?${params.toString()}`)
 
-		this.rateLimitInfo.remainingCalls--
+		this.rateLimitInfo.value.remainingCalls--
 		parseRateLimits(this, response)
 
 		const payload = parseV1Response(response)
 
 		for (const id of payload.newArticles)
-			if (!this.articles.includes(id))
-				this.articles.push(id)
+			if (!this.articles.value.includes(id))
+				this.articles.value.push(id)
 
 		return payload
 	}

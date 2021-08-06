@@ -490,7 +490,7 @@ export default defineComponent({
 		onBeforeMount(() => {
 			initEndpoint()
 
-			if (!endpoint.value?.rateLimitInfo || endpoint.value.rateLimitInfo.remainingCalls > 100)
+			if (!endpoint.value?.rateLimitInfo.value || endpoint.value.rateLimitInfo.value.remainingCalls > 100)
 				getNewArticles()
 		})
 

@@ -1,4 +1,4 @@
-import {reactive, Ref} from 'vue'
+import {ref, Ref} from 'vue'
 import {Service} from '@/services'
 import {MediaArticle} from '@/data/articles'
 
@@ -14,7 +14,7 @@ export function castQueryable(object : any) : Queryable | undefined {
 }
 
 class QueryManager {
-	queue = reactive<Set<string>>(new Set())
+	queue = ref<Set<string>>(new Set())
 	autoQuery = true
 	timeout? : number
 	delay = 3000
@@ -26,10 +26,10 @@ class QueryManager {
 	}
 
 	confirmQueue(queryable : Queryable) {
-		for (const queryingId of this.queue)
+		for (const queryingId of this.queue.value)
 			if (queryable.articles.value[queryingId].queried) {
 				console.debug(`Deleting ${queryingId} from queue.`)
-				this.queue.delete(queryingId)
+				this.queue.value.delete(queryingId)
 			}
 	}
 
@@ -46,20 +46,20 @@ class QueryManager {
 			if (!queryable.articles.value.hasOwnProperty(id) || queryable.articles.value[id].queried)
 				continue
 
-			if (this.queue.size >= this.maxQueryCount) {
+			if (this.queue.value.size >= this.maxQueryCount) {
 				this.timeout = setTimeout(() => this.queryRemainingData(queryable, true), this.delay)
 
-				console.log(`Querying full [${this.queue ? Array.from(this.queue).toString() : 'undefined'}]`)
+				console.log(`Querying full [${this.queue.value ? Array.from(this.queue.value).toString() : 'undefined'}]`)
 				this.confirmQueue(queryable)
 				return
 			}
 
-			if (!this.queue.has(id))
+			if (!this.queue.value.has(id))
 				this.queryArticleData(id, queryable).then()
 		}
 
-		if (this.queue.size)
-			console.log(`Querying [${this.queue ? Array.from(this.queue).toString() : 'undefined'}]`)
+		if (this.queue.value.size)
+			console.log(`Querying [${this.queue.value ? Array.from(this.queue.value).toString() : 'undefined'}]`)
 		else
 			console.debug('Done querying.')
 		this.confirmQueue(queryable)
@@ -70,19 +70,19 @@ class QueryManager {
 	}
 
 	async queryArticleData(id : string, queryable : Queryable) {
-		this.queue.add(id)
+		this.queue.value.add(id)
 		console.debug('Querying ' + id)
 
 		await queryable.getData(id)
 
-		this.queue.delete(id)
+		this.queue.value.delete(id)
 
-		if (this.timeout === undefined && !this.queue.size) {
+		if (this.timeout === undefined && !this.queue.value.size) {
 			console.debug('Done querying.')
 			await queryable.onDoneQuerying()
 		}
 
-		if (this.autoQuery && this.queue.size < this.maxQueryCount)
+		if (this.autoQuery && this.queue.value.size < this.maxQueryCount)
 			this.queryRemainingData(queryable)
 	}
 }
