@@ -1,6 +1,5 @@
 import {
 	Endpoint,
-	EndpointTypeInfo,
 	EndpointTypeInfoGetter,
 	Payload,
 	Service,
@@ -10,7 +9,7 @@ import {Article, LazyMedia, MediaArticle, PlainMedia} from '@/data/articles'
 import TweetComponent from '@/components/Articles/TweetArticle.vue'
 import TweetArticle from '@/components/Articles/TweetArticle.vue'
 import {Filters} from '@/composables/useFilters'
-import {h, reactive, toRaw} from 'vue'
+import {h, reactive, ref, Ref, toRaw} from 'vue'
 import {parseRateLimits, parseResponse, TwitterAPIPayload, TwitterAuth} from '@/data/TwitterV2'
 import {
 	TwitterV1APIPayload,
@@ -59,8 +58,22 @@ export interface QuoteArticle extends TweetArticle {
 	quotedId : string
 }
 
+enum AuthModeType {
+	App,
+	User,
+}
+
+type AuthMode = {
+	type: AuthModeType.App,
+} | {
+	type: AuthModeType.User,
+	user: TwitterAuth,
+}
+
 export class TwitterService extends Service<TwitterArticle> {
-	authUser? : TwitterAuth
+	authMode = ref<AuthMode>({
+		type: AuthModeType.App
+	})
 
 	sortMethods : SortMethods<TwitterArticle> = {
 		RefId: (articles) => articles.sort(
@@ -241,8 +254,8 @@ export class TwitterService extends Service<TwitterArticle> {
 	}
 
 	optionComponent = () => {
-		if (this.authUser)
-			return [['Name', this.authUser.screen_name], ['Handle', this.authUser.name], ['Id', this.authUser.id_str]]
+		if (this.authMode.value.type === AuthModeType.User)
+			return [['Name', this.authMode.value.user.screen_name], ['Handle', this.authMode.value.user.name], ['Id', this.authMode.value.user.id_str]]
 				.map(([label, value]) =>
 					h('div', {class: 'field is-horizontal'}, [
 						h('div', {class: 'field-label is-normal'},
@@ -274,7 +287,15 @@ export class TwitterService extends Service<TwitterArticle> {
 	}
 
 	loadStatus(status : any) {
-		this.authUser = status.authUser
+		if (status.authUser)
+			this.authMode.value = {
+				type: AuthModeType.User,
+				user: status.authUser
+			}
+		else
+			this.authMode.value = {
+				type: AuthModeType.App,
+			}
 	}
 
 	async fetchV1Status(id : string) {
@@ -441,16 +462,19 @@ export class UserTimelineV1Endpoint extends Endpoint<TwitterCallOpt> {
 }
 
 class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
-	static typeInfo : EndpointTypeInfoGetter = () => ({
-		typeName: 'HomeTimelineEndpoint',
-		name: 'Home Timeline V1 Endpoint',
-		factory() {
-			return new HomeTimelineEndpoint()
-		},
-		optionComponent() {
-			return null
-		},
-	})
+	static typeInfo : EndpointTypeInfoGetter = (service : Service) => {
+		const twitterService = service as TwitterService
+		return {
+			typeName: 'HomeTimelineEndpoint',
+			name: 'Home Timeline V1 Endpoint',
+			factory() {
+				return new HomeTimelineEndpoint({authMode: twitterService.authMode})
+			},
+			optionComponent() {
+				return null
+			},
+		}
+	}
 
 	rateLimitInfo = reactive({
 		maxCalls: 15,
@@ -458,8 +482,12 @@ class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 		secUntilNextReset: Date.now() / 1000 + 15 * 60,
 	})
 
-	constructor() {
+	readonly authMode : Ref<AuthMode>
+
+	constructor(opts: {authMode: Ref<AuthMode>}) {
 		super('Home Timeline')
+
+		this.authMode = opts.authMode
 	}
 
 	async call(options : TwitterCallOpt) : Promise<Payload> {
@@ -481,6 +509,10 @@ class HomeTimelineEndpoint extends Endpoint<TwitterCallOpt> {
 				this.articles.push(id)
 
 		return payload
+	}
+
+	get ready() {
+		return super.ready && this.authMode.value.type === AuthModeType.User
 	}
 }
 
