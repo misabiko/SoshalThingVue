@@ -423,11 +423,11 @@ export default defineComponent({
 
 		function expandSectionBottom() {
 			if (!articleSection.value.enabled)
-				getNewArticles({fromEnd: true, pageNum: newPage})
+				getNewArticles({fromEnd: true, pageNum: newPage.value})
 			else {
 				articleSection.value.end += articleSection.value.expandStep
 				if (articleSection.value.end > articleIds.value.length)
-					getNewArticles({fromEnd: true, pageNum: newPage})
+					getNewArticles({fromEnd: true, pageNum: newPage.value})
 			}
 		}
 
