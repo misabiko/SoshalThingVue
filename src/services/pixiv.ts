@@ -38,7 +38,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 		if (this.pageInfo instanceof PixivUserPage)
 			this.addEndpoint(new UserPageEndpoint({pageInfo: this.pageInfo, userId: this.pageInfo.userId}))
 		if (this.pageInfo instanceof PixivBookmarkPage)
-			this.addEndpoint(new BookmarkPageEndpoint(this.pageInfo))
+			this.addEndpoint(new BookmarkPageEndpoint({pageInfo: this.pageInfo}))
 	}
 
 	initialTimelines() {
@@ -46,7 +46,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 		switch (this.pageInfo?.constructor) {
 			case PixivFollowPage:
 				endpointName = JSON.stringify({
-					endpointType: FollowPageEndpoint.name,
+					endpointType: 'FollowPageEndpoint',
 					r18: (this.pageInfo as PixivFollowPage).r18,
 				})
 				return [
@@ -74,7 +74,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 				]
 			case PixivUserPage:
 				endpointName = JSON.stringify({
-					endpointType: UserPageEndpoint.name,
+					endpointType: 'UserPageEndpoint',
 					userId: (this.pageInfo as PixivUserPage).userId,
 				})
 				return [
@@ -102,7 +102,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 				]
 			case PixivBookmarkPage:
 				endpointName = JSON.stringify({
-					endpointType: BookmarkPageEndpoint.name,
+					endpointType: 'BookmarkPageEndpoint',
 					priv: (this.pageInfo as PixivBookmarkPage).priv,
 				})
 				return [
@@ -249,6 +249,14 @@ interface MountPointData {
 
 class FollowPageEndpoint extends PagedEndpoint {
 	static defaultLastPage = 100
+	static typeInfo : EndpointTypeInfoGetter = () => ({
+		typeName: 'FollowPageEndpoint',
+		name: 'Follow Page Endpoint',
+		factory(opts : { pageInfo : PixivFollowPage, r18 : boolean }) {
+			return new FollowPageEndpoint(opts)
+		},
+		optionComponent() {},
+	})
 
 	readonly pageInfo : PixivFollowPage
 	readonly r18 : boolean
@@ -493,12 +501,23 @@ class UserPageEndpoint extends PagedEndpoint {
 }
 
 class BookmarkPageEndpoint extends PagedEndpoint {
+	static typeInfo : EndpointTypeInfoGetter = () => ({
+		typeName: 'BookmarkPageEndpoint',
+		name: 'Bookmark Page Endpoint',
+		factory(opts : { pageInfo : PixivBookmarkPage }) {
+			return new BookmarkPageEndpoint(opts)
+		},
+		optionComponent() {},
+	})
+
+	readonly pageInfo : PixivBookmarkPage
 	priv : boolean
 
-	constructor(readonly pageInfo : PixivBookmarkPage) {
-		super('Bookmark', pageInfo.pageNum, pageInfo.lastPage)
+	constructor(opts : { pageInfo : PixivBookmarkPage }) {
+		super('Bookmark', opts.pageInfo.pageNum, opts.pageInfo.lastPage)
 
-		this.priv = pageInfo.priv
+		this.pageInfo = opts.pageInfo
+		this.priv = opts.pageInfo.priv
 	}
 
 	getKeyOptions() {
