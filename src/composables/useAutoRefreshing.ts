@@ -1,29 +1,11 @@
-import {Endpoint} from '@/services'
-import {computed, ref, Ref, watch} from 'vue'
+import {computed, ref, Ref} from 'vue'
+import {EndpointPackage, EndpointPackageType} from '@/components/Timeline.vue'
 
-export function useAutoRefreshing(endpoint : Readonly<Ref<undefined | Endpoint<any>>>, getNewArticles : Function) {
-	const intervalId = ref<undefined | number>()
-
-	function startRefresh() {
-		if (intervalId.value === undefined && endpoint.value !== undefined) {
-			console.debug('Starting refresh for ' + endpoint.value.name)
-			intervalId.value = setInterval(getNewArticles, endpoint.value.defaultRefreshIntervalMs)
-		}
-	}
-
-	function stopRefresh() {
-		console.debug('Stopping refresh for ' + endpoint.value?.name)
-		clearInterval(intervalId.value)
-		intervalId.value = undefined
-	}
-
-	function resetInterval() {
-		stopRefresh()
-		startRefresh()
-	}
+export function useAutoRefreshing(endpointPackages : Readonly<Ref<EndpointPackage[]>>, getNewArticles : Function) {
+	const intervalIds = ref<undefined | {[endpointName : string] : number}>()
 
 	const isRefreshing = computed( {
-		get: () => intervalId.value !== undefined,
+		get: () => intervalIds.value !== undefined,
 		set: val => {
 			if (val)
 				startRefresh()
@@ -31,6 +13,36 @@ export function useAutoRefreshing(endpoint : Readonly<Ref<undefined | Endpoint<a
 				stopRefresh()
 		}
 	})
+
+	function startRefresh() {
+		if (intervalIds.value !== undefined)
+			return
+
+		console.debug('Starting refresh')
+		intervalIds.value = {}
+		for (const ePackage of endpointPackages.value) {
+			if (ePackage.type === EndpointPackageType.NoEndpoint)
+				continue
+
+			intervalIds.value[ePackage.endpoint.name] = setInterval(getNewArticles, ePackage.endpoint.defaultRefreshIntervalMs)
+		}
+	}
+
+	function stopRefresh() {
+		if (intervalIds.value === undefined)
+			return
+
+		console.debug('Stopping refresh')
+		for (const id of Object.values(intervalIds.value))
+			clearInterval(id)
+
+		intervalIds.value = undefined
+	}
+
+	function resetInterval() {
+		stopRefresh()
+		startRefresh()
+	}
 
 	return {isRefreshing, resetInterval}
 }

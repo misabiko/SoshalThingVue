@@ -1,6 +1,6 @@
 <template>
 	<div class='field'>
-		<label class='label'>Service</label>
+<!--		<label class='label'>Service</label>
 		<div class='control'>
 			<div class='select'>
 				<select v-model='modelValue.serviceName'>
@@ -9,9 +9,9 @@
 					</option>
 				</select>
 			</div>
-		</div>
+		</div>-->
 	</div>
-	<div class='field' v-if='Object.values(service.endpointTypes).length && Object.keys(service.endpoints).length'>
+<!--	<div class='field' v-if='Object.values(service.endpointTypes).length && Object.keys(service.endpoints).length'>
 		<div class='control'>
 			<input type='checkbox' v-model='newEndpoint'/>
 			New Endpoint?
@@ -59,7 +59,7 @@
 	<div class='field' v-else>
 		<label class='label'>Endpoint</label>
 		No endpoints to choose from.
-	</div>
+	</div>-->
 </template>
 
 <script lang='ts'>
@@ -79,19 +79,19 @@ export default defineComponent({
 	setup(props, {emit}) {
 		const service = computed(() => Service.instances[props.modelValue.serviceName])
 
-		const endpointOptions = computed<any>({
-			get: () => props.modelValue.endpointOptions,
+		/*const endpoints = computed<any>({
+			get: () => props.modelValue.endpoints,
 			set: val => {
 				emit('update:modelValue', {
 					...props.modelValue,
-					endpointOptions: val,
+					endpoints: val,
 				})
 			}
 		})
-		const newEndpoint = ref(!!endpointOptions.value)
+		const newEndpoint = ref(!!endpoints.value[0])
 		const endpointOptionComponent = computed(() => {
-			if (endpointOptions.value?.endpointType && Object.keys(service.value.endpointTypes).length)
-				return service.value.endpointTypes[endpointOptions.value.endpointType]?.optionComponent
+			if (endpoints.value?.endpointType && Object.keys(service.value.endpointTypes).length)
+				return service.value.endpointTypes[endpoints.value.endpointType]?.optionComponent
 		})
 
 		watch(
@@ -122,7 +122,8 @@ export default defineComponent({
 			newEndpoint,
 			endpointOptions,
 			endpointOptionComponent,
-		}
+		}*/
+		return {}
 	}
 })
 </script>

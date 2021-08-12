@@ -21,7 +21,7 @@ export type MediaService = Service<MediaArticle>
 export abstract class Service<ArticleType extends Article = Article> {
 	static readonly instances : { [name : string] : Service } = {}
 
-	static addService(service : Service) : Service {
+	static addService(service : Service<any>) : Service<any> {
 		return Service.instances[service.name] = service
 	}
 

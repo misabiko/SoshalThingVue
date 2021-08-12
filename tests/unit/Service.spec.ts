@@ -25,7 +25,9 @@ class MockEndpoint extends Endpoint<{}> {
 	static typeInfo : EndpointTypeInfoGetter = () => ({
 		typeName: MockEndpoint.name,
 		name: 'Mock Endpoint',
-		factory() {return new MockEndpoint()},
+		factory() {
+			return new MockEndpoint()
+		},
 		optionComponent: () => null,
 	})
 
@@ -53,11 +55,12 @@ describe('Services', () => {
 			title: 'Timeline1',
 			articleList: 'Timeline1',
 			serviceName: 'MockService',
+			endpoints: [],
 			container: 'ColumnContainer',
 			filters: {},
 			sortConfig: {
 				method: 'Unsorted',
-				reversed: false
+				reversed: false,
 			},
 			autoRefresh: true,
 			compactArticles: false,
@@ -78,9 +81,12 @@ describe('Services', () => {
 		it('does not throw for invalid endpoint types', () => {
 			const timelineDatas : TimelineData[] = [{
 				...baseTimelineData,
-				endpointOptions: {
-					endpointType: 'InvalidEndpointType'
-				}
+				endpoints: [{
+					serviceName: 'MockService',
+					endpointName: JSON.stringify({
+						endpointType: 'InvalidEndpointType',
+					}),
+				}],
 			}]
 
 			const wrapper = mount(App, {
@@ -93,10 +99,13 @@ describe('Services', () => {
 		})
 
 		it('parses endpoint options', () => {
-			const endpointOptions = {endpointType: MockEndpoint.typeInfo(service).typeName}
+			const endpoints = [{
+				serviceName: 'MockService',
+				endpointName: JSON.stringify({endpointType: MockEndpoint.typeInfo(service).typeName}),
+			}]
 			const timelineDatas : TimelineData[] = [{
 				...baseTimelineData,
-				endpointOptions
+				endpoints,
 			}]
 
 			const wrapper = mount(App, {
@@ -106,9 +115,9 @@ describe('Services', () => {
 			})
 
 			const initializedTimelineDatas = wrapper.vm.initTimelineDatas(timelineDatas)
-			const timelineEndpointName = initializedTimelineDatas[0].endpointName
+			const timelineEndpointName = initializedTimelineDatas[0].endpoints[0].endpointName
 
-			const endpointName = JSON.stringify(endpointOptions)
+			const endpointName = endpoints[0].endpointName
 			expect(service.endpoints).to.own.property(endpointName)
 			expect(timelineEndpointName).to.be.equal(endpointName)
 		})

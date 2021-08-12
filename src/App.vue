@@ -47,35 +47,25 @@ export default defineComponent({
 
 		function initTimelineDatas(timelineDatas : TimelineData[]) : TimelineData[] {
 			return timelineDatas.map((t : TimelineData) => {
-				const copy = {...t}
+				const copy : TimelineData = {...t}
 
-				const service = Service.instances[t.serviceName]
-				if (t.endpointName && !service.endpoints[t.endpointName])
-					t.endpointOptions ??= JSON.parse(t.endpointName)
-
-				if (t.endpointOptions) {
-					if (!service.endpointTypes.hasOwnProperty(t.endpointOptions.endpointType)) {
-						console.error(`"${service.name}" doesn't have endpoint type "${t.endpointOptions.endpointType}" from timeline "${t.title}"`)
-					}else {
-						service.addEndpoint(service.endpointTypes[t.endpointOptions.endpointType].factory(t.endpointOptions))
-						copy.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
+				for (const {serviceName, endpointName} of t.endpoints) {
+					const service = Service.instances[serviceName]
+					if (!service.endpoints[endpointName]) {
+						const options = JSON.parse(endpointName)
+						if (!service.endpointTypes.hasOwnProperty(options.endpointType))
+							console.error(`"${service.name}" doesn't have endpoint type "${options.endpointType}" from timeline "${t.title}"`)
+						else
+							service.addEndpoint(service.endpointTypes[options.endpointType].factory(options))
 					}
 				}
 
-				delete copy.endpointOptions
 				return copy
 			})
 		}
 
 		function updateLocalStorage() {
-			localStorage.setItem(LOCALSTORAGE_TIMELINE_TITLE, JSON.stringify(timelines.value.map(t => {
-				const copy : TimelineData = {...t}
-				if (copy.endpointName !== undefined)
-					copy.endpointOptions = JSON.parse(copy.endpointName)
-
-				delete copy.endpointName
-				return copy
-			})))
+			localStorage.setItem(LOCALSTORAGE_TIMELINE_TITLE, JSON.stringify(timelines.value))
 		}
 
 		function addTimeline(data : TimelineData, serialize = true) {
@@ -84,13 +74,15 @@ export default defineComponent({
 				return
 			}
 
-			const service = Service.instances[data.serviceName]
-			if (data.endpointOptions !== undefined) {
-				service.addEndpoint(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
-				data.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
+			for (const {serviceName, endpointName} of data.endpoints) {
+				const service = Service.instances[serviceName]
+				if (service.endpoints.hasOwnProperty(endpointName))
+					continue
+
+				const options = JSON.parse(endpointName)
+				service.addEndpoint(service.endpointTypes[options.endpointType].factory(options))
 			}
 
-			delete data.endpointOptions
 			timelines.value.push(data)
 
 			if (serialize)
@@ -103,13 +95,15 @@ export default defineComponent({
 				return
 			}
 
-			const service = Service.instances[data.serviceName]
-			if (data.endpointOptions !== undefined) {
-				service.addEndpoint(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
-				data.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
+			for (const {serviceName, endpointName} of data.endpoints) {
+				const service = Service.instances[serviceName]
+				if (service.endpoints.hasOwnProperty(endpointName))
+					continue
+
+				const options = JSON.parse(endpointName)
+				service.addEndpoint(service.endpointTypes[options.endpointType].factory(options))
 			}
 
-			delete data.endpointOptions
 			timelines.value[timelineIndex] = {...data}
 
 			updateLocalStorage()

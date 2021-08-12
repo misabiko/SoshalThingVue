@@ -5,8 +5,7 @@ export interface TimelineData {
 	title : string
 	serviceName : string
 	articleList : string
-	endpointName? : string
-	endpointOptions? : any
+	endpoints : { serviceName: string, endpointName: string }[]
 	container : string
 	filters : FilterConfigs
 	showFiltered? : boolean

@@ -98,11 +98,11 @@ export function resetTimelineData(dataOverride? : any) {
 	const service = Service.instances[serviceName]
 
 	timelineData.value = {
-		endpointName: undefined,
 		...service.initialTimelines()[0],
 		title: 'New Timeline',
 		articleList: getNewId(),
-		serviceName,
+		endpoints: [],
+		endpointOptions: [],
 		container: 'ColumnContainer',
 		columnCount: 2,
 		size: 1,
@@ -118,15 +118,6 @@ export function resetTimelineData(dataOverride? : any) {
 			expandStep: 50,
 		},
 		...dataOverride,
-	}
-
-	const data = timelineData.value as TimelineData
-
-	if (data.endpointName === undefined && data.endpointOptions === undefined) {
-		if (Object.keys(service.endpoints).length)
-			data.endpointName = Object.keys(service.endpoints)[0]
-		else if (Object.keys(service.endpointTypes).length)
-			data.endpointOptions = {endpointType: Object.keys(service.endpointTypes)[0]}
 	}
 }
 

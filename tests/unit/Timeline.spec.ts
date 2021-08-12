@@ -22,6 +22,7 @@ describe('Timelines', () => {
 			title: 'Timeline1',
 			articleList: 'Timeline1',
 			serviceName: 'MockService',
+			endpoints: [],
 			container: 'ColumnContainer',
 			filters: {},
 			sortConfig: {

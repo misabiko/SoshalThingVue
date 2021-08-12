@@ -32,14 +32,14 @@
 						<FontAwesomeIcon icon='scroll' size='lg'/>
 					</span>
 				</button>
-				<button v-if='endpointPackage.type === EndpointPackageType.PagedEndpoint'
+				<button v-if='endpointPackages.length && endpointPackages[0].type === EndpointPackageType.PagedEndpoint'
 						@click='getRandomNewArticles()'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='magic' size='lg'/>
 					</span>
 				</button>
-				<template v-if='endpointPackage.type !== EndpointPackageType.NoEndpoint'>
-					<button @click='getNewArticles({fromTop: true, pageNum: refreshPageNum})'>
+				<template v-if='endpointPackages.length && endpointPackages[0].type !== EndpointPackageType.NoEndpoint'>
+					<button @click='callEndpoints({fromTop: true, pageNum: refreshPageNum})'>
 						<span class='icon'>
 							<FontAwesomeIcon icon='sync-alt' size='lg'/>
 						</span>
@@ -189,7 +189,7 @@ import {
 	VNode,
 	watch,
 } from 'vue'
-import {MediaService, PagedEndpoint, Service} from '@/services'
+import {Endpoint, MediaService, PagedEndpoint, Service} from '@/services'
 import {TimelineData} from '@/data/timelines'
 import {useQueryManagerContainer} from '@/composables/QueryManager'
 import {useLoadManagerTimeline} from '@/composables/LoadManager'
@@ -219,23 +219,25 @@ import FilterOptions from '@/components/FilterOptions.vue'
 
 library.add(faEllipsisV, faArrowUp, faArrowDown, faSyncAlt, faEyeSlash, faRandom, faScroll, faMagic, faPlus)
 
-enum EndpointPackageType {
+export enum EndpointPackageType {
 	NoEndpoint,
 	RefreshEndpoint,
 	PagedEndpoint,
 }
 
-type EndpointPackage = {
+//TODO rename to TimelineEndpoint
+export type EndpointPackage = {
 	type : EndpointPackageType.NoEndpoint,
-	ready : false,
+	service : Service,
+	endpointName : string,
 } | {
 	type : EndpointPackageType.RefreshEndpoint,
-	ready : boolean,
+	service : Service,
+	endpoint : Endpoint<any>,
 } | {
 	type : EndpointPackageType.PagedEndpoint,
-	ready : boolean,
-	endpoint : Readonly<Ref<PagedEndpoint>>,
-	remainingPages : Readonly<Ref<number[]>>,
+	service : Service,
+	endpoint : PagedEndpoint,
 	newPage : Ref<undefined | number>,
 }
 
@@ -255,72 +257,82 @@ export default defineComponent({
 		const options : (() => VNode | VNode[] | undefined)[] = []
 
 		const service = computed(() => Service.instances[props.timeline.serviceName] as Service)
-		const endpoint = computed(() => props.timeline.endpointName === undefined ? undefined : service.value.endpoints[props.timeline.endpointName])
 
 		const modifiedTimelineData = ref<TimelineData>({
 			...props.timeline,
 		})
 
-		const endpointPackage = computed<EndpointPackage>(() => {
-			if (!endpoint.value)
+		const endpointPackages = computed<EndpointPackage[]>(() => props.timeline.endpoints.map(({serviceName, endpointName}) => {
+			if (!service.value.endpoints.hasOwnProperty(endpointName))
 				return {
 					type: EndpointPackageType.NoEndpoint,
-					ready: false,
+					service: service.value,
+					endpointName,
 				}
-			else if (endpoint.value instanceof PagedEndpoint)
+			const endpoint = service.value.endpoints[endpointName]
+
+			if (endpoint instanceof PagedEndpoint)
 				return {
 					type: EndpointPackageType.PagedEndpoint,
-					get ready() {
-						return endpoint.value?.ready ?? false
-					},
-					endpoint: endpoint as unknown as Readonly<Ref<PagedEndpoint>>,
-					remainingPages,
+					service: service.value,
+					endpoint: endpoint as unknown as PagedEndpoint,
 					newPage,
 				}
 			else
 				return {
 					type: EndpointPackageType.RefreshEndpoint,
-					get ready() {
-						return endpoint.value?.ready ?? false
-					},
+					service: service.value,
+					endpoint,
 				}
-		})
+		}))
 
-		const getNewArticles = async function(callOpts : any = {pageNum: newPage.value ?? refreshPageNum.value}, autoRefreshed = false) {
-			if (!endpoint.value?.ready) {
-				if (endpoint.value)
-					console.debug(`${endpoint.value.name} isn't ready.`)
-				return
-			}
-			//endpoint.value.calling = true
+		const callEndpoint = async function(ePackage: EndpointPackage, callOpts : any = {pageNum: newPage.value ?? refreshPageNum.value}, autoRefreshed = false) {
+			switch (ePackage.type) {
+				case EndpointPackageType.NoEndpoint:
+					return
+				default:
+					if (!ePackage.endpoint.ready) {
+						console.debug(`${ePackage.endpoint.name} isn't ready.`)
+						return
+					}
+					//endpoint.calling = true
 
-			try {
-				const newArticles = await service.value.getNewArticles(endpoint.value, callOpts)
+					try {
+						const newArticles = await ePackage.service.getNewArticles(ePackage.endpoint, callOpts)
 
-				if (callOpts.fromTop) {
-					for (const id of newArticles.reverse())
-						if (!articleIds.value.find(listA => listA.articleId === id))
-							articleIds.value.unshift({serviceName: props.timeline.serviceName, articleId: id})
-				}else {
-					for (const id of newArticles)
-						if (!articleIds.value.find(listA => listA.articleId === id))
-							articleIds.value.push({serviceName: props.timeline.serviceName, articleId: id})
-				}
+						if (callOpts.fromTop) {
+							for (const id of newArticles.reverse())
+								if (!articleIds.value.find(listA => listA.articleId === id))
+									articleIds.value.unshift({serviceName: ePackage.service.name, articleId: id})
+						}else {
+							for (const id of newArticles)
+								if (!articleIds.value.find(listA => listA.articleId === id))
+									articleIds.value.push({serviceName: ePackage.service.name, articleId: id})
+						}
 
-				saveLists()
+						saveLists()
 
-				const oldNewPage = newPage.value ?? -1
-				const pages = remainingPages.value
-				if (pages?.length)
-					newPage.value = pages.filter(p => p > oldNewPage)[0] || pages[pages.length - 1]
-			}finally {
-				//endpoint.value.calling = false
-				if (autoRefreshEnabled.value && !autoRefreshed)
-					resetInterval()
+						if (ePackage.type === EndpointPackageType.PagedEndpoint) {
+							const oldNewPage = newPage.value ?? -1
+							const pages = ePackage.endpoint.remainingPages.value
+							if (pages?.length)
+								newPage.value = pages.filter((p : number) => p > oldNewPage)[0] || pages[pages.length - 1]
+						}
+					}finally {
+						//endpoint.calling = false
+						if (autoRefreshEnabled.value && !autoRefreshed)
+							resetInterval()
+					}
+					break
 			}
 		}
 
-		const {isRefreshing, resetInterval} = useAutoRefreshing(endpoint, () => getNewArticles({
+		const callEndpoints = async function(callOpts : any = {pageNum: newPage.value ?? refreshPageNum.value}, autoRefreshed = false) {
+			for (const ePackage of endpointPackages.value)
+				await callEndpoint(ePackage, callOpts, autoRefreshed)
+		}
+
+		const {isRefreshing, resetInterval} = useAutoRefreshing(endpointPackages, () => callEndpoints({
 			fromTop: true,
 			pageNum: refreshPageNum,
 		}, true))
@@ -328,29 +340,31 @@ export default defineComponent({
 		onBeforeUnmount(() => isRefreshing.value = false)
 
 		const getRandomNewArticles = () => {
-			const ePackage = endpointPackage.value
-			const pages = remainingPages.value
-			if (ePackage.type === EndpointPackageType.PagedEndpoint && pages?.length)
-				return getNewArticles({pageNum: pages[Math.floor(Math.random() * pages.length)]})
+			if (!endpointPackages.value.length)
+				return
+
+			const ePackage = endpointPackages.value[0]
+			if (ePackage.type !== EndpointPackageType.PagedEndpoint)
+				return
+
+			const pages = ePackage.endpoint.remainingPages.value
+			if (pages?.length)
+				return callEndpoints({pageNum: pages[Math.floor(Math.random() * pages.length)]})
 		}
 
-		const newPage = ref(endpoint.value instanceof PagedEndpoint ? endpoint.value.basePageNum : undefined)
+		const newPage : Ref<undefined | number> = ref((endpointPackages.value.length && endpointPackages.value[0].type === EndpointPackageType.PagedEndpoint) ? endpointPackages.value[0].endpoint.basePageNum : undefined)
 		const refreshPageNum = computed(() => {
-			const e = endpoint.value
-			if (e instanceof PagedEndpoint)
-				return (e.loadedPages.value && parseInt(Object.keys(e.loadedPages.value)[0])) || 0
+			if (!endpointPackages.value.length)
+				return undefined
+
+			const ePackage = endpointPackages.value[0]
+			if (ePackage.type === EndpointPackageType.PagedEndpoint)
+				return (ePackage.endpoint.loadedPages.value && parseInt(Object.keys(ePackage.endpoint.loadedPages.value)[0])) || 0
 			else
 				return undefined
 		})
 
-		const remainingPages = computed<number[]>(() => {
-			if (!endpoint.value || !(endpoint.value instanceof PagedEndpoint))
-				return []
-
-			return endpoint.value.remainingPages.value
-		})
-
-		options.push(() => {
+		/*options.push(() => {
 			if (endpoint.value && endpoint.value instanceof PagedEndpoint)
 				return h('div', {class: 'field'}, [
 					h('label', {class: 'label'}, "Pages"),
@@ -364,13 +378,13 @@ export default defineComponent({
 						h('button', {
 							class: 'button',
 							disabled: !endpoint.value?.ready,
-							onClick: () => getNewArticles({pageNum: newPage.value}),
+							onClick: () => callEndpoints({pageNum: newPage.value}),
 						}, 'Load Page'),
 					]),
 				])
-		})
+		})*/
 
-		function initEndpoint() {
+		/*function initEndpoint() {
 			if (endpoint.value === undefined)
 				return
 
@@ -379,9 +393,9 @@ export default defineComponent({
 
 			if (endpoint.value instanceof PagedEndpoint)
 				newPage.value ??= endpoint.value.basePageNum
-		}
+		}*/
 
-		watch(
+		/*watch(
 			endpoint,
 			() => {
 				console.debug('Changing endpoint options!')
@@ -390,10 +404,10 @@ export default defineComponent({
 
 				initEndpoint()
 
-				if (!articleIds.value.length && getNewArticles)
-					getNewArticles()
+				if (!articleIds.value.length && callEndpoints)
+					callEndpoints()
 			},
-		)
+		)*/
 
 		const articleIds = computed(() => {
 			articleLists.value[props.timeline.articleList] ??= []
@@ -413,21 +427,21 @@ export default defineComponent({
 
 		function expandSectionTop() {
 			if (!articleSection.value.enabled)
-				getNewArticles({pageNum: refreshPageNum})
+				callEndpoints({pageNum: refreshPageNum})
 			else {
 				articleSection.value.start = Math.max(0, articleSection.value.start - articleSection.value.expandStep)
 				if (articleSection.value.start == 0)
-					getNewArticles({pageNum: refreshPageNum})
+					callEndpoints({pageNum: refreshPageNum})
 			}
 		}
 
 		function expandSectionBottom() {
 			if (!articleSection.value.enabled)
-				getNewArticles({fromEnd: true, pageNum: newPage})
+				callEndpoints({fromEnd: true, pageNum: newPage})
 			else {
 				articleSection.value.end += articleSection.value.expandStep
 				if (articleSection.value.end > articleIds.value.length)
-					getNewArticles({fromEnd: true, pageNum: newPage})
+					callEndpoints({fromEnd: true, pageNum: newPage})
 			}
 		}
 
@@ -488,10 +502,9 @@ export default defineComponent({
 		const filteredArticleIds = computed(() => articles.value.map(a => a.article.id))
 
 		onBeforeMount(() => {
-			initEndpoint()
+			//initEndpoint()
 
-			if (!endpoint.value?.rateLimitInfo.value || endpoint.value.rateLimitInfo.value.remainingCalls > 100)
-				getNewArticles()
+			callEndpoints()
 		})
 
 		const showOptions = ref(false)
@@ -572,8 +585,6 @@ export default defineComponent({
 		}
 
 		const onArticleClick = ref('MarkAsRead')
-
-		provide('service', service)
 
 		options.push(() => [
 			h('label', {class: 'field-label'}, 'On article click'),
@@ -701,10 +712,9 @@ export default defineComponent({
 			articleIds,
 			autoScroll,
 			getRandomNewArticles,
-			getNewArticles,
+			callEndpoints,
 			EndpointPackageType,
-			endpoint,
-			endpointPackage,
+			endpointPackages,
 			containers,
 			service,
 			articles,

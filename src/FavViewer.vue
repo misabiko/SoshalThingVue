@@ -67,13 +67,15 @@ export default defineComponent({
 				return
 			}
 
-			const service = Service.instances[data.serviceName]
-			if (data.endpointOptions !== undefined) {
-				service.addEndpoint(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
-				data.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
+			for (const {serviceName, endpointName} of data.endpoints) {
+				const service = Service.instances[serviceName]
+				if (service.endpoints.hasOwnProperty(endpointName))
+					continue
+
+				const options = JSON.parse(endpointName)
+				service.addEndpoint(service.endpointTypes[options.endpointType].factory(options))
 			}
 
-			delete data.endpointOptions
 			timelines.value.push(data)
 		}
 
@@ -83,13 +85,15 @@ export default defineComponent({
 				return
 			}
 
-			const service = Service.instances[data.serviceName]
-			if (data.endpointOptions !== undefined) {
-				service.addEndpoint(service.endpointTypes[data.endpointOptions.endpointType].factory(data.endpointOptions))
-				data.endpointName = Object.keys(service.endpoints)[Object.keys(service.endpoints).length - 1]
+			for (const {serviceName, endpointName} of data.endpoints) {
+				const service = Service.instances[serviceName]
+				if (service.endpoints.hasOwnProperty(endpointName))
+					continue
+
+				const options = JSON.parse(endpointName)
+				service.addEndpoint(service.endpointTypes[options.endpointType].factory(options))
 			}
 
-			delete data.endpointOptions
 			timelines.value[timelineIndex] = {...data}
 		}
 
