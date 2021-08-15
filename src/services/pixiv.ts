@@ -1,27 +1,136 @@
-import {EndpointTypeInfoGetter, HostPageService, PagedCallOpt, PagedEndpoint, Payload, Service} from '@/services'
+import {
+	EndpointTypeInfoGetter,
+	HostPageService,
+	PagedCallOpt,
+	PagedEndpoint,
+	Payload,
+	Service,
+	ServiceLocalStorage,
+} from '@/services'
 import {PageInfo} from '@/hostpages/pageinfo'
 import {PixivBookmarkPage, PixivFollowPage, PixivPage, PixivUserPage} from '@/hostpages/pixiv'
 import PixivComponent from '@/components/Articles/PixivArticle.vue'
 import {
 	Article,
 	getImageFormat,
-	MediaData,
 	LazyMedia,
 	MediaArticle,
+	MediaData,
+	MediaFormat,
 	MediaLoadStatus,
 	MediaType,
 	QueriedMedia,
 } from '@/data/articles'
-import {h} from 'vue'
+import {h, unref} from 'vue'
+import {Queryable} from '@/composables/QueryManager'
 
 export interface PixivArticle extends Article, MediaArticle {
 	title : string
 	media : (LazyMedia | QueriedMedia)[]
 	liked : boolean
 	bookmarked : boolean
+	tags? : string[]
 }
 
-export class PixivService extends Service<PixivArticle> implements HostPageService {
+interface RPCIllustData {
+	href : string
+	illust_book_style : string
+	illust_create_date : string
+	illust_custom_thumbnail_upload_datetime : string
+	illust_ext : string
+	illust_hash : string
+	illust_height : string
+	illust_id : string
+	illust_page_count : string
+	illust_restrict : string
+	illust_sanity_level : number
+	illust_server_id : string
+	illust_title : string
+	illust_type : string
+	illust_upload_date : string
+	illust_user_id : string
+	illust_width : string
+	illust_x_restrict : string
+	url : string
+	user_account : string
+	user_name : string
+}
+
+interface AJAXIllustData {
+	alt : string
+	bookmarkCount : number
+	bookmarkData : {
+		id: string
+		private: boolean
+	} | null
+	comicPromotion : null
+	commentCount : number
+	contestBanners : null[]
+	contestData : null
+	createDate : string
+	description : string
+	descriptionBoothId : null
+	descriptionYoutubeId : null
+	extraData : { meta : object }
+	fanboxPromotion : object
+	height : number
+	id : string
+	illustComment : string
+	illustId : string
+	illustTitle : string
+	illustType : number
+	imageResponseCount : number
+	imageResponseData : null[]
+	imageResponseOutData : null[]
+	isBookmarkable : boolean
+	isHowto : boolean
+	isOriginal : boolean
+	isUnlisted : boolean
+	likeCount : number
+	likeData : boolean
+	pageCount : number
+	pollData : null
+	request : null
+	responseCount : number
+	restrict : number
+	seriesNavData : null
+	sl : number
+	storableTags : string[]
+	tags : object
+	title : string
+	titleCaptionTranslation : { workTitle : null, workCaption : null }
+	uploadDate : string
+	urls : {
+		mini : string
+		thumb : string
+		small : string
+		regular : string
+		original : string
+	}
+	userAccount : string
+	userId : string
+	userIllusts : { [id : string] : null }
+	userName : string
+	viewCount : number
+	width : number
+	xRestrict : number
+	zoneConfig : {
+		'500x500' : { url : string }
+		expandedFooter : { url : string }
+		footer : { url : string }
+		header : { url : string }
+		logo : { url : string }
+		rectangle : { url : string }
+		relatedworks : { url : string }
+		responsive : { url : string }
+	}
+}
+
+interface PixivLocalStorage extends ServiceLocalStorage {
+	csrfToken? : string
+}
+
+export class PixivService extends Service<PixivArticle> implements HostPageService, Queryable {
 	pageInfo? : PixivPage
 	csrfToken? : string
 
@@ -133,8 +242,27 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 		}
 	}
 
-	getAPIArticleData(id : string) : Promise<any> {
-		return Promise.resolve(undefined)
+	async generateLocalStorage() : Promise<PixivLocalStorage> {
+		const articlesCopy = JSON.parse(JSON.stringify(unref(this.articles)))
+		for (const id in articlesCopy)
+			if (articlesCopy.hasOwnProperty(id) && articlesCopy[id].media.status != MediaLoadStatus.ThumbnailOnly)
+				articlesCopy[id].media.status = MediaLoadStatus.ReadyToLoad
+
+		return {
+			articles: articlesCopy,
+			csrfToken: this.csrfToken,
+		}
+	}
+
+	loadLocalStorage(storage : PixivLocalStorage) {
+		super.loadLocalStorage(storage)
+		this.csrfToken = storage.csrfToken ?? this.csrfToken
+	}
+
+	async getAPIArticleData(id : string) : Promise<AJAXIllustData> {
+		return await fetch(`https://www.pixiv.net/ajax/illust/${id}`)
+			.then(response => response.json())
+			.then(json => json.body)
 	}
 
 	getExternalLink(id : string) : string {
@@ -204,6 +332,46 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 
 		this.articles.value[id].bookmarked = true
 	}
+
+	private async loadApiIllustData(id : string) {
+		const json : AJAXIllustData = await this.getAPIArticleData(id)
+
+		const oldArticle = this.articles.value[id]
+
+		console.log('Loading data for ' + id)
+		this.updateArticle(<PixivArticle>{
+			id: json.id,
+			index: oldArticle.index,
+			title: json.title,
+			media: [{
+				type: MediaType.Image,
+				status: MediaLoadStatus.ReadyToLoad,
+				thumbnail: {
+					url: json.urls.thumb,
+					size: {width: json.width, height: json.height},
+					format: MediaFormat.JPG,
+				},
+				content: {
+					url: json.urls.original,
+					size: {width: json.width, height: json.height},
+					format: MediaFormat.JPG,
+				},
+			}],
+			read: false,
+			hidden: false,
+			queried: true,
+			liked: json.likeData,
+			bookmarked: json.bookmarkData !== null,
+		})
+	}
+
+	getData(id : string) : Promise<void> {
+		return this.loadApiIllustData(id)
+	}
+
+	onDoneQuerying() : Promise<void> {
+		return this.saveLocalStorage()
+	}
 }
 
 type LikeResponse = {
@@ -255,7 +423,8 @@ class FollowPageEndpoint extends PagedEndpoint {
 		factory(opts : { pageInfo : PixivFollowPage, r18 : boolean }) {
 			return new FollowPageEndpoint(opts)
 		},
-		optionComponent() {},
+		optionComponent() {
+		},
 	})
 
 	readonly pageInfo : PixivFollowPage
@@ -347,13 +516,13 @@ class FollowPageEndpoint extends PagedEndpoint {
 							format: getImageFormat(thumb.url),
 						},
 					},
-
 				],
 				read: false,
 				hidden: false,
-				queried: false,
+				queried: true,
 				liked: false,
 				bookmarked: thumb.isBookmarked || thumb.isPrivateBookmark,
+				tags: thumb.tags,
 			})
 			newArticles.push(thumb.illustId)
 		}
@@ -507,7 +676,8 @@ class BookmarkPageEndpoint extends PagedEndpoint {
 		factory(opts : { pageInfo : PixivBookmarkPage }) {
 			return new BookmarkPageEndpoint(opts)
 		},
-		optionComponent() {},
+		optionComponent() {
+		},
 	})
 
 	readonly pageInfo : PixivBookmarkPage
