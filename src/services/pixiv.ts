@@ -270,7 +270,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 	}
 
 	async like(id : string) {
-		if (!(this.pageInfo instanceof PixivFollowPage))
+		if (!this.csrfToken)
 			return
 
 		const response : LikeResponse = await fetch('https://www.pixiv.net/ajax/illusts/like', {
@@ -281,7 +281,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 				"Accept": "application/json",
 				"Content-Type": "application/json",
 				"Cache-Control": "no-cache",
-				'X-CSRF-TOKEN': this.pageInfo.csrfToken,
+				'X-CSRF-TOKEN': this.csrfToken,
 			},
 			body: JSON.stringify({illust_id: id}),
 		}).then(r => r.json())
@@ -301,7 +301,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 	}
 
 	async bookmark(id : string, priv : boolean) {
-		if (!(this.pageInfo instanceof PixivFollowPage))
+		if (!this.csrfToken)
 			return
 
 		const response : BookmarkResponse = await fetch('https://www.pixiv.net/ajax/illusts/bookmarks/add', {
@@ -312,7 +312,7 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 				"Accept": "application/json",
 				"Content-Type": "application/json",
 				"Cache-Control": "no-cache",
-				'X-CSRF-TOKEN': this.pageInfo.csrfToken,
+				'X-CSRF-TOKEN': this.csrfToken,
 			},
 			body: JSON.stringify({
 				illust_id: id,
@@ -532,6 +532,39 @@ class FollowPageEndpoint extends PagedEndpoint {
 	}
 }
 
+function parseUserPageThumb(thumb : HTMLDivElement) : ThumbData {
+	const anchor = thumb.querySelector('a')
+	if (!anchor)
+		throw "Couldn't find thumb anchor"
+
+	const id = anchor.getAttribute('data-gtm-value')
+	if (!id)
+		throw "Couldn't find id"
+
+	const img = anchor.querySelector('img')
+	if (!img)
+		throw "Couldn't find thumb img for " + id
+
+	const title = img.alt
+	if (!title)
+		throw "Couldn't find title for " + id
+
+	const svg = thumb.querySelector('svg')
+	if (!svg)
+		throw "Couldn't find svg in thumb"
+
+	return {
+		id,
+		title,
+		thumbnail: {
+			url: img.src,
+			size: {width: 1, height: 1},
+			format: getImageFormat(img.src),
+		},
+		bookmarked: getComputedStyle(svg).color === "rgb(255, 64, 96)",
+	}
+}
+
 class UserPageEndpoint extends PagedEndpoint {
 	static typeInfo : EndpointTypeInfoGetter = () => ({
 		typeName: 'UserPageEndpoint',
@@ -605,7 +638,7 @@ class UserPageEndpoint extends PagedEndpoint {
 
 		const thumbs : ThumbData[] = [...rawThumbs].map(t => {
 			try {
-				return this.parseThumb(t.firstElementChild as HTMLDivElement)
+				return parseUserPageThumb(t.firstElementChild as HTMLDivElement)
 			}catch (err) {
 				console.error('Failed to parse thumb', t, err)
 				return undefined as unknown as ThumbData
@@ -633,39 +666,6 @@ class UserPageEndpoint extends PagedEndpoint {
 
 		console.log(`Loading ${articles.length} new articles with ${newArticles.length} in timeline.`)
 		return {articles, newArticles}
-	}
-
-	private static parseThumb(thumb : HTMLDivElement) : ThumbData {
-		const anchor = thumb.firstElementChild?.firstElementChild?.firstElementChild
-		if (!anchor)
-			throw "Couldn't find thumb anchor"
-
-		const id = anchor.getAttribute('data-gtm-value')
-		if (!id)
-			throw "Couldn't find id"
-
-		const img = anchor.querySelector('img')
-		if (!img)
-			throw "Couldn't find thumb img for " + id
-
-		const title = img.alt
-		if (!title)
-			throw "Couldn't find title for " + id
-
-		const svg = thumb.querySelector('svg')
-		if (!svg)
-			throw "Couldn't find svg in thumb"
-
-		return {
-			id,
-			title,
-			thumbnail: {
-				url: img.src,
-				size: {width: 1, height: 1},
-				format: getImageFormat(img.src),
-			},
-			bookmarked: getComputedStyle(svg).color === "rgb(255, 64, 96)",
-		}
 	}
 }
 
@@ -736,68 +736,39 @@ class BookmarkPageEndpoint extends PagedEndpoint {
 		const articles : PixivArticle[] = []
 		const newArticles = []
 
-		const thumbs : ThumbData[] = [...page.querySelectorAll('.display_editable_works .image-item')].map(t => BookmarkPageEndpoint.parseThumb(t as HTMLLIElement))
+		const rawThumbs = page.querySelector('#favviewer + div > div ul')?.children
+		if (!rawThumbs)
+			throw "Couldn't find thumbs"
+
+		const thumbs : ThumbData[] = [...rawThumbs].map(t => {
+			try {
+				return parseUserPageThumb(t.firstElementChild as HTMLDivElement)
+			}catch (err) {
+				console.error('Failed to parse thumb', t, err)
+				return undefined as unknown as ThumbData
+			}
+		}).filter(t => !!t)
 
 		for (const [i, thumb] of thumbs.entries()) {
-			let fullImageUrlSplit = thumb.thumbnail.url.split('/')
-			fullImageUrlSplit.splice(3, 2)
-
 			articles.push({
 				id: thumb.id,
 				title: thumb.title,
-				index: pageNum * 20 + i,
+				index: pageNum * 48 + i,
 				media: [{
 					type: MediaType.Image,
-					status: MediaLoadStatus.ReadyToLoad,
+					status: MediaLoadStatus.ThumbnailOnly,
 					thumbnail: thumb.thumbnail,
-					content: {
-						url: fullImageUrlSplit.join('/'),
-						size: thumb.thumbnail.size,
-						format: getImageFormat(thumb.thumbnail.url),
-					},
 				}],
 				read: false,
 				hidden: false,
 				queried: false,
 				liked: false,
-				bookmarked: true,
+				bookmarked: thumb.bookmarked,
 			})
 			newArticles.push(thumb.id)
 		}
 
 		console.log(`Loading ${articles.length} new articles with ${newArticles.length} in timeline.`)
 		return {articles, newArticles}
-	}
-
-	private static parseThumb(thumb : HTMLLIElement) : ThumbData {
-		const img = thumb.querySelector('img') as HTMLImageElement
-		if (!img)
-			throw "Couldn't find img"
-
-		const id = img.getAttribute('data-id')
-		if (!id)
-			throw "Couldn't find id"
-
-		const title = thumb.children[2].firstElementChild?.getAttribute('title')
-		if (!title)
-			throw "Couldn't find title for " + id
-
-		const src = img.getAttribute('data-src')
-		if (!src)
-			throw "Couldn't find src"
-
-		return {
-			id,
-			title,
-			thumbnail: {
-				url: src,
-				size: {
-					width: img.naturalWidth || img.clientWidth || 1,
-					height: img.naturalWidth || img.clientWidth || 1,
-				},
-				format: getImageFormat(src),
-			},
-			bookmarked: true,
-		}
 	}
 }

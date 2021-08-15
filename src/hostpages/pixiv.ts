@@ -57,7 +57,7 @@ export class PixivUserPage extends PixivPage {
 			fullscreen: `#favviewer ~ div {display: none;`
 		})
 
-		this.userId = window.location.pathname.split('/').pop() ?? ''
+		this.userId = window.location.pathname.split('/')[3] ?? ''
 		if (!this.userId)
 			throw `Couldn't find userId in pathname "${window.location.pathname}"`
 	}
@@ -133,40 +133,91 @@ export class PixivUserPage extends PixivPage {
 export class PixivBookmarkPage extends PixivPage {
 	pageNum! : number
 	lastPage! : number
-	priv: boolean
+	readonly userId : string
+	readonly priv : boolean
 
-	activatorSelector = '.column-order-menu > .menu-items'
-	activator() {
-		return h('li', super.activator())
-	}
+	currentViewMode = 'fullscreen'
+	activatorClassNames? : string
+	activatorSelector = 'nav'
 
-	constructor(css : string) {
+	constructor(css: string) {
 		super(css, {
-			default: `form._bookmark-settings {display: none;} #favviewer {width: 100%; height: 60vh}`,
-			fullscreen: `#js-mount-point-header, nav.column-order-menu, footer.footer, .layout-column-1, .column-label, .column-menu, .display_editable_works, #illust-recommend, form._bookmark-settings {display: none;} #wrapper, .layout-a, #wrapper .layout-a .layout-column-2, #favviewer {width: 100%}`,
+			default: `#favviewer {width: 100%; height: 50%}`,
+			fullscreen: `#favviewer ~ div {display: none;`
 		})
 
-		const currPage = document.querySelector('.column-order-menu li.current')
-		if (!currPage || !currPage.textContent)
-			throw "Couldn't find pageNum element"
+		this.userId = window.location.pathname.split('/')[3] ?? ''
+		if (!this.userId)
+			throw `Couldn't find userId in pathname "${window.location.pathname}"`
 
-		this.pageNum = parseInt(currPage.textContent) - 1
-
-		const lastPage = currPage.parentElement?.lastElementChild?.firstElementChild?.textContent
-		if (!lastPage)
-			throw "Couldn't find lastPage element"
-
-		this.lastPage = parseInt(lastPage) - 1
-
-		this.priv = new URLSearchParams(window.location.search).get('rest') === 'hide'
+		this.priv = this.searchParams.get('rest') === 'hide'
 	}
 
-	inject() : void {
-		const paginator = document.querySelector('.column-menu + .column-order-menu')
-		if (!paginator)
-			throw "Couldn't find paginator to inject after"
+	async waitUntilInjectable() : Promise<void> {
+		if (document.readyState !== "complete")
+			return new Promise((resolve, reject) => {
+				document.addEventListener('DOMContentLoaded', () => resolve(), {once: true})
+				document.addEventListener('load', () => resolve(), {once: true})
+				window.setTimeout(() => {
+					if (document.getElementsByTagName('nav')[0]) {
+						console.warn("DOMContentLoaded timed out, but DOM is ready.")
+						resolve()
+					}
+					else
+						reject("DOMContentLoaded timed out.")
+				}, 3000)
+			})
+	}
 
-		paginator.after(this.rootDiv)
+	inject() {
+		const nav = document.getElementsByTagName('nav')[0]
+		this.activatorClassNames = nav.lastElementChild?.className || ''
+
+		const navGrandpa = nav.parentElement?.parentElement
+		if (!navGrandpa)
+			throw "Couldn't find the nav grand-parent."
+
+		navGrandpa.after(this.rootDiv)
+
+		const {pageNum, lastPage} = PixivUserPage.getPageNums(document)
+		this.pageNum = pageNum
+		this.lastPage = lastPage
+	}
+
+	static getPageNums(page : Document | HTMLHtmlElement = document) : { pageNum : number, lastPage : number } {
+		const result = {pageNum: 0, lastPage: 0}
+
+		const pageTab = page.querySelector('#favviewer')?.previousElementSibling?.querySelector('nav')
+		const currentPageIndex = Array.from(pageTab?.children as HTMLCollection, (child: any) => child.ariaCurrent).findIndex((current: string) => current === 'page')
+		if (currentPageIndex === undefined || currentPageIndex < 0)
+			throw "Couldn't find the page tabs"
+		else if (currentPageIndex == 0)
+			return result
+
+		const paginator = page.querySelector('#favviewer')?.nextElementSibling?.nextElementSibling
+		if (!paginator)
+			throw "Couldn't find paginator"
+
+		const pageNumStr = paginator.querySelector('div')?.textContent
+		if (!pageNumStr)
+			throw "Couldn't parse pageNum"
+
+		result.pageNum = parseInt(pageNumStr) - 1
+
+		const lastPageStr = paginator.children[paginator.children.length - 2].textContent
+		if (!lastPageStr)
+			throw "Couldn't parse lastPage"
+
+		result.lastPage = parseInt(lastPageStr) - 1
+
+		return result
+	}
+
+	activator() {
+		return h('a', {
+			id: 'favvieweractivator',
+			class: this.activatorClassNames,
+		}, 'Activate Soshal')
 	}
 }
 
@@ -177,13 +228,13 @@ export default [
 		urlMatch: "https://*pixiv.net/bookmark_new_illust*.php*",
 	},
 	{
+		pageInfo: PixivBookmarkPage,
+		urlRegex: /https:\/\/.*pixiv\.net\/.+\/users\/bookmarks\/artworks.*/,
+		urlMatch: "https://*pixiv.net/*/users/*/bookmarks/artworks*",
+	},
+	{
 		pageInfo: PixivUserPage,
 		urlRegex: /https:\/\/.*pixiv\.net\/.+\/users\/.+/,
 		urlMatch: "https://*pixiv.net/*/users/*",
-	},
-	{
-		pageInfo: PixivBookmarkPage,
-		urlRegex: /https:\/\/.*pixiv\.net\/bookmark\.php/,
-		urlMatch: "https://*pixiv.net/bookmark.php*",
 	},
 ]
