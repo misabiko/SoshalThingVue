@@ -229,7 +229,7 @@ export default [
 	},
 	{
 		pageInfo: PixivBookmarkPage,
-		urlRegex: /https:\/\/.*pixiv\.net\/.+\/users\/bookmarks\/artworks.*/,
+		urlRegex: /https:\/\/.*pixiv\.net\/.+\/users\/[0-9]+\/bookmarks\/artworks.*/,
 		urlMatch: "https://*pixiv.net/*/users/*/bookmarks/artworks*",
 	},
 	{

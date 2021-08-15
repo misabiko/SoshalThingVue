@@ -60,8 +60,8 @@ interface AJAXIllustData {
 	alt : string
 	bookmarkCount : number
 	bookmarkData : {
-		id: string
-		private: boolean
+		id : string
+		private : boolean
 	} | null
 	comicPromotion : null
 	commentCount : number
@@ -146,8 +146,10 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 		}
 		if (this.pageInfo instanceof PixivUserPage)
 			this.addEndpoint(new UserPageEndpoint({pageInfo: this.pageInfo, userId: this.pageInfo.userId}))
-		if (this.pageInfo instanceof PixivBookmarkPage)
+		if (this.pageInfo instanceof PixivBookmarkPage) {
 			this.addEndpoint(new BookmarkPageEndpoint({pageInfo: this.pageInfo}))
+			this.addEndpoint(new BookmarkAPIEndpoint({userId: this.pageInfo.userId, priv: this.pageInfo.priv}))
+		}
 	}
 
 	initialTimelines() {
@@ -211,7 +213,8 @@ export class PixivService extends Service<PixivArticle> implements HostPageServi
 				]
 			case PixivBookmarkPage:
 				endpointName = JSON.stringify({
-					endpointType: 'BookmarkPageEndpoint',
+					endpointType: 'BookmarkAPIEndpoint',
+					userId: (this.pageInfo as PixivBookmarkPage).userId,
 					priv: (this.pageInfo as PixivBookmarkPage).priv,
 				})
 				return [
@@ -770,5 +773,99 @@ class BookmarkPageEndpoint extends PagedEndpoint {
 
 		console.log(`Loading ${articles.length} new articles with ${newArticles.length} in timeline.`)
 		return {articles, newArticles}
+	}
+}
+
+interface BookmarkAPIWork {
+	alt: string
+	bookmarkData: {id: string, private: boolean}
+	createDate: string
+	description: string
+	height: number
+	id: string
+	illustType: number
+	isBookmarkable: boolean
+	isMasked: boolean
+	isUnlisted: boolean
+	pageCount: number
+	profileImageUrl: string
+	restrict: number
+	sl: number
+	tags: string[]
+	title: string
+	titleCaptionTranslation: {workTitle: null, workCaption: null}
+	updateDate: string
+	url: string
+	userId: string
+	userName: string
+	width: number
+	xRestrict: number
+}
+
+class BookmarkAPIEndpoint extends PagedEndpoint {
+	static typeInfo : EndpointTypeInfoGetter = () => ({
+		typeName: 'BookmarkAPIEndpoint',
+		name: 'Bookmark API Endpoint',
+		factory(opts : { userId : string, priv : boolean }) {
+			return new BookmarkAPIEndpoint(opts)
+		},
+		optionComponent: () => null,
+	})
+
+	readonly userId : string
+	readonly priv : boolean
+
+	constructor(opts : { userId : string, priv : boolean }) {
+		super(`BookmarkAPIEndpoint ${opts.userId} ${opts.priv ? 'private' : ''}`)
+
+		this.userId = opts.userId
+		this.priv = opts.priv
+	}
+
+	getKeyOptions() {
+		return {
+			...super.getKeyOptions(),
+			userId: this.userId,
+			priv: this.priv,
+		}
+	}
+
+	async call(options : PagedCallOpt) : Promise<Payload> {
+		const payload : Payload<PixivArticle> = {articles: [], newArticles: []}
+
+		const url = new URL(`https://www.pixiv.net/ajax/user/${this.userId}/illusts/bookmarks?tag=&offset=${options.pageNum * 48}&limit=48${this.priv ? '&rest=hide' : ''}`)
+
+		const json : BookmarkAPIWork[] = await fetch(decodeURIComponent(url.toString())).then(r => r.json()).then(r => r.body.works)
+
+		for (const [i, data] of json.entries()) {
+			payload.articles.push(<PixivArticle>{
+				id: data.id,
+				index: options.pageNum * 48 + i,
+				title: data.title,
+				media: [{
+					type: MediaType.Image,
+					status: MediaLoadStatus.ThumbnailOnly,
+					thumbnail: {
+						url: data.url,
+						size: {width: data.width, height: data.height},
+						format: MediaFormat.JPG,
+					},
+				}],
+				read: false,
+				hidden: false,
+				queried: false,
+				liked: false,
+				bookmarked: true,
+			})
+			payload.newArticles.push(data.id.toString())
+		}
+
+		this.updateInstance(options, {
+			payload,
+			basePageNum: 0,
+			lastPage: options.pageNum + 1,
+		})
+
+		return payload
 	}
 }
