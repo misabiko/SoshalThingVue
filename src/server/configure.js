@@ -6,6 +6,7 @@ const session = require('express-session')
 const connectMemoryStore = require('memorystore')
 const passport = require('passport')
 const {Strategy: TwitterStrategy} = require('passport-twitter')
+const path = require('path')
 
 let credentials, clientV1, clientV2, authUser
 
@@ -55,13 +56,6 @@ function logRateLimit(response) {
 	console.log(`Reset: ${Math.ceil(delta / 1000 / 60)} minutes`)
 }
 
-function preventUnauthorized(req, res, next) {
-	if (req.user)
-		next()
-	else
-		res.sendStatus(401)
-}
-
 module.exports = app => {
 	const MemoryStore = connectMemoryStore(session)
 
@@ -75,7 +69,7 @@ module.exports = app => {
 		secret: 'ehyAv3bH2AwKMMWiOgOeNlOYg',
 		resave: false,
 		saveUninitialized: true,
-		//cookie: {secure: true},	TODO Implement HTTPS
+		//cookie: {secure: true},	TODO Implement HTTPS?
 	}))
 	app.use(passport.initialize())
 	app.use(passport.session())
@@ -95,54 +89,57 @@ module.exports = app => {
 
 	try {
 		credentials = require('../../credentials.json')
-
-		clientV1 = new Twitter({
-			consumer_key: credentials.consumer_key,
-			consumer_secret: credentials.consumer_secret,
-		})
-
-		clientV2 = new Twitter({
-			version: '2',
-			extension: false,
-			//consumer_key: credentials.consumer_key,
-			//consumer_secret: credentials.consumer_secret,
-			bearer_token: credentials.bearer_token,
-		})
-
-		passport.use(new TwitterStrategy({
-				consumerKey: credentials.consumer_key,
-				consumerSecret: credentials.consumer_secret,
-				callbackURL: 'http://localhost:8080/twitter/callback',
-			},
-			function(access_token_key, access_token_secret, profile, cb) {
-				try {
-					clientV1 = new Twitter({
-						consumer_key: credentials.consumer_key,
-						consumer_secret: credentials.consumer_secret,
-						access_token_key,
-						access_token_secret,
-					})
-
-					clientV2 = new Twitter({
-						version: '2',
-						extension: false,
-						consumer_key: credentials.consumer_key,
-						consumer_secret: credentials.consumer_secret,
-						access_token_key,
-						access_token_secret,
-					})
-
-					authUser = profile._json
-
-					cb(null, authUser)
-				}catch (e) {
-					cb(e)
-				}
-			}))
 	}catch (e) {
-		console.error("Please include a 'credentials.json' file with {consumer_key, consumer_secret, access_key, access_secret}\n", e)
+		console.error(`
+Please include a 'credentials.json' file with {consumer_key, consumer_secret, access_key, access_secret}
+Looking for "${path.join(__dirname, '../../credentials.json')}"
+`, e)
 		process.exit(1)
 	}
+
+	clientV1 = new Twitter({
+		consumer_key: credentials.consumer_key,
+		consumer_secret: credentials.consumer_secret,
+	})
+
+	clientV2 = new Twitter({
+		version: '2',
+		extension: false,
+		//consumer_key: credentials.consumer_key,
+		//consumer_secret: credentials.consumer_secret,
+		bearer_token: credentials.bearer_token,
+	})
+
+	passport.use(new TwitterStrategy({
+			consumerKey: credentials.consumer_key,
+			consumerSecret: credentials.consumer_secret,
+			callbackURL: 'http://localhost:8080/twitter/callback',
+		},
+		function(access_token_key, access_token_secret, profile, cb) {
+			try {
+				clientV1 = new Twitter({
+					consumer_key: credentials.consumer_key,
+					consumer_secret: credentials.consumer_secret,
+					access_token_key,
+					access_token_secret,
+				})
+
+				clientV2 = new Twitter({
+					version: '2',
+					extension: false,
+					consumer_key: credentials.consumer_key,
+					consumer_secret: credentials.consumer_secret,
+					access_token_key,
+					access_token_secret,
+				})
+
+				authUser = profile._json
+
+				cb(null, authUser)
+			}catch (e) {
+				cb(e)
+			}
+		}))
 
 	app.get('/twitter/login',
 		passport.authenticate('twitter')
