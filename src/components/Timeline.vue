@@ -22,40 +22,41 @@
 				</div>
 			</div>
 			<div class='timelineButtons'>
-				<button @click='shuffle(articleIds), sortConfig.method = "Unsorted"'>
+				<button @click='shuffle(articleIds), sortConfig.method = "Unsorted"' title='Shuffle articles'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='random' size='lg'/>
 					</span>
 				</button>
-				<button @click='autoScroll()'>
+				<button @click='autoScroll()' title='Autoscroll'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='scroll' size='lg'/>
 					</span>
 				</button>
 				<button v-if='endpointPackage.type === EndpointPackageType.PagedEndpoint'
-						@click='getRandomNewArticles()'>
+						@click='getRandomNewArticles()'
+						title='Load random page'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='magic' size='lg'/>
 					</span>
 				</button>
 				<template v-if='endpointPackage.type !== EndpointPackageType.NoEndpoint'>
-					<button @click='getNewArticles({fromTop: true, pageNum: refreshPageNum})'>
+					<button @click='getNewArticles({fromTop: true, pageNum: refreshPageNum})' title='Refresh'>
 						<span class='icon'>
 							<FontAwesomeIcon icon='sync-alt' size='lg'/>
 						</span>
 					</button>
-					<button v-if='articleSection.enabled && articleSection.start > 0' @click='expandSectionTop()'>
+					<button v-if='articleSection.enabled && articleSection.start > 0' @click='expandSectionTop()' title='Load top page'>
 						<span class='icon'>
 							<FontAwesomeIcon icon='arrow-up' size='lg'/>
 						</span>
 					</button>
-					<button @click='expandSectionBottom()'>
+					<button @click='expandSectionBottom()' title='Load bottom page'>
 						<span class='icon'>
 							<FontAwesomeIcon icon='arrow-down' size='lg'/>
 						</span>
 					</button>
 				</template>
-				<button class='showOptions' @click='showOptions = !showOptions'>
+				<button class='showOptions' @click='showOptions = !showOptions' title='Expand options'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='ellipsis-v' size='lg'/>
 					</span>

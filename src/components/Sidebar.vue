@@ -9,33 +9,33 @@
 		</div>
 		<div id='sidebarButtons'>
 			<div>
-				<button @click='expanded = !expanded'>
+				<button @click='expanded = !expanded' :title='expanded ? "Collapse sidebar" : "Expand sidebar"'>
 					<span class='icon'>
 						<FontAwesomeIcon :icon='expanded ? "angle-double-left" : "angle-double-right"' size='2x'/>
 					</span>
 				</button>
-				<button id='addTimelineButton' @click='modal = "AddTimelineModal"'>
+				<button id='addTimelineButton' @click='modal = "AddTimelineModal"' title='Add new timeline'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='plus' size='2x'/>
 					</span>
 				</button>
-				<button @click='modal = "ArticleListManager"'>
+				<button @click='modal = "ArticleListManager"' title='ArticleList Manager?'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='list' size='2x'/>
 					</span>
 				</button>
-				<button @click='modal = "TimelineManager"'>
+				<button @click='modal = "TimelineManager"' title='Timeline Manager'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='upload' size='2x'/>
 					</span>
 				</button>
-				<button @click='pauseVideos'>
+				<button @click='pauseVideos' title='Pause videos'>
 					<span class='icon'>
 						<FontAwesomeIcon icon='pause' size='2x'/>
 					</span>
 				</button>
 			</div>
-			<div>
+			<div title='Github'>
 				<a href='https://github.com/misabiko/SoshalThing'>
 					<button>
 						<span class='icon'>
