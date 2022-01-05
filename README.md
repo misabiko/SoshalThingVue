@@ -1,7 +1,7 @@
 # SoshalThing Vue
 
-[![CI@main](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml/badge.svg?branch=main "CI@main")](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml)
-[![CI@develop](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml/badge.svg?branch=develop "CI@develop")](https://github.com/misabiko/SoshalThing/actions/workflows/ci.yml)
+[![CI@main](https://github.com/misabiko/SoshalThingVue/actions/workflows/ci.yml/badge.svg?branch=main "CI@main")](https://github.com/misabiko/SoshalThingVue/actions/workflows/ci.yml)
+[![CI@develop](https://github.com/misabiko/SoshalThingVue/actions/workflows/ci.yml/badge.svg?branch=develop "CI@develop")](https://github.com/misabiko/SoshalThingVue/actions/workflows/ci.yml)
 
 At the time of writing, the active version of SoshalThing is on Rust using Yew: https://github.com/misabiko/SoshalThingYew
 
