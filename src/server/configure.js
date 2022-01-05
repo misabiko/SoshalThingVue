@@ -94,20 +94,38 @@ module.exports = app => {
 	})
 
 	try {
-		credentials = require('../../credentials.json')
+		credentials = {
+			consumer_key: process.env.consumer_key,
+			consumer_secret: process.env.consumer_secret,
+			bearer_token: process.env.bearer_token,
+		};
+		if (!credentials.bearer_token?.length) {
+			if (!credentials.consumer_key?.length && credentials.consumer_secret?.length)
+				throw "consumer_key env var found but not consumer_secret"
+			else if (!credentials.consumer_secret?.length && credentials.consumer_key?.length)
+				throw "consumer_secret env var found but not consumer_key"
+			else if (!credentials.consumer_secret?.length && !credentials.consumer_key?.length)
+				credentials = require('../../credentials.json')
+		}
 
 		clientV1 = new Twitter({
 			consumer_key: credentials.consumer_key,
 			consumer_secret: credentials.consumer_secret,
 		})
 
-		clientV2 = new Twitter({
-			version: '2',
-			extension: false,
-			//consumer_key: credentials.consumer_key,
-			//consumer_secret: credentials.consumer_secret,
-			bearer_token: credentials.bearer_token,
-		})
+		if (credentials.bearer_token?.length)
+			clientV2 = new Twitter({
+				version: '2',
+				extension: false,
+				bearer_token: credentials.bearer_token,
+			})
+		else
+			clientV2 = new Twitter({
+				version: '2',
+				extension: false,
+				consumer_key: credentials.consumer_key,
+				consumer_secret: credentials.consumer_secret,
+			})
 
 		passport.use(new TwitterStrategy({
 				consumerKey: credentials.consumer_key,
@@ -140,7 +158,7 @@ module.exports = app => {
 				}
 			}))
 	}catch (e) {
-		console.error("Please include a 'credentials.json' file with {consumer_key, consumer_secret, access_key, access_secret}\n", e)
+		console.error("\nPlease include a 'credentials.json' file with {consumer_key, consumer_secret, access_key, access_secret} or environement variables.\n", e)
 		process.exit(1)
 	}
 
