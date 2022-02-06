@@ -2,6 +2,7 @@
 
 [![CI@main](https://github.com/misabiko/SoshalThingVue/actions/workflows/ci.yml/badge.svg?branch=main "CI@main")](https://github.com/misabiko/SoshalThingVue/actions/workflows/ci.yml)
 [![CI@develop](https://github.com/misabiko/SoshalThingVue/actions/workflows/ci.yml/badge.svg?branch=develop "CI@develop")](https://github.com/misabiko/SoshalThingVue/actions/workflows/ci.yml)
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/misabiko/SoshalThingVue)
 
 At the time of writing, the active version of SoshalThing is on Rust using Yew: https://github.com/misabiko/SoshalThingYew
 
@@ -9,9 +10,9 @@ At the time of writing, the active version of SoshalThing is on Rust using Yew: 
 
 Load feeds from various services in a Tweetdeck-style timeline app.
 
-Most tasks are hosted on the [SoshalThingVue3 project](https://github.com/misabiko/SoshalThing/projects/4).
+Most tasks are hosted on the [SoshalThingVue3 project](https://github.com/misabiko/SoshalThingVue/projects/4).
 
-SoshalThing is being rewritten from scratch with Vue.js 3, so the [vue2 branch](https://github.com/misabiko/SoshalThing/tree/vue2) still has a few more features.
+SoshalThing is being rewritten from scratch with Vue.js 3, so the [vue2 branch](https://github.com/misabiko/SoshalThingVue/tree/vue2) still has a few more features.
 
 Build with
 `npm run serve`
